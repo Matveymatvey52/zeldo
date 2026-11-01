@@ -5040,6 +5040,26 @@ function stageReply(s, base, sug) {
   const st = [['Подготовка и согласование', 0.2], ['Основная работа', 0.6], ['Сдача и доработки', 0.2]].map(([name, k]) => ({ name, price: Math.round(total * k / 100) * 100, days: Math.max(1, Math.round(term * k)) }));
   return { price: st.reduce((a, x) => a + x.price, 0), dur: 90, days: term, stages: st, inc: sug.inc.slice(0, 3), text: 'Посмотрел задачу. Разбил работу на этапы: платите за каждый отдельно, после его приёмки.' };
 }
+/* у каждой услуги два маршрута (решение владельца 01.11): готовая цена (А) и описание задачи (Б).
+   Основной — из таблицы, он открывается первым. Здесь собирается готовая цена: варианты, прайс по пунктам, доплаты */
+function fitPrice(g0, online) {
+  const n = g0.svc; const pp = priceParam(n); const u0 = svcTable(n).u[0];
+  if (g0.model === 'brief') Object.assign(g0, { model: 'generic', dur: g0.dur || (g0.reply || {}).dur || 60 });
+  if (pp && !online && g0.model === 'generic' && u0 === 'за работу' && svcCard(n).st !== true && svcBy(n).c !== 'Аренда') {
+    const step = Math.max(100, Math.round(g0.from * 0.15 / 100) * 100);
+    Object.assign(g0, { model: 'hair', unit: '', varParam: pp.id, variants: pp.v.map((x, k) => ({ id: 'v' + k, name: x, price: g0.from + step * k, dur: (svcTable(n).d || 60) + 15 * k })) });
+  } else if (pp && !online && g0.model === 'generic' && qtyOf(g0)) {
+    /* вариант цены за единицу: ковёр из шерсти — своя цена за м² */
+    Object.assign(g0, { varParam: pp.id, variants: pp.v.map((x, k) => ({ id: 'v' + k, name: x, price: rnd(g0.from * (1 + 0.3 * k)) })) });
+  }
+  const pk = pickParam(n);
+  if (pk && !online && g0.model === 'generic' && !qtyOf(g0)) Object.assign(g0, { pick: pk.id, unit: '' });  /* итог — сумма пунктов прайса */
+  if (g0.model === 'generic' && !g0.pick && (g0.route !== 'A' || svcCard(n).st)) g0.priceFrom = true;  /* основной маршрут — бриф: цена «от», исполнитель подтвердит */
+  g0.prp = g0.prp || prpDefault(n, g0.variants ? g0.variants[0].price : g0.from);
+  return g0;
+}
+const briefOf = o => o.brief || [['Что важно', ['Срочно', 'Нестандартная задача', 'Есть фото', 'Есть свои материалы']]];
+const replyOf = o => o.reply || { price: priceFrom(o) || 1000, dur: o.dur || 60, inc: (o.inc || []).slice(0, 3), text: 'Посмотрел задачу. Предлагаю так.' };
 function offersFor(svcName) {
   const own = OFFERS.filter(o => o.svc === svcName && !o.hidden);
   if (own.length) return own;
@@ -5054,24 +5074,14 @@ function offersFor(svcName) {
       GEN.set(id, {
         id, svc: s.n, ex: exId, title: i === 0 ? s.n : `${s.n}${[', быстро', ' с гарантией', ' под ключ'][i % 3]}`, ph: [`svc|${s.n}`, `sub|${s.c}|${s.s}`, s.c].filter(k => PH[k])[i] || s.c,
         desc: sug.desc[i % sug.desc.length], inc: sug.inc.slice(0, 4), res: sug.res[0],
-        model: s.r === 'B' || svcCard(s.n).st ? 'brief' : (s.r === 'V' && svcTable(s.n).b === 'period' ? 'period' : 'generic'), route: s.r || 'A', mode: i % 2 ? 'confirm' : 'instant', term: (ZP.term || {})[s.n] || 5, docs: !!svcCard(s.n).docs,
+        model: s.r === 'V' && svcTable(s.n).b === 'period' && !svcCard(s.n).st ? 'period' : 'generic', route: s.r || 'A', mode: i % 2 ? 'confirm' : 'instant', term: (ZP.term || {})[s.n] || 5, docs: !!svcCard(s.n).docs,
         formats: online ? ['online'] : (s.f === 'off' ? (i % 2 ? ['visit'] : ['point']) : (i % 2 ? ['visit', 'online'] : ['point', 'online'])), booking: online ? 'term' : 'slots',
         from: (u0 => { const k = 0.8 + ((h >> i) % 5) / 10; const up = unitParam(u0) && UNIT_PRICE[u0]; return up ? Math.max(10, Math.round(up * k / (up >= 1000 ? 100 : 10)) * (up >= 1000 ? 100 : 10)) : Math.round(base * k / 100) * 100; })(svcTable(s.n).u[0]), unit: unitShown(svcTable(s.n).u[0]), dur: svcTable(s.n).d || 60,
         brief: [['Что важно', ['Срочно', 'Нужна консультация', 'Есть фото', 'Есть свои материалы']]],
         reply: svcCard(s.n).st ? stageReply(s, base, sug) : { price: Math.round(base * 1.3 / 100) * 100, dur: 90, inc: sug.inc.slice(0, 3), text: 'Посмотрел задачу. Предлагаю так.' },
         zone: online ? 'Онлайн' : /онлайн/.test(EX[exId].area) ? 'выезд по Москве' : EX[exId].area, generated: true,
       });
-      const pp = priceParam(s.n); const g0 = GEN.get(id);
-      if (pp && !online && g0.model !== 'brief' && svcTable(s.n).u[0] === 'за работу' && s.c !== 'Аренда') {  /* маршрут Б — цена после брифа, параметры — его вопросы */
-        const step = Math.max(100, Math.round(g0.from * 0.15 / 100) * 100);
-        Object.assign(g0, { model: 'hair', route: 'A', unit: '', varParam: pp.id, variants: pp.v.map((n, k) => ({ id: 'v' + k, name: n, price: g0.from + step * k, dur: (svcTable(s.n).d || 60) + 15 * k })) });
-      } else if (pp && !online && g0.model === 'generic' && qtyOf(g0)) {
-        /* вариант цены за единицу: ковёр из шерсти — своя цена за м² */
-        Object.assign(g0, { varParam: pp.id, variants: pp.v.map((n, k) => ({ id: 'v' + k, name: n, price: rnd(g0.from * (1 + 0.3 * k)) })) });
-      }
-      const pk = pickParam(s.n);
-      if (pk && !online && g0.model === 'generic' && !qtyOf(g0)) g0.pick = pk.id;  /* итог — сумма пунктов прайса */
-      g0.prp = prpDefault(s.n, g0.variants ? g0.variants[0].price : g0.from);
+      fitPrice(GEN.get(id), online);
       if (s.c === 'Аренда' || (svcTable(s.n).b === 'rent' && svcTable(s.n).u[0] === 'за сутки')) Object.assign(GEN.get(id), { model: 'rent', route: 'A', mode: 'instant', formats: ['point'], booking: 'range', unit: 'за сутки', variants: (RENT_ITEMS[s.n] || [s.c === 'Аренда' ? 'Вещь из списка' : s.n]).map((n, k) => ({ id: 'r' + k, name: n, price: Math.round((BASE['Аренда'] * (0.6 + k * 0.3 + i * 0.1)) / 50) * 50 })), terms: 'Получение и возврат в пункте исполнителя, в часы работы. Вещь проверяем при вас.' });
     }
     out.push(GEN.get(id));
@@ -5983,7 +5993,9 @@ function placeText(o, fmt, paid) {
   if (fmt === 'visit') return paid ? `К вам: Москва, ул. Профсоюзная, 104, кв. 18` : `Выезд к вам: ${S.district}`;
   return paid && o.addr ? o.addr : (areaText(o.zone, o.ex) || 'Район покажем до оплаты');
 }
-const needsSlot = (o, c) => (o.booking === 'slots' || o.booking === 'both') && c.visit !== 'free' && o.route !== 'B';
+/* два маршрута у каждой услуги: А — готовая цена, Б — описать задачу; по умолчанию — основной из таблицы */
+const wayOf = (o, c) => (c && c.way) || (o.route === 'B' || o.model === 'brief' || (o.reply && o.reply.stages) ? 'B' : 'A');  /* проект по этапам начинают с брифа */
+const needsSlot = (o, c) => (o.booking === 'slots' || o.booking === 'both') && c.visit !== 'free' && wayOf(o, c) !== 'B';
 const calKey = (o, c) => o.masters && c.master ? `${o.ex}:${c.master}` : o.ex;
 function blockers(o, c) {
   if (o.model === 'tire') { if (!c.wh.some(Boolean)) return 'отметьте хотя бы одно колесо'; if (c.rf && c.lp && o.tire.both == null) return 'RunFlat вместе с низким профилем исполнитель не настроил, напишите ему'; }
@@ -6176,9 +6188,14 @@ function totalCard(o, c, r) {
     <div class="sumline total"><span>${agree ? 'Предварительно' : 'К оплате'}</span><b>${rub(r.total)}</b></div>
     <div class="m">${!agree ? 'Оплата сразу, отдельного подтверждения не нужно.' : o.priceFrom ? 'Окончательную цену исполнитель подтвердит до оплаты.' : (c.needs || []).length ? 'Сначала исполнитель оценит пункты вне прайса и подтвердит цену, потом вы оплатите.' : 'Сначала исполнитель подтвердит заказ, потом вы оплатите.'} Деньги ждут на защищённом счёте до приёмки работы.</div>`, 'c');
 }
+function wayField(o, c) {
+  const main = wayOf(o, {}); const w = wayOf(o, c);
+  const opts = [['A', 'По цене исполнителя', main === 'A' ? 'выбрать и оплатить' : 'выбрать, исполнитель подтвердит'], ['B', 'Описать задачу', 'исполнитель пришлёт цену']];
+  return field('Как заказать', seg('cfgSet', opts.map(([k, l, s]) => [`${o.id}|way|${k}`, l, s]), `${o.id}|way|${w}`), { hint: `${main === 'B' ? 'Обычно здесь сначала описывают задачу: исполнитель посмотрит фото и назовёт точную цену.' : 'Задача нестандартная? Опишите её — исполнитель пришлёт свою цену.'}` });
+}
 SCREENS.c_offer = p => {
   const o = offerById(p.id); const e = EX[o.ex]; const c = cfgOf(o); const s = svcBy(o.svc);
-  const r = calc(o, c); const preview = p.preview === '1'; const routeB = o.route === 'B' || o.model === 'brief';
+  const r = calc(o, c); const preview = p.preview === '1'; const routeB = wayOf(o, c) === 'B' || o.model === 'brief';
   const related = (o.related || OFFERS.filter(x => x.ex === o.ex && x.id !== o.id && !x.hidden && s && svcBy(x.svc) && svcBy(x.svc).c === s.c).map(x => x.id)).map(offerById).filter(Boolean);
   const bl = blockers(o, c); const agree = needsAgree(o, c); const insp = o.model === 'inspect';
   const sendLabel = insp ? 'Записаться на осмотр' : o.route === 'V' || o.priceFrom || (c.needs || []).length ? 'Отправить на согласование' : 'Отправить исполнителю';
@@ -6198,9 +6215,10 @@ SCREENS.c_offer = p => {
       ${S.role === 'guest' ? `<button class="card c" data-a="guestNeed" data-v="увидеть имя и профиль исполнителя" style="text-align:left"><span class="row"><span class="ava">${ic('user', 22, 2)}</span><span class="grow">${exLine(o)}<span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')} · ${esc(areaText(e.area, o.ex))}</span><span class="m" style="display:block">Имя и связь с исполнителем — после входа</span></span><span class="blue">${ic('lock', 20, 2)}</span></span></button>`
         : `<div class="card c" style="gap:10px"><button data-a="go" data-v="${gv('c_exec', { id: o.ex })}" style="text-align:left"><span class="row"><span class="ava">${letter(e.name)}</span><span class="grow">${exLine(o)}<span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')} · ${esc(areaText(e.area, o.ex))}</span></span><span class="blue">${ic('arr', 22, 2)}</span></span></button>${o.ex === 'alex' ? '' : `<div class="btns two">${btn(`${ic('chat', 20)} Написать`, 'chatWith', o.id, 'soft')}${btn(`${ic('phone', 20)} Позвонить`, 'callAsk', o.ex, 'soft')}</div>`}</div>`}
       ${card(`<div>${esc(o.desc)}</div><div class="h2">Что входит</div>${bullets(o.inc)}<div class="h2">Что вы получите</div><div>${esc(o.res)}</div>${bounds.length ? `<div class="h2">Заказывается отдельно</div><div class="m">${bounds.map((x, i) => esc(i ? lcFirst(x) : x)).join(', ')}. Это другие услуги: в эту карточку они не входят.</div>` : ''}`)}
+      ${preview || o.model === 'brief' || o.model === 'inspect' ? '' : wayField(o, c)}
       <div class="row wrap">${pillRow}${o.formats.includes('online') ? pill('Можно онлайн', '', 'globe') : ''}${o.docs ? pill('Документы проверены', 'ok', 'shield') : ''}</div>
       ${promoInfo(o, c)}
-      ${routeB ? card(`<div class="h2">Как договоримся</div>${bullets(o.reply && o.reply.stages ? ['Вы описываете задачу и прикладываете фото', 'Исполнитель присылает план по этапам: у каждого этапа свой результат, цена и срок', 'Платите за текущий этап — деньги уходят исполнителю после его приёмки'] : ['Вы отмечаете подходящее и прикладываете фото — писать много не нужно', 'Исполнитель отвечает в переписке и присылает условия с ценой', 'Соглашаетесь и оплачиваете — переписка становится заказом с номером'])}${svcCard(o.svc).why ? `<div class="m"><b>Почему так:</b> ${esc(lcFirst(svcCard(o.svc).why))}</div>` : ''}<div class="m">Ориентир: ${priceLabel(o)}. Это не окончательная цена.</div>`, 'soft') + paramsBlock(o, c) : `${configBlock(o, c)}${paramsBlock(o, c)}${subBlock(o, c)}${addonsBlock(o, c)}${needBlock(o, c)}${placeBlock(o, c)}${whenBlock(o, c, r)}${noteBlock(o, c)}${totalCard(o, c, r)}`}
+      ${routeB ? card(`<div class="h2">Как договоримся</div>${bullets(replyOf(o).stages ? ['Вы описываете задачу и прикладываете фото', 'Исполнитель присылает план по этапам: у каждого этапа свой результат, цена и срок', 'Платите за текущий этап — деньги уходят исполнителю после его приёмки'] : ['Вы отмечаете подходящее и прикладываете фото — писать много не нужно', 'Исполнитель отвечает в переписке и присылает условия с ценой', 'Соглашаетесь и оплачиваете — переписка становится заказом с номером'])}${svcCard(o.svc).why ? `<div class="m"><b>Почему так:</b> ${esc(lcFirst(svcCard(o.svc).why))}</div>` : ''}<div class="m">Ориентир: ${priceLabel(o)}. Это не окончательная цена.</div>`, 'soft') + paramsBlock(o, c) : `${configBlock(o, c)}${paramsBlock(o, c)}${subBlock(o, c)}${addonsBlock(o, c)}${needBlock(o, c)}${placeBlock(o, c)}${whenBlock(o, c, r)}${noteBlock(o, c)}${totalCard(o, c, r)}`}
       ${related.length ? `<div class="col g12"><div class="h2">Другие услуги этой тематики у исполнителя</div><div class="hscroll">${related.map(x => offerCard(x, 'h')).join('')}</div><button class="lnk" data-a="go" data-v="${gv('c_exec', { id: o.ex })}">Все услуги исполнителя ${ic('arr', 18, 2.2)}</button><span class="m">Это отдельные услуги: в текущий заказ они не добавляются.</span></div>` : ''}`,
     bar: `<div class="abar">${!routeB && !preview ? `<div class="tot"><span>${insp ? 'Осмотр' : agree ? 'Предварительно' : 'Итого'}</span><b>${rub(r.total)}</b></div>` : ''}<div class="two"><button class="btn outline" data-a="chatWith" data-v="${o.id}" aria-label="Написать исполнителю" ${preview ? 'disabled' : ''}>${ic('chat', 22)}</button>${main}</div>${bl && !preview && !routeB ? `<div class="why center">Причина: ${bl}.</div>` : ''}</div>`,
   };
@@ -6342,7 +6360,7 @@ SCREENS.c_brief = p => {
   return {
     title: 'Опишите задачу', sub: `${esc(o.title)} · ${esc(exName(o.ex))}`, tabs: false,
     body: `<div class="m">Отметьте подходящее — писать текст не обязательно.</div>
-      ${o.brief.map(([g, opts], gi) => field(esc(g), chips('briefTog', opts.map(x => [`${o.id}|${gi}|${x}`, x]), v => (b.sel[gi] || []).includes(v.split('|')[2])))).join('')}
+      ${briefOf(o).map(([g, opts], gi) => field(esc(g), chips('briefTog', opts.map(x => [`${o.id}|${gi}|${x}`, x]), v => (b.sel[gi] || []).includes(v.split('|')[2])))).join('')}
       ${field('Фото', `<div class="thumbs">${Array.from({ length: b.photos }, () => `<span class="thumb">${photo(o.ph)}<span class="tk">${ic('check', 14, 3)}</span></span>`).join('')}<button class="thumb add" data-a="briefPhoto" data-v="${o.id}" aria-label="Добавить фото">${ic('camera', 26)}</button></div>`, { hint: 'С фото исполнитель назовёт точную цену без выезда.' })}
       <div class="field"><span class="lbl">Когда удобно</span>${whenPick('brief', b, 'briefWhen')}</div>
       ${field('Комментарий, если нужно', `<textarea class="textarea" data-in="briefText|${o.id}" placeholder="Например: диван у окна, пятна от кофе" rows="3">${esc(b.text)}</textarea>`)}`,
@@ -6361,9 +6379,9 @@ Object.assign(A, {
     postMsg(ch, 'sys', { t: 'Задача у исполнителя. Он ответит здесь же.' });
     S.brief[id] = null;
     later(1800, () => {
-      postMsg(ch, 'them', { t: o.reply.text });
-      postMsg(ch, 'them', { kind: 'version', v: { offer: o.id, title: o.title, price: o.reply.price, dur: o.reply.dur, inc: o.reply.inc, stages: o.reply.stages ? o.reply.stages.map(x => Object.assign({}, x)) : null, days: o.reply.days || 0, date: b.when === 'date' && b.day ? b.day : dk(1), time: b.part === 'Вечером' ? '18:00' : b.part === 'Днём' ? '13:00' : '10:00', ver: 1, st: 'new' } });
-      notify('cust', 'Пришло предложение', `${exName(o.ex)}: ${rub(o.reply.price)}`, gv('chat', { id: ch.id }));
+      const rp = replyOf(o); postMsg(ch, 'them', { t: rp.text });
+      postMsg(ch, 'them', { kind: 'version', v: { offer: o.id, title: o.title, price: rp.price, dur: rp.dur, inc: rp.inc, stages: rp.stages ? rp.stages.map(x => Object.assign({}, x)) : null, days: rp.days || 0, date: b.when === 'date' && b.day ? b.day : dk(1), time: b.part === 'Вечером' ? '18:00' : b.part === 'Днём' ? '13:00' : '10:00', ver: 1, st: 'new' } });
+      notify('cust', 'Пришло предложение', `${exName(o.ex)}: ${rub(rp.price)}`, gv('chat', { id: ch.id }));
     });
     replace('chat', { id: ch.id });
   },
@@ -6428,6 +6446,9 @@ A.reqChooseOk = v => {
   postMsg(ch, 'sys', { t: `Вы выбрали это предложение по заявке «${r.title}».` });
   go('c_checkout', { order: ord.id });
 };
+
+/* карточки, заданные вручную с одним маршрутом Б, получают и готовую цену (оба маршрута у каждой услуги) */
+OFFERS.forEach(o => { if (o.model === 'brief' && !(o.reply && o.reply.stages)) fitPrice(o, o.formats.length === 1 && o.formats[0] === 'online'); });
 
 /* ---------- исполнитель: главная (эталон «Главная исполнителя» 15.10, 7 блоков) ---------- */
 const myOrders = () => S.orders.filter(o => o.ex === 'alex');
@@ -7264,7 +7285,7 @@ function wizToOffer(w, id) {
     const variants = w.vr.map((v, i) => ({ id: 'p' + i, name: v.name || `Вариант ${i + 1}`, price: v.price, term: v.term, dur: v.dur, inc: v.inc.slice(), res: v.res }));
     const pp = priceParam(w.svc); const vp = pp && variants.every(v => pp.v.includes(v.name)) ? pp.id : null;
     Object.assign(o, onlyOnline(w) ? { model: 'pack', unit: '', variants } : { model: 'hair', unit: '', variants, custom: true }, { varParam: vp });
-  } else if (w.priceType === 'deal') Object.assign(o, { model: 'brief', from: w.price, brief: [['Что важно', ['Срочно', 'Нужна консультация', 'Есть фото', 'Есть свои материалы']]], reply: { price: w.price, dur: w.dur, inc: w.inc.slice(0, 3), text: 'Посмотрел задачу. Предлагаю так.' } });
+  } else if (w.priceType === 'deal') Object.assign(o, { model: 'generic', priceFrom: !w.pick, dur: w.dur, term: w.term, from: w.price, brief: [['Что важно', ['Срочно', 'Нужна консультация', 'Есть фото', 'Есть свои материалы']]], reply: { price: w.price, dur: w.dur, inc: w.inc.slice(0, 3), text: 'Посмотрел задачу. Предлагаю так.' } });
   else Object.assign(o, { model: 'generic', from: w.price, dur: w.dur, term: w.term, priceFrom: w.priceType === 'from' }, w.pick ? { pick: w.pick, unit: '' } : {});
   o.prp = JSON.parse(JSON.stringify(w.prp || {}));
   if (w.doc) o.docs = true;
@@ -7419,7 +7440,7 @@ function routeInfo(w) {
   const s = svcBy(w.svc); const c = svcCard(w.svc); if (!s || !c.why) return '';
   const b = svcTable(w.svc).b;
   const head = s.r === 'B' ? 'Обычно цену называют после брифа или осмотра' : s.r === 'V' ? (c.st ? 'Обычно это проект по этапам' : b === 'rent' ? 'Это аренда на даты' : 'Обычно это абонемент или период') : 'Обычно эту услугу оплачивают сразу';
-  return `<div class="info"><b>${head}</b><span class="m">${esc(c.why)} Мы уже настроили карточку так, поменять можно ниже.</span></div>`;
+  return `<div class="info"><b>${head}</b><span class="m">${esc(c.why)} Мы уже настроили карточку так, поменять можно ниже. В карточке у заказчика всегда два способа: купить по вашей цене или описать задачу и получить ваше предложение.</span></div>`;
 }
 function docCard(w) {
   if (!w.svc || !svcCard(w.svc).docs) return '';
@@ -7430,7 +7451,7 @@ A.wzDoc = () => { S.wiz.doc = true; wzTouch(); render(); toast('Документ
 
 /* ---------- заказчик по документу «Главная, поиск и заявка, 20.10, ред. 6»: главная, поиск, выдача, фильтры, заявка в 3 шага ---------- */
 const exStatus = id => { const e = EX[id] || {}; return e.reviews < 30 ? ['Новый', 'new'] : ['Стабильный', 'ok']; };
-const isDeal = o => o.route === 'B' || o.model === 'brief';
+const isDeal = o => o.model === 'brief';  /* у каждой услуги есть готовая цена: «договорная» — только если её нет */
 /* цена в карточке: договорная — словом, иначе «от N ₽» и единица */
 const priceHtml = o => isDeal(o) ? 'Договорная' : o.model === 'inspect' ? `осмотр ${rub(priceFrom(o))}` : `${fromWord(o) ? 'от ' : ''}${rub(priceFrom(o))}${o.unit ? ` <small>${esc(o.unit)}</small>` : ''}`;
 const ratingText = id => { const e = EX[id] || {}; return e.reviews ? `★ ${String(e.rating).replace('.', ',')} (${e.reviews})` : 'Нет отзывов'; };
