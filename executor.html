@@ -4366,7 +4366,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 .slot.on .sdisc { color: #fff; }
 
 /* ===== компьютер, ноутбук, планшет (01.11): свой интерфейс во всю ширину вместо рамки телефона ===== */
-#aside, .hnav, .hsq, .hb-txt, .asum, .asum-p { display: none; }
+.hnav, .hsq, .hb-txt, .asum, .asum-p { display: none; }
 @media (min-width: 768px) {
   html, body { overflow: hidden; }
   .stage { position: fixed; inset: 0; padding: 0; display: block; }
@@ -4410,19 +4410,22 @@ input, textarea, select { font-size: max(16px, 1em); }
   .chip:hover:not(.on) { box-shadow: inset 0 0 0 1.5px var(--act); }
   .lnk:hover { text-decoration: underline; text-underline-offset: 3px; }
 }
-/* ===== компьютер (01.11, вторая версия — по образцу больших досок объявлений) =====
-   белый фон, белая шапка в две строки, серые поля без теней, тонкие рамки; выдача — колонка фильтров слева и широкие карточки */
-.dh, .dtitle, .dcats, .dfind, .dside { display: none; }
-.phone[data-view="desk"] { --hh: 113px; }
-:root:not([data-theme="dark"]) .phone[data-view="desk"] { --page: #FFFFFF; --soft2: #F2F5F9; --line: #E3E9F0; }
+/* ===== компьютер (01.11, третья версия): язык телефона — серо-голубой фон, белые карточки с тенью, цветные значки;
+   белая шапка с поиском; разделы роли — кабинет с меню слева; сообщения — одно окно мессенджера ===== */
+.dh, .dtitle, .dcats, .dfind, .dside, .lc-img { display: none; }
+.phone[data-view="desk"] { --hh: 113px; --sh: 0 1px 2px rgba(16, 33, 61, 0.04), 0 8px 24px rgba(16, 33, 61, 0.07); --sh2: 0 2px 4px rgba(16, 33, 61, 0.05), 0 16px 36px rgba(16, 33, 61, 0.12); }
+:root:not([data-theme="dark"]) .phone[data-view="desk"] { --page: #F1F4F9; }
 .phone[data-view="desk"] #tabs { display: none !important; }
-[data-style] .phone[data-view="desk"] #top { background: var(--card); box-shadow: 0 1px 0 var(--line); }
+/* шапка */
+[data-style] .phone[data-view="desk"] #top { background: var(--card); box-shadow: 0 1px 0 var(--line), 0 4px 16px rgba(16, 33, 61, 0.04); }
 .phone[data-view="desk"] .dh { display: block; }
 .dh-top .dh-w, .dh-main .dh-w { display: flex; align-items: center; height: 100%; padding: 0 var(--gut); }
 .dh-top { height: 36px; font-size: 14px; line-height: 18px; color: var(--muted); }
 .dh-top .dh-w { gap: 20px; }
 .dh-l { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); white-space: nowrap; }
 .dh-l:hover { color: var(--ink); }
+.dh-plus { color: var(--act); font-weight: 600; }
+.dh-plus:hover { color: var(--act-press); }
 .dh-role { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 10px; background: var(--soft); color: var(--act); white-space: nowrap; }
 .dh-role .dh-n { position: static; }
 .dh-main { height: 76px; }
@@ -4440,22 +4443,14 @@ input, textarea, select { font-size: max(16px, 1em); }
 .dh-i.on { color: var(--act); font-weight: 600; }
 .dh-n { position: absolute; top: 0; left: calc(50% + 6px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--brand); color: #fff; font-size: 12px; line-height: 18px; font-weight: 700; text-align: center; }
 .dh-cta { display: inline-flex; align-items: center; gap: 6px; height: 48px; padding: 0 18px; border-radius: 12px; background: var(--soft); color: var(--act); font-size: 18px; font-weight: 600; white-space: nowrap; flex: none; }
-.dh-cta:hover { background: #DCEBFF; }
 @media (max-width: 1240px) { .dh-i span { display: none; } .dh-i { padding: 8px 10px; } }
-.dh-plus { color: var(--act); font-weight: 600; }
-.dh-plus:hover { color: var(--act-press); }
-/* общий вид: плоско, рамки вместо теней, поля серые */
-.phone[data-view="desk"] .card { box-shadow: none; border: 1px solid var(--line); border-radius: 20px; }
-.phone[data-view="desk"] .card.soft, .phone[data-view="desk"] .card.hero { border-color: transparent; }
-.phone[data-view="desk"] .lc, .phone[data-view="desk"] .oc { box-shadow: none; border: 1px solid var(--line); border-radius: 20px; }
-.phone[data-view="desk"] .search, .phone[data-view="desk"] .input, .phone[data-view="desk"] .textarea, .phone[data-view="desk"] .fakefield { background: var(--soft2); border-color: transparent; box-shadow: none; }
-.phone[data-view="desk"] .search:focus-within, .phone[data-view="desk"] .input:focus, .phone[data-view="desk"] .textarea:focus { box-shadow: inset 0 0 0 2px var(--act); }
-.phone[data-view="desk"] .chip:not(.on) { background: var(--soft2); box-shadow: none; }
-.phone[data-view="desk"] .pc:hover, .phone[data-view="desk"] .pct:hover, .phone[data-view="desk"] .lc:hover, .phone[data-view="desk"] .cg:hover { transform: none; box-shadow: none; }
-.phone[data-view="desk"] .lc:hover, .phone[data-view="desk"] .oc:hover, .phone[data-view="desk"] .entry:hover { border-color: var(--line2); }
+/* общий вид: белые карточки с тенью на серо-голубом фоне */
 .phone[data-view="desk"] .page { padding-top: 28px; }
+.phone[data-view="desk"] .card, .phone[data-view="desk"] .lc, .phone[data-view="desk"] .oc { box-shadow: var(--sh); border: 0; border-radius: 20px; }
+.phone[data-view="desk"] .card.soft, .phone[data-view="desk"] .card.flat { box-shadow: none; }
+.phone[data-view="desk"] .pc:hover, .phone[data-view="desk"] .pct:hover, .phone[data-view="desk"] .lc:hover, .phone[data-view="desk"] .oc:hover, .phone[data-view="desk"] .entry:hover, .phone[data-view="desk"] .dcat:hover { box-shadow: var(--sh2); transform: translateY(-2px); }
+.phone[data-view="desk"] .pc, .phone[data-view="desk"] .pct, .phone[data-view="desk"] .lc, .phone[data-view="desk"] .oc, .phone[data-view="desk"] .entry, .phone[data-view="desk"] .dcat { transition: box-shadow 0.18s ease, transform 0.18s ease; }
 .phone[data-view="desk"][data-lay="wide"] .cgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.phone[data-view="desk"][data-lay="wide"] .hside .cgrid { grid-template-columns: minmax(0, 1fr); }
 .phone[data-view="desk"] .scrim.topp { padding-top: calc(var(--hh) - 8px); background: rgba(16, 33, 61, 0.28); }
 .phone[data-view="desk"] .scrim.topp .panel { width: min(720px, 100%); }
 .phone[data-view="desk"] .scrim.topp .panel:has(> .mega) { width: min(1240px, 100%); max-height: 72%; }
@@ -4466,59 +4461,73 @@ input, textarea, select { font-size: max(16px, 1em); }
 .mega-i { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: 10px; text-align: left; font-size: 14px; line-height: 18px; font-weight: 500; }
 .mega-i small { color: var(--muted); font-variant-numeric: tabular-nums; }
 .mega-i:hover { background: var(--soft2); color: var(--act); }
-/* плитка услуги: фото сверху, без подложки */
-.phone[data-view="desk"] .pct { background: transparent; box-shadow: none; border-radius: 0; overflow: visible; }
-.phone[data-view="desk"] .pct-p { height: auto; aspect-ratio: 4 / 3; border-radius: 16px; overflow: hidden; }
-.phone[data-view="desk"] .pct-in { padding: 10px 2px 0; gap: 4px; }
+/* цветные значки разделов */
+.ci { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 11px; }
+.ci-blue { background: #E7F1FF; color: #0864D4; } .ci-green { background: #E3F5EA; color: #17733F; } .ci-orange { background: #FFF0DB; color: #B45F00; }
+.ci-violet { background: #EFEAFE; color: #6A4CE0; } .ci-pink { background: #FDE9EE; color: #C7254E; } .ci-teal { background: #DFF4F3; color: #0B7F7A; } .ci-grey { background: var(--soft2); color: var(--muted); }
+[data-theme="dark"] .ci:not(.ci-grey) { background: var(--soft); }
+/* плитка услуги — белая карточка с фото сверху */
+.phone[data-view="desk"] .pct { border-radius: 20px; box-shadow: var(--sh); overflow: hidden; }
+.phone[data-view="desk"] .pct-p { height: auto; aspect-ratio: 4 / 3; }
+.phone[data-view="desk"] .pct-in { padding: 12px 14px 16px; gap: 4px; }
 .phone[data-view="desk"] .pct-t { font-size: 18px; line-height: 24px; font-weight: 600; min-height: 48px; }
 .phone[data-view="desk"] .pct:hover .pct-t { color: var(--act); }
-.phone[data-view="desk"] .cgrid.tiles, .phone[data-view="desk"][data-lay="wide"] .cgrid.tiles { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 28px 16px; }
-/* широкая карточка в выдаче: фото, название, цена, описание; справа исполнитель */
-.phone[data-view="desk"] .cgrid.pcs, .phone[data-view="desk"][data-lay="wide"] .cgrid.pcs { grid-template-columns: minmax(0, 1fr); gap: 0; }
-.phone[data-view="desk"] .pc { display: grid; grid-template-columns: minmax(0, 1fr) 240px; column-gap: 28px; background: transparent; box-shadow: none; border-radius: 0; border-bottom: 1px solid var(--line); padding: 20px 0; overflow: visible; height: auto; }
+.phone[data-view="desk"] .cgrid.tiles, .phone[data-view="desk"][data-lay="wide"] .cgrid.tiles { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 20px; }
+/* широкая карточка в выдаче */
+.phone[data-view="desk"] .cgrid.pcs, .phone[data-view="desk"][data-lay="wide"] .cgrid.pcs { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.phone[data-view="desk"] .pc { display: grid; grid-template-columns: minmax(0, 1fr) 230px; column-gap: 24px; border-radius: 20px; box-shadow: var(--sh); padding: 16px; height: auto; overflow: visible; }
 .phone[data-view="desk"] .pc-top { grid-column: 1; grid-row: 1 / span 2; }
 .phone[data-view="desk"] .pc-b { padding: 0; }
-.phone[data-view="desk"] .pc-g { grid-template-columns: 232px minmax(0, 1fr); gap: 20px; align-items: start; }
-.phone[data-view="desk"] .pc-p { width: 232px; height: 174px; border-radius: 16px; }
-.phone[data-view="desk"] .pc-c { gap: 6px; }
-.phone[data-view="desk"] .pc-t { order: 1; color: var(--act); min-height: 0; }
-.phone[data-view="desk"] .pc-b:hover .pc-t { text-decoration: underline; text-underline-offset: 3px; }
-.phone[data-view="desk"] .pc-pr { order: 2; height: auto; color: var(--ink); }
+.phone[data-view="desk"] .pc-g { grid-template-columns: 220px minmax(0, 1fr); gap: 20px; align-items: start; }
+.phone[data-view="desk"] .pc-p { width: 220px; height: 165px; border-radius: 16px; }
+.phone[data-view="desk"] .pc-c { gap: 6px; padding-top: 2px; }
+.phone[data-view="desk"] .pc-t { order: 1; min-height: 0; }
+.phone[data-view="desk"] .pc-b:hover .pc-t { color: var(--act); }
+.phone[data-view="desk"] .pc-pr { order: 2; height: auto; }
 .phone[data-view="desk"] .pc-d { order: 3; -webkit-line-clamp: 3; min-height: 0; }
-.phone[data-view="desk"] .pc-foot { grid-column: 2; grid-row: 1; display: grid; align-content: start; gap: 6px; padding: 0; border: 0; min-height: 0; background: none; }
+.phone[data-view="desk"] .pc-foot { grid-column: 2; grid-row: 1; display: grid; align-content: start; gap: 8px; padding: 14px 16px; border: 0; border-radius: 16px; background: var(--soft2); min-height: 0; }
 .phone[data-view="desk"] .pc-who { display: grid; gap: 6px; justify-items: start; }
 .phone[data-view="desk"] .pc-who b { font-size: 18px; line-height: 24px; white-space: normal; }
 .phone[data-view="desk"] .pc-r { margin-left: 0; }
-.phone[data-view="desk"] .pc-partner { grid-column: 2; grid-row: 2; align-self: end; padding: 0; border: 0; background: none; min-height: 0; }
+.phone[data-view="desk"] .pc-partner { grid-column: 2; grid-row: 2; align-self: end; padding: 0 4px; border: 0; background: none; min-height: 0; }
 .phone[data-view="desk"] .pc .heart { top: 10px; left: 10px; }
+/* карточка списка (заказ, заявка) с фото */
+.phone[data-view="desk"] .lc.has-img { display: grid; grid-template-columns: 96px minmax(0, 1fr); column-gap: 16px; align-content: start; }
+.phone[data-view="desk"] .lc.has-img .lc-img { display: block; grid-row: 1 / span 5; width: 96px; height: 96px; border-radius: 14px; overflow: hidden; background: var(--soft); }
+.lc-img img { width: 100%; height: 100%; object-fit: cover; }
+.phone[data-view="desk"] .lc.has-img > span:not(.lc-img) { grid-column: 2; }
 /* главная заказчика */
 .phone[data-view="desk"] .dtitle { display: block; margin: 0; font-size: 28px; line-height: 34px; font-weight: 800; letter-spacing: -0.02em; }
 .dtitle span { color: var(--muted); font-weight: 700; }
-.phone[data-view="desk"] .dcats { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; }
-.dcat { position: relative; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; height: 124px; padding: 12px 14px; border-radius: 16px; background: var(--soft2); overflow: hidden; text-align: left; }
-.dcat:hover { background: #E8EEF5; }
-.dcat-t { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 4px; max-width: 100%; font-size: 14px; line-height: 18px; font-weight: 600; }
-.dcat-p { position: absolute; right: 10px; bottom: 10px; width: 76px; height: 52px; border-radius: 12px; overflow: hidden; }
+.phone[data-view="desk"] .dcats { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 14px; }
+.dcat { position: relative; display: flex; flex-direction: column; align-items: flex-start; height: 128px; padding: 14px 16px; border-radius: 20px; background: var(--card); box-shadow: var(--sh); overflow: hidden; text-align: left; }
+.dcat-t { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 4px; max-width: 100%; font-size: 14px; line-height: 18px; font-weight: 700; }
+.dcat-p { position: absolute; right: 12px; bottom: 12px; width: 80px; height: 56px; border-radius: 12px; overflow: hidden; }
 .dcat-p img { width: 100%; height: 100%; object-fit: cover; }
-.dcat.all { background: var(--soft); color: var(--act); }
-.phone[data-view="desk"] .dfind { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 32px; padding: 28px 32px; border-radius: 24px; background: #E6F1FF; }
-[data-theme="dark"] .dfind { background: var(--soft) !important; }
-.df-a, .df-r { display: grid; gap: 14px; align-content: start; }
-.df-q { display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 16px; border-radius: 12px; background: var(--card); color: var(--muted); font-size: 18px; text-align: left; }
-.df-b { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 12px; background: var(--card); font-weight: 600; }
-.df-q:hover, .df-b:hover { box-shadow: inset 0 0 0 1.5px var(--act); }
-.df-r { border-left: 1px solid rgba(8, 100, 212, 0.16); padding-left: 32px; }
+.dcat.all { background: var(--soft); color: var(--act); box-shadow: none; }
+.phone[data-view="desk"] .dfind { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 36px; padding: 32px 36px; border-radius: 28px; color: #fff;
+  background: radial-gradient(90% 140% at 100% 0%, rgba(11, 108, 242, 0.6) 0%, rgba(11, 108, 242, 0) 60%), #0E1D36; }
+.dfind .h2 { font-size: 28px; line-height: 34px; font-weight: 800; }
+.dfind .m { color: #C7D2E4; }
+.df-a, .df-r { display: grid; gap: 16px; align-content: start; }
+.df-q { display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 18px; border-radius: 14px; background: #fff; color: var(--muted); font-size: 18px; text-align: left; }
+.df-b { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 12px; background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24); color: #fff; font-weight: 600; }
+.df-b:hover { background: rgba(255, 255, 255, 0.18); }
+.df-q:hover { box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35); }
+.df-r { border-left: 1px solid rgba(255, 255, 255, 0.16); padding-left: 36px; }
 .df-r .btn { justify-self: start; }
-.phone[data-view="desk"] .hcols { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 40px; align-items: start; }
-.phone[data-view="desk"] .hside .entry .ri { display: none; }
+.phone[data-view="desk"] .hcols { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 32px; align-items: start; }
 .phone[data-view="desk"] .hmain { display: grid; gap: 36px; min-width: 0; }
 .phone[data-view="desk"] .hside { display: grid; gap: 16px; position: sticky; top: 0; min-width: 0; }
+.phone[data-view="desk"][data-lay="wide"] .hside .cgrid { grid-template-columns: minmax(0, 1fr); }
+.phone[data-view="desk"] .hside .entry .ri { display: none; }
 /* выдача: колонка слева */
-.phone[data-view="desk"] .dcols { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 40px; align-items: start; }
-.phone[data-view="desk"] .dside { display: grid; gap: 24px; }
+.phone[data-view="desk"] .dcols { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 32px; align-items: start; }
+.phone[data-view="desk"] .dside { display: grid; gap: 16px; padding: 20px; border-radius: 20px; background: var(--card); box-shadow: var(--sh); }
 .dmain { display: grid; gap: 16px; min-width: 0; align-content: start; }
 .phone[data-view="desk"] .dmain .qbar, .phone[data-view="desk"] .dmain .card.nf { display: none; }
 .ds-b { display: grid; gap: 8px; }
+.ds-b + .ds-b { padding-top: 16px; border-top: 1px solid var(--line); }
 .ds-h { font-size: 18px; line-height: 24px; font-weight: 700; }
 .ds-up { display: inline-flex; align-items: center; gap: 4px; justify-self: start; color: var(--muted); font-size: 14px; }
 .ds-up:hover { color: var(--act); }
@@ -4533,15 +4542,15 @@ input, textarea, select { font-size: max(16px, 1em); }
 .dside .opt .ot { font-size: 14px; line-height: 18px; font-weight: 500; }
 .dside .mark { width: 18px; height: 18px; margin: 0; }
 .ds-loc { display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 14px; border-radius: 12px; background: var(--soft2); text-align: left; font-size: 14px; line-height: 18px; }
-.ds-cta { display: grid; gap: 10px; padding: 20px; border-radius: 20px; background: var(--soft); }
+.ds-cta { display: grid; gap: 10px; padding: 18px; border-radius: 16px; background: var(--soft); }
 .phone[data-view="desk"] .rhead .h2 { font-size: 28px; line-height: 34px; font-weight: 800; }
 /* карточка услуги и заказ: заголовок над фото, справа цена, кнопки и исполнитель */
-.phone[data-view="desk"][data-lay="aside"] .page { max-width: calc(var(--cw) + 48px); padding-right: calc(24px + 380px + 40px); }
+.phone[data-view="desk"][data-lay="aside"] .page { max-width: calc(var(--cw) + 48px); padding-right: calc(24px + 380px + 32px); }
 .phone[data-view="desk"][data-lay="aside"] .page > .back { order: -2; }
 .phone[data-view="desk"][data-lay="aside"] .page > .ohead { order: -1; }
 .phone[data-view="desk"][data-lay="aside"] .page > .oexec { display: none; }
 .phone[data-view="desk"][data-lay="aside"] .cgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.phone[data-view="desk"][data-lay="aside"] #bar { position: absolute; top: calc(var(--hh) + 28px); right: var(--gut); width: 380px; border-radius: 20px; box-shadow: 0 0 0 1px var(--line), 0 12px 32px rgba(16, 33, 61, 0.08); overflow: hidden; }
+.phone[data-view="desk"][data-lay="aside"] #bar { position: absolute; top: calc(var(--hh) + 28px); right: var(--gut); width: 380px; border-radius: 20px; box-shadow: var(--sh2); overflow: hidden; }
 .phone[data-view="desk"][data-lay="aside"] #bar > * { max-width: none; }
 .phone[data-view="desk"][data-lay="aside"] .abar { padding: 20px; gap: 12px; }
 .phone[data-view="desk"][data-lay="aside"] .abar .tot b { font-size: 28px; line-height: 32px; }
@@ -4552,18 +4561,84 @@ input, textarea, select { font-size: max(16px, 1em); }
 .asum-ex { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; border-radius: 14px; background: var(--soft2); text-align: left; }
 .asum-ex b { display: block; }
 .asum-ex:hover { box-shadow: inset 0 0 0 1.5px var(--line2); }
-/* сообщения: диалоги слева, переписка справа */
-.phone.has-aside #aside { display: block; position: absolute; top: var(--hh); bottom: 0; left: var(--gut); width: 360px; overflow-y: auto; padding: 0 0 24px; scrollbar-width: thin; }
-.phone.has-aside #screen { padding-left: calc(var(--gut) + 384px); padding-right: var(--gut); }
-.phone.has-aside #screen > .page, .phone.has-aside.raw #screen > * { max-width: none; margin-left: 0; margin-right: 0; }
-.phone.has-aside #screen > .page { padding-left: 0; padding-right: 0; }
-.phone.has-aside #bar { margin-left: calc(var(--gut) + 384px); margin-right: var(--gut); border-radius: 20px 20px 0 0; box-shadow: 0 0 0 1px var(--line); }
-.phone.has-aside #bar > * { max-width: none; }
-.asd-h { position: sticky; top: 0; z-index: 1; display: grid; gap: 12px; padding: 28px 0 12px; background: var(--page); }
-#aside .rl.on { background: var(--soft); }
-#aside .card { padding: 6px; }
-.phone.has-aside .page > .back { display: none; }
-.phone[data-view="desk"] .rtabs { max-width: 600px; }
+/* кабинет: меню роли слева, содержимое справа */
+.phone[data-view="desk"] .page.cabp { max-width: calc(var(--cw) + 48px); }
+.cabw { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 32px; align-items: start; }
+.cabnav { position: sticky; top: 0; max-height: calc(100vh - var(--hh) - 56px); overflow-y: auto; scrollbar-width: thin; display: grid; gap: 10px; padding: 16px; border-radius: 24px; background: var(--card); box-shadow: var(--sh); }
+.cabme { display: flex; align-items: center; gap: 12px; padding: 2px 2px 4px; }
+.cabme .ava.lg { width: 52px; height: 52px; font-size: 22px; background: linear-gradient(135deg, #0B6CF2, #0A55C4); color: #fff; }
+.cabme b { display: block; }
+.cabme .m { display: block; font-size: 14px; line-height: 18px; }
+.cabsw { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; border-radius: 12px; background: var(--soft); color: var(--act); font-size: 14px; font-weight: 600; }
+.cabsw:hover { background: #DCEBFF; }
+.cnl { display: grid; gap: 2px; }
+.cnl.tail { padding-top: 10px; border-top: 1px solid var(--line); }
+.cni { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 6px 10px 6px 6px; border-radius: 14px; text-align: left; font-size: 14px; line-height: 18px; font-weight: 500; color: var(--ink); }
+.cni .ci { width: 32px; height: 32px; border-radius: 10px; }
+.cni:hover { background: var(--soft2); }
+.cni.on { background: var(--soft); color: var(--act); font-weight: 700; }
+.cni .cnt { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; font-size: 12px; line-height: 22px; }
+.cnum { color: var(--muted); font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.cabmain { display: grid; gap: 20px; min-width: 0; align-content: start; }
+.phone[data-view="desk"] .cabmain .cgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.phone[data-view="desk"] .cabmain .cgrid.pcs { grid-template-columns: minmax(0, 1fr); }
+.phone[data-view="desk"] .cabmain .rtabs { max-width: 560px; }
+.phone[data-view="desk"] .cabmain > .seg { max-width: 360px; }
+.phone[data-view="desk"] .cabmain .ltabs { margin: 0; padding: 0; }
+/* сообщения: одно окно мессенджера */
+.msgr { display: grid; grid-template-columns: 340px minmax(0, 1fr); height: calc(100vh - var(--hh) - 56px); min-height: 520px; border-radius: 24px; background: var(--card); box-shadow: var(--sh); overflow: hidden; }
+.msgr-l { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--line); }
+.msgr-lh { display: grid; gap: 12px; padding: 18px 16px 12px; border-bottom: 1px solid var(--line); }
+.msgr-lh .search { min-height: 44px; }
+.msgr-lh .search input { padding: 8px 0; font-size: 14px; }
+.msgr-list { flex: 1; overflow-y: auto; padding: 6px; scrollbar-width: thin; }
+.msgr-none { padding: 16px; }
+.mrow { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px; border-radius: 14px; text-align: left; }
+.mrow:hover { background: var(--soft2); }
+.mrow.on { background: var(--soft); }
+.mrow-h { display: flex; align-items: baseline; gap: 8px; }
+.mrow-h b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mrow-h small { color: var(--muted); font-size: 12px; flex: none; }
+.mrow-s { display: block; color: var(--muted); font-size: 14px; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mrow-o { display: inline-block; margin-top: 4px; padding: 0 8px; border-radius: 8px; background: var(--soft2); color: var(--muted); font-size: 12px; line-height: 20px; }
+.mrow .cnt { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; font-size: 12px; line-height: 22px; }
+.msgr-r { display: flex; flex-direction: column; min-height: 0; min-width: 0; background: var(--page); }
+.msgr-h { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--line); }
+.msgr-h .grow b, .msgr-h .grow .m { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.msgr-h > .pill, .msgr-h > .btn { flex: none; }
+.msgr-h .grow .m { font-size: 14px; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.msgr-b { flex: 1; overflow-y: auto; padding: 12px 8px; scrollbar-width: thin; }
+.msgr-b .chat { max-width: 760px; margin: 0 auto; }
+.msgr-f { background: var(--card); border-top: 1px solid var(--line); }
+.msgr-f .composer { padding: 10px 16px 14px; }
+.msgr-empty { align-items: center; justify-content: center; gap: 8px; padding: 32px; text-align: center; }
+.msgr-ei { display: grid; place-items: center; width: 80px; height: 80px; border-radius: 24px; background: var(--card); color: var(--act); box-shadow: var(--sh); margin-bottom: 8px; }
+.msgr-empty .m { max-width: 320px; }
+/* сводка исполнителя */
+.dhero { display: flex; align-items: center; gap: 28px; padding: 28px 32px; border-radius: 24px; color: #fff; background: radial-gradient(90% 160% at 100% 0%, rgba(11, 108, 242, 0.6) 0%, rgba(11, 108, 242, 0) 60%), #0E1D36; }
+.dhero-t { margin: 0; font-size: 28px; line-height: 34px; font-weight: 800; letter-spacing: -0.02em; }
+.dhero-s { display: block; margin-top: 4px; color: #C7D2E4; }
+.dhero-q { flex: 0 1 460px; display: flex; align-items: stretch; height: 52px; border-radius: 14px; background: #fff; color: var(--muted); overflow: hidden; text-align: left; }
+.dhero-q > svg { align-self: center; margin: 0 10px 0 16px; flex: none; }
+.dhero-q span { flex: 1; min-width: 0; align-self: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dhero-q b { display: grid; place-items: center; padding: 0 20px; background: var(--act); color: #fff; font-weight: 600; white-space: nowrap; }
+.dstats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.dstat { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 20px; background: var(--card); box-shadow: var(--sh); text-align: left; }
+.dstat .ci { width: 44px; height: 44px; border-radius: 14px; }
+.dstat b { display: block; font-size: 28px; line-height: 32px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.dstat .m { display: block; font-size: 14px; line-height: 18px; }
+.dstat:hover { box-shadow: var(--sh2); }
+.dgrid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.drows { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
+.drows.two { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; }
+.drow { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 10px; margin: 0 -10px; width: calc(100% + 20px); border-radius: 14px; text-align: left; }
+.drow > .pill, .drow > .nowrap { flex: none; }
+.drow:hover { background: var(--soft2); }
+.drow .grow b, .drow .grow .m { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.drow .grow .m { font-size: 14px; line-height: 18px; }
+.dtime { flex: none; min-width: 56px; font-size: 18px; color: var(--act); font-variant-numeric: tabular-nums; }
+.dthumb { flex: none; width: 56px; height: 56px; border-radius: 12px; overflow: hidden; background: var(--soft); }
+.dthumb img { width: 100%; height: 100%; object-fit: cover; }
 
 /* ===== защита от копирования (01.11): без выделения, меню долгого нажатия и перетаскивания; шторка ===== */
 body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -4584,7 +4659,6 @@ img, svg, a { -webkit-user-drag: none; }
 <div class="stage" lang="ru">
   <div class="phone" id="phone">
     <div id="top"></div>
-    <aside id="aside" aria-label="Диалоги"></aside>
     <div id="screen"></div>
     <div id="bar"></div>
     <nav id="tabs" aria-label="Разделы"></nav>
@@ -4789,12 +4863,13 @@ const allNew = r => unreadMsgs(r) + unreadNotifs(r) + homeNew(r);
 /* компьютер и планшет (01.11): phone — до 768 px, tab — до 1100 px, desk — шире */
 const VIEW = () => innerWidth >= 1100 ? 'desk' : innerWidth >= 768 ? 'tab' : 'phone';
 /* как экран раскладывается на широком экране: wide — сетка карточек на всю ширину, aside — итог и кнопки справа,
-   split — список диалогов слева; остальные экраны — колонка формы по центру */
+   cab — кабинет: на компьютере слева меню роли, справа содержимое; остальные экраны — колонка формы по центру */
 const LAY = {
-  c_home: 'wide', c_results: 'wide', c_catalog: 'wide', c_dir: 'wide', c_cat: 'wide', c_sub: 'wide', c_service: 'wide', c_map: 'wide', c_online: 'wide',
-  c_fav: 'wide', c_orders: 'wide', c_sched: 'wide', e_home: 'wide', e_feed: 'wide', e_offers: 'wide', e_services: 'wide', e_orders: 'wide', e_fav: 'wide', e_portfolio: 'wide',
-  e_incoming: 'wide', e_promos: 'wide', g_home: 'wide', notifs: 'wide',
-  c_offer: 'aside', order: 'aside', c_msgs: 'split', e_msgs: 'split', chat: 'split',
+  c_home: 'wide', c_results: 'wide', c_catalog: 'wide', c_dir: 'wide', c_cat: 'wide', c_sub: 'wide', c_service: 'wide', c_map: 'wide', c_online: 'wide', g_home: 'wide',
+  c_offer: 'aside', order: 'aside',
+  c_orders: 'cab', c_fav: 'cab', c_cab: 'cab', c_aboutme: 'cab', c_sched: 'cab', c_msgs: 'cab', e_msgs: 'cab', chat: 'cab', notifs: 'cab', settings: 'cab',
+  e_home: 'cab', e_feed: 'cab', e_offers: 'cab', e_incoming: 'cab', e_orders: 'cab', e_fav: 'cab', e_cab: 'cab', e_services: 'cab', e_schedule: 'cab',
+  e_portfolio: 'cab', e_promos: 'cab', e_money: 'cab', e_package: 'cab', e_profile: 'cab',
 };
 /* разделы: внизу на телефоне и планшете, в шапке на компьютере */
 function navItems(cls) {
@@ -4868,21 +4943,23 @@ function render(mode) {
   const keep = el.scrollTop;
   const view = VIEW(); let lay = scr.lay || LAY[c.n] || 'form'; const ph = $('#phone');
   if (lay === 'aside' && !scr.bar) lay = 'form';  /* справа нечего показать — обычная колонка */
-  ph.dataset.view = view; ph.dataset.lay = lay; ph.classList.toggle('raw', !!scr.raw);
-  const aside = view === 'desk' && lay === 'split' && scr.aside ? scr.aside : '';
-  $('#aside').innerHTML = aside; ph.classList.toggle('has-aside', !!aside);
-  const body = aside && scr.deskBody != null ? scr.deskBody : scr.body;
+  const desk = view === 'desk'; const cabL = desk && lay === 'cab';
+  ph.dataset.view = view; ph.dataset.lay = lay; ph.classList.toggle('raw', !!scr.raw && !cabL);
+  /* у экрана может быть своё тело и своя нижняя панель для компьютера (мессенджер, сводка исполнителя) */
+  const body = desk && scr.deskBody != null ? scr.deskBody : scr.body;
+  const bar = desk && scr.deskBar != null ? scr.deskBar : (scr.bar || '');
   $('#top').innerHTML = header();
   const backLink = S.stack.length > 1 && !scr.noBack ? `<button class="back" data-a="back">${ic('back', 22, 2.1)}Назад</button>` : '';
   const head = scr.title ? `<div class="h1-wrap"><h1 class="h1">${scr.title}</h1>${scr.sub ? `<div class="h1-sub">${scr.sub}</div>` : ''}</div>` : '';
   /* компьютер: у выдачи слева колонка с разделом, местом, сортировкой и фильтрами */
   const main = view === 'desk' && scr.side ? `<div class="dcols"><aside class="dside">${scr.side}</aside><div class="dmain">${body}</div></div>` : body;
-  el.innerHTML = scr.raw ? (backLink ? `<div class="page" style="padding-bottom:0">${backLink}${head}</div>` : '') + main : `<div class="page ${scr.cls || ''}">${backLink}${head}${main}</div>`;
+  if (cabL) el.innerHTML = `<div class="page cabp ${scr.cls || ''}"><div class="cabw"><aside class="cabnav" aria-label="Кабинет">${cabNav()}</aside><div class="cabmain">${scr.deskBare ? '' : backLink + head}${main}</div></div></div>`;
+  else el.innerHTML = scr.raw ? (backLink ? `<div class="page" style="padding-bottom:0">${backLink}${head}</div>` : '') + main : `<div class="page ${scr.cls || ''}">${backLink}${head}${main}</div>`;
   if (view !== 'phone') gridCards(el);
   if (mode === 'new') el.scrollTop = 0;
   else if (mode === 'restore') el.scrollTop = c.y || 0;
   else el.scrollTop = keep;
-  $('#bar').innerHTML = scr.bar || '';
+  $('#bar').innerHTML = bar;
   const tabs = $('#tabs');
   const showTabs = S.role !== 'guest' && scr.tabs !== false;
   tabs.classList.toggle('hide', !showTabs);
@@ -5627,7 +5704,8 @@ const svcPill = s => { const [t, k, i] = SVC_ST[s.status]; return pill(t, k, i);
 /* бюджет заявки для карточки: коротко, без второго знака рубля */
 const cardBudget = x => x.budgetFrom ? `${rub(x.budgetFrom).replace(/\s?₽$/, '')}–${rub(x.budget)}` : x.budget ? `до ${rub(x.budget)}` : 'договорная';
 /* компактная карточка списка (заказ, заявка): у каждой строки своя высота, поэтому карточки в списке одинаковые, а вся карточка — одна кнопка */
-const listCard = ({ to, t, pr = '', ps = '', s = '', m = '', mb = false, pl = '' }) => `<button class="lc" data-a="go" data-v="${esc(to)}"><span class="lc-t">${t}</span><span class="lc-p">${pr ? `<b>${pr}</b>` : ''}${pr && ps ? ' · ' : ''}${ps ? `<small>${ps}</small>` : ''}</span><span class="lc-s">${s}</span><span class="lc-m${mb ? ' lc-b' : ''}">${m}</span><span class="lc-f">${pl}${ic('right', 18, 2.2)}</span></button>`;
+/* img — фото услуги: на компьютере слева в карточке, на телефоне карточка без фото, как в эталоне */
+const listCard = ({ to, t, pr = '', ps = '', s = '', m = '', mb = false, pl = '', img = '' }) => `<button class="lc${img && PH[img] ? ' has-img' : ''}" data-a="go" data-v="${esc(to)}">${img && PH[img] ? `<span class="lc-img">${photo(img, '', 'M')}</span>` : ''}<span class="lc-t">${t}</span><span class="lc-p">${pr ? `<b>${pr}</b>` : ''}${pr && ps ? ' · ' : ''}${ps ? `<small>${ps}</small>` : ''}</span><span class="lc-s">${s}</span><span class="lc-m${mb ? ' lc-b' : ''}">${m}</span><span class="lc-f">${pl}${ic('right', 18, 2.2)}</span></button>`;
 
 /* ---------- карточка услуги (листы 19–20) ---------- */
 /* гость не видит имени исполнителя: только «проверенный исполнитель», рейтинг и район */
@@ -6079,7 +6157,7 @@ SCREENS.c_orders = () => {
   const active = mine.filter(o => !['done', 'cancel'].includes(o.status)); const past = mine.filter(o => ['done', 'cancel'].includes(o.status));
   const tab = S.cOrdersTab;
   const body = tab === 'req'
-    ? (S.requests.length ? S.requests.map(r => listCard({ to: gv('c_reqview', { id: r.id }), t: esc(r.title), pr: cardBudget(r), ps: r.offers.length ? `предложений: ${r.offers.length}` : 'пока без предложений', s: esc(r.what), m: `${esc(r.whenText)} · ${esc(r.whereText)}`, pl: r.status === 'open' ? pill('Ждём предложения', '', 'clock') : pill('Исполнитель выбран', 'ok', 'check') })).join('')
+    ? (S.requests.length ? S.requests.map(r => listCard({ img: svcBy(r.svc) ? svcPh(svcBy(r.svc)) : '', to: gv('c_reqview', { id: r.id }), t: esc(r.title), pr: cardBudget(r), ps: r.offers.length ? `предложений: ${r.offers.length}` : 'пока без предложений', s: esc(r.what), m: `${esc(r.whenText)} · ${esc(r.whereText)}`, pl: r.status === 'open' ? pill('Ждём предложения', '', 'clock') : pill('Исполнитель выбран', 'ok', 'check') })).join('')
       : emptyBox('Заявок пока нет', 'Опишите задачу — исполнители сами предложат цену.', 'Разместить заявку', 'newRequest', ''))
     : (active.length || past.length ? `${active.map(orderCard).join('')}${past.length ? `<div class="h2">Завершённые</div>${past.map(orderCard).join('')}` : ''}` : emptyBox('Заказов пока нет', 'Найдите услугу и оформите первый заказ.', 'Найти услугу', 'go', 'c_find'));
   return { title: 'Заказы', body: `${roleTabs('orders')}${ltabs('cOrdTab', [['orders', 'Заказы', active.length || ''], ['req', 'Заявки', S.requests.filter(r => r.status === 'open').length || '']], tab)}${body}` };
@@ -6088,7 +6166,8 @@ A.cOrdTab = v => { S.cOrdersTab = v; render(); };
 function orderCard(o) {
   const who = S.role === 'exec' ? o.client : exName(o.ex);
   const next = nextStepText(o) || (o.status === 'done' ? 'Работа принята' : o.status === 'cancel' ? 'Заказ отменён' : '');
-  return listCard({ to: gv('order', { id: o.id }), t: esc(o.svc), pr: rub(o.total), ps: `№${NB}${o.id}`, s: `${esc(who)}${o.date ? ' · ' + when(o.date, o.time) : ''}`, m: next, mb: true, pl: orderPill(o) });
+  const of = offerById(o.offer); const sv = svcBy(o.svc);
+  return listCard({ to: gv('order', { id: o.id }), t: esc(o.svc), pr: rub(o.total), ps: `№${NB}${o.id}`, s: `${esc(who)}${o.date ? ' · ' + when(o.date, o.time) : ''}`, m: next, mb: true, pl: orderPill(o), img: of && PH[of.ph] ? of.ph : sv ? svcPh(sv) : '' });
 }
 
 /* ---------- кабинет заказчика ---------- */
@@ -6842,6 +6921,25 @@ SCREENS.e_home = () => {
   const nowM = new Date().getHours() * 60 + new Date().getMinutes(); const next = today.find(o => tmin(o.time || '00:00') + 60 > nowM) || today[0];
   const todayCard = today.length ? `<button class="card c today" data-a="go" data-v="e_schedule"><span class="row"><span class="h2 grow">Сегодня</span><span class="m">${pn(today.length, 'заказ', 'заказа', 'заказов')}</span><span class="blue">${ic('arr', 22, 2)}</span></span>
       <span class="tnext"><b class="tt">${esc(next.time || '—')}</b><span class="grow"><b style="display:block">${esc(next.svc)}</b><span class="m">${esc(next.client)} · ${nextStepText(next)}</span></span></span></button>` : '';
+  /* компьютер (01.11): сводка — поиск заказа, цифры дня, сегодняшние заказы, личные заявки и свои услуги */
+  if (VIEW() === 'desk') {
+    const stat = (icn, hue, n, l, to) => `<button class="dstat" data-a="go" data-v="${to}"><span class="ci ci-${hue}">${ic(icn, 22, 2)}</span><span><b>${n}</b><span class="m">${l}</span></span></button>`;
+    const row = (to, lead, title, sub, tail) => `<button class="drow" data-a="go" data-v="${to}">${lead}<span class="grow"><b>${title}</b><span class="m">${sub}</span></span>${tail}</button>`;
+    const todayL = today.length ? today.map(o => row(gv('order', { id: o.id }), `<b class="dtime">${esc(o.time || '—')}</b>`, esc(o.svc), `${esc(o.client)} · ${nextStepText(o)}`, orderPill(o))).join('') : '<div class="m">Сегодня заказов нет. Свободное время видно заказчикам в расписании.</div>';
+    const incL = st === 'loading' ? '<div class="m">Загружаем заявки…</div>' : st === 'error' ? `<div class="m">Не удалось загрузить заявки</div>${btn('Повторить', 'retryInc', '', 'soft')}` : inc.length
+      ? inc.slice(0, 4).map(i => row(gv('e_request', { id: i.id }), `<span class="ava">${letter(i.client)}</span>`, esc(i.svc), `${esc(i.client)} · ${esc(i.what)}`, `<span class="m nowrap">${i.date ? when(i.date, i.time) : 'без даты'}</span>`)).join('') : '<div class="m">Новых личных заявок нет.</div>';
+    const svcL = empty ? `<div class="m">Пока нет услуг. Начните с первой.</div>` : svcs.slice(0, 4).map(s => { const o = s.offer && offerById(s.offer); const sv = svcBy(s.svc);
+      return row(gv('e_service', { id: s.id }), `<span class="dthumb">${o ? photo(o.ph) : sv ? photo(svcPh(sv)) : ''}</span>`, esc(s.title), o ? priceLabel(o) : esc(s.need || (s.status === 'fix' ? `Исправьте шаг ${s.fixStep}` : 'Цена появится после проверки')), svcPill(s)); }).join('');
+    return {
+      deskBare: true,
+      body: '', deskBody: `<div class="dhero"><div class="grow"><h1 class="dhero-t">Здравствуйте, Алексей</h1><span class="dhero-s">Заявки заказчиков по вашим услугам и в других темах.</span></div>
+          <button class="dhero-q" data-a="go" data-v="${gv('e_feed', { scope: 'all' })}">${ic('search', 20, 2.2)}<span>Например: шиномонтаж R17 или сборка шкафа</span><b>Найти заказ</b></button></div>
+        <div class="dstats">${stat('calok', 'green', today.length, 'заказов сегодня', 'e_schedule')}${stat('docsearch', 'orange', S.incLoaded ? inc.length : '…', 'новых личных заявок', 'e_incoming')}${stat('send', 'violet', offersN, 'заявок по вашим услугам', 'e_offers')}${stat('star', 'blue', '4,9', '214 отзывов', gv('c_reviews', { id: 'alex' }))}</div>
+        <div class="dgrid2">${card(`<div class="sec"><span class="h2">Сегодня</span><button class="lnk" data-a="go" data-v="e_schedule">Расписание ${ic('arr', 16, 2.2)}</button></div><div class="drows">${todayL}</div>`)}
+          ${card(`<div class="sec"><span class="h2">Поступившие заявки</span><button class="lnk" data-a="go" data-v="e_incoming">Все ${ic('arr', 16, 2.2)}</button></div><div class="drows">${incL}</div>`)}</div>
+        ${card(`<div class="sec"><span class="h2">Мои услуги</span><span class="row">${btn(`${ic('plus', 18, 2.4)} Добавить услугу`, 'newService', '', 'soft sm')}<button class="lnk" data-a="go" data-v="e_services">Все ${ic('arr', 16, 2.2)}</button></span></div><div class="drows two">${svcL}</div>`)}`,
+    };
+  }
   return {
     body: `
     <div class="card hero" style="gap:14px">
@@ -6898,7 +6996,7 @@ const feedAudience = x => x.personal ? `Заказчик сам выбрал ${p
 const budgetText = x => x.budgetFrom ? `${rub(x.budgetFrom)} – ${rub(x.budget)}` : x.budget ? `до ${rub(x.budget)}` : 'договорная';
 function feedList(list) {
   if (!list.length) return emptyBox('Нет совпадений', 'Измените запрос или фильтр.', 'Сбросить фильтр', 'feedReset');
-  return list.map(x => listCard({ to: gv('e_task', { id: x.id }), t: esc(x.title), pr: cardBudget(x), ps: x.my ? 'вы предложили ' + rub(x.my.price) : x.offers ? 'предложений: ' + x.offers : 'вы будете первым',
+  return list.map(x => listCard({ img: svcBy(x.svc) ? svcPh(svcBy(x.svc)) : '', to: gv('e_task', { id: x.id }), t: esc(x.title), pr: cardBudget(x), ps: x.my ? 'вы предложили ' + rub(x.my.price) : x.offers ? 'предложений: ' + x.offers : 'вы будете первым',
     s: esc(x.what), m: `${ic('pin', 15, 2)} ${esc(x.where)}${x.dist ? `, ${String(x.dist).replace('.', ',')}${NB}км` : ''} · ${dayName(x.date)}, ${esc(x.part)}`,
     pl: x.personal ? pill('Вас выбрали', 'ok', 'user') : isMine(x) ? pill('По вашей услуге', 'grey') : pill('Другая тема', 'warn') })).join('');
 }
@@ -6982,7 +7080,7 @@ SCREENS.e_incoming = () => {
   if (st === 'loading') body = `<div class="m">Загружаем заявки…</div>${skel(2)}`;
   else if (st === 'error') body = card(`<div class="h2">Не удалось загрузить заявки</div><div class="m">Это ошибка загрузки, а не отсутствие заявок.</div>${btn(`Повторить ${ic('retry', 20, 2.2)}`, 'retryInc', '', 'soft block')}`);
   else if (!list.length) body = emptyBox('Пока нет новых заявок', 'Когда заказчик напишет вам или отправит заказ на подтверждение, заявка появится здесь.', '', '', '');
-  else body = list.map(i => { const [t, k, icn] = INC_KIND[i.kind]; return listCard({ to: gv('e_request', { id: i.id }), t: esc(i.svc), ps: `Заказчик: ${esc(i.client)}${clientRating(i.client) ? ` · ★${NB}${String(clientRating(i.client).avg).replace('.', ',')}` : ''}`, s: esc(i.what), m: i.date ? when(i.date, i.time) : 'Время не указано', pl: pill(t, k, icn) }); }).join('');
+  else body = list.map(i => { const [t, k, icn] = INC_KIND[i.kind]; return listCard({ img: offerById(i.offer) ? offerById(i.offer).ph : '', to: gv('e_request', { id: i.id }), t: esc(i.svc), ps: `Заказчик: ${esc(i.client)}${clientRating(i.client) ? ` · ★${NB}${String(clientRating(i.client).avg).replace('.', ',')}` : ''}`, s: esc(i.what), m: i.date ? when(i.date, i.time) : 'Время не указано', pl: pill(t, k, icn) }); }).join('');
   return { title: 'Поступившие заявки', body: body + (done.length && st === 'normal' ? `<div class="h2">Разобранные</div>${done.map(i => card(`<div class="row"><span class="grow">${esc(i.svc)} · ${esc(i.client)}</span>${pill('Ответили', 'ok', 'check')}</div>`, 'c')).join('')}` : '') };
 };
 const REPLY_INC = ['Снятие и установка колеса', 'Ремонт прокола грибком', 'Ремонт прокола жгутом', 'Балансировка', 'Проверка давления'];
@@ -8529,6 +8627,28 @@ function roleTabs(kind) {
   return `<div class="rtabs${roles.length === 2 ? ' two' : ''}" role="tablist" aria-label="Роли">${roles.map(([r, l]) => { const n = r === 'partner' ? 0 : ROLE_CNT[kind](r); return `<button class="${S.role === r ? 'on' : ''}" data-a="roleTab" data-v="${kind}|${r}" role="tab" aria-selected="${S.role === r}"><span class="rl1">${l}</span><span class="rl2 ${n ? 'on' : ''}">${n ? `новых: ${n}` : 'нет новых'}</span></button>`; }).join('')}</div>`;
 }
 const ROLE_ROOT = { msgs: { cust: 'c_msgs', exec: 'e_msgs' }, orders: { cust: 'c_orders', exec: 'e_orders' } };
+/* компьютер (01.11): меню кабинета слева — профиль, смена роли и все разделы роли со счётчиками */
+function cabNav() {
+  const ex = S.role === 'exec'; const n = cur().n; const r0 = S.stack[0].n; const reqTab = n === 'c_orders' && S.cOrdersTab === 'req';
+  const it = (to, icn, label, cnt, hue, o = {}) => { const on = o.on != null ? o.on : (n === to || r0 === to);
+    return `<button class="cni ${on ? 'on' : ''}" data-a="${o.act || 'tab'}" data-v="${to}" ${on ? 'aria-current="page"' : ''}><span class="ci ci-${hue}">${ic(icn, 20, 2)}</span><span class="grow">${label}</span>${cnt ? `<b class="${o.num ? 'cnum' : 'cnt'}">${cnt}</b>` : ''}</button>`; };
+  const cr = clientRating('Алексей');
+  const items = ex ? [
+    it('e_home', 'home', 'Главная', 0, 'blue'), it('e_feed', 'search', 'Найти заказ', 0, 'blue'),
+    it('e_incoming', 'docsearch', 'Поступившие заявки', newIncoming().length, 'orange'), it('e_offers', 'send', 'Заявки по вашим услугам', S.feed.filter(x => !x.my).length, 'violet'),
+    it('e_orders', 'orders', 'Заказы', actOrders('exec'), 'green'), it('e_msgs', 'chat', 'Сообщения', unreadMsgs('exec'), 'teal'),
+    it('e_services', 'case', 'Мои услуги', S.myServices.length, 'blue', { num: true }), it('e_schedule', 'calok', 'Расписание', 0, 'green'),
+    it('e_portfolio', 'image', 'Портфолио', 0, 'pink'), it('e_promos', 'tag', 'Акции', 0, 'orange'), it('e_money', 'wallet', 'Финансы', 0, 'teal'), it('e_package', 'diamond', 'Пакет и ИИ-помощник', 0, 'violet'),
+  ] : [
+    it('c_home', 'home', 'Главная', 0, 'blue'), it('c_orders', 'orders', 'Заказы', actOrders('cust'), 'green', { on: n === 'c_orders' && !reqTab }),
+    it('req', 'send', 'Мои заявки', homeNew('cust'), 'violet', { act: 'myReqs', on: reqTab }), it('c_msgs', 'chat', 'Сообщения', unreadMsgs('cust'), 'teal'),
+    it('c_fav', 'heart', 'Избранное', S.favs.length, 'pink', { num: true }), it('c_sched', 'calok', 'Моё расписание', 0, 'orange'), it('c_aboutme', 'star', 'Отзывы обо мне', 0, 'orange'),
+  ];
+  return `<div class="cabme"><span class="ava lg">А</span><span class="grow"><b class="t18">Алексей Смирнов</b><span class="m">${ex ? 'Исполнитель · ★ 4,9 · 214 отзывов' : `Заказчик${cr ? ` · ★ ${String(cr.avg).replace('.', ',')} от исполнителей` : ''}`}</span></span></div>
+    <button class="cabsw" data-a="setRole" data-v="${ex ? 'cust' : 'exec'}">${ic('retry', 18, 2.2)}Перейти в роль «${ex ? 'Заказчик' : 'Исполнитель'}»</button>
+    <nav class="cnl">${items.join('')}</nav>
+    <nav class="cnl tail">${it(ex ? 'e_cab' : 'c_cab', 'user', 'Кабинет', 0, 'grey')}${it('notifs', 'bell', 'Уведомления', unreadNotifs(S.role), 'grey')}${it('settings', 'gear', 'Настройки', 0, 'grey')}</nav>`;
+}
 function switchRole(r, rootScreen) {
   S.stacks[S.role] = S.stack; S.role = r;
   S.stack = rootScreen ? [{ n: rootScreen, p: {} }] : (S.stacks[r] || [{ n: r === 'exec' ? 'e_home' : 'c_home', p: {} }]);
@@ -8541,25 +8661,41 @@ A.roleTab = v => {
   switchRole(r, ROLE_ROOT[kind][r]); render('new'); toast(`Вы в роли «${ROLE_NAME[r]}»`, 'info');
 };
 const QUICK = { cust: ['Когда сможете?', 'Сколько это будет стоить?', 'Можно фото ваших работ?', 'Спасибо!'], exec: ['Добрый день! Да, сделаю', 'Пришлите фото, пожалуйста', `Могу ${dayName(dk(1)).toLowerCase()} в 10:00`, 'Спасибо!'] };
-/* компьютер: диалоги слева, переписка справа (01.11) */
 const chatFilter = role => { const q = norm(S.chatQ || ''); return chatsFor(role).filter(c => !q || norm(c.with + ' ' + c.msgs.map(m => m.t || '').join(' ')).includes(q)); };
-const chatAside = (role, curId) => `<div class="asd-h"><div class="h1">Сообщения</div>${roleTabs('msgs')}<span class="search"><input data-in="chatQ|${role}" value="${esc(S.chatQ || '')}" placeholder="Имя или текст" autocomplete="off" aria-label="Поиск по диалогам">${ic('search', 22)}</span></div>
-  <div id="chatlist">${chatListHtml(chatFilter(role), curId || '')}</div>`;
+/* последнее сообщение диалога и подпись к нему в списке */
+const lastOf = c => { const last = [...c.msgs].reverse().find(m => m.from !== 'sys') || c.msgs[c.msgs.length - 1] || { t: '' }; return [last, last.kind === 'version' ? `Предложение: ${rub(last.v.price)}` : last.kind === 'brief' ? 'Запрос с условиями' : last.kind === 'file' ? last.name : last.t]; };
+/* компьютер (01.11): одно окно мессенджера во всю высоту — диалоги слева, переписка справа, поле ввода внизу */
+const chatRow = (c, curId) => { const [last, lt] = lastOf(c); const on = c.id === curId;
+  return `<button class="mrow ${on ? 'on' : ''}" data-a="openChat" data-v="${c.id}" ${on ? 'aria-current="true"' : ''}><span class="ava">${letter(c.with)}</span><span class="grow"><span class="mrow-h"><b>${esc(c.with)}</b><small>${esc(last.at || '')}</small></span><span class="mrow-s">${esc(lt || '')}</span>${c.order ? `<span class="mrow-o">Заказ № ${c.order}</span>` : ''}</span>${c.unread ? `<span class="cnt">${c.unread}</span>` : ''}</button>`; };
+const chatRows = (role, curId) => { const l = chatFilter(role); return l.length ? l.map(c => chatRow(c, curId)).join('') : '<div class="msgr-none m">Диалогов нет</div>'; };
+const composerHtml = ch => `<div class="composer"><div class="chips scroll" style="margin:0 -12px;padding:0 12px 2px">${QUICK[ch.role].map(t => `<button class="chip" data-a="quickSend" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</div>
+      <div class="compose"><label class="iconbtn" style="color:var(--act);cursor:pointer" aria-label="Прикрепить файл">${ic('plus', 24, 2.2)}<input type="file" data-ch="chatFile" hidden></label><input id="msgin" data-in="chatText" data-enter="chatSend" value="${esc(S.chatDraft || '')}" placeholder="Напишите сообщение" autocomplete="off"><button data-a="chatSend" aria-label="Отправить">${ic('send', 22, 2)}</button></div></div>`;
+function chatPane(ch) {
+  const o = offerById(ch.offer); const ord = ch.order && orderById(ch.order);
+  const sub = ord ? `${esc(ord.svc)} · заказ № ${ord.id}` : o ? `По услуге «${esc(o.title)}»` : '';
+  const act = ord ? btn('Открыть заказ', 'go', gv('order', { id: ord.id }), 'soft sm') : o && ch.role === 'cust' ? btn('Карточка услуги', 'openOffer', o.id, 'soft sm') : '';
+  return `<div class="msgr-r"><div class="msgr-h"><span class="ava">${letter(ch.with)}</span><span class="grow"><b class="t18">${esc(ch.with)}</b><span class="m">${sub}</span></span>${ord ? orderPill(ord) : ''}${act}<button class="iconbtn" data-a="callAsk" data-v="${esc(ch.ex || '')}" aria-label="Позвонить через ZELDO" title="Позвонить через ZELDO">${ic('phone', 22, 2)}</button></div>
+    <div class="msgr-b"><div class="chat">${ch.msgs.map((m, i) => msgHtml(ch, m, i)).join('')}</div></div><div class="msgr-f">${composerHtml(ch)}</div></div>`;
+}
+function messenger(role, ch) {
+  const right = ch ? chatPane(ch) : `<div class="msgr-r msgr-empty"><span class="msgr-ei">${ic('chat', 40, 1.6)}</span><b class="t18">Выберите диалог</b><span class="m">Слева — все ваши переписки. Нажмите на любую, и она откроется здесь.</span></div>`;
+  return `<div class="msgr"><div class="msgr-l"><div class="msgr-lh"><b class="h2">Сообщения</b>${roleTabs('msgs')}<span class="search"><input data-in="chatQ|${role}" value="${esc(S.chatQ || '')}" placeholder="Имя или текст" autocomplete="off" aria-label="Поиск по диалогам">${ic('search', 22)}</span></div>
+    <div id="chatlist" class="msgr-list">${chatRows(role, ch && ch.id)}</div></div>${right}</div>`;
+}
 function chatListScreen(role) {
   const list = chatFilter(role);
   return {
-    title: 'Сообщения', aside: chatAside(role), deskBody: emptyBox('Выберите диалог', list.length ? 'Слева — все ваши переписки. Нажмите на любую, она откроется здесь.' : 'Напишите исполнителю из карточки услуги — переписка появится слева.', '', '', ''),
+    title: 'Сообщения', deskBody: messenger(role, null), deskBare: true,
     body: `${roleTabs('msgs')}${field('Поиск по диалогам', `<span class="search"><input data-in="chatQ|${role}" value="${esc(S.chatQ || '')}" placeholder="Имя или текст" autocomplete="off">${ic('search', 22)}</span>`)}
       <div id="chatlist">${chatListHtml(list)}</div>
       <div class="m">Сообщения — это переписка. События по заказам приходят в колокольчик.</div>`,
   };
 }
-function chatListHtml(list, curId) {
+function chatListHtml(list) {
   if (!list.length) return emptyBox('Диалогов нет', 'Напишите исполнителю из карточки услуги.', '', '', '');
-  const side = curId != null; const nav = c => side ? `class="rl ${c.id === curId ? 'on' : ''}" data-a="openChat" data-v="${c.id}" ${c.id === curId ? 'aria-current="true"' : ''}` : `class="rl" data-a="go" data-v="${gv('chat', { id: c.id })}"`;
-  return card(`${side ? '' : '<div class="h2">Диалоги</div>'}<div class="list">${list.map(c => { const last = [...c.msgs].reverse().find(m => m.from !== 'sys') || c.msgs[c.msgs.length - 1] || { t: '' }; const lt = last.kind === 'version' ? `Предложение: ${rub(last.v.price)}` : last.kind === 'brief' ? 'Запрос с условиями' : last.kind === 'file' ? last.name : last.t; return `<button ${nav(c)}><span class="lt">${letter(c.with)}</span><span class="grow"><span class="rt">${esc(c.with)}</span><span class="rs clamp2">${esc(lt || '')}${last.at ? ' · ' + esc(last.at) : ''}</span>${c.order ? `<span class="pill grey" style="margin-top:4px">Заказ № ${c.order}</span>` : ''}</span>${c.unread ? `<span class="cnt" style="min-width:30px;height:30px;font-size:14px">${c.unread}</span>` : `<span class="ra">${ic('arr', 22, 2)}</span>`}</button>`; }).join('')}</div>`, 'c');
+  return card(`<div class="h2">Диалоги</div><div class="list">${list.map(c => { const [last, lt] = lastOf(c); return `<button class="rl" data-a="go" data-v="${gv('chat', { id: c.id })}"><span class="lt">${letter(c.with)}</span><span class="grow"><span class="rt">${esc(c.with)}</span><span class="rs clamp2">${esc(lt || '')}${last.at ? ' · ' + esc(last.at) : ''}</span>${c.order ? `<span class="pill grey" style="margin-top:4px">Заказ № ${c.order}</span>` : ''}</span>${c.unread ? `<span class="cnt" style="min-width:30px;height:30px;font-size:14px">${c.unread}</span>` : `<span class="ra">${ic('arr', 22, 2)}</span>`}</button>`; }).join('')}</div>`, 'c');
 }
-IN.chatQ = (v, role) => { S.chatQ = v; const el = $('#chatlist'); if (el) el.innerHTML = chatListHtml(chatFilter(role), el.closest('#aside') ? (cur().n === 'chat' ? cur().p.id : '') : undefined); };
+IN.chatQ = (v, role) => { S.chatQ = v; const el = $('#chatlist'); if (el) el.innerHTML = el.classList.contains('msgr-list') ? chatRows(role, cur().n === 'chat' ? cur().p.id : '') : chatListHtml(chatFilter(role)); };
 A.openChat = id => { if (cur().n === 'chat') replace('chat', { id }); else go('chat', { id }); };
 SCREENS.c_msgs = () => chatListScreen('cust');
 SCREENS.e_msgs = () => chatListScreen('exec');
@@ -8589,11 +8725,10 @@ SCREENS.chat = p => {
     : o ? `<div class="ctx"><span class="grow"><span class="m">По услуге</span><b style="display:block">${esc(o.title)}</b></span>${ch.role === 'cust' ? `<button class="lnk" data-a="openOffer" data-v="${o.id}">Карточка</button>` : ''}</div>` : '';
   const call = `<div style="padding:8px 16px 0">${btn(`${ic('phone', 20)} Позвонить через ZELDO`, 'callAsk', ch.ex || '', 'text block')}</div>`;
   return {
-    raw: true, title: esc(ch.with), aside: chatAside(ch.role, ch.id),
+    raw: true, title: esc(ch.with), deskBody: messenger(ch.role, ch), deskBar: '', deskBare: true,
     body: `${ctx}${call}<div class="chat">${ch.msgs.map((m, i) => msgHtml(ch, m, i)).join('')}</div>`,
-    bar: `<div class="composer"><div class="chips scroll" style="margin:0 -12px;padding:0 12px 2px">${QUICK[ch.role].map(t => `<button class="chip" data-a="quickSend" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</div>
-      <div class="compose"><label class="iconbtn" style="color:var(--act);cursor:pointer" aria-label="Прикрепить файл">${ic('plus', 24, 2.2)}<input type="file" data-ch="chatFile" hidden></label><input id="msgin" data-in="chatText" data-enter="chatSend" value="${esc(S.chatDraft || '')}" placeholder="Напишите сообщение" autocomplete="off"><button data-a="chatSend" aria-label="Отправить">${ic('send', 22, 2)}</button></div></div>`,
-    after: el => { el.scrollTop = el.scrollHeight; },
+    bar: composerHtml(ch),
+    after: el => { el.scrollTop = el.scrollHeight; const b = el.querySelector('.msgr-b'); if (b) b.scrollTop = b.scrollHeight; },
   };
 };
 IN.chatText = v => { S.chatDraft = v; };
