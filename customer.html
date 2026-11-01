@@ -4413,13 +4413,18 @@ input, textarea, select { font-size: max(16px, 1em); }
 /* ===== компьютер (01.11, третья версия): язык телефона — серо-голубой фон, белые карточки с тенью, цветные значки;
    белая шапка с поиском; разделы роли — кабинет с меню слева; сообщения — одно окно мессенджера ===== */
 .dh, .dtitle, .dcats, .dfind, .dside, .lc-img { display: none; }
-.phone[data-view="desk"] { --hh: 113px; --sh: 0 1px 2px rgba(16, 33, 61, 0.04), 0 8px 24px rgba(16, 33, 61, 0.07); --sh2: 0 2px 4px rgba(16, 33, 61, 0.05), 0 16px 36px rgba(16, 33, 61, 0.12); }
+.phone[data-view="desk"] { --cw: 100%; --hh: 113px; --sh: 0 1px 2px rgba(16, 33, 61, 0.04), 0 8px 24px rgba(16, 33, 61, 0.07); --sh2: 0 2px 4px rgba(16, 33, 61, 0.05), 0 16px 36px rgba(16, 33, 61, 0.12); }
 :root:not([data-theme="dark"]) .phone[data-view="desk"] { --page: #F1F4F9; }
 .phone[data-view="desk"] #tabs { display: none !important; }
+/* ничего не пружинит и не съезжает: страница стоит, прокручиваются только нужные части */
+@media (min-width: 768px) {
+  html, body { position: fixed; inset: 0; width: 100%; height: 100%; overscroll-behavior: none; }
+  #screen, .sheet, .panel { overscroll-behavior: none; }
+}
 /* шапка */
 [data-style] .phone[data-view="desk"] #top { background: var(--card); box-shadow: 0 1px 0 var(--line), 0 4px 16px rgba(16, 33, 61, 0.04); }
 .phone[data-view="desk"] .dh { display: block; }
-.dh-top .dh-w, .dh-main .dh-w { display: flex; align-items: center; height: 100%; padding: 0 var(--gut); }
+.dh-top .dh-w, .dh-main .dh-w { display: flex; align-items: center; height: 100%; padding: 0 24px; }
 .dh-top { height: 36px; font-size: 14px; line-height: 18px; color: var(--muted); }
 .dh-top .dh-w { gap: 20px; }
 .dh-l { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); white-space: nowrap; }
@@ -4433,11 +4438,11 @@ input, textarea, select { font-size: max(16px, 1em); }
 .dh-logo { font-size: 28px; line-height: 32px; font-weight: 800; letter-spacing: 0.02em; color: var(--brand); margin-right: 12px; }
 .dh-cats { display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 18px; border-radius: 12px; background: var(--act); color: #fff; font-size: 18px; font-weight: 600; white-space: nowrap; flex: none; }
 .dh-cats:hover, .dh-q:hover b { background: var(--act-press); }
-.dh-q { flex: 1 1 auto; min-width: 180px; display: flex; align-items: stretch; height: 48px; border-radius: 12px; box-shadow: inset 0 0 0 2px var(--act); background: var(--card); color: var(--muted); overflow: hidden; text-align: left; }
+.dh-q { flex: 1 1 auto; min-width: 180px; max-width: 860px; display: flex; align-items: stretch; height: 48px; border-radius: 12px; box-shadow: inset 0 0 0 2px var(--act); background: var(--card); color: var(--muted); overflow: hidden; text-align: left; }
 .dh-q > svg { align-self: center; margin: 0 10px 0 16px; flex: none; }
 .dh-q span { flex: 1; min-width: 0; align-self: center; font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dh-q b { display: grid; place-items: center; padding: 0 24px; background: var(--act); color: #fff; font-size: 18px; font-weight: 600; }
-.dh-nav { display: flex; gap: 2px; flex: none; }
+.dh-nav { display: flex; gap: 2px; flex: none; margin-left: auto; }
 .dh-i { position: relative; display: grid; justify-items: center; gap: 2px; padding: 4px 8px; border-radius: 12px; color: var(--muted); font-size: 14px; line-height: 18px; white-space: nowrap; }
 .dh-i:hover { color: var(--ink); background: var(--soft2); }
 .dh-i.on { color: var(--act); font-weight: 600; }
@@ -4468,23 +4473,22 @@ input, textarea, select { font-size: max(16px, 1em); }
 [data-theme="dark"] .ci:not(.ci-grey) { background: var(--soft); }
 /* плитка услуги — белая карточка с фото сверху */
 .phone[data-view="desk"] .pct { border-radius: 20px; box-shadow: var(--sh); overflow: hidden; }
-.phone[data-view="desk"] .pct-p { height: auto; aspect-ratio: 4 / 3; }
 .phone[data-view="desk"] .pct-in { padding: 12px 14px 16px; gap: 4px; }
 .phone[data-view="desk"] .pct-t { font-size: 18px; line-height: 24px; font-weight: 600; min-height: 48px; }
 .phone[data-view="desk"] .pct:hover .pct-t { color: var(--act); }
-.phone[data-view="desk"] .cgrid.tiles, .phone[data-view="desk"][data-lay="wide"] .cgrid.tiles { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 20px; }
+.phone[data-view="desk"] .cgrid.tiles, .phone[data-view="desk"][data-lay="wide"] .cgrid.tiles { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
 /* широкая карточка в выдаче */
 .phone[data-view="desk"] .cgrid.pcs, .phone[data-view="desk"][data-lay="wide"] .cgrid.pcs { grid-template-columns: minmax(0, 1fr); gap: 16px; }
 .phone[data-view="desk"] .pc { display: grid; grid-template-columns: minmax(0, 1fr) 230px; column-gap: 24px; border-radius: 20px; box-shadow: var(--sh); padding: 16px; height: auto; overflow: visible; }
 .phone[data-view="desk"] .pc-top { grid-column: 1; grid-row: 1 / span 2; }
 .phone[data-view="desk"] .pc-b { padding: 0; }
-.phone[data-view="desk"] .pc-g { grid-template-columns: 220px minmax(0, 1fr); gap: 20px; align-items: start; }
-.phone[data-view="desk"] .pc-p { width: 220px; height: 165px; border-radius: 16px; }
+.phone[data-view="desk"] .pc-g { grid-template-columns: 340px minmax(0, 1fr); gap: 24px; align-items: start; }
+.phone[data-view="desk"] .pc-p { width: 340px; height: 255px; border-radius: 16px; }
 .phone[data-view="desk"] .pc-c { gap: 6px; padding-top: 2px; }
 .phone[data-view="desk"] .pc-t { order: 1; min-height: 0; }
 .phone[data-view="desk"] .pc-b:hover .pc-t { color: var(--act); }
 .phone[data-view="desk"] .pc-pr { order: 2; height: auto; }
-.phone[data-view="desk"] .pc-d { order: 3; -webkit-line-clamp: 3; min-height: 0; }
+.phone[data-view="desk"] .pc-d { order: 3; -webkit-line-clamp: 6; min-height: 0; }
 .phone[data-view="desk"] .pc-foot { grid-column: 2; grid-row: 1; display: grid; align-content: start; gap: 8px; padding: 14px 16px; border: 0; border-radius: 16px; background: var(--soft2); min-height: 0; }
 .phone[data-view="desk"] .pc-who { display: grid; gap: 6px; justify-items: start; }
 .phone[data-view="desk"] .pc-who b { font-size: 18px; line-height: 24px; white-space: normal; }
@@ -4492,19 +4496,40 @@ input, textarea, select { font-size: max(16px, 1em); }
 .phone[data-view="desk"] .pc-partner { grid-column: 2; grid-row: 2; align-self: end; padding: 0 4px; border: 0; background: none; min-height: 0; }
 .phone[data-view="desk"] .pc .heart { top: 10px; left: 10px; }
 /* карточка списка (заказ, заявка) с фото */
-.phone[data-view="desk"] .lc.has-img { display: grid; grid-template-columns: 96px minmax(0, 1fr); column-gap: 16px; align-content: start; }
-.phone[data-view="desk"] .lc.has-img .lc-img { display: block; grid-row: 1 / span 5; width: 96px; height: 96px; border-radius: 14px; overflow: hidden; background: var(--soft); }
+.phone:not([data-view="phone"]) .lc.has-img { position: relative; min-height: 190px; padding: 18px 18px 16px 268px; overflow: hidden; }
+.phone:not([data-view="phone"]) .lc.has-img .lc-img { display: block; position: absolute; left: 0; top: 0; bottom: 0; width: 250px; background: var(--soft); }
 .lc-img img { width: 100%; height: 100%; object-fit: cover; }
-.phone[data-view="desk"] .lc.has-img > span:not(.lc-img) { grid-column: 2; }
+/* карточка своей услуги и маленькие фото в шапке заказа, оплаты и услуги */
+.phone:not([data-view="phone"]) .oc.my { position: relative; min-height: 190px; padding: 18px 18px 16px 268px; overflow: hidden; }
+.phone:not([data-view="phone"]) .oc.my .op { position: absolute; left: 0; top: 0; bottom: 0; float: none; width: 250px; height: auto; margin: 0; border-radius: 0; }
+.phone:not([data-view="phone"]) .oc.my .my-c { height: auto; min-height: 156px; }
+.phone:not([data-view="phone"]) .bigth { width: 200px !important; height: 150px !important; }
+.phone:not([data-view="phone"]) .pct-p { height: auto; aspect-ratio: 4 / 3; }
+/* планшет: широкая карточка в одну колонку, фото крупно; разделы роли — во всю ширину */
+.phone[data-view="tab"] .cgrid.pcs { grid-template-columns: minmax(0, 1fr); }
+.phone[data-view="tab"] .pc:not(.h) .pc-g { grid-template-columns: 240px minmax(0, 1fr); gap: 16px; }
+.phone[data-view="tab"] .pc:not(.h) .pc-p { width: 240px; height: 180px; }
+.phone[data-view="tab"] .pc:not(.h) .pc-d { -webkit-line-clamp: 3; min-height: 0; }
+.phone[data-view="tab"][data-lay="cab"] .page { max-width: none; }
+.phone[data-view="tab"][data-lay="cab"] .cgrid { grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); }
+.phone[data-view="tab"][data-lay="cab"] .cgrid.pcs { grid-template-columns: minmax(0, 1fr); }
+.phone[data-view="desk"] .thumbs { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.phone[data-view="desk"] .thumb { aspect-ratio: 4 / 3; }
+.phone[data-view="desk"] .rth { width: 120px; height: 90px; }
+.phone[data-view="desk"] .rth.sm { width: 96px; height: 72px; }
+.phone[data-view="desk"] .ohero { max-height: 560px; }
+.phone[data-view="desk"][data-lay="wide"] .grid2:has(> .cat) { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+.phone[data-view="desk"][data-lay="wide"] .grid3 { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.phone[data-view="desk"] .sub-t.ph .sc { font-size: 18px; line-height: 24px; }
 /* главная заказчика */
 .phone[data-view="desk"] .dtitle { display: block; margin: 0; font-size: 28px; line-height: 34px; font-weight: 800; letter-spacing: -0.02em; }
 .dtitle span { color: var(--muted); font-weight: 700; }
-.phone[data-view="desk"] .dcats { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 14px; }
-.dcat { position: relative; display: flex; flex-direction: column; align-items: flex-start; height: 128px; padding: 14px 16px; border-radius: 20px; background: var(--card); box-shadow: var(--sh); overflow: hidden; text-align: left; }
-.dcat-t { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 4px; max-width: 100%; font-size: 14px; line-height: 18px; font-weight: 700; }
-.dcat-p { position: absolute; right: 12px; bottom: 12px; width: 80px; height: 56px; border-radius: 12px; overflow: hidden; }
+.dsec { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.phone[data-view="desk"] .dcats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; }
+.dcat { display: block; border-radius: 20px; background: var(--card); box-shadow: var(--sh); overflow: hidden; text-align: left; }
+.dcat-p { display: block; width: 100%; aspect-ratio: 1 / 1; background: var(--soft); }
 .dcat-p img { width: 100%; height: 100%; object-fit: cover; }
-.dcat.all { background: var(--soft); color: var(--act); box-shadow: none; }
+.dcat-t { display: flex; align-items: center; min-height: 60px; padding: 8px 14px; font-size: 18px; line-height: 22px; font-weight: 700; }
 .phone[data-view="desk"] .dfind { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 36px; padding: 32px 36px; border-radius: 28px; color: #fff;
   background: radial-gradient(90% 140% at 100% 0%, rgba(11, 108, 242, 0.6) 0%, rgba(11, 108, 242, 0) 60%), #0E1D36; }
 .dfind .h2 { font-size: 28px; line-height: 34px; font-weight: 800; }
@@ -4562,9 +4587,12 @@ input, textarea, select { font-size: max(16px, 1em); }
 .asum-ex b { display: block; }
 .asum-ex:hover { box-shadow: inset 0 0 0 1.5px var(--line2); }
 /* кабинет: меню роли слева, содержимое справа */
-.phone[data-view="desk"] .page.cabp { max-width: calc(var(--cw) + 48px); }
-.cabw { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 32px; align-items: start; }
-.cabnav { position: sticky; top: 0; max-height: calc(100vh - var(--hh) - 56px); overflow-y: auto; scrollbar-width: thin; display: grid; gap: 10px; padding: 16px; border-radius: 24px; background: var(--card); box-shadow: var(--sh); }
+.phone[data-view="desk"][data-lay="cab"] #screen { overflow: hidden; }
+.phone[data-view="desk"] .page.cabp { position: absolute; inset: 0; display: block; max-width: none; margin: 0; padding: 0; }
+.cabw { display: grid; grid-template-columns: 288px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); height: 100%; }
+.cabnav { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 8px; min-height: 0; padding: 14px 14px 16px; overflow-y: auto; overscroll-behavior: none; scrollbar-width: thin; background: var(--card); box-shadow: 1px 0 0 var(--line); }
+.cabnav > * { flex: none; }
+.phone[data-view="desk"][data-lay="cab"] #bar { margin-left: 288px; box-shadow: 0 -1px 0 var(--line), -288px 0 0 var(--card); }
 .cabme { display: flex; align-items: center; gap: 12px; padding: 2px 2px 4px; }
 .cabme .ava.lg { width: 52px; height: 52px; font-size: 22px; background: linear-gradient(135deg, #0B6CF2, #0A55C4); color: #fff; }
 .cabme b { display: block; }
@@ -4572,26 +4600,33 @@ input, textarea, select { font-size: max(16px, 1em); }
 .cabsw { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; border-radius: 12px; background: var(--soft); color: var(--act); font-size: 14px; font-weight: 600; }
 .cabsw:hover { background: #DCEBFF; }
 .cnl { display: grid; gap: 2px; }
-.cnl.tail { padding-top: 10px; border-top: 1px solid var(--line); }
-.cni { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 6px 10px 6px 6px; border-radius: 14px; text-align: left; font-size: 14px; line-height: 18px; font-weight: 500; color: var(--ink); }
+.cni { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 40px; padding: 4px 10px 4px 6px; border-radius: 14px; text-align: left; font-size: 14px; line-height: 18px; font-weight: 500; color: var(--ink); }
 .cni .ci { width: 32px; height: 32px; border-radius: 10px; }
 .cni:hover { background: var(--soft2); }
 .cni.on { background: var(--soft); color: var(--act); font-weight: 700; }
 .cni .cnt { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; font-size: 12px; line-height: 22px; }
 .cnum { color: var(--muted); font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.cabmain { display: grid; gap: 20px; min-width: 0; align-content: start; }
-.phone[data-view="desk"] .cabmain .cgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cabmain { min-width: 0; min-height: 0; padding: 28px 32px 48px; overflow-y: auto; overscroll-behavior: none; }
+.cabin { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-content: start; margin: 0 auto; }
+.cabin:not(:has(.cgrid)):not(:has(.dhero)):not(:has(.cat)) { max-width: 1160px; }
+.page.cabh .cabin { max-width: none; }
+.page.cabh .card.c > .list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; }
+.page.cabh .card.c > .list > :nth-child(2) { border-top: 0; box-shadow: none; }
+.phone[data-view="desk"] .cabmain .cgrid { grid-template-columns: repeat(auto-fill, minmax(500px, 1fr)); }
+.phone[data-view="desk"] .cabmain .cgrid.tiles { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
 .phone[data-view="desk"] .cabmain .cgrid.pcs { grid-template-columns: minmax(0, 1fr); }
 .phone[data-view="desk"] .cabmain .rtabs { max-width: 560px; }
-.phone[data-view="desk"] .cabmain > .seg { max-width: 360px; }
+.phone[data-view="desk"] .cabin > .seg { max-width: 360px; }
 .phone[data-view="desk"] .cabmain .ltabs { margin: 0; padding: 0; }
 /* сообщения: одно окно мессенджера */
-.msgr { display: grid; grid-template-columns: 340px minmax(0, 1fr); height: calc(100vh - var(--hh) - 56px); min-height: 520px; border-radius: 24px; background: var(--card); box-shadow: var(--sh); overflow: hidden; }
+.phone[data-view="desk"] .page.msgp .cabmain { display: grid; grid-template-rows: minmax(0, 1fr); padding: 0; overflow: hidden; }
+.phone[data-view="desk"] .page.msgp .cabin { display: grid; grid-template-rows: minmax(0, 1fr); gap: 0; max-width: none; min-height: 0; margin: 0; }
+.msgr { display: grid; grid-template-columns: 380px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); min-height: 0; background: var(--card); overflow: hidden; }
 .msgr-l { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--line); }
 .msgr-lh { display: grid; gap: 12px; padding: 18px 16px 12px; border-bottom: 1px solid var(--line); }
 .msgr-lh .search { min-height: 44px; }
 .msgr-lh .search input { padding: 8px 0; font-size: 14px; }
-.msgr-list { flex: 1; overflow-y: auto; padding: 6px; scrollbar-width: thin; }
+.msgr-list { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: none; padding: 6px; scrollbar-width: thin; }
 .msgr-none { padding: 16px; }
 .mrow { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px; border-radius: 14px; text-align: left; }
 .mrow:hover { background: var(--soft2); }
@@ -4607,8 +4642,8 @@ input, textarea, select { font-size: max(16px, 1em); }
 .msgr-h .grow b, .msgr-h .grow .m { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .msgr-h > .pill, .msgr-h > .btn { flex: none; }
 .msgr-h .grow .m { font-size: 14px; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.msgr-b { flex: 1; overflow-y: auto; padding: 12px 8px; scrollbar-width: thin; }
-.msgr-b .chat { max-width: 760px; margin: 0 auto; }
+.msgr-b { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: none; padding: 12px 16px; scrollbar-width: thin; }
+.msgr-b .chat { max-width: 1040px; margin: 0 auto; }
 .msgr-f { background: var(--card); border-top: 1px solid var(--line); }
 .msgr-f .composer { padding: 10px 16px 14px; }
 .msgr-empty { align-items: center; justify-content: center; gap: 8px; padding: 32px; text-align: center; }
@@ -4632,13 +4667,13 @@ input, textarea, select { font-size: max(16px, 1em); }
 .drows { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
 .drows.two { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; }
 .drow { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 10px; margin: 0 -10px; width: calc(100% + 20px); border-radius: 14px; text-align: left; }
-.drow > .pill, .drow > .nowrap { flex: none; }
 .drow:hover { background: var(--soft2); }
 .drow .grow b, .drow .grow .m { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .drow .grow .m { font-size: 14px; line-height: 18px; }
-.dtime { flex: none; min-width: 56px; font-size: 18px; color: var(--act); font-variant-numeric: tabular-nums; }
-.dthumb { flex: none; width: 56px; height: 56px; border-radius: 12px; overflow: hidden; background: var(--soft); }
+.drow-t { display: flex; margin-top: 6px; min-width: 0; }
+.dthumb { position: relative; flex: none; width: 150px; height: 112px; border-radius: 14px; overflow: hidden; background: var(--soft); }
 .dthumb img { width: 100%; height: 100%; object-fit: cover; }
+.dtm { position: absolute; left: 6px; bottom: 6px; padding: 2px 8px; border-radius: 9px; background: rgba(14, 29, 54, 0.82); color: #fff; font-size: 14px; line-height: 20px; font-variant-numeric: tabular-nums; }
 
 /* ===== защита от копирования (01.11): без выделения, меню долгого нажатия и перетаскивания; шторка ===== */
 body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -4832,7 +4867,9 @@ const A = {};
 const IN = {};
 const CH = {};
 const cur = () => S.stack[S.stack.length - 1];
-function saveScroll() { const el = $('#screen'); if (el && S.stack.length) cur().y = el.scrollTop; }
+/* что прокручивается: на компьютере в кабинете — только правая часть, экран и меню стоят на месте */
+const scrollEl = () => $('.cabmain') || $('#screen');
+function saveScroll() { const el = scrollEl(); if (el && S.stack.length) cur().y = el.scrollTop; }
 function go(n, p = {}) { saveScroll(); S.stack.push({ n, p }); render('new'); }
 function replace(n, p = {}) { S.stack[S.stack.length - 1] = { n, p }; render('new'); }
 function back() { if (S.stack.length > 1) { S.stack.pop(); render('restore'); } }
@@ -4863,13 +4900,13 @@ const allNew = r => unreadMsgs(r) + unreadNotifs(r) + homeNew(r);
 /* компьютер и планшет (01.11): phone — до 768 px, tab — до 1100 px, desk — шире */
 const VIEW = () => innerWidth >= 1100 ? 'desk' : innerWidth >= 768 ? 'tab' : 'phone';
 /* как экран раскладывается на широком экране: wide — сетка карточек на всю ширину, aside — итог и кнопки справа,
-   cab — кабинет: на компьютере слева меню роли, справа содержимое; остальные экраны — колонка формы по центру */
+   cab — кабинет: на компьютере меню роли у левого края, справа содержимое; остальные экраны — колонка формы по центру */
 const LAY = {
   c_home: 'wide', c_results: 'wide', c_catalog: 'wide', c_dir: 'wide', c_cat: 'wide', c_sub: 'wide', c_service: 'wide', c_map: 'wide', c_online: 'wide', g_home: 'wide',
-  c_offer: 'aside', order: 'aside',
-  c_orders: 'cab', c_fav: 'cab', c_cab: 'cab', c_aboutme: 'cab', c_sched: 'cab', c_msgs: 'cab', e_msgs: 'cab', chat: 'cab', notifs: 'cab', settings: 'cab',
+  c_offer: 'aside',
+  c_orders: 'cab', c_reqview: 'cab', order: 'cab', c_fav: 'cab', c_cab: 'cab', c_aboutme: 'cab', c_sched: 'cab', c_msgs: 'cab', e_msgs: 'cab', chat: 'cab', notifs: 'cab', notifset: 'cab', settings: 'cab', privacy: 'cab',
   e_home: 'cab', e_feed: 'cab', e_offers: 'cab', e_incoming: 'cab', e_orders: 'cab', e_fav: 'cab', e_cab: 'cab', e_services: 'cab', e_schedule: 'cab',
-  e_portfolio: 'cab', e_promos: 'cab', e_money: 'cab', e_package: 'cab', e_profile: 'cab',
+  e_request: 'cab', e_task: 'cab', e_service: 'cab', e_work: 'cab', e_schedset: 'cab', e_promo: 'cab', e_portfolio: 'cab', e_promos: 'cab', e_money: 'cab', e_package: 'cab', e_profile: 'cab',
 };
 /* разделы: внизу на телефоне и планшете, в шапке на компьютере */
 function navItems(cls) {
@@ -4940,7 +4977,7 @@ function render(mode) {
   const fn = SCREENS[c.n] || SCREENS.notfound;
   const scr = fn(c.p || {});
   const el = $('#screen');
-  const keep = el.scrollTop;
+  const keep = scrollEl().scrollTop; const navY = ($('.cabnav') || {}).scrollTop || 0; const listY = ($('.msgr-list') || {}).scrollTop || 0;
   const view = VIEW(); let lay = scr.lay || LAY[c.n] || 'form'; const ph = $('#phone');
   if (lay === 'aside' && !scr.bar) lay = 'form';  /* справа нечего показать — обычная колонка */
   const desk = view === 'desk'; const cabL = desk && lay === 'cab';
@@ -4953,12 +4990,15 @@ function render(mode) {
   const head = scr.title ? `<div class="h1-wrap"><h1 class="h1">${scr.title}</h1>${scr.sub ? `<div class="h1-sub">${scr.sub}</div>` : ''}</div>` : '';
   /* компьютер: у выдачи слева колонка с разделом, местом, сортировкой и фильтрами */
   const main = view === 'desk' && scr.side ? `<div class="dcols"><aside class="dside">${scr.side}</aside><div class="dmain">${body}</div></div>` : body;
-  if (cabL) el.innerHTML = `<div class="page cabp ${scr.cls || ''}"><div class="cabw"><aside class="cabnav" aria-label="Кабинет">${cabNav()}</aside><div class="cabmain">${scr.deskBare ? '' : backLink + head}${main}</div></div></div>`;
+  if (cabL) el.innerHTML = `<div class="page cabp ${scr.cls || ''}"><div class="cabw"><aside class="cabnav" aria-label="Кабинет">${cabNav()}</aside><div class="cabmain"><div class="cabin">${scr.deskBare ? '' : backLink + head}${main}</div></div></div></div>`;
   else el.innerHTML = scr.raw ? (backLink ? `<div class="page" style="padding-bottom:0">${backLink}${head}</div>` : '') + main : `<div class="page ${scr.cls || ''}">${backLink}${head}${main}</div>`;
   if (view !== 'phone') gridCards(el);
-  if (mode === 'new') el.scrollTop = 0;
-  else if (mode === 'restore') el.scrollTop = c.y || 0;
-  else el.scrollTop = keep;
+  const box = scrollEl(); if (box !== el) el.scrollTop = 0;
+  if (mode === 'new') box.scrollTop = 0;
+  else if (mode === 'restore') box.scrollTop = c.y || 0;
+  else box.scrollTop = keep;
+  if ($('.cabnav')) $('.cabnav').scrollTop = navY;
+  if ($('.msgr-list')) $('.msgr-list').scrollTop = listY;
   $('#bar').innerHTML = bar;
   const tabs = $('#tabs');
   const showTabs = S.role !== 'guest' && scr.tabs !== false;
@@ -5663,9 +5703,11 @@ const dayFull = (exId, k, dur) => !freeSlots(exId, k, dur).some(x => x.ok);
 
 /* ---------- общие компоненты (альбом эталона) ---------- */
 /* фото: маленькое вшито в страницу и видно сразу. Если на сайте есть большое (img/M — карточки, img/L — обложка), оно грузится поверх маленького */
-const photo = (key, alt = '', size = '') => !PH[key] ? `<div class="ph" style="display:grid;place-items:center;color:var(--act)">${ic('image', 32)}</div>`
-  : size && PHB[key] ? `<img class="ph" src="img/${size}/${PHB[key]}.jpg" data-k="${esc(key)}" alt="${esc(alt)}" draggable="false" decoding="async"${size === 'M' ? ' loading="lazy"' : ''} style="background-image:url('${PH[key].src}')">`
-  : `<img class="ph" src="${PH[key].src}" alt="${esc(alt)}" draggable="false">`;
+/* на широком экране фото крупнее, поэтому версия больше: планшет — M вместо встроенной, компьютер — L вместо M */
+const phSize = size => { const v = VIEW(); return v === 'phone' ? size : !size ? 'M' : size === 'M' && v === 'desk' ? 'L' : size; };
+const photo = (key, alt = '', size = '') => { const s = phSize(size); return !PH[key] ? `<div class="ph" style="display:grid;place-items:center;color:var(--act)">${ic('image', 32)}</div>`
+  : s && PHB[key] ? `<img class="ph" src="img/${s}/${PHB[key]}.jpg" data-k="${esc(key)}" alt="${esc(alt)}" draggable="false" decoding="async"${s === 'M' || VIEW() === 'desk' ? ' loading="lazy"' : ''} style="background-image:url('${PH[key].src}')">`
+  : `<img class="ph" src="${PH[key].src}" alt="${esc(alt)}" draggable="false">`; };
 /* обложка услуги: крупная, по нажатию открывается на весь экран */
 const heroPh = (key, alt, extra = '') => `<div class="ohero">${PH[key] ? `<button class="ohero-b" data-a="phView" data-v="${esc(key)}" aria-label="Открыть фото на весь экран">${photo(key, alt, 'L')}<span class="ohero-z" aria-hidden="true">${ic('expand', 18, 2.2)}</span></button>` : photo(key, alt)}${extra}</div>`;
 const btn = (label, act, v = '', kind = '', extra = '') => `<button class="btn ${kind}" data-a="${act}" data-v="${esc(v)}" ${extra}>${label}</button>`;
@@ -6038,7 +6080,10 @@ SCREENS.c_sub = p => {
   const sub = subBy(p.c, p.s);
   return {
     title: esc(sub.name), sub: esc(p.c),
-    body: listSearch(`sub_${p.c}_${p.s}`, 'Найти в этой группе', q => { const l = sub.list.filter(s => !q.trim() || hitWords(s.n, q)); return l.length ? card(`<div class="list">${l.map(s => { const of = offersFor(s.n); const min = Math.min(...of.map(priceFrom)); return rl(hl(s.n, q), `от ${rub(min)} · ${pn(of.length, 'исполнитель готов', 'исполнителя готовы', 'исполнителей готовы')} взяться${canOnline(s.f) ? ' · можно онлайн' : ''}`, 'openSvc', s.id, { ph: svcPh(s) }); }).join('')}</div>`, 'c svcl') : noHits(); }),
+    body: listSearch(`sub_${p.c}_${p.s}`, 'Найти в этой группе', q => { const l = sub.list.filter(s => !q.trim() || hitWords(s.n, q)); const line = s => { const of = offersFor(s.n); return `от ${rub(Math.min(...of.map(priceFrom)))} · ${pn(of.length, 'исполнитель готов', 'исполнителя готовы', 'исполнителей готовы')} взяться${canOnline(s.f) ? ' · можно онлайн' : ''}`; };
+      if (!l.length) return noHits();
+      if (VIEW() === 'desk') return `<div class="grid2">${l.map(s => catTile(s.n, 'openSvc', s.id, svcPh(s), line(s))).join('')}</div>`;  /* компьютер: крупные фото вместо списка */
+      return card(`<div class="list">${l.map(s => rl(hl(s.n, q), line(s), 'openSvc', s.id, { ph: svcPh(s) })).join('')}</div>`, 'c svcl'); }),
   };
 };
 /* параметры шиномонтажа в выдаче: только предложения с настроенным сочетанием и точная цена (Р5, стр. 12, 52) */
@@ -6172,7 +6217,7 @@ function orderCard(o) {
 
 /* ---------- кабинет заказчика ---------- */
 SCREENS.c_cab = () => ({
-  title: 'Кабинет',
+  title: 'Кабинет', cls: 'cabh',
   body: `<div class="card"><div class="row"><span class="ava lg">А</span><span class="grow"><span class="h2" style="display:block;font-size:28px;line-height:32px">Алексей Смирнов</span><span class="m">+7 916 •••-••-42 · одна учётная запись для всех ролей</span></span></div></div>
     ${card(`<div class="list">
       ${rl('Мои данные', 'Имя, телефон, почта', 'cabSoon', 'Мои данные', { icon: 'user' })}
@@ -6715,7 +6760,7 @@ SCREENS.c_checkout = p => {
   const method = S.payMethod || 'sbp';
   return {
     title: 'Оформление', tabs: false,
-    body: `${card(`<div class="row top"><span style="width:64px;height:64px;border-radius:14px;overflow:hidden;flex:none">${photo(o.ph)}</span><span class="grow"><span class="h2" style="display:block">${esc(o.title)}</span><span class="m">${esc(exName(o.ex))}</span></span></div>
+    body: `${card(`<div class="row top"><span class="bigth" style="width:64px;height:64px;border-radius:14px;overflow:hidden;flex:none">${photo(o.ph, '', 'M')}</span><span class="grow"><span class="h2" style="display:block">${esc(o.title)}</span><span class="m">${esc(exName(o.ex))}</span></span></div>
         <div class="sep"></div>${r.what ? `<div class="sumline"><span>Условия</span><b>${esc(r.what)}</b></div>` : ''}
         <div class="sumline"><span>Где</span><b>${esc(placeText(o, fmt, false))}</b></div>
         ${o.booking === 'range' && !ord ? `<div class="sumline"><span>Даты</span><b>${when(c.from)} — ${when(c.to)}</b></div>` : date ? `<div class="sumline"><span>Когда</span><b>${when(date, time)}${ord && ord.dateTo ? ' — ' + when(ord.dateTo) : ''}</b></div>` : o.booking === 'term' ? `<div class="sumline"><span>Срок</span><b>${pn(r.days || 5, 'день', 'дня', 'дней')}</b></div>` : '<div class="sumline"><span>Когда</span><b>Без записи, в часы работы</b></div>'}
@@ -6924,12 +6969,14 @@ SCREENS.e_home = () => {
   /* компьютер (01.11): сводка — поиск заказа, цифры дня, сегодняшние заказы, личные заявки и свои услуги */
   if (VIEW() === 'desk') {
     const stat = (icn, hue, n, l, to) => `<button class="dstat" data-a="go" data-v="${to}"><span class="ci ci-${hue}">${ic(icn, 22, 2)}</span><span><b>${n}</b><span class="m">${l}</span></span></button>`;
-    const row = (to, lead, title, sub, tail) => `<button class="drow" data-a="go" data-v="${to}">${lead}<span class="grow"><b>${title}</b><span class="m">${sub}</span></span>${tail}</button>`;
-    const todayL = today.length ? today.map(o => row(gv('order', { id: o.id }), `<b class="dtime">${esc(o.time || '—')}</b>`, esc(o.svc), `${esc(o.client)} · ${nextStepText(o)}`, orderPill(o))).join('') : '<div class="m">Сегодня заказов нет. Свободное время видно заказчикам в расписании.</div>';
+    const row = (to, lead, title, sub, tail) => `<button class="drow" data-a="go" data-v="${to}">${lead}<span class="grow"><b>${title}</b><span class="m">${sub}</span><span class="drow-t">${tail}</span></span></button>`;
+    const thumb = (ph, mark = '') => `<span class="dthumb">${ph ? photo(ph, '', 'M') : ''}${mark}</span>`;
+    const phOf = id => (offerById(id) || {}).ph;
+    const todayL = today.length ? today.map(o => row(gv('order', { id: o.id }), thumb(phOf(o.offer), `<b class="dtm">${esc(o.time || '—')}</b>`), esc(o.svc), `${esc(o.client)} · ${nextStepText(o)}`, orderPill(o))).join('') : '<div class="m">Сегодня заказов нет. Свободное время видно заказчикам в расписании.</div>';
     const incL = st === 'loading' ? '<div class="m">Загружаем заявки…</div>' : st === 'error' ? `<div class="m">Не удалось загрузить заявки</div>${btn('Повторить', 'retryInc', '', 'soft')}` : inc.length
-      ? inc.slice(0, 4).map(i => row(gv('e_request', { id: i.id }), `<span class="ava">${letter(i.client)}</span>`, esc(i.svc), `${esc(i.client)} · ${esc(i.what)}`, `<span class="m nowrap">${i.date ? when(i.date, i.time) : 'без даты'}</span>`)).join('') : '<div class="m">Новых личных заявок нет.</div>';
+      ? inc.slice(0, 4).map(i => row(gv('e_request', { id: i.id }), thumb(svcBy(i.svc) ? svcPh(svcBy(i.svc)) : phOf(i.offer)), esc(i.svc), `${esc(i.client)} · ${esc(i.what)}`, `<span class="m">${i.date ? when(i.date, i.time) : 'без даты'}</span>`)).join('') : '<div class="m">Новых личных заявок нет.</div>';
     const svcL = empty ? `<div class="m">Пока нет услуг. Начните с первой.</div>` : svcs.slice(0, 4).map(s => { const o = s.offer && offerById(s.offer); const sv = svcBy(s.svc);
-      return row(gv('e_service', { id: s.id }), `<span class="dthumb">${o ? photo(o.ph) : sv ? photo(svcPh(sv)) : ''}</span>`, esc(s.title), o ? priceLabel(o) : esc(s.need || (s.status === 'fix' ? `Исправьте шаг ${s.fixStep}` : 'Цена появится после проверки')), svcPill(s)); }).join('');
+      return row(gv('e_service', { id: s.id }), thumb(o ? o.ph : sv ? svcPh(sv) : ''), esc(s.title), o ? priceLabel(o) : esc(s.need || (s.status === 'fix' ? `Исправьте шаг ${s.fixStep}` : 'Цена появится после проверки')), svcPill(s)); }).join('');
     return {
       deskBare: true,
       body: '', deskBody: `<div class="dhero"><div class="grow"><h1 class="dhero-t">Здравствуйте, Алексей</h1><span class="dhero-s">Заявки заказчиков по вашим услугам и в других темах.</span></div>
@@ -7144,7 +7191,7 @@ SCREENS.e_services = () => {
   return {
     title: 'Мои услуги',
     body: `${ltabs('svcTab', [['all', 'Все', all.length], ['draft', 'Черновики', all.filter(s => s.status === 'draft').length || ''], ['review', 'На проверке', all.filter(s => s.status === 'review').length || ''], ['fix', 'Исправить', all.filter(s => s.status === 'fix').length || '']], t)}
-      ${listSearch('mysvc', 'Найти среди моих услуг', q => { const l = list.filter(s => !q.trim() || hitWords(`${s.title} ${s.svc}`, q)); return l.length ? l.map(s => { const o = s.offer && offerById(s.offer); const sv = svcBy(s.svc); const line = o ? `<b>${priceLabel(o)}</b>` : esc(s.need || (s.status === 'fix' ? `Исправьте шаг ${s.fixStep}` : s.status === 'review' ? 'Цена появится после проверки' : sv ? sv.n : s.svc)); return `<button class="oc my" data-a="go" data-v="${gv('e_service', { id: s.id })}"><span class="op">${o ? photo(o.ph) : `<span class="op-ic">${ic(subIcon(sv ? sv.s : ''), 34)}</span>`}</span><span class="my-c"><span class="ot">${esc(s.title)}</span><span class="od">${line}</span><span class="my-f">${svcPill(s)}</span></span></button>`; }).join('') : (list.length ? noHits() : emptyBox('Здесь пусто', 'В этом разделе нет карточек.', '', '', '')); })}
+      ${listSearch('mysvc', 'Найти среди моих услуг', q => { const l = list.filter(s => !q.trim() || hitWords(`${s.title} ${s.svc}`, q)); return l.length ? l.map(s => { const o = s.offer && offerById(s.offer); const sv = svcBy(s.svc); const line = o ? `<b>${priceLabel(o)}</b>` : esc(s.need || (s.status === 'fix' ? `Исправьте шаг ${s.fixStep}` : s.status === 'review' ? 'Цена появится после проверки' : sv ? sv.n : s.svc)); return `<button class="oc my" data-a="go" data-v="${gv('e_service', { id: s.id })}"><span class="op">${o ? photo(o.ph) : VIEW() !== 'phone' && sv ? photo(svcPh(sv)) : `<span class="op-ic">${ic(subIcon(sv ? sv.s : ''), 34)}</span>`}</span><span class="my-c"><span class="ot">${esc(s.title)}</span><span class="od">${line}</span><span class="my-f">${svcPill(s)}</span></span></button>`; }).join('') : (list.length ? noHits() : emptyBox('Здесь пусто', 'В этом разделе нет карточек.', '', '', '')); })}
       ${btn(`${ic('plus', 20, 2.4)} Добавить услугу`, 'newService', '', 'block')}`,
   };
 };
@@ -7158,7 +7205,7 @@ SCREENS.e_service = p => {
       ${s.status === 'draft' ? card(`<div class="h2">Нужно дополнить</div><div class="m">${esc(s.need || 'Не все шаги заполнены')}. Остальное сохранено в черновике.</div>${btn(`Продолжить заполнение ${ic('arr', 20, 2.2)}`, 'continueDraft', s.id, 'block')}`, 'soft') : ''}
       ${s.status === 'fix' ? card(`<div class="h2">Нужно исправить</div><div class="m">${esc(s.reason)}</div><div class="m">Остальные ваши услуги и профиль это не затрагивает.</div>${btn(`Исправить ${ic('arr', 20, 2.2)}`, 'fixService', s.id, 'block')}`, 'soft') : ''}
       ${s.status === 'review' ? `<div class="info"><b>${s.nextVer ? 'Новая версия на проверке' : 'Карточка на проверке'}</b><span class="m">${s.nextVer ? 'В каталоге пока прежняя версия. Новая заменит её после проверки.' : 'Отправка на проверку не публикует карточку сразу. Сообщим, когда она появится в каталоге.'}</span></div>` : ''}
-      ${o ? card(`<div class="row top"><span style="width:72px;height:72px;border-radius:14px;overflow:hidden;flex:none">${photo(o.ph)}</span><span class="grow"><b class="t18">${esc(o.title)}</b><span class="m" style="display:block">${priceLabel(o)}</span></span></div>${goBtn('Как видит заказчик', gv('c_offer', { id: o.id, preview: '1' }))}`) : ''}
+      ${o ? card(`<div class="row top"><span class="bigth" style="width:72px;height:72px;border-radius:14px;overflow:hidden;flex:none">${photo(o.ph, '', 'M')}</span><span class="grow"><b class="t18">${esc(o.title)}</b><span class="m" style="display:block">${priceLabel(o)}</span></span></div>${goBtn('Как видит заказчик', gv('c_offer', { id: o.id, preview: '1' }))}`) : ''}
       ${card(`<div class="list">${rl('Изменить карточку', 'Пять шагов, данные уже заполнены', 'editService', s.id, { icon: 'edit' })}${s.status === 'pub' || s.status === 'pause' ? rl(s.status === 'pause' ? 'Возобновить показ' : 'Поставить на паузу', s.status === 'pause' ? 'Карточка снова появится в каталоге' : 'Карточка временно не видна заказчикам', 'pauseService', s.id, { icon: s.status === 'pause' ? 'eye' : 'minus' }) : ''}${rl('Ещё', 'Открыть, удалить', 'svcMore', s.id, { icon: 'more' })}</div>`, 'c')}
       <div class="m">Изменения не затронут уже оформленные заказы: у них остаются условия, на которые согласился заказчик.</div>`,
   };
@@ -7446,7 +7493,7 @@ SCREENS.e_fav = () => ({
 
 /* ---------- кабинет исполнителя и финансы (лист 37: деньги и баллы раздельно) ---------- */
 SCREENS.e_cab = () => ({
-  title: 'Кабинет',
+  title: 'Кабинет', cls: 'cabh',
   body: `<div class="card"><div class="row"><span class="ava lg">А</span><span class="grow"><span class="h2" style="display:block;font-size:28px;line-height:32px">Алексей Смирнов</span><span class="row wrap">${pill('Проверен', '', 'diamond')}<span class="rating">${ic('star', 16, 2)} 4,9</span><span class="m">214 отзывов</span></span></span></div></div>
     ${card(`<div class="list">
       ${rl('Профиль и направления', 'Заполняется один раз для всех карточек', 'go', 'e_profile', { icon: 'user' })}
@@ -7955,8 +8002,8 @@ SCREENS.c_home = () => {
   if (desk) {
     const pop = OFFERS.filter(o => !o.hidden && o.ex !== 'alex' && !viewed.includes(o)).slice(0, 8);
     const tiles = l => l.map(o => offerCard(o, 'tile')).join('');
-    return { cls: 'home', body: `<h1 class="dtitle">Услуги ${inMsk() ? 'в Москве' : 'рядом с вами'} <span>${SERVICES.length}</span></h1>
-      <div class="dcats">${DIRS.map(d => `<button class="dcat" data-a="openDir" data-v="${esc(d.id)}"><span class="dcat-t">${esc(d.name)}</span><span class="dcat-p">${photo(d.ph, d.name, 'M')}</span></button>`).join('')}<button class="dcat all" data-a="go" data-v="c_catalog"><span class="dcat-t">Все категории ${ic('arr', 16, 2.2)}</span></button></div>
+    return { cls: 'home', body: `<div class="dsec"><h1 class="dtitle">Услуги ${inMsk() ? 'в Москве' : 'рядом с вами'} <span>${SERVICES.length}</span></h1><button class="lnk nowrap" data-a="go" data-v="c_catalog">Все категории ${ic('arr', 18, 2.2)}</button></div>
+      <div class="dcats">${DIRS.map(d => `<button class="dcat" data-a="openDir" data-v="${esc(d.id)}"><span class="dcat-p">${photo(d.ph, d.name, 'L')}</span><span class="dcat-t">${esc(d.name)}</span></button>`).join('')}</div>
       <div class="dfind"><div class="df-a"><div class="h2">Поиск исполнителя</div><button class="df-q" data-a="openSearch">${ic('search', 20, 2.2)}<span>Услуга или исполнитель</span></button>
           <div class="row"><button class="df-b" data-a="go" data-v="c_map">${ic('map', 18, 2)}Рядом на карте</button><button class="df-b" data-a="go" data-v="c_online">${ic('globe', 18, 2)}Онлайн</button></div></div>
         <div class="df-r"><div class="h2">Не хотите искать?</div><span class="m">Опишите задачу — исполнители сами предложат цену и время.</span><button class="btn" data-a="newRequest">${ic('send', 20, 2)}Разместить заявку</button></div></div>
@@ -8627,7 +8674,7 @@ function roleTabs(kind) {
   return `<div class="rtabs${roles.length === 2 ? ' two' : ''}" role="tablist" aria-label="Роли">${roles.map(([r, l]) => { const n = r === 'partner' ? 0 : ROLE_CNT[kind](r); return `<button class="${S.role === r ? 'on' : ''}" data-a="roleTab" data-v="${kind}|${r}" role="tab" aria-selected="${S.role === r}"><span class="rl1">${l}</span><span class="rl2 ${n ? 'on' : ''}">${n ? `новых: ${n}` : 'нет новых'}</span></button>`; }).join('')}</div>`;
 }
 const ROLE_ROOT = { msgs: { cust: 'c_msgs', exec: 'e_msgs' }, orders: { cust: 'c_orders', exec: 'e_orders' } };
-/* компьютер (01.11): меню кабинета слева — профиль, смена роли и все разделы роли со счётчиками */
+/* компьютер (01.11): меню кабинета у левого края — профиль, смена роли и все разделы роли со счётчиками; уведомления и настройки — в шапке */
 function cabNav() {
   const ex = S.role === 'exec'; const n = cur().n; const r0 = S.stack[0].n; const reqTab = n === 'c_orders' && S.cOrdersTab === 'req';
   const it = (to, icn, label, cnt, hue, o = {}) => { const on = o.on != null ? o.on : (n === to || r0 === to);
@@ -8635,7 +8682,7 @@ function cabNav() {
   const cr = clientRating('Алексей');
   const items = ex ? [
     it('e_home', 'home', 'Главная', 0, 'blue'), it('e_feed', 'search', 'Найти заказ', 0, 'blue'),
-    it('e_incoming', 'docsearch', 'Поступившие заявки', newIncoming().length, 'orange'), it('e_offers', 'send', 'Заявки по вашим услугам', S.feed.filter(x => !x.my).length, 'violet'),
+    it('e_incoming', 'docsearch', 'Поступившие заявки', newIncoming().length, 'orange'), it('e_offers', 'send', 'Заявки по услугам', S.feed.filter(x => !x.my).length, 'violet'),
     it('e_orders', 'orders', 'Заказы', actOrders('exec'), 'green'), it('e_msgs', 'chat', 'Сообщения', unreadMsgs('exec'), 'teal'),
     it('e_services', 'case', 'Мои услуги', S.myServices.length, 'blue', { num: true }), it('e_schedule', 'calok', 'Расписание', 0, 'green'),
     it('e_portfolio', 'image', 'Портфолио', 0, 'pink'), it('e_promos', 'tag', 'Акции', 0, 'orange'), it('e_money', 'wallet', 'Финансы', 0, 'teal'), it('e_package', 'diamond', 'Пакет и ИИ-помощник', 0, 'violet'),
@@ -8646,8 +8693,7 @@ function cabNav() {
   ];
   return `<div class="cabme"><span class="ava lg">А</span><span class="grow"><b class="t18">Алексей Смирнов</b><span class="m">${ex ? 'Исполнитель · ★ 4,9 · 214 отзывов' : `Заказчик${cr ? ` · ★ ${String(cr.avg).replace('.', ',')} от исполнителей` : ''}`}</span></span></div>
     <button class="cabsw" data-a="setRole" data-v="${ex ? 'cust' : 'exec'}">${ic('retry', 18, 2.2)}Перейти в роль «${ex ? 'Заказчик' : 'Исполнитель'}»</button>
-    <nav class="cnl">${items.join('')}</nav>
-    <nav class="cnl tail">${it(ex ? 'e_cab' : 'c_cab', 'user', 'Кабинет', 0, 'grey')}${it('notifs', 'bell', 'Уведомления', unreadNotifs(S.role), 'grey')}${it('settings', 'gear', 'Настройки', 0, 'grey')}</nav>`;
+    <nav class="cnl">${items.join('')}${it(ex ? 'e_cab' : 'c_cab', 'user', 'Кабинет', 0, 'grey')}</nav>`;
 }
 function switchRole(r, rootScreen) {
   S.stacks[S.role] = S.stack; S.role = r;
@@ -8685,7 +8731,7 @@ function messenger(role, ch) {
 function chatListScreen(role) {
   const list = chatFilter(role);
   return {
-    title: 'Сообщения', deskBody: messenger(role, null), deskBare: true,
+    title: 'Сообщения', cls: 'msgp', deskBody: messenger(role, null), deskBare: true,
     body: `${roleTabs('msgs')}${field('Поиск по диалогам', `<span class="search"><input data-in="chatQ|${role}" value="${esc(S.chatQ || '')}" placeholder="Имя или текст" autocomplete="off">${ic('search', 22)}</span>`)}
       <div id="chatlist">${chatListHtml(list)}</div>
       <div class="m">Сообщения — это переписка. События по заказам приходят в колокольчик.</div>`,
@@ -8725,7 +8771,7 @@ SCREENS.chat = p => {
     : o ? `<div class="ctx"><span class="grow"><span class="m">По услуге</span><b style="display:block">${esc(o.title)}</b></span>${ch.role === 'cust' ? `<button class="lnk" data-a="openOffer" data-v="${o.id}">Карточка</button>` : ''}</div>` : '';
   const call = `<div style="padding:8px 16px 0">${btn(`${ic('phone', 20)} Позвонить через ZELDO`, 'callAsk', ch.ex || '', 'text block')}</div>`;
   return {
-    raw: true, title: esc(ch.with), deskBody: messenger(ch.role, ch), deskBar: '', deskBare: true,
+    raw: true, title: esc(ch.with), cls: 'msgp', deskBody: messenger(ch.role, ch), deskBar: '', deskBare: true,
     body: `${ctx}${call}<div class="chat">${ch.msgs.map((m, i) => msgHtml(ch, m, i)).join('')}</div>`,
     bar: composerHtml(ch),
     after: el => { el.scrollTop = el.scrollHeight; const b = el.querySelector('.msgr-b'); if (b) b.scrollTop = b.scrollHeight; },
@@ -8854,7 +8900,7 @@ SCREENS.order = p => {
     : `<div class="tl">${(o.kind === 'rent' ? TL_RENT : TL).map(([k, t, sub], i) => { const dn = i <= idx; const cu = !dn && i === idx + 1 && !['cancel', 'dispute'].includes(o.status); return `<div class="st ${dn ? 'done' : cu ? 'cur' : ''}"><span class="dotx">${dn ? ic('check', 16, 3) : i + 1}</span><span><b>${t}</b><span class="m" style="display:block">${sub}</span></span></div>`; }).join('')}</div>`;
   return {
     title: `Заказ № ${o.id}`,
-    body: `${card(`<div class="row top"><span style="width:56px;height:56px;border-radius:14px;overflow:hidden;flex:none">${photo(of.ph)}</span><span class="grow"><span class="h2" style="display:block">${esc(o.svc)}</span><span class="m">${esc(o.what)}</span></span><b class="t18 num">${rub(o.total)}</b></div><div class="row wrap">${orderPill(o)}${nextStepText(o) ? `<span class="m">${nextStepText(o)}</span>` : ''}</div>
+    body: `${card(`<div class="row top"><span class="bigth" style="width:56px;height:56px;border-radius:14px;overflow:hidden;flex:none">${photo(of.ph, '', 'M')}</span><span class="grow"><span class="h2" style="display:block">${esc(o.svc)}</span><span class="m">${esc(o.what)}</span></span><b class="t18 num">${rub(o.total)}</b></div><div class="row wrap">${orderPill(o)}${nextStepText(o) ? `<span class="m">${nextStepText(o)}</span>` : ''}</div>
         <div class="ocontact"><span class="ava">${letter(ex ? o.client : exName(o.ex))}</span><span class="grow"><span class="m" style="display:block">${ex ? 'Заказчик' : 'Исполнитель'}</span><b>${esc(ex ? o.client : exName(o.ex))}</b>${ex ? `<span class="m" style="display:block">${clientLine(o.client)}</span>` : ''}</span>
           ${ch ? `<button class="cbtn" data-a="go" data-v="${gv('chat', { id: ch.id })}" aria-label="Написать">${ic('chat', 22, 2)}${ch.unread ? `<i class="cdot"></i>` : ''}</button>` : `<button class="cbtn" data-a="orderChat" data-v="${o.id}" aria-label="Написать">${ic('chat', 22, 2)}</button>`}
           <button class="cbtn" data-a="callAsk" data-v="${ex ? '' : o.ex}" aria-label="Позвонить через ZELDO">${ic('phone', 22, 2)}</button></div>`)}
