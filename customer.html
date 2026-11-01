@@ -5235,7 +5235,7 @@ const orderById = id => S.orders.find(o => String(o.id) === String(id));
 /* личные заявки исполнителю и общая лента «Заказы для вас» */
 S.incoming = [
   { id: 'i1', kind: 'confirm', client: 'Марина', offer: 'my_tire', svc: 'Шиномонтаж', what: 'R17 · RunFlat · комплект 4 колеса · на автомобиле', date: dk(5), time: '11:00', total: 4200, dur: 52, chat: 'ch_marina', status: 'new', note: ['Позвоните за час'] },
-  { id: 'i2', kind: 'brief', client: 'Денис', offer: 'my_tire', svc: 'Ремонт проколов шин', what: 'R16 · 1 колесо · снятое колесо', text: 'Саморез у боковины. Колесо снял, привезу сам.', files: 1, chat: 'ch_denis', status: 'new' },
+  { id: 'i2', kind: 'brief', client: 'Денис', offer: 'my_tire', svc: 'Ремонт проколов шин', what: 'R16 · 1 колесо · снятое колесо', text: 'Саморез у боковины. Колесо снял, привезу сам.', files: 1, budget: 1200, chat: 'ch_denis', status: 'new' },
   { id: 'i3', kind: 'question', client: 'Павел', offer: 'my_tire', svc: 'Шиномонтаж', what: 'R20 · низкий профиль · 4 колеса', text: 'В карточке нет R20 с RunFlat. Сделаете на этой неделе?', status: 'new' },
 ];
 S.feed = [
@@ -6008,7 +6008,7 @@ function placeText(o, fmt, paid) {
   if (fmt === 'visit') return paid ? `К вам: Москва, ул. Профсоюзная, 104, кв. 18` : `Выезд к вам: ${S.district}`;
   return paid && o.addr ? o.addr : (areaText(o.zone, o.ex) || 'Район покажем до оплаты');
 }
-/* два маршрута у каждой услуги: А — готовая цена, Б — описать задачу; по умолчанию — основной из таблицы */
+/* два маршрута у каждой услуги: А — готовая цена, Б — свой запрос исполнителю (параметры, фото, своя цена); по умолчанию — основной из таблицы */
 const wayOf = (o, c) => (c && c.way) || (o.route === 'B' || o.model === 'brief' || (o.reply && o.reply.stages) ? 'B' : 'A');  /* проект по этапам начинают с брифа */
 const needsSlot = (o, c) => (o.booking === 'slots' || o.booking === 'both') && c.visit !== 'free' && wayOf(o, c) !== 'B';
 const calKey = (o, c) => o.masters && c.master ? `${o.ex}:${c.master}` : o.ex;
@@ -6076,6 +6076,47 @@ const paramWhat = (o, c) => !prOn(o) || !c.pr ? [] : svcParams(o.svc).filter(p =
   if (p.t === QTYS_T) return Object.entries(v).filter(([, n]) => n).map(([x, n]) => `${x.toLowerCase()} × ${n}`).join(', ');
   if (p.r === 'sur' && p.t === 'один из списка' && v === p.v[0]) return '';  /* значение без доплаты в состав не пишем */
   return Array.isArray(v) ? v.join(', ').toLowerCase() : v === true ? p.n.toLowerCase() : p.t === 'число' ? `${p.n.toLowerCase()}: ${v}` : String(v).toLowerCase(); }).filter(Boolean);
+/* те же вопросы, что в карточках, для запроса исполнителю и общей заявки (разговор с Максимом 01.11): без цен;
+   ответы — в st.pr, количество для цены «за единицу» — в st.q; k — 'req' (заявка) или id карточки (запрос) */
+const askUnit = n => svcTable(n).u.find(u => QTY[u] && unitParam(u)) || null;
+const askSt = k => k === 'req' ? S.req : S.brief[k];
+const askOn = n => !!(n && (svcParams(n).length || askUnit(n)));
+/* площадь уже спрошена единицей цены — параметр «Площадь» второй раз не показываем */
+const askPs = n => { const u = askUnit(n); const q = u ? unitParam(u) : ''; return svcParams(n).filter(p => !q || !(p.n === q || (q.startsWith('Площадь') && ['area', 'plot'].includes(p.id)))); };
+function askForm(n, k) {
+  const st = askSt(k); st.pr = st.pr || {}; const u = askUnit(n);
+  if (u && (st.u !== u || st.q == null)) { st.u = u; st.q = QTY[u][0]; }
+  const rows = askPs(n).map(p => {
+    const kk = `${k}|${p.id}`; if (p.t === 'число' && st.pr[p.id] == null) st.pr[p.id] = 1; const v = st.pr[p.id];
+    if (p.t === 'один из списка') return field(p.n, chips('askSet', p.v.map((x, i) => [`${kk}|${x}`, x, p.h[i] || '']), x => x === `${kk}|${v}`, { scroll: p.v.length > 4 }));
+    if (p.t === 'несколько из списка') return field(p.n, chips('askTog', p.v.map(x => [`${kk}|${x}`, x]), x => (v || []).includes(x.split('|')[2])), { hint: 'Можно несколько' });
+    if (p.t === QTYS_T) return field(p.n, `<div class="list">${p.v.map(x => `<div class="rlx"><div class="row"><span class="grow t18 sb">${esc(x)}</span>${stepper('askQty', `${kk}|${x}`, (v || {})[x] || 0, 0, 20, m => m, true)}</div></div>`).join('')}</div>`);
+    if (p.t === 'да / нет') return `<div class="row prrow"><span class="grow">${esc(p.n)}</span>${sw('askYes', kk, !!v, p.n)}</div>`;
+    if (p.t === 'число') return field(p.n, stepper('askNum', kk, v, 0, p.inc >= 10 ? 500 : 50, x => x));
+    return field(p.n, `<input class="input" data-in="askText|${kk}" value="${esc(v || '')}" placeholder="${PR_PH[p.id] || ''}" maxlength="60" autocomplete="off">`);
+  });
+  if (u) rows.unshift(field(unitParam(u), stepper('askAmt', k, st.q, QTY[u][2], QTY[u][3], QTY[u][4])));
+  return rows.join('');
+}
+/* ответы строками: «Квартира: 2 комнаты», «Диван × 1» — в сообщение, заявку и заказ */
+const askWhat = (n, st) => {
+  const pr = st.pr || {}; const u = askUnit(n);
+  const l = askPs(n).map(p => { const v = pr[p.id];
+    if (v == null || v === '' || v === false || (Array.isArray(v) && !v.length)) return '';
+    if (p.t === QTYS_T) return Object.entries(v).filter(([, m]) => m).map(([x, m]) => `${x} × ${m}`).join(', ');
+    const s = Array.isArray(v) ? v.join(', ') : String(v); return v === true ? p.n : `${p.n}: ${/^[А-ЯЁ][а-яё]/.test(s) ? lcFirst(s) : s}`; }).filter(Boolean);
+  if (u && st.q) l.unshift(`${unitParam(u)}: ${st.q}`);
+  return l;
+};
+IN.askText = (v, kk) => { const [k, p] = kk.split('|'); askSt(k).pr[p] = v; };
+Object.assign(A, {
+  askSet(v) { const [k, p, x] = v.split('|'); askSt(k).pr[p] = x; render(); },
+  askTog(v) { const [k, p, x] = v.split('|'); const pr = askSt(k).pr; const l = pr[p] || (pr[p] = []); const i = l.indexOf(x); i < 0 ? l.push(x) : l.splice(i, 1); render(); },
+  askYes(v) { const [k, p] = v.split('|'); const pr = askSt(k).pr; pr[p] = !pr[p]; render(); },
+  askNum(v) { const [k, p, d] = v.split('|'); const pr = askSt(k).pr; pr[p] = clamp((pr[p] == null ? 1 : pr[p]) + Number(d), 0, 500); render(); },
+  askQty(v) { const [k, p, x, d] = v.split('|'); const pr = askSt(k).pr; const m = pr[p] && typeof pr[p] === 'object' ? pr[p] : (pr[p] = {}); m[x] = clamp((m[x] || 0) + Number(d), 0, 20); render(); },
+  askAmt(v) { const [k, d] = v.split('|'); const st = askSt(k); const q = QTY[st.u]; st.q = clamp(st.q + Number(d) * q[1], q[2], q[3]); render(); },
+});
 /* акции исполнителя в карточке услуги: какая скидка и при каком условии; «Приведи друга» — с приглашением */
 /* разово или абонементом: исполнитель задал число визитов, срок, скидку и правило пропуска */
 function subBlock(o, c) {
@@ -6207,8 +6248,8 @@ function totalCard(o, c, r) {
 }
 function wayField(o, c) {
   const main = wayOf(o, {}); const w = wayOf(o, c);
-  const opts = [['A', 'По цене исполнителя', main === 'A' ? 'выбрать и оплатить' : 'выбрать, исполнитель подтвердит'], ['B', 'Описать задачу', 'исполнитель пришлёт цену']];
-  return field('Как заказать', seg('cfgSet', opts.map(([k, l, s]) => [`${o.id}|way|${k}`, l, s]), `${o.id}|way|${w}`), { hint: `${main === 'B' ? 'Обычно здесь сначала описывают задачу: исполнитель посмотрит фото и назовёт точную цену.' : 'Задача нестандартная? Опишите её — исполнитель пришлёт свою цену.'}` });
+  const opts = [['A', 'По цене исполнителя', main === 'A' ? 'выбрать и оплатить' : 'выбрать, исполнитель подтвердит'], ['B', 'Свой запрос', 'ваши условия и цена']];
+  return field('Как заказать', seg('cfgSet', opts.map(([k, l, s]) => [`${o.id}|way|${k}`, l, s]), `${o.id}|way|${w}`), { hint: `${main === 'B' ? 'Обычно здесь сначала присылают запрос: отметьте, что нужно, и приложите фото. Исполнитель назовёт точную цену.' : 'Нужны другие условия или своя цена? Отправьте запрос: исполнитель согласится или предложит свою.'} Вопросы до заказа — кнопка «Написать».` });
 }
 SCREENS.c_offer = p => {
   const o = offerById(p.id); const e = EX[o.ex]; const c = cfgOf(o); const s = svcBy(o.svc);
@@ -6219,12 +6260,12 @@ SCREENS.c_offer = p => {
   let main;
   if (o.ex === 'alex' && !preview) return { tabs: false, body: `${heroPh(o.ph, o.title)}<div class="col g4"><h1 class="h1">${esc(o.title)}</h1><span class="m">${esc(s ? `${s.c} · ${s.s} · ${s.n}` : '')}</span></div><div class="info"><b>Это ваша карточка</b><span class="m">Так её видят заказчики. Заказать у себя нельзя. Изменить карточку можно в роли «Исполнитель».</span></div>${card(`<div>${esc(o.desc)}</div><div class="h2">Что входит</div>${bullets(o.inc)}`)}`, bar: `<div class="abar">${btn('Перейти в роль исполнителя', 'setRole', 'exec', 'block')}</div>` };
   if (preview) main = `<button class="btn block" disabled>Так увидит заказчик</button>`;
-  else if (routeB) main = btn(`Описать задачу ${ic('arr', 20, 2.2)}`, 'go', gv('c_brief', { id: o.id }), 'block');
+  else if (routeB) main = btn(`Составить запрос ${ic('arr', 20, 2.2)}`, 'go', gv('c_brief', { id: o.id }), 'block');
   else if (bl) main = `<button class="btn block" disabled>${!agree && !insp ? 'Оплатить ' + rub(r.total) : sendLabel}</button>`;
   else if (!agree && !insp) main = btn(`Оплатить ${rub(r.total)}`, 'checkout', o.id, 'block');
   else main = btn(sendLabel, 'sendToExec', o.id, 'block');
   const favOn = S.favs.includes(o.id); const bounds = boundsFor(o.svc);
-  const pillRow = routeB ? pill('Цена после описания задачи', 'warn', 'info') : insp ? pill('Сначала осмотр, потом смета', 'warn', 'info') : !agree ? pill('Оплата сразу', 'ok', 'check') : pill('Сначала подтвердит исполнитель', '', 'clock');
+  const pillRow = routeB ? pill('Цена после запроса', 'warn', 'info') : insp ? pill('Сначала осмотр, потом смета', 'warn', 'info') : !agree ? pill('Оплата сразу', 'ok', 'check') : pill('Сначала подтвердит исполнитель', '', 'clock');
   return {
     tabs: false,
     body: `${heroPh(o.cover || o.ph, o.title, preview ? '' : `<button class="heart ${favOn ? 'on' : ''}" style="top:12px;left:12px" data-a="fav" data-v="${o.id}" aria-label="${favOn ? 'Убрать из избранного' : 'В избранное'}" aria-pressed="${favOn}">${ic('heart', 20, 2)}</button>`)}
@@ -6235,7 +6276,7 @@ SCREENS.c_offer = p => {
       ${preview || o.model === 'brief' || o.model === 'inspect' ? '' : wayField(o, c)}
       <div class="row wrap">${pillRow}${o.formats.includes('online') ? pill('Можно онлайн', '', 'globe') : ''}${o.docs ? pill('Документы проверены', 'ok', 'shield') : ''}</div>
       ${promoInfo(o, c)}
-      ${routeB ? card(`<div class="h2">Как договоримся</div>${bullets(replyOf(o).stages ? ['Вы описываете задачу и прикладываете фото', 'Исполнитель присылает план по этапам: у каждого этапа свой результат, цена и срок', 'Платите за текущий этап — деньги уходят исполнителю после его приёмки'] : ['Вы отмечаете подходящее и прикладываете фото — писать много не нужно', 'Исполнитель отвечает в переписке и присылает условия с ценой', 'Соглашаетесь и оплачиваете — переписка становится заказом с номером'])}${svcCard(o.svc).why ? `<div class="m"><b>Почему так:</b> ${esc(lcFirst(svcCard(o.svc).why))}</div>` : ''}<div class="m">Ориентир: ${priceLabel(o)}. Это не окончательная цена.</div>`, 'soft') + paramsBlock(o, c) : `${configBlock(o, c)}${paramsBlock(o, c)}${subBlock(o, c)}${addonsBlock(o, c)}${needBlock(o, c)}${placeBlock(o, c)}${whenBlock(o, c, r)}${noteBlock(o, c)}${totalCard(o, c, r)}`}
+      ${routeB ? card(`<div class="h2">Как договоримся</div>${bullets(replyOf(o).stages ? ['Вы отмечаете, что нужно, и прикладываете фото', 'Исполнитель присылает план по этапам: у каждого этапа свой результат, цена и срок', 'Платите за текущий этап — деньги уходят исполнителю после его приёмки'] : ['Вы отмечаете, что нужно, прикладываете фото и, если хотите, называете свою цену', 'Исполнитель соглашается или присылает свои условия с ценой', 'Соглашаетесь и оплачиваете — переписка становится заказом с номером'])}${svcCard(o.svc).why ? `<div class="m"><b>Почему так:</b> ${esc(lcFirst(svcCard(o.svc).why))}</div>` : ''}<div class="m">Ориентир: ${priceLabel(o)}. Это не окончательная цена.</div>`, 'soft') + paramsBlock(o, c) : `${configBlock(o, c)}${paramsBlock(o, c)}${subBlock(o, c)}${addonsBlock(o, c)}${needBlock(o, c)}${placeBlock(o, c)}${whenBlock(o, c, r)}${noteBlock(o, c)}${totalCard(o, c, r)}`}
       ${related.length ? `<div class="col g12"><div class="h2">Другие услуги этой тематики у исполнителя</div><div class="hscroll">${related.map(x => offerCard(x, 'h')).join('')}</div><button class="lnk" data-a="go" data-v="${gv('c_exec', { id: o.ex })}">Все услуги исполнителя ${ic('arr', 18, 2.2)}</button><span class="m">Это отдельные услуги: в текущий заказ они не добавляются.</span></div>` : ''}`,
     bar: `<div class="abar">${!routeB && !preview ? `<div class="tot"><span>${insp ? 'Осмотр' : agree ? 'Предварительно' : 'Итого'}</span><b>${rub(r.total)}</b></div>` : ''}<div class="two"><button class="btn outline" data-a="chatWith" data-v="${o.id}" aria-label="Написать исполнителю" ${preview ? 'disabled' : ''}>${ic('chat', 22)}</button>${main}</div>${bl && !preview && !routeB ? `<div class="why center">Причина: ${bl}.</div>` : ''}</div>`,
   };
@@ -6371,34 +6412,56 @@ function whenPick(id, st, act) {
     ${until ? `${calendarHtml(id)}<span class="m">${st.day ? `Работа должна быть готова к ${dayName(st.day).toLowerCase()}. Исполнитель сам предложит, когда начать.` : 'Нажмите на число, к которому всё должно быть готово.'}</span>` : ''}`;
 }
 const whenText = st => st.when === 'date' ? (st.day ? `${dayName(st.day)}, ${st.part.toLowerCase()}` : 'Дата не выбрана') : st.when === 'until' ? (st.day ? `Сделать до: ${dayName(st.day).toLowerCase()}` : 'Срок не выбран') : st.when;
-/* ---------- маршрут Б: описать задачу выбором → переписка → предложение → заказ ---------- */
+/* ---------- маршрут Б: свой запрос исполнителю — параметры, фото, когда, своя цена → переписка → предложение → заказ ---------- */
+const budText = (b, f) => f ? `${rub(f)} – ${rub(b)}` : b ? rub(b) : '';
 SCREENS.c_brief = p => {
-  const o = offerById(p.id); const b = S.brief[o.id] || (S.brief[o.id] = { sel: {}, when: 'Завтра', day: null, part: 'Не важно', photos: 0, text: '' });
+  const o = offerById(p.id); const b = S.brief[o.id] || (S.brief[o.id] = { sel: {}, pr: {}, when: 'Завтра', day: null, part: 'Не важно', photos: 0, text: '', btype: 'deal', budget: 0, budgetFrom: 0 });
   return {
-    title: 'Опишите задачу', sub: `${esc(o.title)} · ${esc(exName(o.ex))}`, tabs: false,
-    body: `<div class="m">Отметьте подходящее — писать текст не обязательно.</div>
-      ${briefOf(o).map(([g, opts], gi) => field(esc(g), chips('briefTog', opts.map(x => [`${o.id}|${gi}|${x}`, x]), v => (b.sel[gi] || []).includes(v.split('|')[2])))).join('')}
+    title: 'Запрос исполнителю', sub: `${esc(o.title)} · ${esc(exName(o.ex))}`, tabs: false,
+    body: `<div class="m">Отметьте, что нужно. Писать текст не обязательно.</div>
+      ${askOn(o.svc) ? askForm(o.svc, o.id) : briefOf(o).map(([g, opts], gi) => field(esc(g), chips('briefTog', opts.map(x => [`${o.id}|${gi}|${x}`, x]), v => (b.sel[gi] || []).includes(v.split('|')[2])))).join('')}
       ${field('Фото', `<div class="thumbs">${Array.from({ length: b.photos }, () => `<span class="thumb">${photo(o.ph)}<span class="tk">${ic('check', 14, 3)}</span></span>`).join('')}<button class="thumb add" data-a="briefPhoto" data-v="${o.id}" aria-label="Добавить фото">${ic('camera', 26)}</button></div>`, { hint: 'С фото исполнитель назовёт точную цену без выезда.' })}
       <div class="field"><span class="lbl">Когда удобно</span>${whenPick('brief', b, 'briefWhen')}</div>
+      ${field('Ваша цена', `<div class="optlist">${opt('briefBt', `${o.id}|deal`, 'Пусть назовёт исполнитель', `Ориентир в карточке: ${priceLabel(o)}`, b.btype === 'deal')}${opt('briefBt', `${o.id}|fix`, 'Своя сумма', 'Сколько готовы заплатить', b.btype === 'fix')}${opt('briefBt', `${o.id}|range`, 'От и до', 'В какую сумму хотите уложиться', b.btype === 'range')}</div>
+        ${b.btype === 'fix' ? stepper('briefBudget', `${o.id}|budget`, b.budget, 500, 500000, rub) : b.btype === 'range' ? `<div class="grid2">${field('От', stepper('briefBudget', `${o.id}|budgetFrom`, b.budgetFrom, 500, 500000, rub, true))}${field('До', stepper('briefBudget', `${o.id}|budget`, b.budget, 500, 500000, rub, true))}</div>` : ''}`, { hint: b.btype === 'deal' ? '' : 'Исполнитель согласится на вашу цену или предложит свою.' })}
       ${field('Комментарий, если нужно', `<textarea class="textarea" data-in="briefText|${o.id}" placeholder="Например: диван у окна, пятна от кофе" rows="3">${esc(b.text)}</textarea>`)}`,
-    bar: `<div class="abar">${btn(`Отправить исполнителю ${ic('send', 20)}`, 'sendBrief', o.id, 'block')}</div>`,
+    bar: `<div class="abar">${btn(`Отправить запрос ${ic('send', 20)}`, 'sendBrief', o.id, 'block')}</div>`,
   };
 };
 IN.briefText = (v, id) => { S.brief[id].text = v; };
+const r100 = x => Math.max(500, Math.round(x / 100) * 100);
 Object.assign(A, {
   briefTog(v) { const [id, gi, x] = v.split('|'); const b = S.brief[id]; const l = b.sel[gi] || (b.sel[gi] = []); const i = l.indexOf(x); i < 0 ? l.push(x) : l.splice(i, 1); render(); },
   briefWhen(v) { const [k, x] = v.split('|'); const b = S.brief[cur().p.id]; b[k] = x; if (k === 'when' && x === 'date' && !b.day) b.day = dk(1); render(); },
   briefPhoto(id) { S.brief[id].photos = Math.min(4, S.brief[id].photos + 1); render(); toast('Фото добавлено'); },
+  briefBt(v) {
+    const [id, t] = v.split('|'); const b = S.brief[id]; const ref = replyOf(offerById(id)).price; b.btype = t;
+    if (t === 'fix') { b.budget = b.budget || r100(ref * 0.9); b.budgetFrom = 0; }
+    if (t === 'range') { b.budgetFrom = b.budgetFrom || r100(ref * 0.8); b.budget = Math.max(b.budget || r100(ref * 1.05), b.budgetFrom + 500); }
+    render();
+  },
+  briefBudget(v) {
+    const [id, k, dir] = v.split('|'); const b = S.brief[id]; const x = b[k] || 0; b[k] = clamp(x + Number(dir) * (x >= 10000 ? 1000 : 500), 500, 500000);
+    if (b.btype === 'range' && b.budget <= b.budgetFrom) { if (k === 'budget') b.budgetFrom = Math.max(500, b.budget - 500); else b.budget = b.budgetFrom + 500; }
+    render();
+  },
   sendBrief(id) {
     const o = offerById(id); const b = S.brief[id];
+    const budget = b.btype === 'deal' ? 0 : b.budget; const budgetFrom = b.btype === 'range' ? b.budgetFrom : 0;
     const ch = ensureChat('cust', o);
-    postMsg(ch, 'me', { kind: 'brief', items: Object.values(b.sel).flat(), photos: b.photos, when: whenText(b), text: b.text, svc: o.svc });
-    postMsg(ch, 'sys', { t: 'Задача у исполнителя. Он ответит здесь же.' });
+    postMsg(ch, 'me', { kind: 'brief', items: askOn(o.svc) ? askWhat(o.svc, b) : Object.values(b.sel).flat(), photos: b.photos, when: whenText(b), text: b.text, svc: o.svc, budget, budgetFrom });
+    postMsg(ch, 'sys', { t: 'Запрос у исполнителя. Он ответит здесь же.' });
     S.brief[id] = null;
     later(1800, () => {
-      const rp = replyOf(o); postMsg(ch, 'them', { t: rp.text });
-      postMsg(ch, 'them', { kind: 'version', v: { offer: o.id, title: o.title, price: rp.price, dur: rp.dur, inc: rp.inc, stages: rp.stages ? rp.stages.map(x => Object.assign({}, x)) : null, days: rp.days || 0, date: b.when === 'date' && b.day ? b.day : dk(1), time: b.part === 'Вечером' ? '18:00' : b.part === 'Днём' ? '13:00' : '10:00', ver: 1, st: 'new' } });
-      notify('cust', 'Пришло предложение', `${exName(o.ex)}: ${rub(rp.price)}`, gv('chat', { id: ch.id }));
+      /* имитация ответа: цена заказчика подходит — исполнитель соглашается, нет — называет свою */
+      const rp = replyOf(o); let price = rp.price; let t = rp.text;
+      if (budget && !rp.stages) {
+        if (budgetFrom ? rp.price <= budget : budget >= rp.price * 0.9) { price = budgetFrom ? Math.max(budgetFrom, rp.price) : budget; t = budgetFrom ? 'Посмотрел задачу. Укладываюсь в вашу сумму.' : 'Посмотрел задачу. Согласен на вашу цену.'; }
+        else t = `Посмотрел задачу. За ${budText(budget, budgetFrom)} не получится, могу за ${rub(rp.price)}.`;
+      }
+      postMsg(ch, 'them', { t });
+      postMsg(ch, 'them', { kind: 'version', v: { offer: o.id, title: o.title, price, dur: rp.dur, inc: rp.inc, stages: rp.stages ? rp.stages.map(x => Object.assign({}, x)) : null, days: rp.days || 0, date: b.when === 'date' && b.day ? b.day : dk(1), time: b.part === 'Вечером' ? '18:00' : b.part === 'Днём' ? '13:00' : '10:00', ver: 1, st: 'new' } });
+      notify('cust', 'Пришло предложение', `${exName(o.ex)}: ${rub(price)}`, gv('chat', { id: ch.id }));
     });
     replace('chat', { id: ch.id });
   },
@@ -6639,7 +6702,7 @@ const REPLY_INC = ['Снятие и установка колеса', 'Ремо�
 const Q_ANS = ['Да, сделаем R20 с RunFlat: 1 500 ₽ за колесо. Записать на четверг?', 'Такие колёса не берём: нужен другой станок. Подскажу, куда обратиться.'];
 SCREENS.e_request = p => {
   const i = S.incoming.find(x => x.id === p.id);
-  const rd = S.replyDraft && S.replyDraft.id === i.id ? S.replyDraft : (S.replyDraft = { id: i.id, price: 1400, day: dk(1), slot: null, inc: ['Снятие и установка колеса', 'Ремонт прокола грибком', 'Балансировка'] });
+  const rd = S.replyDraft && S.replyDraft.id === i.id ? S.replyDraft : (S.replyDraft = { id: i.id, price: i.budget || 1400, day: dk(1), slot: null, inc: ['Снятие и установка колеса', 'Ремонт прокола грибком', 'Балансировка'] });
   SLOT_ST.reply = () => S.replyDraft; SLOT_ST.alt = () => S.altTime;
   const alt = S.altTime && S.altTime.id === i.id ? S.altTime : null;
   let actions;
@@ -6649,13 +6712,13 @@ SCREENS.e_request = p => {
   else if (i.kind === 'confirm') actions = card(`<div class="h2">Действия</div><div class="list">${rl('Подтвердить заказ', 'Заказчик сможет оплатить', 'incConfirm', i.id, { icon: 'check' })}${rl('Предложить другое время', 'День и время из вашего расписания', 'incOtherTime', i.id, { icon: 'clock' })}${i.chat ? rl('Переписка', 'Если нужно уточнить детали', 'go', gv('chat', { id: i.chat }), { icon: 'chat' }) : ''}</div>`);
   else if (i.kind === 'brief') actions = card(`<div class="h2">Ответить предложением</div><div class="m">Заказчик увидит состав, цену и время одной карточкой и сможет сразу оплатить.</div>
       ${field('Что сделаете', chips('replyInc', REPLY_INC, v => rd.inc.includes(v)))}
-      ${field('Цена', stepper('replyPrice', 'p', rd.price, 100, 50000, rub))}
+      ${field('Цена', stepper('replyPrice', 'p', rd.price, 100, 50000, rub), { hint: i.budget ? `Заказчик предложил ${budText(i.budget, i.budgetFrom)}. Согласитесь или назовите свою цену.` : '' })}
       ${pickDayTime('reply', rd, 40, null, '')}
       ${rd.slot ? btn('Отправить предложение', 'replySend', i.id, 'block') : `<button class="btn block" disabled>Отправить предложение</button><div class="why center">Причина: выберите день и время.</div>`}${i.chat ? btn('Открыть переписку', 'go', gv('chat', { id: i.chat }), 'text block') : ''}`);
   else actions = card(`<div class="h2">Быстрый ответ</div><div class="optlist">${Q_ANS.map((t, k) => opt('qAnswer', `${i.id}|${k}`, t, '', false)).join('')}</div>`);
   return {
     title: 'Заявка',
-    body: `${card(`<div class="h2">Сведения о задаче</div><div class="sumline"><span>Заказчик: ${esc(i.client)}</span><b>${clientLine(i.client)}</b></div><div class="t18">${esc(i.svc)}</div><div>${esc(i.what)}</div>${i.text ? `<div class="m">«${esc(i.text)}»</div>` : ''}${i.files ? `<div class="row">${ic('image', 20)}<span>Фото от заказчика: ${i.files}</span></div>` : ''}${i.date ? `<div class="sumline"><span>Когда</span><b>${when(i.date, i.time)}</b></div>` : ''}${i.note && i.note.length ? `<div class="sumline"><span>Пожелания</span><b>${esc(i.note.join(', '))}</b></div>` : ''}${i.total ? `<div class="sumline"><span>Сумма по вашему прайсу</span><b>${rub(i.total)}</b></div>` : ''}<div class="sumline"><span>Заказчик</span><b>${esc(i.client)}</b></div>`)}
+    body: `${card(`<div class="h2">Сведения о задаче</div><div class="sumline"><span>Заказчик: ${esc(i.client)}</span><b>${clientLine(i.client)}</b></div><div class="t18">${esc(i.svc)}</div><div>${esc(i.what)}</div>${i.text ? `<div class="m">«${esc(i.text)}»</div>` : ''}${i.files ? `<div class="row">${ic('image', 20)}<span>Фото от заказчика: ${i.files}</span></div>` : ''}${i.date ? `<div class="sumline"><span>Когда</span><b>${when(i.date, i.time)}</b></div>` : ''}${i.budget ? `<div class="sumline"><span>Цена заказчика</span><b>${budText(i.budget, i.budgetFrom)}</b></div>` : ''}${i.note && i.note.length ? `<div class="sumline"><span>Пожелания</span><b>${esc(i.note.join(', '))}</b></div>` : ''}${i.total ? `<div class="sumline"><span>Сумма по вашему прайсу</span><b>${rub(i.total)}</b></div>` : ''}<div class="sumline"><span>Заказчик</span><b>${esc(i.client)}</b></div>`)}
       ${actions}<div class="m">Просмотр заявки не подтверждает заказ.</div>`,
   };
 };
@@ -7458,7 +7521,7 @@ function routeInfo(w) {
   const s = svcBy(w.svc); const c = svcCard(w.svc); if (!s || !c.why) return '';
   const b = svcTable(w.svc).b;
   const head = s.r === 'B' ? 'Обычно цену называют после брифа или осмотра' : s.r === 'V' ? (c.st ? 'Обычно это проект по этапам' : b === 'rent' ? 'Это аренда на даты' : 'Обычно это абонемент или период') : 'Обычно эту услугу оплачивают сразу';
-  return `<div class="info"><b>${head}</b><span class="m">${esc(c.why)} Мы уже настроили карточку так, поменять можно ниже. В карточке у заказчика всегда два способа: купить по вашей цене или описать задачу и получить ваше предложение.</span></div>`;
+  return `<div class="info"><b>${head}</b><span class="m">${esc(c.why)} Мы уже настроили карточку так, поменять можно ниже. В карточке у заказчика всегда два способа: купить по вашей цене или прислать вам запрос со своими условиями и, если захочет, своей ценой.</span></div>`;
 }
 function docCard(w) {
   if (!w.svc || !svcCard(w.svc).docs) return '';
@@ -7699,7 +7762,7 @@ Object.assign(A, {
 function startRequest(svcId) {
   if (S.reqDraft && !svcId) { S.req = JSON.parse(JSON.stringify(S.reqDraft)); go('c_req'); toast('Продолжаем черновик', 'info'); return; }
   const s = svcId ? svcById(svcId) : null;
-  S.req = { step: 1, svc: s ? s.id : null, title: '', text: '', files: [], sel: {}, fmt: s && !canOffline(s.f) ? 'online' : 'place', addr: S.myAddrs[0].street, city: S.myAddrs[0].city, district: S.myAddrs[0].district, lat: S.myAddrs[0].lat, lng: S.myAddrs[0].lng, when: 'exact', from: null, to: null, time: '18:00', btype: 'deal', budget: 0, budgetFrom: 0, posting: false };
+  S.req = { step: 1, svc: s ? s.id : null, title: '', text: '', files: [], sel: {}, pr: {}, q: null, fmt: s && !canOffline(s.f) ? 'online' : 'place', addr: S.myAddrs[0].street, city: S.myAddrs[0].city, district: S.myAddrs[0].district, lat: S.myAddrs[0].lat, lng: S.myAddrs[0].lng, when: 'exact', from: null, to: null, time: '18:00', btype: 'deal', budget: 0, budgetFrom: 0, posting: false };
   go('c_req');
 }
 const reqFmtText = R => R.fmt === 'online' ? 'Онлайн' : `На месте · ${R.city}, ${R.district}`;
@@ -7721,7 +7784,7 @@ SCREENS.c_req = () => {
     body = `<div class="field"><span class="lbl">Услуга</span><button class="fakefield svcf" data-a="reqSvcOpen"><span class="grow t18" style="color:${s ? 'var(--ink)' : 'var(--muted)'}">${s ? esc(s.n) : 'Выберите услугу'}</span>${ic('right', 22, 2.2)}</button>${s ? `<span class="m">${esc(pathOf(s))}</span>` : ''}</div>
       <label class="field"><span class="lbl">Заголовок заявки</span><input class="input" data-in="reqTitle" value="${esc(R.title)}" maxlength="80" placeholder="Коротко: что нужно и к какому сроку"></label>
       <label class="field"><span class="lbl">Что нужно сделать?</span><textarea class="textarea" data-in="reqText" rows="4" maxlength="600" placeholder="Коротко опишите задачу">${esc(R.text)}</textarea><span id="reqmod">${modCheck(R.title + ' ' + R.text).length ? modWarn(modCheck(R.title + ' ' + R.text)) : ''}</span></label>
-      ${opts.length && opts[0][0] !== 'Что важно' ? `<div class="field"><span class="lbl">Уточнения, если хотите</span>${opts.map(([g, list], gi) => `<span class="m">${esc(g)}</span>${chips('reqTog', list.map(x => [`${gi}|${x}`, x]), v => (R.sel[gi] || []).includes(v.split('|')[1]))}`).join('')}</div>` : ''}
+      ${askOn(s && s.n) ? `<div class="field"><span class="lbl">Параметры</span><span class="m">Те же вопросы, что в карточках исполнителей. С ответами предложения будут точнее.</span></div>${askForm(s.n, 'req')}` : opts.length && opts[0][0] !== 'Что важно' ? `<div class="field"><span class="lbl">Уточнения, если хотите</span>${opts.map(([g, list], gi) => `<span class="m">${esc(g)}</span>${chips('reqTog', list.map(x => [`${gi}|${x}`, x]), v => (R.sel[gi] || []).includes(v.split('|')[1]))}`).join('')}</div>` : ''}
       <div class="field"><span class="lbl">Фото и файлы</span>${R.files.length ? `<div class="chips">${R.files.map((f, i) => `<button class="chip on" data-a="reqFileDel" data-v="${i}" aria-label="Убрать файл ${esc(f)}">${ic('clip', 16, 2.2)} ${esc(f)} <span class="x">×</span></button>`).join('')}</div>` : ''}<label class="fakefield svcf" style="cursor:pointer"><span class="grow t18">Выбрать файл</span>${ic('right', 22, 2.2)}<input type="file" data-ch="reqFile" hidden></label><span class="m">Фото, записи и документы по задаче — если они нужны.</span></div>`;
     bar = `<div class="abar">${bl ? `<button class="btn block" disabled>Далее</button><div class="why center">Причина: ${bl}.</div>` : btn('Далее', 'reqStep', '2', 'block')}${btn('Сохранить черновик', 'reqSave', '', 'outline block')}</div>`;
   } else if (R.step === 2) {
@@ -7736,7 +7799,7 @@ SCREENS.c_req = () => {
         ${R.btype === 'fix' ? stepper('reqBudget', 'budget', R.budget, 500, 500000, rub) : R.btype === 'range' ? `<div class="grid2">${field('От', stepper('reqBudget', 'budgetFrom', R.budgetFrom, 500, 500000, rub, true))}${field('До', stepper('reqBudget', 'budget', R.budget, 500, 500000, rub, true))}</div>` : ''}`, { hint: 'Бюджет — ваше пожелание, а не цена исполнителя.' })}`;
     bar = `<div class="abar">${bl ? `<button class="btn block" disabled>Проверить заявку</button><div class="why center">Причина: ${bl}.</div>` : btn('Проверить заявку', 'reqStep', '3', 'block')}<div class="btns two">${btn('Назад', 'reqStep', '1', 'outline')}${btn('Сохранить черновик', 'reqSave', '', 'outline')}</div></div>`;
   } else {
-    const rows = [['Услуга', esc(s.n)], ['Что нужно', esc(R.text || '—')], ...(Object.values(R.sel).flat().length ? [['Уточнения', esc(Object.values(R.sel).flat().join(', '))]] : []), ['Формат и место', esc(reqFmtText(R))], ['Когда', esc(reqWhenText(R))], ['Бюджет', esc(reqBudgetText(R))], ['Материалы', R.files.length ? esc(R.files.join(', ')) : 'нет']];
+    const rows = [['Услуга', esc(s.n)], ['Что нужно', esc(R.text || '—')], ...(askOn(s.n) && askWhat(s.n, R).length ? [['Параметры', esc(askWhat(s.n, R).join(', '))]] : Object.values(R.sel).flat().length ? [['Уточнения', esc(Object.values(R.sel).flat().join(', '))]] : []), ['Формат и место', esc(reqFmtText(R))], ['Когда', esc(reqWhenText(R))], ['Бюджет', esc(reqBudgetText(R))], ['Материалы', R.files.length ? esc(R.files.join(', ')) : 'нет']];
     const mod = modCheck(R.title + ' ' + R.text);
     body = `${card(`<div class="h2">${esc(R.title || s.n)}</div><div class="kv">${rows.map(([k, v]) => `<span class="m">${k}</span><span>${v}</span>`).join('')}</div>`)}
       <div class="info"><b>Кому будет видна заявка</b><span class="m">Проверенные исполнители с услугой «${esc(s.n)}» и форматом «${R.fmt === 'online' ? 'Онлайн' : 'На месте'}». ${R.fmt === 'online' ? 'География не ограничивает получателей.' : `Те, кто работает в районе ${esc(R.district)}.`} Бюджет и срок не жёсткий отсев: исполнитель может предложить свои условия. Точный адрес и контакты не публикуются.</span></div>
@@ -7771,7 +7834,7 @@ Object.assign(A, {
   svcPickCat(v) { S.svcPick.cat = v; S.svcPick.sub = null; svcPickSheet(); },
   svcPickSub(v) { S.svcPick.sub = v; svcPickSheet(); },
   svcPickUp() { if (S.svcPick.sub) S.svcPick.sub = null; else S.svcPick.cat = null; svcPickSheet(); },
-  reqSvcSet(id) { const R = S.req; const s = svcById(id); if (R.svc !== id) R.sel = {}; R.svc = id; if (!canOffline(s.f)) R.fmt = 'online'; else if (!canOnline(s.f)) R.fmt = 'place'; S.reqSaved = false; closeSheet(); render(); },
+  reqSvcSet(id) { const R = S.req; const s = svcById(id); if (R.svc !== id) { R.sel = {}; R.pr = {}; R.q = null; R.u = null; } R.svc = id; if (!canOffline(s.f)) R.fmt = 'online'; else if (!canOnline(s.f)) R.fmt = 'place'; S.reqSaved = false; closeSheet(); render(); },
   reqStep(v) { const R = S.req; const n = Number(v); if (n > R.step && reqBlock(R)) return; R.step = n; render('new'); },
   reqFmt(v) { S.req.fmt = v; render(); },
   reqWhen(v) { S.req.when = v; if (v === 'exact') S.req.to = null; render(); },
@@ -7781,7 +7844,7 @@ Object.assign(A, {
     const R = S.req; if (R.posting) return; R.posting = true; render();
     setTimeout(() => {
       R.posting = false; const s = svcById(R.svc);
-      const what = [R.text, Object.values(R.sel).flat().join(' · ')].filter(Boolean).join(' · ') || 'Подробности обсудим в переписке';
+      const what = [R.text, (askOn(s.n) ? askWhat(s.n, R) : Object.values(R.sel).flat()).join(' · ')].filter(Boolean).join(' · ') || 'Подробности обсудим в переписке';
       const req = { id: uid('r'), svc: s.n, title: R.title.trim() || s.n, what, text: '', files: R.files.slice(), photos: 0, whenText: reqWhenText(R), whereText: reqFmtText(R), budget: R.btype === 'deal' ? 0 : R.budget, budgetFrom: R.btype === 'range' ? R.budgetFrom : 0, to: 'all', pick: [], offers: [], status: 'open', created: dk(0), until: dk(7), day: R.from };
       S.requests.unshift(req); S.reqDraft = null; S.reqSaved = false;
       offersFor(s.n).filter(o => o.ex !== 'alex').slice(0, 3).forEach((o, i) => later(2200 + i * 2300, () => {
@@ -8179,7 +8242,7 @@ function chatListScreen(role) {
 }
 function chatListHtml(list) {
   if (!list.length) return emptyBox('Диалогов нет', 'Напишите исполнителю из карточки услуги.', '', '', '');
-  return card(`<div class="h2">Диалоги</div><div class="list">${list.map(c => { const last = [...c.msgs].reverse().find(m => m.from !== 'sys') || c.msgs[c.msgs.length - 1] || { t: '' }; const lt = last.kind === 'version' ? `Предложение: ${rub(last.v.price)}` : last.kind === 'brief' ? 'Описание задачи' : last.kind === 'file' ? last.name : last.t; return `<button class="rl" data-a="go" data-v="${gv('chat', { id: c.id })}"><span class="lt">${letter(c.with)}</span><span class="grow"><span class="rt">${esc(c.with)}</span><span class="rs clamp2">${esc(lt || '')}${last.at ? ' · ' + esc(last.at) : ''}</span>${c.order ? `<span class="pill grey" style="margin-top:4px">Заказ № ${c.order}</span>` : ''}</span>${c.unread ? `<span class="cnt" style="min-width:30px;height:30px;font-size:14px">${c.unread}</span>` : `<span class="ra">${ic('arr', 22, 2)}</span>`}</button>`; }).join('')}</div>`, 'c');
+  return card(`<div class="h2">Диалоги</div><div class="list">${list.map(c => { const last = [...c.msgs].reverse().find(m => m.from !== 'sys') || c.msgs[c.msgs.length - 1] || { t: '' }; const lt = last.kind === 'version' ? `Предложение: ${rub(last.v.price)}` : last.kind === 'brief' ? 'Запрос с условиями' : last.kind === 'file' ? last.name : last.t; return `<button class="rl" data-a="go" data-v="${gv('chat', { id: c.id })}"><span class="lt">${letter(c.with)}</span><span class="grow"><span class="rt">${esc(c.with)}</span><span class="rs clamp2">${esc(lt || '')}${last.at ? ' · ' + esc(last.at) : ''}</span>${c.order ? `<span class="pill grey" style="margin-top:4px">Заказ № ${c.order}</span>` : ''}</span>${c.unread ? `<span class="cnt" style="min-width:30px;height:30px;font-size:14px">${c.unread}</span>` : `<span class="ra">${ic('arr', 22, 2)}</span>`}</button>`; }).join('')}</div>`, 'c');
 }
 IN.chatQ = (v, role) => { S.chatQ = v; const el = $('#chatlist'); const q = norm(v); if (el) el.innerHTML = chatListHtml(chatsFor(role).filter(c => !q || norm(c.with + ' ' + c.msgs.map(m => m.t || '').join(' ')).includes(q))); };
 SCREENS.c_msgs = () => chatListScreen('cust');
@@ -8188,7 +8251,7 @@ function msgHtml(ch, m, i) {
   if (m.from === 'sys') return `<div class="sysmsg ${m.ok ? 'ok' : ''}">${esc(m.t)}</div>`;
   const me = m.from === 'me';
   if (m.kind === 'file') return `<div class="msgcard ${me ? 'me' : ''}">${m.t ? `<div>${esc(m.t)}</div>` : ''}<div class="row">${ic('doc', 26)}<span class="grow"><b>${esc(m.name)}</b><span class="m" style="display:block">${esc(m.size || '')}</span></span></div>${btn('Открыть', 'pfOpen', '', 'text')}<span class="m">${esc(m.at || '')}</span></div>`;
-  if (m.kind === 'brief') return `<div class="msgcard ${me ? 'me' : ''}"><b class="t18">Задача: ${esc(m.svc)}</b>${m.items.length ? `<div class="chips">${m.items.map(x => `<span class="pill grey">${esc(x)}</span>`).join('')}</div>` : ''}${m.photos ? `<div class="thumbs">${Array.from({ length: m.photos }, () => `<span class="thumb">${photo(offerById(ch.offer).ph)}</span>`).join('')}</div>` : ''}<div class="m">Когда удобно: ${esc(m.when)}</div>${m.text ? `<div>«${esc(m.text)}»</div>` : ''}<span class="m">${esc(m.at)}</span></div>`;
+  if (m.kind === 'brief') return `<div class="msgcard ${me ? 'me' : ''}"><b class="t18">Запрос: ${esc(m.svc)}</b>${m.items.length ? `<div class="chips">${m.items.map(x => `<span class="pill grey">${esc(x)}</span>`).join('')}</div>` : ''}${m.photos ? `<div class="thumbs">${Array.from({ length: m.photos }, () => `<span class="thumb">${photo(offerById(ch.offer).ph)}</span>`).join('')}</div>` : ''}<div class="m">Когда удобно: ${esc(m.when)}</div>${m.budget ? `<div class="sumline"><span>${me ? 'Ваша цена' : 'Цена заказчика'}</span><b>${budText(m.budget, m.budgetFrom)}</b></div>` : ''}${m.text ? `<div>«${esc(m.text)}»</div>` : ''}<span class="m">${esc(m.at)}</span></div>`;
   if (m.kind === 'order') { const o = orderById(m.order); return `<div class="msgcard ${me ? 'me' : ''}"><b class="t18">Заказ № ${m.order}</b><div>${esc(o.svc)}: ${esc(o.what)}</div>${o.date ? `<div class="m">${when(o.date, o.time)}</div>` : ''}<div class="row">${orderPill(o)}<b class="num">${rub(o.total)}</b></div>${goBtn('Открыть заказ', gv('order', { id: o.id }))}</div>`; }
   if (m.kind === 'version') {
     const v = m.v; const custView = ch.role === 'cust';
