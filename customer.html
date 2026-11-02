@@ -4397,7 +4397,6 @@ input, textarea, select { font-size: max(16px, 1em); }
   .phone[data-lay="wide"] .grid2:has(> .pct) { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
   .phone[data-lay="wide"] .grid2:has(> .cat) { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
   .phone[data-lay="wide"] .grid3 { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
-  .phone[data-lay="wide"] .hside .cgrid { grid-template-columns: minmax(0, 1fr); }
   .ohero { aspect-ratio: 16 / 9; max-height: none; }
   .lmap { height: 540px; }
   [data-style] .page.home > .hband { margin: -24px -24px 8px; padding: 20px 24px 28px; }
@@ -4412,7 +4411,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 }
 /* ===== компьютер (01.11, третья версия): язык телефона — серо-голубой фон, белые карточки с тенью, цветные значки;
    белая шапка с поиском; разделы роли — кабинет с меню слева; сообщения — одно окно мессенджера ===== */
-.dh, .dtitle, .dcats, .dfind, .dside, .lc-img { display: none; }
+.dh, .dtitle, .rib, .hrow, .dfind, .dside, .lc-img { display: none; }
 .phone[data-view="desk"] { --cw: 100%; --hh: 113px; --sh: 0 1px 2px rgba(16, 33, 61, 0.04), 0 8px 24px rgba(16, 33, 61, 0.07); --sh2: 0 2px 4px rgba(16, 33, 61, 0.05), 0 16px 36px rgba(16, 33, 61, 0.12); }
 :root:not([data-theme="dark"]) .phone[data-view="desk"] { --page: #F1F4F9; }
 .phone[data-view="desk"] #tabs { display: none !important; }
@@ -4425,13 +4424,13 @@ input, textarea, select { font-size: max(16px, 1em); }
 [data-style] .phone[data-view="desk"] #top { background: var(--card); box-shadow: 0 1px 0 var(--line), 0 4px 16px rgba(16, 33, 61, 0.04); }
 .phone[data-view="desk"] .dh { display: block; }
 .dh-top .dh-w, .dh-main .dh-w { display: flex; align-items: center; height: 100%; padding: 0 24px; }
-.dh-top { height: 36px; font-size: 14px; line-height: 18px; color: var(--muted); }
-.dh-top .dh-w { gap: 20px; }
-.dh-l { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); white-space: nowrap; }
+.dh-top { height: 48px; font-size: 17px; line-height: 22px; color: var(--muted); }
+.dh-top .dh-w { gap: 24px; }
+.dh-l { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); white-space: nowrap; }
 .dh-l:hover { color: var(--ink); }
 .dh-plus { color: var(--act); font-weight: 600; }
 .dh-plus:hover { color: var(--act-press); }
-.dh-role { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 10px; background: var(--soft); color: var(--act); white-space: nowrap; }
+.dh-role { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 12px; background: var(--soft); color: var(--act); white-space: nowrap; }
 .dh-role .dh-n { position: static; }
 .dh-main { height: 76px; }
 .dh-main .dh-w { gap: 12px; }
@@ -4443,7 +4442,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 .dh-q span { flex: 1; min-width: 0; align-self: center; font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dh-q b { display: grid; place-items: center; padding: 0 24px; background: var(--act); color: #fff; font-size: 18px; font-weight: 600; }
 .dh-nav { display: flex; gap: 2px; flex: none; margin-left: auto; }
-.dh-i { position: relative; display: grid; justify-items: center; gap: 2px; padding: 4px 8px; border-radius: 12px; color: var(--muted); font-size: 14px; line-height: 18px; white-space: nowrap; }
+.dh-i { position: relative; display: grid; justify-items: center; gap: 2px; padding: 4px 8px; border-radius: 12px; color: var(--muted); font-size: 15px; line-height: 20px; white-space: nowrap; }
 .dh-i:hover { color: var(--ink); background: var(--soft2); }
 .dh-i.on { color: var(--act); font-weight: 600; }
 .dh-n { position: absolute; top: 0; left: calc(50% + 6px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--brand); color: #fff; font-size: 12px; line-height: 18px; font-weight: 700; text-align: center; }
@@ -4525,7 +4524,21 @@ input, textarea, select { font-size: max(16px, 1em); }
 .phone[data-view="desk"] .dtitle { display: block; margin: 0; font-size: 28px; line-height: 34px; font-weight: 800; letter-spacing: -0.02em; }
 .dtitle span { color: var(--muted); font-weight: 700; }
 .dsec { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
-.phone[data-view="desk"] .dcats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; }
+.phone[data-view="desk"] .rib { display: block; }
+/* лента (02.11): видно пять с половиной плиток, край следующей подсказывает, что ряд листается */
+.phone[data-view="desk"] .page.home { grid-template-columns: minmax(0, 1fr); }  /* лента не распирает страницу */
+.rib { position: relative; min-width: 0; --rib-up: 56px; }
+.rib-s { display: flex; gap: 16px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding: 0 4px; scrollbar-width: none; padding: 4px 4px 16px; margin: -4px -4px -16px; }
+.rib-s::-webkit-scrollbar { display: none; }
+.rib-s > * { flex: 0 0 calc((100% - 5 * 16px) / 5.4); min-width: 0; scroll-snap-align: start; }
+.rib.big { --rib-up: 64px; }
+.rib.big .rib-s { gap: 20px; }
+.rib.big .rib-s > * { flex-basis: calc((100% - 3 * 20px) / 4); }  /* как плитки «Популярных услуг» ниже */
+.rib-b { position: absolute; z-index: 2; top: calc(50% - var(--rib-up)); display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: var(--card); color: var(--ink); box-shadow: 0 6px 22px rgba(14, 29, 54, 0.2); transition: opacity 0.15s ease, color 0.15s ease; }
+.rib-b.prev { left: -12px; }
+.rib-b.next { right: -12px; }
+.rib-b:hover { color: var(--act); }
+.rib.at-s .rib-b.prev, .rib.at-e .rib-b.next { opacity: 0; pointer-events: none; }
 .dcat { display: block; border-radius: 20px; background: var(--card); box-shadow: var(--sh); overflow: hidden; text-align: left; }
 .dcat-p { display: block; width: 100%; aspect-ratio: 1 / 1; background: var(--soft); }
 .dcat-p img { width: 100%; height: 100%; object-fit: cover; }
@@ -4541,11 +4554,8 @@ input, textarea, select { font-size: max(16px, 1em); }
 .df-q:hover { box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35); }
 .df-r { border-left: 1px solid rgba(255, 255, 255, 0.16); padding-left: 36px; }
 .df-r .btn { justify-self: start; }
-.phone[data-view="desk"] .hcols { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 32px; align-items: start; }
-.phone[data-view="desk"] .hmain { display: grid; gap: 36px; min-width: 0; }
-.phone[data-view="desk"] .hside { display: grid; gap: 16px; position: sticky; top: 0; min-width: 0; }
-.phone[data-view="desk"][data-lay="wide"] .hside .cgrid { grid-template-columns: minmax(0, 1fr); }
-.phone[data-view="desk"] .hside .entry .ri { display: none; }
+/* заявки, бонусы и расписание — один ряд на всю ширину под панелью поиска */
+.phone[data-view="desk"] .hrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; align-items: stretch; }
 /* выдача: колонка слева */
 .phone[data-view="desk"] .dcols { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 32px; align-items: start; }
 .phone[data-view="desk"] .dside { display: grid; gap: 16px; padding: 20px; border-radius: 20px; background: var(--card); box-shadow: var(--sh); }
@@ -4978,6 +4988,7 @@ function render(mode) {
   const scr = fn(c.p || {});
   const el = $('#screen');
   const keep = scrollEl().scrollTop; const navY = ($('.cabnav') || {}).scrollTop || 0; const listY = ($('.msgr-list') || {}).scrollTop || 0;
+  const ribX = mode ? [] : [...document.querySelectorAll('.rib-s')].map(x => x.scrollLeft);  /* ленты не прыгают в начало, когда экран перерисовался на месте */
   const view = VIEW(); let lay = scr.lay || LAY[c.n] || 'form'; const ph = $('#phone');
   if (lay === 'aside' && !scr.bar) lay = 'form';  /* справа нечего показать — обычная колонка */
   const desk = view === 'desk'; const cabL = desk && lay === 'cab';
@@ -4999,6 +5010,7 @@ function render(mode) {
   else box.scrollTop = keep;
   if ($('.cabnav')) $('.cabnav').scrollTop = navY;
   if ($('.msgr-list')) $('.msgr-list').scrollTop = listY;
+  document.querySelectorAll('.rib-s').forEach((x, i) => { if (ribX[i]) x.scrollLeft = ribX[i]; });
   $('#bar').innerHTML = bar;
   const tabs = $('#tabs');
   const showTabs = S.role !== 'guest' && scr.tabs !== false;
@@ -5017,7 +5029,7 @@ function gridCards(root) {
   if (!root || !root.querySelectorAll) return;
   const parents = new Set([...root.querySelectorAll(CARD_SEL)].map(x => x.parentElement));
   parents.forEach(par => {
-    if (!par || par.matches('.cgrid, .grid2, .hscroll') || par.closest('.hscroll')) return;
+    if (!par || par.matches('.cgrid, .grid2, .hscroll, .hrow') || par.closest('.hscroll, .rib-s')) return;
     let run = [];
     const flush = () => { if (run.length) { const g = document.createElement('div'); g.className = 'cgrid' + (run.every(x => x.matches('.pct')) ? ' tiles' : run.every(x => x.matches('.pc')) ? ' pcs' : ''); run[0].before(g); run.forEach(x => g.appendChild(x)); } run = []; };
     [...par.children].forEach(ch => { if (ch.matches(CARD_SEL)) run.push(ch); else flush(); }); flush();
@@ -5774,6 +5786,11 @@ A.lsClear = key => { S.lsq[key] = ''; render(); };
 
 /* ---------- фото-плитки каталога (лист 21) ---------- */
 const catTile = (name, act, v, ph, sub) => `<button class="cat" data-a="${act}" data-v="${esc(v)}"><span class="pic">${photo(ph, name, 'M')}</span><span class="cap">${esc(name)}${sub ? `<small>${sub}</small>` : ''}</span></button>`;
+/* компьютер: лента плиток — листается вбок жестом на тачпаде и стрелками по краям */
+const ribbon = (items, cls = '') => `<div class="rib ${cls}"><button class="rib-b prev" data-a="ribGo" data-v="-1" aria-label="Назад">${ic('back', 24, 2.4)}</button><div class="rib-s">${items}</div><button class="rib-b next" data-a="ribGo" data-v="1" aria-label="Дальше">${ic('arr', 24, 2.4)}</button></div>`;
+const ribEnds = s => { const r = s.parentElement; r.classList.toggle('at-s', s.scrollLeft < 4); r.classList.toggle('at-e', s.scrollLeft + s.clientWidth > s.scrollWidth - 4); };
+A.ribGo = (v, el) => { const s = el.parentElement.querySelector('.rib-s'); s.scrollBy({ left: Math.sign(+v) * s.clientWidth * 0.8, behavior: 'smooth' }); };
+AFTER_RENDER.push(() => document.querySelectorAll('.rib-s').forEach(s => { ribEnds(s); s.addEventListener('scroll', () => ribEnds(s), { passive: true }); }));
 /* группа каталога — небольшая карточка с фото; без фото — значок */
 const subTile = (name, act, v, on, cat) => { const k = `sub|${cat}|${name}`; return `<button class="sub-t ${on ? 'on' : ''} ${PH[k] ? 'ph' : ''}" data-a="${act}" data-v="${esc(v)}">${PH[k] ? `<span class="sp">${photo(k, name)}</span>` : `<span class="si">${ic(subIcon(name), 22)}</span>`}<span class="sc">${esc(name)}</span></button>`; };
 /* фото услуги для списков: своё фото витринной карточки, иначе подобранное к услуге */
@@ -7998,17 +8015,22 @@ SCREENS.c_home = () => {
       <div class="hscroll cribbon">${DIRS.map(d => `<button class="cg" data-a="openDir" data-v="${esc(d.id)}"><span class="cgp">${photo(d.ph, d.name, 'M')}</span><span class="cgc">${esc(d.name)}</span></button>`).join('')}</div></div>`;
   const near = `<div class="duo"><button data-a="go" data-v="c_map"><span class="di">${ic('map', 22, 2)}</span><b>Рядом</b><span>${esc(S.me && S.me.src === 'geo' ? 'От вашего места' : S.district || S.city || 'На карте')}</span></button><i></i><button data-a="go" data-v="c_online"><span class="di">${ic('globe', 22, 2)}</span><b>Онлайн</b><span>Из любого города</span></button></div>`;
   const seen = viewed.length ? `<div class="col g12"><div class="sec-t">Вы смотрели</div><div class="hscroll">${viewed.map(o => offerCard(o, 'h')).join('')}</div></div>` : '';
-  /* компьютер: заголовок с числом услуг, плитки категорий в ряд, панель «найти или разместить заявку», ниже плитки услуг */
+  /* компьютер: заголовок с числом услуг, лента категорий, панель «найти или разместить заявку», ряд «заявки, бонусы, расписание», ниже плитки услуг */
   if (desk) {
     const pop = OFFERS.filter(o => !o.hidden && o.ex !== 'alex' && !viewed.includes(o)).slice(0, 8);
     const tiles = l => l.map(o => offerCard(o, 'tile')).join('');
+    /* лента (02.11): сначала шесть направлений, за ними категории, которые в направления не вошли */
+    const inDirs = DIRS.flatMap(d => d.cats);
+    const tile = (act, v, ph, name) => `<button class="dcat" data-a="${act}" data-v="${esc(v)}"><span class="dcat-p">${photo(ph, name, 'L')}</span><span class="dcat-t">${esc(name)}</span></button>`;
+    const cats = [...DIRS.map(d => tile('openDir', d.id, d.ph, d.name)), ...CATS.filter(c => !inDirs.includes(c.name)).map(c => tile('go', gv('c_cat', { c: c.name }), c.name, c.name))].join('');
     return { cls: 'home', body: `<div class="dsec"><h1 class="dtitle">Услуги ${inMsk() ? 'в Москве' : 'рядом с вами'} <span>${SERVICES.length}</span></h1><button class="lnk nowrap" data-a="go" data-v="c_catalog">Все категории ${ic('arr', 18, 2.2)}</button></div>
-      <div class="dcats">${DIRS.map(d => `<button class="dcat" data-a="openDir" data-v="${esc(d.id)}"><span class="dcat-p">${photo(d.ph, d.name, 'L')}</span><span class="dcat-t">${esc(d.name)}</span></button>`).join('')}</div>
+      ${ribbon(cats, 'cats')}
       <div class="dfind"><div class="df-a"><div class="h2">Поиск исполнителя</div><button class="df-q" data-a="openSearch">${ic('search', 20, 2.2)}<span>Услуга или исполнитель</span></button>
           <div class="row"><button class="df-b" data-a="go" data-v="c_map">${ic('map', 18, 2)}Рядом на карте</button><button class="df-b" data-a="go" data-v="c_online">${ic('globe', 18, 2)}Онлайн</button></div></div>
         <div class="df-r"><div class="h2">Не хотите искать?</div><span class="m">Опишите задачу — исполнители сами предложат цену и время.</span><button class="btn" data-a="newRequest">${ic('send', 20, 2)}Разместить заявку</button></div></div>
-      <div class="hcols"><div class="hmain">${viewed.length ? `<div class="col g16"><div class="sec-t">Вы смотрели</div>${tiles(viewed)}</div>` : ''}<div class="col g16"><div class="sec-t">Популярные услуги</div>${tiles(pop)}</div></div>
-        <div class="hside">${reqStatus()}${bonusCard()}${schedHome()}</div></div>` };
+      <div class="hrow">${reqStatus()}${bonusCard()}${schedHome()}</div>
+      ${viewed.length ? `<div class="col g16"><div class="sec-t">Вы смотрели</div>${ribbon(tiles(viewed), 'big')}</div>` : ''}
+      <div class="col g16"><div class="sec-t">Популярные услуги</div>${tiles(pop)}</div>` };
   }
   return { cls: 'home', body: `${hero}${reqStatus()}${bonusCard()}${cats}${near}${schedHome()}${seen}` };
 };
@@ -9347,7 +9369,7 @@ function fitPhone() {}
 fitPhone();
 document.documentElement.dataset.theme = S.theme;
 document.documentElement.dataset.style = 'bold';
-window.__z = { S, A, SCREENS, CATS, SERVICES, OFFERS, offerById, offersFor, svcBy, render, go, root, stackTo, startRequest, openWizard, ZP, calc, cfgOf, dk, fromKey, blockers };
+window.__z = { S, A, SCREENS, CATS, DIRS, SERVICES, OFFERS, offerById, offersFor, svcBy, render, go, root, stackTo, startRequest, openWizard, ZP, calc, cfgOf, dk, fromKey, blockers };
 render('new');
 
 /* ---------- защита от копирования (01.11, решение владельца) ----------
