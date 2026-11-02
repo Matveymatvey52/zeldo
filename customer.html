@@ -3441,7 +3441,7 @@ img { display: block; max-width: 100%; }
 
 /* экран */
 #screen { flex: 1; overflow-y: auto; overflow-x: hidden; position: relative; overscroll-behavior: contain; scrollbar-width: thin; }
-.page { padding: 12px 16px 24px; display: grid; gap: 16px; align-content: start; }
+.page { padding: 12px 16px 24px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-content: start; }  /* колонка = ширина экрана: длинная строка обрезается, а не распирает страницу (02.11, телефоны 360 px) */
 .page.tight { gap: 12px; }
 .back { display: inline-flex; align-items: center; gap: 6px; color: var(--act); font-size: 18px; font-weight: 500; line-height: 24px; justify-self: start; padding: 6px 0 0; }
 .h1 { font-size: 28px; line-height: 32px; font-weight: 800; letter-spacing: -0.01em; margin: 0; overflow-wrap: anywhere; }
@@ -3523,7 +3523,7 @@ img { display: block; max-width: 100%; }
 .btn .spin { width: 18px; height: 18px; border-radius: 50%; border: 2.5px solid rgba(255, 255, 255, 0.45); border-top-color: #fff; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .btns { display: grid; gap: 8px; }
-.btns.two { grid-template-columns: 1fr 1fr; }
+.btns.two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .why { color: var(--muted); }
 a.lnk, .lnk { color: var(--act); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
 
@@ -3680,6 +3680,14 @@ img.ph[data-k] { background-size: cover; background-position: center; background
 .tab { display: grid; justify-items: center; gap: 2px; color: #5B6577; font-size: 14px; line-height: 18px; font-weight: 500; padding: 4px 0; position: relative; letter-spacing: -0.02em; min-width: 0; }
 .tab.on { color: var(--brand); font-weight: 700; }
 .tab .tb { position: absolute; top: 0; left: calc(50% + 6px); min-width: 18px; height: 18px; border-radius: 9px; background: var(--brand); color: #fff; font-size: 12px; line-height: 18px; font-weight: 700; padding: 0 5px; border: 2px solid var(--card); box-sizing: content-box; }
+/* узкие телефоны (360–400 px): подписи меню не слипаются, значки шапки не налезают друг на друга */
+@media (max-width: 400px) {
+  .tab { font-size: 12px; letter-spacing: -0.01em; }
+  .hdr { padding: 0 2px 0 12px; }
+  .hdr .hbtn { width: 40px; }
+  .logo { margin-right: 6px; }
+  .btns.two .btn { padding: 0 10px; gap: 6px; font-size: 16px; }
+}
 
 
 /* календарь и время (лист 34) */
@@ -4183,6 +4191,9 @@ mark { background: none; color: var(--act); font-weight: 700; }
 .lc-f { display: flex !important; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; height: 26px; }
 .lc-f .pill { max-width: 85%; overflow: hidden; text-overflow: ellipsis; }
 .lc-f > svg { flex: none; color: var(--act); }
+/* телефон (02.11): фото карточки — квадрат слева, рядом название, цена и кто; подсказка и статус ниже на всю ширину */
+.phone[data-view="phone"] .lc.has-img .lc-img { float: left; width: 72px; height: 72px; margin-right: 12px; border-radius: 14px; overflow: hidden; background: var(--soft); }
+.phone[data-view="phone"] .lc.has-img .lc-m { clear: both; margin-top: 0; padding-top: 10px; height: 28px; }
 /* «Мои услуги» исполнителя: та же сетка, что у карточки услуги */
 .oc.my { display: block; width: 100%; padding: 12px; border-radius: 22px; }
 .oc.my::after { content: ""; display: table; clear: both; }
@@ -4624,8 +4635,9 @@ input, textarea, select { font-size: max(16px, 1em); }
 .cabin { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-content: start; margin: 0 auto; }
 .cabin:not(:has(.cgrid)):not(:has(.dhero)):not(:has(.cat)) { max-width: 1160px; }
 .page.cabh .cabin { max-width: none; }
-.page.cabh .card.c > .list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; }
-.page.cabh .card.c > .list > :nth-child(2) { border-top: 0; box-shadow: none; }
+/* две колонки пунктов — только на компьютере: на телефоне кабинет остаётся списком (02.11, «почему всё съехало») */
+.phone[data-view="desk"] .page.cabh .card.c > .list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; }
+.phone[data-view="desk"] .page.cabh .card.c > .list > :nth-child(2) { border-top: 0; box-shadow: none; }
 .phone[data-view="desk"] .cabmain .cgrid { grid-template-columns: repeat(auto-fill, minmax(500px, 1fr)); }
 .phone[data-view="desk"] .cabmain .cgrid.tiles { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
 .phone[data-view="desk"] .cabmain .cgrid.pcs { grid-template-columns: minmax(0, 1fr); }
@@ -8040,8 +8052,8 @@ SCREENS.c_home = () => {
   }
   return { cls: 'home', body: `${hero}${reqStatus()}${bonusCard()}${cats}${near}${schedHome()}${seen}` };
 };
-/* ---------- моё расписание заказчика (28.10): все записи по дням — что, когда, у кого и где ---------- */
-/* в расписании только записи на время: у заказов со сроком в поле времени стоит дата, их здесь нет */
+/* ---------- «Мои записи» заказчика (28.10; до 02.11 — «Моё расписание»): все записи по дням — что, когда, у кого и где ---------- */
+/* здесь только записи на время: у заказов со сроком в поле времени стоит дата, их здесь нет */
 const custBooked = () => S.orders.filter(o => o.cust && o.date && /^\d{1,2}:\d{2}$/.test(o.time || '') && o.status !== 'cancel');
 const bookEnd = o => tmin(o.time) + (o.dur || 60);
 const bookPlace = o => { const of = offerById(o.offer); return of ? placeText(of, (of.formats || [])[0], true) : ''; };
@@ -8051,7 +8063,7 @@ function nextBooking() {
 }
 function schedHome() {
   const n = nextBooking(); const cnt = custBooked().filter(o => o.status !== 'done' && o.date >= dk(0)).length;
-  return `<button class="card c entry" data-a="go" data-v="c_sched"><span class="ri">${ic('calok', 28, 1.8)}</span><span class="grow"><span class="h2" style="display:block">Моё расписание</span><span class="m">${n ? `Ближайшая: ${esc(when(n.date, n.time).toLowerCase())}<br>${esc(n.svc)}` : 'Записей пока нет'}</span></span>${cnt ? `<span class="cnt">${cnt}</span>` : ''}<span class="blue">${ic('arr', 22, 2)}</span></button>`;
+  return `<button class="card c entry" data-a="go" data-v="c_sched"><span class="ri">${ic('calok', 28, 1.8)}</span><span class="grow"><span class="h2" style="display:block">Мои записи</span><span class="m">${n ? `Ближайшая: ${esc(when(n.date, n.time).toLowerCase())}<br>${esc(n.svc)}` : 'Записей пока нет'}</span></span>${cnt ? `<span class="cnt">${cnt}</span>` : ''}<span class="blue">${ic('arr', 22, 2)}</span></button>`;
 }
 function bookBlock(o) {
   return `<button class="card c sbk" data-a="go" data-v="${gv('order', { id: o.id })}"><span class="sbk-h"><span class="sbk-t">${o.time}–${tstr(bookEnd(o))}</span>${orderPill(o)}</span><span class="h2">${esc(o.svc)}</span>${o.sub ? `<span class="m">Абонемент: визит ${o.sub.used + 1} из ${o.sub.total}</span>` : ''}<span class="m">${esc(exName(o.ex))}</span>${bookPlace(o) ? `<span class="m">${esc(bookPlace(o))}</span>` : ''}</button>`;
@@ -8074,7 +8086,7 @@ SCREENS.c_sched = () => {
     ${day.length ? list : emptyBox('В этот день записей нет', 'День свободен. Найдите услугу и выберите удобное время.', 'Найти услугу', 'openSearch', '')}`;
   const weekView = card(`<div class="list">${Array.from({ length: 7 }, (_, i) => { const d = dk(i); const l = all.filter(o => o.date === d).sort((a, b) => tmin(a.time) - tmin(b.time)); return rl(dayName(d), l.length ? l.map(o => `${o.time} ${o.svc.toLowerCase()}`).join(', ') : 'свободно', 'cSchedPick', d); }).join('')}</div>`, 'c');
   return {
-    title: 'Моё расписание',
+    title: 'Мои записи',
     body: `${seg('cSchedView', [['day', 'День'], ['week', 'Неделя']], view)}
       <div class="info"><span class="m">Все ваши записи: что, когда, у кого и где. Перенести или отменить запись можно в самом заказе.</span></div>
       ${view === 'day' ? dayView : weekView}`,
@@ -8717,7 +8729,7 @@ function cabNav() {
   ] : [
     it('c_home', 'home', 'Главная', 0, 'blue'), it('c_orders', 'orders', 'Заказы', actOrders('cust'), 'green', { on: n === 'c_orders' && !reqTab }),
     it('req', 'send', 'Мои заявки', homeNew('cust'), 'violet', { act: 'myReqs', on: reqTab }), it('c_msgs', 'chat', 'Сообщения', unreadMsgs('cust'), 'teal'),
-    it('c_fav', 'heart', 'Избранное', S.favs.length, 'pink', { num: true }), it('c_sched', 'calok', 'Моё расписание', 0, 'orange'), it('c_aboutme', 'star', 'Отзывы обо мне', 0, 'orange'),
+    it('c_fav', 'heart', 'Избранное', S.favs.length, 'pink', { num: true }), it('c_sched', 'calok', 'Мои записи', 0, 'orange'), it('c_aboutme', 'star', 'Отзывы обо мне', 0, 'orange'),
   ];
   return `<div class="cabme"><span class="ava lg">А</span><span class="grow"><b class="t18">Алексей Смирнов</b><span class="m">${ex ? 'Исполнитель · ★ 4,9 · 214 отзывов' : `Заказчик${cr ? ` · ★ ${String(cr.avg).replace('.', ',')} от исполнителей` : ''}`}</span></span></div>
     <button class="cabsw" data-a="setRole" data-v="${ex ? 'cust' : 'exec'}">${ic('retry', 18, 2.2)}Перейти в роль «${ex ? 'Заказчик' : 'Исполнитель'}»</button>
