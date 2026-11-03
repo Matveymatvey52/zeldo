@@ -5068,6 +5068,23 @@ function gridCards(root) {
 }
 let lastView = VIEW();
 window.addEventListener('resize', () => { const v = VIEW(); if (v !== lastView) { lastView = v; render(); } });
+/* компьютер: у края прокрутки содержимое чуть-чуть уходит дальше и мягко возвращается (03.11, «чуть-чуть совсем»).
+   Прокрутку не перехватываем: она родная, а у края сдвигаем на несколько пикселей только то, что листается; шапка и меню стоят */
+const EDGE = { max: 10, box: null, dir: 0, acc: 0, t: 0 };
+const edgeOn = typeof matchMedia === 'function' ? matchMedia('(hover: hover) and (min-width: 768px) and (prefers-reduced-motion: no-preference)') : { matches: false };  /* нет matchMedia — живём без упора */
+const EDGE_BOX = '.msgr-b, .msgr-list, .cabnav, .cabmain, #screen';
+function edgeSet(box, y, ms) { for (const c of box.children) { c.style.transition = `transform ${ms}ms cubic-bezier(0.2, 0.8, 0.2, 1)`; c.style.transform = y ? `translate3d(0, ${y.toFixed(1)}px, 0)` : ''; } }
+window.addEventListener('wheel', e => {
+  if (!edgeOn.matches || !e.deltaY || Math.abs(e.deltaX) > Math.abs(e.deltaY) || !e.target.closest) return;
+  const box = e.target.closest(EDGE_BOX); if (!box || box.scrollHeight <= box.clientHeight + 1) return;
+  const dir = e.deltaY > 0 ? 1 : -1;
+  const atEdge = dir > 0 ? box.scrollTop + box.clientHeight >= box.scrollHeight - 1 : box.scrollTop <= 0;
+  if (!atEdge) return;
+  if (EDGE.box !== box || EDGE.dir !== dir) { if (EDGE.box && EDGE.box !== box) edgeSet(EDGE.box, 0, 0); EDGE.box = box; EDGE.dir = dir; EDGE.acc = 0; }
+  EDGE.acc += Math.abs(e.deltaY);
+  edgeSet(box, -dir * EDGE.max * (1 - Math.exp(-EDGE.acc / 220)), 90);  /* как резинка: чем сильнее тянешь, тем меньше прибавка, не больше 10 px */
+  clearTimeout(EDGE.t); EDGE.t = setTimeout(() => { edgeSet(box, 0, 420); EDGE.box = null; EDGE.acc = 0; }, 140);
+}, { passive: true });
 
 /* фото на весь экран: нажали на обложку услуги — открылось крупно; закрывается нажатием в любом месте или Escape */
 const lboxHtml = k => `<div class="lbox" data-a="closeLbox" role="dialog" aria-modal="true" aria-label="Фото"><img src="${PHB[k] ? `img/L/${PHB[k]}.jpg` : PH[k].src}" data-k="${esc(k)}" alt="" style="background-image:url('${PH[k].src}')"><button class="lbox-x" data-a="closeLbox" aria-label="Закрыть фото">${ic('x', 24, 2.4)}</button></div>`;
