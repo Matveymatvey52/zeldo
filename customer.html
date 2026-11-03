@@ -3777,6 +3777,15 @@ img.ph[data-k] { background-size: cover; background-position: center; background
 .compose input { flex: 1; border: 0; outline: 0; background: none; font-size: 18px; min-width: 0; padding: 12px 0; }
 .compose button { width: 44px; height: 44px; display: grid; place-items: center; color: var(--act); border-radius: 12px; }
 .ctx { display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: var(--card); box-shadow: 0 1px 0 var(--line); }
+/* договорились в переписке (03.11): кнопка сделки стоит первой среди быстрых ответов, старые предложения приглушены */
+.chip.deal { background: var(--act); color: #fff; box-shadow: none; font-weight: 600; }
+.chip.deal:hover { background: var(--act-press); }
+.msgcard.deal { width: min(100%, 440px); max-width: 100%; }
+.msgcard.dim { opacity: 0.62; }
+.msgcard .btns.two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.incstrip { display: grid; gap: 10px; padding: 12px 14px; border-radius: 16px; background: var(--warn-soft); }
+.incstrip .grow { display: grid; gap: 2px; min-width: 0; }
+.incstrip .btns { display: flex; flex-wrap: wrap; gap: 8px; }
 
 /* шаги мастера */
 .wsteps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
@@ -4990,7 +4999,7 @@ const LAY = {
   c_offer: 'aside',
   c_orders: 'cab', c_reqview: 'cab', order: 'cab', c_fav: 'cab', c_cab: 'cab', c_aboutme: 'cab', c_sched: 'cab', c_msgs: 'cab', e_msgs: 'cab', chat: 'cab', notifs: 'cab', notifset: 'cab', settings: 'cab', privacy: 'cab',
   e_home: 'cab', e_feed: 'cab', e_offers: 'cab', e_incoming: 'cab', e_orders: 'cab', e_fav: 'cab', e_cab: 'cab', e_services: 'cab', e_schedule: 'cab',
-  e_request: 'cab', e_task: 'cab', e_service: 'cab', e_work: 'cab', e_schedset: 'cab', e_promo: 'cab', e_portfolio: 'cab', e_promos: 'cab', e_money: 'cab', e_package: 'cab', e_profile: 'cab',
+  e_request: 'cab', deal_offer: 'cab', e_task: 'cab', e_service: 'cab', e_work: 'cab', e_schedset: 'cab', e_promo: 'cab', e_portfolio: 'cab', e_promos: 'cab', e_money: 'cab', e_package: 'cab', e_profile: 'cab',
 };
 /* разделы: внизу на телефоне и планшете, в шапке на компьютере */
 function navItems(cls) {
@@ -5702,6 +5711,16 @@ S.orders = [
 
 /* переписки: та же переписка становится частью заказа */
 S.chats = [
+  /* 03.11: договорились в переписке — заказ из неё же (правило R-18). У исполнителя вопрос без заявки, у заказчика — пришедшее предложение */
+  { id: 'ch_svetlana', role: 'exec', with: 'Светлана', offer: 'my_season', unread: 1, msgs: [
+    { from: 'them', t: 'Здравствуйте! Нужно переобуться на зимнюю резину, R16, колёса на дисках. Можно на этой неделе, лучше днём? Сколько выйдет?', at: '12:40' },
+  ] },
+  { id: 'ch_chisto', role: 'cust', with: 'Клининг «Чисто и точка»', ex: 'chisto', offer: 'clean1', unread: 1, msgs: [
+    { from: 'sys', t: 'Переписка по услуге «Генеральная уборка квартиры». Если договоритесь, она станет частью заказа.' },
+    { from: 'me', t: 'Здравствуйте! Нужна генеральная уборка двухкомнатной квартиры, 58 м², санузел один. Дома кот. Когда сможете?', at: '11:20' },
+    { from: 'them', t: 'Здравствуйте! Посчитали по вашей квартире. Отправляем предложение: примете его, и это станет заказом.', at: '11:32' },
+    { from: 'them', kind: 'version', at: '11:32', v: { offer: 'clean1', title: 'Генеральная уборка квартиры', what: '2 комнаты, 58 м² · дома кот', price: 8300, dur: 300, inc: ['2 комнаты, стандартная уборка', 'Дома животное'], lines: [['2 комнаты, стандартная уборка', 7500], ['Дома животное: шерсть с мебели и пола', 800]], date: dk(4), time: '10:00', ver: 1, st: 'new', until: dk(2) } },
+  ] },
   { id: 'ch_oleg', role: 'exec', with: 'Олег', offer: 'my_tire', order: 1040, unread: 0, msgs: [
     { from: 'them', t: 'Добрый день! Успеете до 15:00? У меня встреча.', at: '09:12' },
     { from: 'me', t: 'Да, работы на 40 минут. Приезжайте к 14:00.', at: '09:15' },
@@ -6987,8 +7006,8 @@ Object.assign(A, {
   sendBrief(id) {
     const o = offerById(id); const b = S.brief[id];
     const budget = b.btype === 'deal' ? 0 : b.budget; const budgetFrom = b.btype === 'range' ? b.budgetFrom : 0;
-    const ch = ensureChat('cust', o);
-    postMsg(ch, 'me', { kind: 'brief', items: askOn(o.svc) ? askWhat(o.svc, b) : Object.values(b.sel).flat(), photos: b.photos, when: whenText(b), text: b.text, svc: o.svc, budget, budgetFrom });
+    const ch = ensureChat('cust', o); const txt = maskContacts(b.text); if (txt.hit) contactsHidden();
+    postMsg(ch, 'me', { kind: 'brief', items: askOn(o.svc) ? askWhat(o.svc, b) : Object.values(b.sel).flat(), photos: b.photos, when: whenText(b), text: txt.t, svc: o.svc, budget, budgetFrom });
     postMsg(ch, 'sys', { t: 'Запрос у исполнителя. Он ответит здесь же.' });
     S.brief[id] = null;
     later(1800, () => {
@@ -6999,10 +7018,11 @@ Object.assign(A, {
         else t = `Посмотрел задачу. За ${budText(budget, budgetFrom)} не получится, могу за ${rub(rp.price)}.`;
       }
       postMsg(ch, 'them', { t });
-      postMsg(ch, 'them', { kind: 'version', v: { offer: o.id, title: o.title, price, dur: rp.dur, inc: rp.inc, stages: rp.stages ? rp.stages.map(x => Object.assign({}, x)) : null, days: rp.days || 0, date: b.when === 'date' && b.day ? b.day : dk(1), time: b.part === 'Вечером' ? '18:00' : b.part === 'Днём' ? '13:00' : '10:00', ver: 1, st: 'new' } });
+      sendVersion(ch, 'them', { offer: o.id, title: o.title, price, dur: rp.dur, inc: rp.inc, stages: rp.stages ? rp.stages.map(x => Object.assign({}, x)) : null, days: rp.days || 0, date: b.when === 'date' && b.day ? b.day : dk(1), time: b.part === 'Вечером' ? '18:00' : b.part === 'Днём' ? '13:00' : '10:00' });
       notify('cust', 'Пришло предложение', `${exName(o.ex)}: ${rub(price)}`, gv('chat', { id: ch.id }));
     });
-    replace('chat', { id: ch.id });
+    /* запрос отправили из переписки — возвращаемся в неё, а не открываем её второй раз */
+    if (S.briefFromChat === ch.id) { S.briefFromChat = null; back(); } else replace('chat', { id: ch.id });
   },
 });
 
@@ -7258,6 +7278,23 @@ SCREENS.e_incoming = () => {
   else body = list.map(i => { const [t, k, icn] = INC_KIND[i.kind]; return listCard({ img: offerById(i.offer) ? offerById(i.offer).ph : '', to: gv('e_request', { id: i.id }), t: esc(i.svc), ps: `Заказчик: ${esc(i.client)}${clientRating(i.client) ? ` · ★${NB}${String(clientRating(i.client).avg).replace('.', ',')}` : ''}`, s: esc(i.what), m: i.date ? when(i.date, i.time) : 'Время не указано', pl: pill(t, k, icn) }); }).join('');
   return { title: 'Поступившие заявки', body: body + (done.length && st === 'normal' ? `<div class="h2">Разобранные</div>${done.map(i => card(`<div class="row"><span class="grow">${esc(i.svc)} · ${esc(i.client)}</span>${pill('Ответили', 'ok', 'check')}</div>`, 'c')).join('')}` : '') };
 };
+/* подтвердил заявку — она сразу становится заказом с номером, переписка с заказчиком привязывается к нему (03.11, Максим) */
+function confirmInc(id) {
+  const i = S.incoming.find(x => x.id === id); i.status = 'ok';
+  if (i.order) { const ord = orderById(i.order); ord.status = 'confirmed'; const ch = chatById(ord.echat); if (ch) postMsg(ch, 'me', { t: 'Подтверждаю, жду вас. Можно оплачивать.' }); notify('cust', 'Исполнитель подтвердил заказ', `${ord.svc} · можно оплатить`, gv('order', { id: ord.id })); }
+  else {
+    const ch = i.chat && chatById(i.chat); const of = offerById(i.offer);
+    const ord = mkOrder({ offer: i.offer, svc: i.svc, ex: 'alex', client: i.client, what: i.what, date: i.date, time: i.time, dur: i.dur || 60, total: i.total, lines: [[`${i.svc}: ${i.what}`, i.total]], status: 'confirmed', fmt: of ? of.formats[0] : 'point', echat: ch ? ch.id : null, note: i.note });
+    i.order = ord.id;
+    if (ch) { ch.order = ord.id; postMsg(ch, 'me', { t: 'Подтверждаю, жду вас. Можно оплачивать.' }); postMsg(ch, 'sys', { t: `Вы подтвердили заявку. Это заказ № ${ord.id}: вся переписка сохранена в нём. Ждём оплату.` }); }
+    later(3500, () => {
+      if (ord.status !== 'confirmed') return; ord.status = 'paid';
+      if (ch) postMsg(ch, 'sys', { t: `Заказ № ${ord.id} оплачен. Деньги на защищённом счёте до приёмки работы.`, ok: true });
+      notify('exec', `Заказ № ${ord.id} оплачен`, `${i.client} · ${i.svc}`, gv('order', { id: ord.id })); toast(`Заказ № ${ord.id} оплачен`);
+    });
+  }
+  toast('Заказ подтверждён. Заказчик может оплатить');
+}
 const REPLY_INC = ['Снятие и установка колеса', 'Ремонт прокола грибком', 'Ремонт прокола жгутом', 'Балансировка', 'Проверка давления'];
 const Q_ANS = ['Да, сделаем R20 с RunFlat: 1 500 ₽ за колесо. Записать на четверг?', 'Такие колёса не берём: нужен другой станок. Подскажу, куда обратиться.'];
 SCREENS.e_request = p => {
@@ -7283,30 +7320,25 @@ SCREENS.e_request = p => {
   };
 };
 Object.assign(A, {
-  incConfirm(id) {
-    const i = S.incoming.find(x => x.id === id); i.status = 'ok';
-    if (i.order) { const ord = orderById(i.order); ord.status = 'confirmed'; const ch = chatById(ord.echat); if (ch) postMsg(ch, 'me', { t: 'Подтверждаю, жду вас. Можно оплачивать.' }); notify('cust', 'Исполнитель подтвердил заказ', `${ord.svc} · можно оплатить`, gv('order', { id: ord.id })); }
-    else if (i.chat) postMsg(chatById(i.chat), 'me', { t: 'Подтверждаю, жду вас. Можно оплачивать.' });
-    toast('Заказ подтверждён. Заказчик может оплатить'); back();
-  },
+  incConfirm(id) { confirmInc(id); back(); },
+  incConfirmChat(id) { confirmInc(id); render(); },
   incOtherTime(id) { const i = S.incoming.find(x => x.id === id); S.altTime = { id, day: i.date || dk(1), slot: null }; render(); },
   incAltCancel() { S.altTime = null; render(); },
-  incTime(id) { const i = S.incoming.find(x => x.id === id); const a = S.altTime; i.status = 'ok'; if (i.chat) postMsg(chatById(i.chat), 'me', { t: `Могу ${when(a.day, a.slot).toLowerCase()}. Подойдёт?` }); S.altTime = null; toast('Предложили другое время'); back(); },
+  incTime(id) {
+    const i = S.incoming.find(x => x.id === id); const a = S.altTime; const ch = i.chat && chatById(i.chat); i.status = 'ok';
+    if (ch && !i.order) {
+      /* другое время — это новые условия: уходят предложением, заказчик примет его, и переписка станет заказом */
+      postMsg(ch, 'me', { t: `Могу ${when(a.day, a.slot).toLowerCase()}. Отправляю предложение с этим временем.` });
+      simCustDeal(ch, sendVersion(ch, 'me', { offer: i.offer, title: offerById(i.offer).title, svc: i.svc, what: i.what, price: i.total, dur: i.dur || 60, inc: [i.what], date: a.day, time: a.slot }));
+    } else if (ch) postMsg(ch, 'me', { t: `Могу ${when(a.day, a.slot).toLowerCase()}. Подойдёт?` });
+    S.altTime = null; toast('Предложили другое время'); back();
+  },
   replyInc(v) { togIn(S.replyDraft.inc, v); render(); },
   replyPrice(v) { S.replyDraft.price = clamp(S.replyDraft.price + Number(v.split('|')[1]) * 100, 100, 50000); render(); },
   replySend(id) {
     const i = S.incoming.find(x => x.id === id); const rd = S.replyDraft; i.status = 'ok';
     const ch = chatById(i.chat);
-    postMsg(ch, 'me', { kind: 'version', v: { offer: 'my_tire', title: i.svc, price: rd.price, dur: 40, inc: rd.inc.slice(), date: rd.day, time: rd.slot, ver: 1, st: 'new' } });
-    later(3200, () => {
-      const vm = ch.msgs.find(m => m.kind === 'version' && m.v.st === 'new'); if (vm) vm.v.st = 'ok';
-      const ord = mkOrder({ offer: 'my_tire', svc: i.svc, ex: 'alex', client: i.client, what: i.what, date: rd.day, time: rd.slot, dur: 40, total: rd.price, lines: [[i.svc, rd.price]], status: 'paid', fmt: 'point', echat: ch.id });
-      ch.order = ord.id;
-      postMsg(ch, 'them', { t: 'Согласен, оплатил.', at: nowTime() });
-      postMsg(ch, 'sys', { t: `Заказ № ${ord.id} оплачен. Вся переписка сохранена в заказе.`, ok: true });
-      notify('exec', `Заказ № ${ord.id} оплачен`, `${i.client} · ${i.svc}`, gv('order', { id: ord.id }));
-      toast(`${i.client} согласился и оплатил заказ № ${ord.id}`);
-    });
+    simCustDeal(ch, sendVersion(ch, 'me', { offer: 'my_tire', title: i.svc, svc: i.svc, what: i.what, price: rd.price, dur: 40, inc: rd.inc.slice(), date: rd.day, time: rd.slot }));
     S.replyDraft = null; replace('chat', { id: ch.id });
   },
   qAnswer(v) { const [id, k] = v.split('|'); const i = S.incoming.find(x => x.id === id); i.status = 'ok'; let ch = i.chat && chatById(i.chat); if (!ch) { ch = { id: uid('ch'), role: 'exec', with: i.client, offer: 'my_tire', unread: 0, msgs: [{ from: 'them', t: i.text, at: '12:20' }] }; S.chats.unshift(ch); i.chat = ch.id; } postMsg(ch, 'me', { t: Q_ANS[k] }); replace('chat', { id: ch.id }); },
@@ -8844,19 +8876,27 @@ A.roleTab = v => {
 const QUICK = { cust: ['Когда сможете?', 'Сколько это будет стоить?', 'Можно фото ваших работ?', 'Спасибо!'], exec: ['Добрый день! Да, сделаю', 'Пришлите фото, пожалуйста', `Могу ${dayName(dk(1)).toLowerCase()} в 10:00`, 'Спасибо!'] };
 const chatFilter = role => { const q = norm(S.chatQ || ''); return chatsFor(role).filter(c => !q || norm(c.with + ' ' + c.msgs.map(m => m.t || '').join(' ')).includes(q)); };
 /* последнее сообщение диалога и подпись к нему в списке */
-const lastOf = c => { const last = [...c.msgs].reverse().find(m => m.from !== 'sys') || c.msgs[c.msgs.length - 1] || { t: '' }; return [last, last.kind === 'version' ? `Предложение: ${rub(last.v.price)}` : last.kind === 'brief' ? 'Запрос с условиями' : last.kind === 'file' ? last.name : last.t]; };
+const lastOf = c => { const last = [...c.msgs].reverse().find(m => m.from !== 'sys') || c.msgs[c.msgs.length - 1] || { t: '' }; return [last, last.kind === 'version' ? `Предложение: ${rub(last.v.price)}` : last.kind === 'ask' ? `Просьба изменить условия: ${rub(last.a.price)}` : last.kind === 'brief' ? 'Запрос с условиями' : last.kind === 'file' ? last.name : last.t]; };
+/* договорились в переписке (03.11, Максим): предложение уходит карточкой прямо в диалог — примут, и эта же переписка становится заказом с номером.
+   Исполнитель — «Предложить заказ», заказчик — «Предложить свои условия». Правило R-18 в таблице */
+const canDeal = ch => !ch.order && ch.with !== 'Администратор ZELDO' && (ch.role === 'exec' || !!(offerById(ch.offer) && offerById(ch.offer).ex !== 'alex'));
+const dealChip = ch => !canDeal(ch) ? '' : ch.role === 'exec' ? `<button class="chip deal" data-a="dealOffer" data-v="${ch.id}">${ic('tag', 18, 2.2)} Предложить заказ</button>` : `<button class="chip deal" data-a="dealBrief" data-v="${ch.id}">${ic('tag', 18, 2.2)} Предложить свои условия</button>`;
+/* контакты в переписке скрыты: телефоны, почта, ссылки и мессенджеры собеседнику не уходят (решение встречи 20.10, правило R-19) */
+const CONTACT_RE = [/(https?:\/\/|www\.|t\.me\/)\S*/gi, /[\w.\-]+@[\w\-]+\.[a-zа-я]{2,}/gi, /@[a-z0-9_.]{3,}/gi, /\b[\w\-]+\.(ru|com|рф|net|org|me|io)\b\S*/gi, /(\+7|\b8)[\s\-()]*\d{3}[\s\-()]*\d{3}[\s\-]*\d{2}[\s\-]*\d{2}|\d{10,}/g, /(телеграм[а-яё]*|telegram|ватсап[а-яё]*|whatsapp|вайбер[а-яё]*|viber|инстаграм[а-яё]*|instagram)/gi];
+function maskContacts(t) { const src = String(t || ''); const out = CONTACT_RE.reduce((s, re) => s.replace(re, '•••'), src); return { t: out, hit: out !== src }; }
+const contactsHidden = () => toast('Контакты скрыты: номера, почта и ссылки в переписке не передаются. Звоните через ZELDO', 'info');
 /* компьютер (01.11): одно окно мессенджера во всю высоту — диалоги слева, переписка справа, поле ввода внизу */
 const chatRow = (c, curId) => { const [last, lt] = lastOf(c); const on = c.id === curId;
   return `<button class="mrow ${on ? 'on' : ''}" data-a="openChat" data-v="${c.id}" ${on ? 'aria-current="true"' : ''}><span class="ava">${letter(c.with)}</span><span class="grow"><span class="mrow-h"><b>${esc(c.with)}</b><small>${esc(last.at || '')}</small></span><span class="mrow-s">${esc(lt || '')}</span>${c.order ? `<span class="mrow-o">Заказ № ${c.order}</span>` : ''}</span>${c.unread ? `<span class="cnt">${c.unread}</span>` : ''}</button>`; };
 const chatRows = (role, curId) => { const l = chatFilter(role); return l.length ? l.map(c => chatRow(c, curId)).join('') : '<div class="msgr-none m">Диалогов нет</div>'; };
-const composerHtml = ch => `<div class="composer"><div class="chips scroll" style="margin:0 -12px;padding:0 12px 2px">${QUICK[ch.role].map(t => `<button class="chip" data-a="quickSend" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</div>
+const composerHtml = ch => `<div class="composer"><div class="chips scroll" style="margin:0 -12px;padding:0 12px 2px">${dealChip(ch)}${QUICK[ch.role].map(t => `<button class="chip" data-a="quickSend" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</div>
       <div class="compose"><label class="iconbtn" style="color:var(--act);cursor:pointer" aria-label="Прикрепить файл">${ic('plus', 24, 2.2)}<input type="file" data-ch="chatFile" hidden></label><input id="msgin" data-in="chatText" data-enter="chatSend" value="${esc(S.chatDraft || '')}" placeholder="Напишите сообщение" autocomplete="off"><button data-a="chatSend" aria-label="Отправить">${ic('send', 22, 2)}</button></div></div>`;
 function chatPane(ch) {
   const o = offerById(ch.offer); const ord = ch.order && orderById(ch.order);
   const sub = ord ? `${esc(ord.svc)} · заказ № ${ord.id}` : o ? `По услуге «${esc(o.title)}»` : '';
   const act = ord ? btn('Открыть заказ', 'go', gv('order', { id: ord.id }), 'soft sm') : o && ch.role === 'cust' ? btn('Карточка услуги', 'openOffer', o.id, 'soft sm') : '';
   return `<div class="msgr-r"><div class="msgr-h"><span class="ava">${letter(ch.with)}</span><span class="grow"><b class="t18">${esc(ch.with)}</b><span class="m">${sub}</span></span>${ord ? orderPill(ord) : ''}${act}<button class="iconbtn" data-a="callAsk" data-v="${esc(ch.ex || '')}" aria-label="Позвонить через ZELDO" title="Позвонить через ZELDO">${ic('phone', 22, 2)}</button></div>
-    <div class="msgr-b"><div class="chat">${ch.msgs.map((m, i) => msgHtml(ch, m, i)).join('')}</div></div><div class="msgr-f">${composerHtml(ch)}</div></div>`;
+    <div class="msgr-b"><div class="chat">${incStrip(ch)}${ch.msgs.map((m, i) => msgHtml(ch, m, i)).join('')}</div></div><div class="msgr-f">${composerHtml(ch)}</div></div>`;
 }
 function messenger(role, ch) {
   const right = ch ? chatPane(ch) : `<div class="msgr-r msgr-empty"><span class="msgr-ei">${ic('chat', 40, 1.6)}</span><b class="t18">Выберите диалог</b><span class="m">Слева — все ваши переписки. Нажмите на любую, и она откроется здесь.</span></div>`;
@@ -8880,6 +8920,13 @@ IN.chatQ = (v, role) => { S.chatQ = v; const el = $('#chatlist'); if (el) el.inn
 A.openChat = id => { if (cur().n === 'chat') replace('chat', { id }); else go('chat', { id }); };
 SCREENS.c_msgs = () => chatListScreen('cust');
 SCREENS.e_msgs = () => chatListScreen('exec');
+/* у исполнителя: если диалог начался с заявки, она видна сверху переписки, и её можно подтвердить прямо здесь */
+function incStrip(ch) {
+  const i = ch.role === 'exec' && ch.inc && S.incoming.find(x => x.id === ch.inc);
+  if (!i || i.status !== 'new') return '';
+  const t = i.kind === 'confirm' ? `Заявка: ${when(i.date, i.time).toLowerCase()} · ${rub(i.total)}` : `Запрос${i.budget ? ` · цена заказчика ${budText(i.budget, i.budgetFrom)}` : ''}`;
+  return `<div class="incstrip"><span class="grow"><b>${esc(i.svc)}</b><span class="m">${t}</span></span><span class="btns">${i.kind === 'confirm' ? btn('Подтвердить', 'incConfirmChat', i.id, 'sm') : ''}${btn(i.kind === 'confirm' ? 'Открыть заявку' : 'Ответить на запрос', 'go', gv('e_request', { id: i.id }), 'soft sm')}</span></div>`;
+}
 function msgHtml(ch, m, i) {
   if (m.from === 'sys') return `<div class="sysmsg ${m.ok ? 'ok' : ''}">${esc(m.t)}</div>`;
   const me = m.from === 'me';
@@ -8887,14 +8934,27 @@ function msgHtml(ch, m, i) {
   if (m.kind === 'brief') return `<div class="msgcard ${me ? 'me' : ''}"><b class="t18">Запрос: ${esc(m.svc)}</b>${m.items.length ? `<div class="chips">${m.items.map(x => `<span class="pill grey">${esc(x)}</span>`).join('')}</div>` : ''}${m.photos ? `<div class="thumbs">${Array.from({ length: m.photos }, () => `<span class="thumb">${photo(offerById(ch.offer).ph)}</span>`).join('')}</div>` : ''}<div class="m">Когда удобно: ${esc(m.when)}</div>${m.budget ? `<div class="sumline"><span>${me ? 'Ваша цена' : 'Цена заказчика'}</span><b>${budText(m.budget, m.budgetFrom)}</b></div>` : ''}${m.text ? `<div>«${esc(m.text)}»</div>` : ''}<span class="m">${esc(m.at)}</span></div>`;
   if (m.kind === 'order') { const o = orderById(m.order); return `<div class="msgcard ${me ? 'me' : ''}"><b class="t18">Заказ № ${m.order}</b><div>${esc(o.svc)}: ${esc(o.what)}</div>${o.date ? `<div class="m">${when(o.date, o.time)}</div>` : ''}<div class="row">${orderPill(o)}<b class="num">${rub(o.total)}</b></div>${goBtn('Открыть заказ', gv('order', { id: o.id }))}</div>`; }
   if (m.kind === 'version') {
-    const v = m.v; const custView = ch.role === 'cust';
-    return `<div class="msgcard ${me ? 'me' : ''}"><div class="row"><b class="t18 grow">Предложение</b>${v.st === 'ok' ? pill('Принято', 'ok', 'check') : pill('Ждёт ответа', 'warn', 'clock')}</div>
-      <div class="sb">${esc(v.title)}</div>${v.lines ? sumLines(v.lines.map(([a, b]) => [esc(a), rub(b)])) : bullets(v.inc)}
-      ${v.matNote ? `<div class="m">${esc(v.matNote)}</div>` : ''}
+    const v = m.v; const custView = ch.role === 'cust'; const live = v.st === 'new'; const gone = v.st === 'old' || v.st === 'no';
+    const st = { new: pill('Ждёт ответа', 'warn', 'clock'), ok: pill('Принято', 'ok', 'check'), old: pill('Заменено новым', 'grey'), no: pill('Отказ', 'grey') }[v.st] || '';
+    const body = gone ? sumLines([['Итого', rub(v.price)]]) : `${v.lines ? sumLines(v.lines.map(([a, b]) => [esc(a), rub(b)])) : bullets(v.inc)}
+      ${v.matNote ? `<div class="m">${esc(v.matNote)}</div>` : ''}${v.note ? `<div>«${esc(v.note)}»</div>` : ''}
       ${v.stages ? `<div class="m">Оплата по этапам: платите за текущий этап, деньги уходят бригаде после приёмки.</div>${sumLines(v.stages.map((x, k) => [`${k + 1}. ${esc(x.name)} · ${pn(x.days, 'день', 'дня', 'дней')}`, rub(x.price)]))}` : ''}
-      ${sumLines([[v.stages ? 'Начало' : 'Когда', when(v.date, v.time)], v.days ? ['Срок', pn(v.days, 'день', 'дня', 'дней')] : ['Займёт', mins(v.dur)], ['Итого', rub(v.price)]])}
-      ${custView && v.st === 'new' ? `<div class="btns two">${btn('Обсудить', 'focusComposer', '', 'soft')}${btn('Согласиться', 'acceptVersion', `${ch.id}|${i}`)}</div>` : ''}
+      ${sumLines([[v.stages ? 'Начало' : 'Когда', when(v.date, v.time)], v.days ? ['Срок', pn(v.days, 'день', 'дня', 'дней')] : ['Займёт', mins(v.dur)], ['Итого', rub(v.price)]])}`;
+    return `<div class="msgcard deal ${me ? 'me' : ''} ${gone ? 'dim' : ''}"><div class="row"><b class="t18 grow">Предложение${v.ver > 1 ? ' ' + v.ver : ''}</b>${st}</div>
+      <div class="sb">${esc(v.title)}</div>${body}
+      ${live && v.until ? `<span class="m">Действует до ${dayName(v.until).toLowerCase()} включительно. Цена и время войдут в заказ и больше не изменятся.</span>` : ''}
+      ${custView && live ? `${btn(v.stages ? 'Принять и оплатить первый этап' : `Принять и оплатить ${rub(v.price)}`, 'acceptVersion', `${ch.id}|${i}`, 'block')}${btn('Изменить условия', 'verAsk', `${ch.id}|${i}`, 'soft block')}${btn('Отказаться', 'verNo', `${ch.id}|${i}`, 'text block')}` : ''}
+      ${!custView && live ? '<span class="m">Заказчик примет предложение — и переписка станет заказом с номером.</span>' : ''}
       ${v.order ? goBtn(`Заказ № ${v.order}`, gv('order', { id: v.order })) : ''}
+      <span class="m">${esc(m.at)}</span></div>`;
+  }
+  if (m.kind === 'ask') {
+    const a = m.a; const rows = [];
+    if (a.price !== a.was.price) rows.push(['Цена', `${rub(a.was.price)} → ${rub(a.price)}`]);
+    if (a.date !== a.was.date || a.time !== a.was.time) rows.push(['Когда', `${when(a.date, a.time)}`]);
+    return `<div class="msgcard deal ${me ? 'me' : ''}"><div class="row"><b class="t18 grow">Просьба изменить условия</b>${a.st === 'new' ? pill('Ждёт ответа', 'warn', 'clock') : pill('Ответили', 'ok', 'check')}</div>
+      <span class="m">К предложению ${a.ver}</span>${sumLines(rows)}${a.text ? `<div>«${esc(a.text)}»</div>` : ''}
+      ${ch.role === 'exec' && a.st === 'new' ? `<div class="btns two">${btn('Своё предложение', 'askOwn', `${ch.id}|${i}`, 'soft')}${btn('Согласиться', 'askAgree', `${ch.id}|${i}`)}</div>` : ''}
       <span class="m">${esc(m.at)}</span></div>`;
   }
   return `<div class="bub ${me ? 'me' : ''}">${esc(m.t)}<span class="tm">${esc(m.at || '')}</span></div>`;
@@ -8907,19 +8967,140 @@ SCREENS.chat = p => {
   const call = `<div style="padding:8px 16px 0">${btn(`${ic('phone', 20)} Позвонить через ZELDO`, 'callAsk', ch.ex || '', 'text block')}</div>`;
   return {
     raw: true, title: esc(ch.with), cls: 'msgp', deskBody: messenger(ch.role, ch), deskBar: '', deskBare: true,
-    body: `${ctx}${call}<div class="chat">${ch.msgs.map((m, i) => msgHtml(ch, m, i)).join('')}</div>`,
+    body: `${ctx}${call}<div class="chat">${incStrip(ch)}${ch.msgs.map((m, i) => msgHtml(ch, m, i)).join('')}</div>`,
     bar: composerHtml(ch),
     after: el => { el.scrollTop = el.scrollHeight; const b = el.querySelector('.msgr-b'); if (b) b.scrollTop = b.scrollHeight; },
   };
 };
 IN.chatText = v => { S.chatDraft = v; };
 CH.chatFile = el => { const f = el.files[0]; if (!f) return; const ch = chatById(cur().p.id); postMsg(ch, 'me', { kind: 'file', name: f.name, size: `${(f.name.split('.').pop() || '').toUpperCase()} · ${Math.max(1, Math.round(f.size / 1024))} КБ` }); render(); };
+/* имитация собеседника: исполнитель в ответ на вопрос присылает предложение, заказчик — просит назвать условия */
 function autoReply(ch) {
   if (ch.pair) return;
-  later(1500, () => postMsg(ch, 'them', { t: ch.role === 'cust' ? 'Здравствуйте! Да, всё получится. Уточню детали и отвечу.' : 'Спасибо, договорились!' }));
+  const o = ch.role === 'cust' && canDeal(ch) && offerById(ch.offer); const vers = ch.msgs.filter(m => m.kind === 'version');
+  if (o && !vers.length) {
+    later(1500, () => postMsg(ch, 'them', { t: 'Здравствуйте! Да, сделаю. Пришлю предложение с ценой и временем: примете его, и это станет заказом.' }));
+    later(3000, () => { const rp = replyOf(o); sendVersion(ch, 'them', { offer: o.id, title: o.title, price: rp.price, dur: rp.dur, inc: rp.inc, stages: rp.stages ? rp.stages.map(x => Object.assign({}, x)) : null, days: rp.days || 0, date: dk(1), time: '12:00' }); notify('cust', 'Пришло предложение', `${exName(o.ex)}: ${rub(rp.price)}`, gv('chat', { id: ch.id })); });
+    return;
+  }
+  const pending = vers.some(m => m.v.st === 'new');
+  const t = ch.role === 'cust' ? (pending ? 'Если условия подходят, примите предложение: оно сразу станет заказом. Если нет, нажмите «Изменить условия».' : 'Здравствуйте! Да, всё получится. Уточню детали и отвечу.')
+    : canDeal(ch) && !pending ? 'Хорошо. Пришлите предложение с ценой и временем, я приму его здесь.' : 'Спасибо, договорились!';
+  later(1500, () => postMsg(ch, 'them', { t }));
 }
+/* новое предложение заменяет прежнее: у каждого свой номер, старые остаются в истории */
+function sendVersion(ch, from, v) {
+  const ver = ch.msgs.filter(m => m.kind === 'version').length + 1;
+  ch.msgs.forEach(m => { if (m.kind === 'version' && m.v.st === 'new') m.v.st = 'old'; if (m.kind === 'ask' && m.a.st === 'new') m.a.st = 'done'; });
+  const nv = Object.assign({}, v, { ver, st: 'new', until: dk(2), order: null });
+  postMsg(ch, from, { kind: 'version', v: nv });
+  return nv;
+}
+/* приложение исполнителя: заказчик отвечает на предложение сам — просит свою цену, если она меньше, или принимает и оплачивает */
+function simCustDeal(ch, v) {
+  if (ch.pair) return;
+  const inc = ch.inc && S.incoming.find(x => x.id === ch.inc); const budget = ch.budget || (inc && inc.budget) || 0;
+  later(2600, () => {
+    if (v.st !== 'new') return;
+    if (budget && v.price > budget && !v.asked) {
+      postMsg(ch, 'them', { kind: 'ask', a: { ver: v.ver, price: budget, date: v.date, time: v.time, was: { price: v.price, date: v.date, time: v.time }, text: `Можно за ${rub(budget)}? На большее не рассчитывал.`, st: 'new' } });
+      notify('exec', 'Просят изменить условия', `${ch.with}: ${rub(budget)} вместо ${rub(v.price)}`, gv('chat', { id: ch.id }));
+      return;
+    }
+    const of = offerById(v.offer); v.st = 'ok';
+    const ord = mkOrder({ offer: v.offer, svc: v.svc || of.svc, ex: 'alex', client: ch.with, what: v.what || v.inc.join(', '), date: v.date, time: v.time, dur: v.dur, total: v.price, lines: [[v.title, v.price]], status: 'paid', fmt: of.formats[0], echat: ch.id, fromVer: v.ver });
+    v.order = ord.id; ch.order = ord.id; if (inc) { inc.status = 'ok'; inc.order = ord.id; }
+    postMsg(ch, 'them', { t: 'Подходит, принимаю и оплачиваю.' });
+    postMsg(ch, 'sys', { t: `Предложение ${v.ver} принято. Это заказ № ${ord.id}: вся переписка сохранена в нём.` });
+    postMsg(ch, 'sys', { t: `Заказ № ${ord.id} оплачен. Деньги на защищённом счёте до приёмки работы.`, ok: true });
+    notify('exec', `Заказ № ${ord.id} оплачен`, `${ch.with} · ${ord.svc} · ${rub(v.price)}`, gv('order', { id: ord.id }));
+    toast(`${ch.with}: предложение принято и оплачено, заказ № ${ord.id}`);
+  });
+}
+/* приложение заказчика: исполнитель отвечает на просьбу изменить условия новым предложением */
+function simExecDeal(ch, a) {
+  if (ch.pair) return;
+  later(2200, () => {
+    const old = (ch.msgs.find(m => m.kind === 'version' && m.v.ver === a.ver) || {}).v;
+    if (!old || old.st !== 'new') return;
+    const price = a.price >= old.price * 0.85 ? a.price : r100((a.price + old.price) / 2);
+    postMsg(ch, 'them', { t: price === a.price ? 'Хорошо, поменял условия. Новое предложение ниже.' : `За ${rub(a.price)} не получится, могу за ${rub(price)}. Обновил предложение.` });
+    const nv = sendVersion(ch, 'them', Object.assign({}, old, { price, date: a.date, time: a.time, note: '', lines: old.lines && price !== old.price ? null : old.lines }));
+    notify('cust', `Предложение ${nv.ver}`, `${exName(ch.ex)}: ${rub(price)}`, gv('chat', { id: ch.id }));
+  });
+}
+const ASK_TIMES = ['09:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'];
+function askSheet() {
+  const a = S.askDraft; const times = [...new Set([...ASK_TIMES, a.was.time].filter(Boolean))].sort();
+  sheet('Изменить условия', `<div class="m">Исполнитель увидит просьбу в переписке и пришлёт новое предложение. Пока вы не примете его, заказа нет.</div>
+    ${field('Цена', stepper('askPrice', 'p', a.price, 100, 500000, rub), { hint: `Сейчас в предложении ${rub(a.was.price)}.` })}
+    <div class="field"><span class="lbl">День</span>${chips('askDay', Array.from({ length: 7 }, (_, n) => [dk(n), dayName(dk(n), true)]), v => v === a.date)}</div>
+    <div class="field"><span class="lbl">Время</span>${chips('askTime', times, v => v === a.time)}</div>
+    ${field('Что ещё поменять, если нужно', `<textarea class="textarea" data-in="askText" rows="3" placeholder="Например: добавить кресло или начать пораньше">${esc(a.text)}</textarea>`)}
+    ${btn('Отправить просьбу', 'askSend', '', 'block')}${btn('Отмена', 'closeSheet', '', 'text block')}`);
+}
+IN.askText = v => { S.askDraft.text = v; };
+IN.dealText = v => { S.dealDraft.text = v; };
+/* исполнитель: предложение заказом из переписки — услуга, что сделает, цена, день и время из расписания */
+function newDeal(ch, from) {
+  const inc = ch.inc && S.incoming.find(x => x.id === ch.inc); const o = offerById(ch.offer && offerById(ch.offer).ex === 'alex' ? ch.offer : 'my_tire'); const rp = replyOf(o);
+  return Object.assign({ ch: ch.id, offer: o.id, inc: (o.inc || rp.inc).slice(0, 3), price: (inc && (inc.total || inc.budget)) || rp.price || 2000, dur: rp.dur || 40, day: (inc && inc.date) || dk(1), slot: null, text: '', budget: (inc && inc.budget) || 0 }, from || {});
+}
+SCREENS.deal_offer = p => {
+  const ch = chatById(p.id); const d = S.dealDraft && S.dealDraft.ch === ch.id ? S.dealDraft : (S.dealDraft = newDeal(ch)); SLOT_ST.deal = () => S.dealDraft;
+  const mine = OFFERS.filter(o => o.ex === 'alex' && !o.hidden); const o = offerById(d.offer); const why = !d.inc.length ? 'отметьте, что сделаете' : !d.slot ? 'выберите день и время' : '';
+  return {
+    title: 'Предложить заказ', sub: esc(ch.with),
+    body: `<div class="m">${esc(ch.with)} увидит предложение в переписке. Примет — и переписка станет заказом с номером, а цена и время зафиксируются.</div>
+      ${card(`<div class="field"><span class="lbl">Услуга</span>${chips('dealSvc', mine.map(x => [x.id, x.title]), v => v === d.offer, { cls: 'wrapok' })}</div>
+        <div class="field"><span class="lbl">Что сделаете</span>${chips('dealInc', o.inc || [], v => d.inc.includes(v), { cls: 'wrapok' })}</div>
+        ${field('Цена', stepper('dealPrice', 'p', d.price, 100, 200000, rub), { hint: d.budget ? `${esc(ch.with)} рассчитывает на ${rub(d.budget)}.` : 'Подставили из вашего прайса.' })}
+        ${pickDayTime('deal', d, d.dur, null, '')}
+        ${field('Комментарий, если нужно', `<textarea class="textarea" data-in="dealText" rows="3" placeholder="Например: балансировка входит, грузики наши">${esc(d.text)}</textarea>`)}`)}
+      <div class="m">Предложение действует 2 дня. Новое предложение заменит прежнее, а прежнее останется в истории.</div>`,
+    bar: `<div class="abar">${!why ? btn('Отправить предложение', 'dealSend', ch.id, 'block') : `<button class="btn block" disabled>Отправить предложение</button><div class="why center">Причина: ${why}.</div>`}</div>`,
+  };
+};
+Object.assign(A, {
+  dealOffer(id) { S.dealDraft = newDeal(chatById(id)); go('deal_offer', { id }); },
+  dealBrief(id) { const ch = chatById(id); S.briefFromChat = id; go('c_brief', { id: ch.offer }); },
+  dealSvc(id) { const d = S.dealDraft; const o = offerById(id); const rp = replyOf(o); Object.assign(d, { offer: id, inc: (o.inc || rp.inc).slice(0, 3), dur: rp.dur || 40, slot: null }); if (!d.budget && !d.fromAsk) d.price = rp.price || d.price; render(); },
+  dealInc(v) { togIn(S.dealDraft.inc, v); render(); },
+  dealPrice(v) { const d = S.dealDraft; d.price = clamp(d.price + Number(v.split('|')[1]) * (d.price >= 10000 ? 500 : 100), 100, 200000); render(); },
+  dealSend(id) {
+    const ch = chatById(id); const d = S.dealDraft; const o = offerById(d.offer); const note = maskContacts(d.text); if (note.hit) contactsHidden();
+    const v = sendVersion(ch, 'me', { offer: o.id, title: o.title, price: d.price, dur: d.dur, inc: d.inc.slice(), date: d.day, time: d.slot, note: note.t.trim(), asked: !!d.fromAsk });
+    const inc = ch.inc && S.incoming.find(x => x.id === ch.inc); if (inc) inc.status = 'ok';
+    S.dealDraft = null; back(); toast('Предложение отправлено. Примут — появится заказ');
+    simCustDeal(ch, v);
+  },
+  askAgree(v) {
+    const [cid, i] = v.split('|'); const ch = chatById(cid); const a = ch.msgs[Number(i)].a; const old = (ch.msgs.find(m => m.kind === 'version' && m.v.ver === a.ver) || {}).v;
+    if (!old) return;
+    const nv = sendVersion(ch, 'me', Object.assign({}, old, { price: a.price, date: a.date, time: a.time, lines: null, asked: true }));
+    render(); toast(`Отправили предложение ${nv.ver} на условиях заказчика`); simCustDeal(ch, nv);
+  },
+  askOwn(v) { const [cid, i] = v.split('|'); const ch = chatById(cid); const a = ch.msgs[Number(i)].a; S.dealDraft = newDeal(ch, { price: a.price, day: a.date, fromAsk: true }); go('deal_offer', { id: cid }); },
+  verAsk(v) { const [cid, i] = v.split('|'); const ver = chatById(cid).msgs[Number(i)].v; S.askDraft = { ch: cid, ver: ver.ver, price: ver.price, date: ver.date, time: ver.time, text: '', was: { price: ver.price, date: ver.date, time: ver.time } }; askSheet(); },
+  askPrice(v) { const a = S.askDraft; a.price = clamp(a.price + Number(v.split('|')[1]) * (a.price >= 10000 ? 500 : 100), 100, 500000); askSheet(); },
+  askDay(k) { S.askDraft.date = k; askSheet(); },
+  askTime(t) { S.askDraft.time = t; askSheet(); },
+  askSend() {
+    const d = S.askDraft; const ch = chatById(d.ch); const txt = maskContacts(d.text.trim()); if (txt.hit) contactsHidden();
+    if (d.price === d.was.price && d.date === d.was.date && d.time === d.was.time && !txt.t) { toast('Поменяйте цену, день, время или напишите, что изменить', 'info'); return; }
+    const a = { ver: d.ver, price: d.price, date: d.date, time: d.time, was: d.was, text: txt.t, st: 'new' };
+    postMsg(ch, 'me', { kind: 'ask', a }); S.askDraft = null; closeSheet(); render(); if (!txt.hit) toast('Просьба отправлена исполнителю');
+    simExecDeal(ch, a);
+  },
+  verNo(v) {
+    const [cid, i] = v.split('|'); const ch = chatById(cid); ch.msgs[Number(i)].v.st = 'no';
+    postMsg(ch, 'sys', { t: 'Вы отказались от предложения. Переписка остаётся: можно договориться заново.' }); render();
+    if (!ch.pair) later(1500, () => postMsg(ch, 'them', { t: 'Понял. Если передумаете или нужно что-то другое, напишите.' }));
+  },
+});
 Object.assign(A, {
   chatSend() { let t = (S.chatDraft || '').trim(); if (!t) return; const ch = chatById(cur().p.id);
+    const mc = maskContacts(t); if (mc.hit) { t = mc.t; contactsHidden(); }
     const so = S.role !== 'exec' && ch.order && orderById(ch.order); if (so && so.status === 'paid' && t.includes(startCode(so))) { t = t.split(startCode(so)).join('••••'); toast('Код начала не отправляется в переписке. Покажите его исполнителю на месте', 'info'); }
     postMsg(ch, 'me', { t }); S.chatDraft = ''; render(); autoReply(ch); },
   quickSend(t) { const ch = chatById(cur().p.id); postMsg(ch, 'me', { t }); render(); autoReply(ch); },
@@ -8933,9 +9114,9 @@ Object.assign(A, {
   acceptVersion(v) {
     const [cid, i] = v.split('|'); const ch = chatById(cid); const m = ch.msgs[Number(i)]; const ver = m.v; const o = offerById(ver.offer);
     ver.st = 'ok';
-    const ord = mkOrder({ offer: o.id, svc: o.svc, ex: o.ex, client: 'Алексей', cust: true, what: ver.what || ver.inc.join(', '), date: ver.date, time: ver.time, dur: ver.dur, total: ver.price, lines: ver.lines ? ver.lines.slice() : [[ver.title, ver.price]], status: 'confirmed', fmt: o.formats[0], chat: ch.id, echat: ch.pair || null, stages: ver.stages ? ver.stages.map(x => Object.assign({}, x, { st: 'wait' })) : null, days: ver.days || 0 });
-    ver.order = ord.id; ch.order = ord.id;
-    postMsg(ch, 'sys', { t: 'Вы согласились с предложением. Осталось оплатить.' });
+    const ord = mkOrder({ offer: o.id, svc: o.svc, ex: o.ex, client: 'Алексей', cust: true, what: ver.what || ver.inc.join(', '), date: ver.date, time: ver.time, dur: ver.dur, total: ver.price, lines: ver.lines ? ver.lines.slice() : [[ver.title, ver.price]], status: 'confirmed', fmt: o.formats[0], chat: ch.id, echat: ch.pair || null, stages: ver.stages ? ver.stages.map(x => Object.assign({}, x, { st: 'wait' })) : null, days: ver.days || 0, fromVer: ver.ver || 1 });
+    ver.order = ord.id; ch.order = ord.id; ch.msgs.forEach(x => { if (x.kind === 'ask' && x.a.st === 'new') x.a.st = 'done'; });
+    postMsg(ch, 'sys', { t: `Вы приняли предложение${ver.ver > 1 ? ' ' + ver.ver : ''}. Это заказ № ${ord.id}: вся переписка сохранена в нём. Осталось оплатить.` });
     go('c_checkout', { order: ord.id });
   },
 });
@@ -9050,6 +9231,7 @@ SCREENS.order = p => {
         <div class="sumline total"><span>Итого</span><b>${rub(o.total)}</b></div>
         ${o.note && o.note.length ? `<div class="sumline"><span>${ex ? 'Пожелания заказчика' : 'Ваши пожелания'}</span><b>${esc(o.note.join(', '))}</b></div>` : ''}
         ${o.files ? `<div class="sumline"><span>Файлы</span><b>${pn(o.files, 'файл', 'файла', 'файлов')}</b></div>` : ''}
+        ${o.fromVer ? `<div class="m">Условия из предложения${o.fromVer > 1 ? ' ' + o.fromVer : ''} в переписке. Вся переписка до заказа сохранена в нём: если возникнет спор, администратор увидит, о чём договорились.</div>` : ''}
         <div class="m">Условия зафиксированы. Если исполнитель изменит карточку, этот заказ не изменится.</div>`)}
       ${card(`<div class="list">
         ${ch ? rl('Переписка', `Вся история с начала: ${pn(ch.msgs.length, 'сообщение', 'сообщения', 'сообщений')}`, 'go', gv('chat', { id: ch.id }), { icon: 'chat' }) : rl('Переписка', 'Написать по этому заказу', 'orderChat', o.id, { icon: 'chat' })}
@@ -9407,7 +9589,7 @@ SCREENS.notifset = () => {
 };
 SCREENS.privacy = () => ({
   title: 'Конфиденциальность',
-  body: `${card(`<div class="h2">Кто что видит</div>${bullets(['До оплаты исполнитель видит только ваш район', 'Точный адрес открывается после защищённой оплаты', 'Телефон не показываем: общение идёт в переписке', 'Паспорт и банковские данные до заказа не передаются'])}`)}`,
+  body: `${card(`<div class="h2">Кто что видит</div>${bullets(['До оплаты исполнитель видит только ваш район', 'Точный адрес открывается после защищённой оплаты', 'Телефон не показываем: общение идёт в переписке, звонки — через подменный номер', 'Номера, почта и ссылки в переписке скрываются: собеседник видит •••', 'Паспорт и банковские данные до заказа не передаются'])}`)}`,
 });
 Object.assign(A, {
   setTheme(v) { S.theme = v; document.documentElement.dataset.theme = v; render(); },
