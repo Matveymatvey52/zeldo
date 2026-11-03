@@ -4203,9 +4203,21 @@ mark { background: none; color: var(--act); font-weight: 700; }
 .lc-f { display: flex !important; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; height: 26px; }
 .lc-f .pill { max-width: 85%; overflow: hidden; text-overflow: ellipsis; }
 .lc-f > svg { flex: none; color: var(--act); }
-/* телефон (02.11): фото карточки — квадрат слева, рядом название, цена и кто; подсказка и статус ниже на всю ширину */
-.phone[data-view="phone"] .lc.has-img .lc-img { float: left; width: 72px; height: 72px; margin-right: 12px; border-radius: 14px; overflow: hidden; background: var(--soft); }
-.phone[data-view="phone"] .lc.has-img .lc-m { clear: both; margin-top: 0; padding-top: 10px; height: 28px; }
+.lc-h > span { display: block; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* телефон (03.11, «фотографии побольше»): одна крупная миниатюра во всех списках — около 120 px на iPhone, не меньше 104 px на узких */
+.phone[data-view="phone"] { --thumb: clamp(104px, 28vw, 120px); }
+.phone[data-view="phone"] .lc.has-img { display: grid; grid-template-columns: var(--thumb) minmax(0, 1fr); column-gap: 14px; align-items: center; }
+.phone[data-view="phone"] .lc.has-img .lc-img { width: var(--thumb); height: var(--thumb); border-radius: 16px; overflow: hidden; background: var(--soft); }
+.phone[data-view="phone"] .lc.has-img .lc-t { height: auto; max-height: 44px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.phone[data-view="phone"] .lc.has-img .lc-m, .phone[data-view="phone"] .lc.has-img .lc-f { grid-column: 1 / -1; }
+.phone[data-view="phone"] .lc.has-img .lc-m { margin-top: 12px; }
+.phone[data-view="phone"] .pc-g, .phone[data-view="phone"] .pc.h .pc-g { grid-template-columns: var(--thumb) minmax(0, 1fr); }
+.phone[data-view="phone"] .pc-p, .phone[data-view="phone"] .pc.h .pc-p { width: var(--thumb); height: var(--thumb); border-radius: 16px; }
+.phone[data-view="phone"] .pc-c { height: var(--thumb); }
+.phone[data-view="phone"] .pc.h { width: min(340px, calc(100vw - 64px)); }
+.phone[data-view="phone"] .oc.my .op { width: var(--thumb); height: var(--thumb); border-radius: 16px; }
+.phone[data-view="phone"] .oc.my .my-c { height: var(--thumb); }
+.phone[data-view="phone"] .bigth { width: 96px !important; height: 96px !important; border-radius: 16px !important; }
 /* «Мои услуги» исполнителя: та же сетка, что у карточки услуги */
 .oc.my { display: block; width: 100%; padding: 12px; border-radius: 22px; }
 .oc.my::after { content: ""; display: table; clear: both; }
@@ -5810,7 +5822,10 @@ const svcPill = s => { const [t, k, i] = SVC_ST[s.status]; return pill(t, k, i);
 const cardBudget = x => x.budgetFrom ? `${rub(x.budgetFrom).replace(/\s?₽$/, '')}–${rub(x.budget)}` : x.budget ? `до ${rub(x.budget)}` : 'договорная';
 /* компактная карточка списка (заказ, заявка): у каждой строки своя высота, поэтому карточки в списке одинаковые, а вся карточка — одна кнопка */
 /* img — фото услуги: на компьютере слева в карточке, на телефоне карточка без фото, как в эталоне */
-const listCard = ({ to, t, pr = '', ps = '', s = '', m = '', mb = false, pl = '', img = '' }) => `<button class="lc${img && PH[img] ? ' has-img' : ''}" data-a="go" data-v="${esc(to)}">${img && PH[img] ? `<span class="lc-img">${photo(img, '', 'M')}</span>` : ''}<span class="lc-t">${t}</span><span class="lc-p">${pr ? `<b>${pr}</b>` : ''}${pr && ps ? ' · ' : ''}${ps ? `<small>${ps}</small>` : ''}</span><span class="lc-s">${s}</span><span class="lc-m${mb ? ' lc-b' : ''}">${m}</span><span class="lc-f">${pl}${ic('right', 18, 2.2)}</span></button>`;
+/* с фото (03.11): строки «название — цена — кто» собраны в .lc-h, на телефоне они стоят по центру рядом с крупным фото */
+const listCard = ({ to, t, pr = '', ps = '', s = '', m = '', mb = false, pl = '', img = '' }) => { const hasImg = !!(img && PH[img]);
+  const head = `<span class="lc-t">${t}</span><span class="lc-p">${pr ? `<b>${pr}</b>` : ''}${pr && ps ? ' · ' : ''}${ps ? `<small>${ps}</small>` : ''}</span><span class="lc-s">${s}</span>`;
+  return `<button class="lc${hasImg ? ' has-img' : ''}" data-a="go" data-v="${esc(to)}">${hasImg ? `<span class="lc-img">${photo(img, '', 'M')}</span><span class="lc-h">${head}</span>` : head}<span class="lc-m${mb ? ' lc-b' : ''}">${m}</span><span class="lc-f">${pl}${ic('right', 18, 2.2)}</span></button>`; };
 
 /* ---------- карточка услуги (листы 19–20) ---------- */
 /* гость не видит имени исполнителя: только «проверенный исполнитель», рейтинг и район */
