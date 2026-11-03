@@ -4453,7 +4453,8 @@ input, textarea, select { font-size: max(16px, 1em); }
 /* ничего не пружинит и не съезжает: страница стоит, прокручиваются только нужные части */
 @media (min-width: 768px) {
   html, body { position: fixed; inset: 0; width: 100%; height: 100%; overscroll-behavior: none; }
-  #screen, .sheet, .panel { overscroll-behavior: none; }
+  /* страница целиком стоит, а то, что листается, у края пружинит родной резинкой Safari и не тянет за собой шапку (03.11) */
+  #screen, .sheet, .panel { overscroll-behavior: contain; }
 }
 /* шапка */
 [data-style] .phone[data-view="desk"] #top { background: var(--card); box-shadow: 0 1px 0 var(--line), 0 4px 16px rgba(16, 33, 61, 0.04); }
@@ -4642,7 +4643,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 .phone[data-view="desk"][data-lay="cab"] #screen { overflow: hidden; }
 .phone[data-view="desk"] .page.cabp { position: absolute; inset: 0; display: block; max-width: none; margin: 0; padding: 0; }
 .cabw { display: grid; grid-template-columns: 288px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); height: 100%; }
-.cabnav { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 8px; min-height: 0; padding: 14px 14px 16px; overflow-y: auto; overscroll-behavior: none; scrollbar-width: thin; background: var(--card); box-shadow: 1px 0 0 var(--line); }
+.cabnav { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 8px; min-height: 0; padding: 14px 14px 16px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; background: var(--card); box-shadow: 1px 0 0 var(--line); }
 .cabnav > * { flex: none; }
 .phone[data-view="desk"][data-lay="cab"] #bar { margin-left: 288px; box-shadow: 0 -1px 0 var(--line), -288px 0 0 var(--card); }
 .cabme { display: flex; align-items: center; gap: 12px; padding: 2px 2px 4px; }
@@ -4658,7 +4659,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 .cni.on { background: var(--soft); color: var(--act); font-weight: 700; }
 .cni .cnt { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; font-size: 12px; line-height: 22px; }
 .cnum { color: var(--muted); font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.cabmain { min-width: 0; min-height: 0; padding: 28px 32px 48px; overflow-y: auto; overscroll-behavior: none; }
+.cabmain { min-width: 0; min-height: 0; padding: 28px 32px 48px; overflow-y: auto; overscroll-behavior: contain; }
 .cabin { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-content: start; margin: 0 auto; }
 .cabin:not(:has(.cgrid)):not(:has(.dhero)):not(:has(.cat)) { max-width: 1160px; }
 .page.cabh .cabin { max-width: none; }
@@ -4679,7 +4680,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 .msgr-lh { display: grid; gap: 12px; padding: 18px 16px 12px; border-bottom: 1px solid var(--line); }
 .msgr-lh .search { min-height: 44px; }
 .msgr-lh .search input { padding: 8px 0; font-size: 14px; }
-.msgr-list { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: none; padding: 6px; scrollbar-width: thin; }
+.msgr-list { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 6px; scrollbar-width: thin; }
 .msgr-none { padding: 16px; }
 .mrow { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px; border-radius: 14px; text-align: left; }
 .mrow:hover { background: var(--soft2); }
@@ -4695,7 +4696,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 .msgr-h .grow b, .msgr-h .grow .m { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .msgr-h > .pill, .msgr-h > .btn { flex: none; }
 .msgr-h .grow .m { font-size: 14px; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.msgr-b { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: none; padding: 12px 16px; scrollbar-width: thin; }
+.msgr-b { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 12px 16px; scrollbar-width: thin; }
 .msgr-b .chat { max-width: 1040px; margin: 0 auto; }
 .msgr-f { background: var(--card); border-top: 1px solid var(--line); }
 .msgr-f .composer { padding: 10px 16px 14px; }
@@ -5080,23 +5081,6 @@ function gridCards(root) {
 }
 let lastView = VIEW();
 window.addEventListener('resize', () => { const v = VIEW(); if (v !== lastView) { lastView = v; render(); } });
-/* компьютер: у края прокрутки содержимое чуть-чуть уходит дальше и мягко возвращается (03.11, «чуть-чуть совсем»).
-   Прокрутку не перехватываем: она родная, а у края сдвигаем на несколько пикселей только то, что листается; шапка и меню стоят */
-const EDGE = { max: 10, box: null, dir: 0, acc: 0, t: 0 };
-const edgeOn = typeof matchMedia === 'function' ? matchMedia('(hover: hover) and (min-width: 768px) and (prefers-reduced-motion: no-preference)') : { matches: false };  /* нет matchMedia — живём без упора */
-const EDGE_BOX = '.msgr-b, .msgr-list, .cabnav, .cabmain, #screen';
-function edgeSet(box, y, ms) { for (const c of box.children) { c.style.transition = `transform ${ms}ms cubic-bezier(0.2, 0.8, 0.2, 1)`; c.style.transform = y ? `translate3d(0, ${y.toFixed(1)}px, 0)` : ''; } }
-window.addEventListener('wheel', e => {
-  if (!edgeOn.matches || !e.deltaY || Math.abs(e.deltaX) > Math.abs(e.deltaY) || !e.target.closest) return;
-  const box = e.target.closest(EDGE_BOX); if (!box || box.scrollHeight <= box.clientHeight + 1) return;
-  const dir = e.deltaY > 0 ? 1 : -1;
-  const atEdge = dir > 0 ? box.scrollTop + box.clientHeight >= box.scrollHeight - 1 : box.scrollTop <= 0;
-  if (!atEdge) return;
-  if (EDGE.box !== box || EDGE.dir !== dir) { if (EDGE.box && EDGE.box !== box) edgeSet(EDGE.box, 0, 0); EDGE.box = box; EDGE.dir = dir; EDGE.acc = 0; }
-  EDGE.acc += Math.abs(e.deltaY);
-  edgeSet(box, -dir * EDGE.max * (1 - Math.exp(-EDGE.acc / 220)), 90);  /* как резинка: чем сильнее тянешь, тем меньше прибавка, не больше 10 px */
-  clearTimeout(EDGE.t); EDGE.t = setTimeout(() => { edgeSet(box, 0, 420); EDGE.box = null; EDGE.acc = 0; }, 140);
-}, { passive: true });
 
 /* фото на весь экран: нажали на обложку услуги — открылось крупно; закрывается нажатием в любом месте или Escape */
 const lboxHtml = k => `<div class="lbox" data-a="closeLbox" role="dialog" aria-modal="true" aria-label="Фото"><img src="${PHB[k] ? `img/L/${PHB[k]}.jpg` : PH[k].src}" data-k="${esc(k)}" alt="" style="background-image:url('${PH[k].src}')"><button class="lbox-x" data-a="closeLbox" aria-label="Закрыть фото">${ic('x', 24, 2.4)}</button></div>`;
