@@ -3628,8 +3628,38 @@ img.ph[data-k] { background-size: cover; background-position: center; background
 .ohero-b { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
 .ohero-b:focus-visible { outline: 3px solid var(--brand); outline-offset: -3px; }
 .ohero-z { position: absolute; right: 12px; bottom: 12px; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: rgba(16, 33, 61, .55); color: #fff; pointer-events: none; }
-.lbox { position: absolute; inset: 0; background: #0A1424; display: grid; place-items: center; animation: fade .18s ease-out; cursor: zoom-out; }
-.lbox img { width: 100%; max-height: 100%; aspect-ratio: 4 / 3; object-fit: contain; background-size: contain; background-position: center; background-repeat: no-repeat; }
+/* галерея услуги (03.11): лента снимков с прилипанием, счётчик, стрелки на компьютере, миниатюры под фото */
+.ogal-w { display: grid; gap: 10px; min-width: 0; }
+.ogal-s { display: flex; width: 100%; height: 100%; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
+.ogal-s::-webkit-scrollbar { display: none; }
+.ogal-i { flex: 0 0 100%; width: 100%; height: 100%; padding: 0; border: 0; background: none; scroll-snap-align: start; scroll-snap-stop: always; cursor: zoom-in; }
+.ogal-i:focus-visible { outline: 3px solid var(--brand); outline-offset: -3px; }
+.ogal-n { position: absolute; left: 12px; bottom: 12px; padding: 4px 10px; border-radius: 12px; background: rgba(16, 33, 61, .6); color: #fff; font-size: 14px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums; pointer-events: none; }
+.ogal-b { position: absolute; top: calc(50% - 22px); width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, .94); color: var(--ink); box-shadow: 0 4px 16px rgba(14, 29, 54, .22); opacity: 0; transition: opacity .15s ease; }
+.ogal-b.prev { left: 12px; }
+.ogal-b.next { right: 12px; }
+.ogal:hover .ogal-b, .ogal-b:focus-visible { opacity: 1; }
+.ogal.at-s .ogal-b.prev, .ogal.at-e .ogal-b.next { opacity: 0; pointer-events: none; }
+@media (hover: none) { .ogal-b { display: none; } }
+.ogal-t { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.ogal-t::-webkit-scrollbar { display: none; }
+.ogal-t button { position: relative; flex: none; width: 96px; height: 72px; border-radius: 12px; overflow: hidden; background: var(--soft); opacity: .65; transition: opacity .15s ease; }
+.ogal-t button:hover, .ogal-t button.on { opacity: 1; }
+.ogal-t button.on::after { content: ''; position: absolute; inset: 0; border-radius: 12px; box-shadow: inset 0 0 0 3px var(--act); }
+/* на весь экран: та же галерея крупно */
+.lbox { position: absolute; inset: 0; background: #0A1424; animation: fade .18s ease-out; }
+.lbox-s { display: flex; width: 100%; height: 100%; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior: contain; scrollbar-width: none; }
+.lbox-s::-webkit-scrollbar { display: none; }
+.lbox-i { flex: 0 0 100%; height: 100%; display: grid; place-items: center; scroll-snap-align: start; scroll-snap-stop: always; cursor: zoom-out; container-type: size; }
+/* фото 4:3 вписано в окно целиком: по ширине на телефоне, по высоте на компьютере */
+.lbox-i img { width: min(100cqw, calc(100cqh * 4 / 3)); height: auto; aspect-ratio: 4 / 3; object-fit: cover; background-size: cover; background-position: center; background-repeat: no-repeat; cursor: default; }
+.lbox-n { position: absolute; top: 20px; left: 16px; color: #fff; font-size: 16px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.lbox-b { position: absolute; top: calc(50% - 26px); width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, .16); color: #fff; transition: background .15s ease, opacity .15s ease; }
+.lbox-b:hover { background: rgba(255, 255, 255, .28); }
+.lbox-b.prev { left: 16px; }
+.lbox-b.next { right: 16px; }
+.lbox.at-s .lbox-b.prev, .lbox.at-e .lbox-b.next { opacity: 0; pointer-events: none; }
+@media (hover: none) { .lbox-b { display: none; } }
 .lbox-x { position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, .16); color: #fff; border: 0; }
 .lbox-x:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
@@ -5032,7 +5062,7 @@ function render(mode) {
   const scr = fn(c.p || {});
   const el = $('#screen');
   const keep = scrollEl().scrollTop; const navY = ($('.cabnav') || {}).scrollTop || 0; const listY = ($('.msgr-list') || {}).scrollTop || 0;
-  const ribX = mode ? [] : [...document.querySelectorAll('.rib-s')].map(x => x.scrollLeft);  /* ленты не прыгают в начало, когда экран перерисовался на месте */
+  const ribX = mode ? [] : [...document.querySelectorAll('.rib-s, .ogal-s')].map(x => x.scrollLeft);  /* ленты не прыгают в начало, когда экран перерисовался на месте */
   const view = VIEW(); let lay = scr.lay || LAY[c.n] || 'form'; const ph = $('#phone');
   if (lay === 'aside' && !scr.bar) lay = 'form';  /* справа нечего показать — обычная колонка */
   const desk = view === 'desk'; const cabL = desk && lay === 'cab';
@@ -5054,7 +5084,7 @@ function render(mode) {
   else box.scrollTop = keep;
   if ($('.cabnav')) $('.cabnav').scrollTop = navY;
   if ($('.msgr-list')) $('.msgr-list').scrollTop = listY;
-  document.querySelectorAll('.rib-s').forEach((x, i) => { if (ribX[i]) x.scrollLeft = ribX[i]; });
+  document.querySelectorAll('.rib-s, .ogal-s').forEach((x, i) => { if (ribX[i]) x.scrollLeft = ribX[i]; });  /* и галерея услуги остаётся на том же фото */
   $('#bar').innerHTML = bar;
   const tabs = $('#tabs');
   const showTabs = S.role !== 'guest' && scr.tabs !== false;
@@ -5082,8 +5112,13 @@ function gridCards(root) {
 let lastView = VIEW();
 window.addEventListener('resize', () => { const v = VIEW(); if (v !== lastView) { lastView = v; render(); } });
 
-/* фото на весь экран: нажали на обложку услуги — открылось крупно; закрывается нажатием в любом месте или Escape */
-const lboxHtml = k => `<div class="lbox" data-a="closeLbox" role="dialog" aria-modal="true" aria-label="Фото"><img src="${PHB[k] ? `img/L/${PHB[k]}.jpg` : PH[k].src}" data-k="${esc(k)}" alt="" style="background-image:url('${PH[k].src}')"><button class="lbox-x" data-a="closeLbox" aria-label="Закрыть фото">${ic('x', 24, 2.4)}</button></div>`;
+/* фото на весь экран: нажали на фото услуги — открылась вся галерея с этого снимка, листается пальцем, стрелками и клавишами ← →;
+   закрывается крестиком, нажатием мимо фото или Escape. S.lbox = { keys, i } */
+const lboxHtml = ({ keys, i }) => `<div class="lbox${i <= 0 ? ' at-s' : ''}${i >= keys.length - 1 ? ' at-e' : ''}" role="dialog" aria-modal="true" aria-label="Фото"><div class="lbox-s">${keys.map(k => `<div class="lbox-i" data-a="closeLbox"><img src="${PHB[k] ? `img/L/${PHB[k]}.jpg` : PH[k].src}" data-k="${esc(k)}" data-a="stop" alt="" style="background-image:url('${PH[k].src}')"></div>`).join('')}</div>
+  ${keys.length > 1 ? `<span class="lbox-n">${i + 1} / ${keys.length}</span><button class="lbox-b prev" data-a="lbGo" data-v="-1" aria-label="Предыдущее фото">${ic('back', 24, 2.4)}</button><button class="lbox-b next" data-a="lbGo" data-v="1" aria-label="Следующее фото">${ic('arr', 24, 2.4)}</button>` : ''}
+  <button class="lbox-x" data-a="closeLbox" aria-label="Закрыть фото">${ic('x', 24, 2.4)}</button></div>`;
+function lbSync() { const s = $('.lbox-s'); if (!s || !S.lbox) return; const n = S.lbox.keys.length; const i = Math.round(s.scrollLeft / Math.max(1, s.clientWidth)); S.lbox.i = i;
+  const c = $('.lbox-n'); if (c) c.textContent = `${i + 1} / ${n}`; const b = $('.lbox'); b.classList.toggle('at-s', i <= 0); b.classList.toggle('at-e', i >= n - 1); }
 function renderOverlay() {
   const o = $('#overlay'); let h = '';
   if (S.panel) h += `<div class="scrim topp" data-a="closeAll"><div class="panel" data-a="stop" role="dialog" aria-modal="true">${S.panel}</div></div>`;
@@ -5092,9 +5127,10 @@ function renderOverlay() {
     const d = S.dialog;
     h += `<div class="scrim center" data-a="stop"><div class="dialog" role="alertdialog" aria-modal="true" aria-label="${esc(d.title)}"><div class="h2">${esc(d.title)}</div>${d.text ? `<div class="m">${d.text}</div>` : ''}<div class="btns">${(d.actions || []).map(([label, act, v, kind]) => `<button class="btn ${kind || ''} block" data-a="${act}" data-v="${esc(v ?? '')}">${label}</button>`).join('')}</div></div></div>`;
   }
-  if (S.lbox && PH[S.lbox]) h += lboxHtml(S.lbox);
+  if (S.lbox && S.lbox.keys.length) h += lboxHtml(S.lbox);
   if (S.toast) h += `<div class="toast ${S.toast.kind || ''}" role="status">${ic(S.toast.kind === 'info' ? 'info' : 'check', 20, 2.4)}<span>${esc(S.toast.t)}</span></div>`;
   o.innerHTML = h;
+  const ls = $('.lbox-s'); if (ls) { ls.scrollLeft = S.lbox.i * ls.clientWidth; ls.addEventListener('scroll', lbSync, { passive: true }); }  /* снимок не прыгает на первый, когда окно перерисовалось */
 }
 
 /* ---------- общие действия ---------- */
@@ -5104,7 +5140,9 @@ Object.assign(A, {
   closeAll() { S.sheet = null; S.panel = null; renderOverlay(); },
   closeSheet() { closeSheet(); },
   closeDialog() { S.dialog = null; renderOverlay(); },
-  phView(k) { S.lbox = k; renderOverlay(); const x = $('.lbox-x'); if (x) x.focus(); },
+  phView(v) { const keys = /^\d+$/.test(v) && S.gal.length ? S.gal : PH[v] ? [v] : []; if (!keys.length) return;
+    S.lbox = { keys, i: Math.min(+v || 0, keys.length - 1) }; renderOverlay(); const x = $('.lbox-x'); if (x) x.focus(); },
+  lbGo(v) { const s = $('.lbox-s'); if (s) s.scrollTo({ left: (S.lbox.i + Math.sign(+v)) * s.clientWidth, behavior: 'smooth' }); },
   closeLbox() { S.lbox = null; renderOverlay(); },
   go(v) { const i = v.indexOf('|'); if (i < 0) go(v); else go(v.slice(0, i), parseP(v.slice(i + 1))); },
   goClose(v) { S.sheet = null; S.panel = null; A.go(v); },
@@ -5130,6 +5168,7 @@ document.addEventListener('load', e => { const t = e.target; if (t && t.tagName 
 document.addEventListener('error', e => { const t = e.target; if (t && t.tagName === 'IMG' && t.dataset && t.dataset.k && PH[t.dataset.k] && t.getAttribute('src') !== PH[t.dataset.k].src) t.src = PH[t.dataset.k].src; }, true);
 document.addEventListener('change', e => { const el = e.target; if (el.dataset && el.dataset.ch && CH[el.dataset.ch]) CH[el.dataset.ch](el); });
 document.addEventListener('keydown', e => {
+  if (S.lbox && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) { e.preventDefault(); A.lbGo(e.key === 'ArrowRight' ? 1 : -1); return; }
   if (e.key === 'Escape') { if (S.lbox) { S.lbox = null; renderOverlay(); } else if (S.dialog) { S.dialog = null; renderOverlay(); } else if (S.sheet || S.panel) { S.sheet = null; S.panel = null; renderOverlay(); } return; }
   if (e.key !== 'Enter') return; const el = e.target;
   if (el.dataset && el.dataset.enter && A[el.dataset.enter]) { e.preventDefault(); A[el.dataset.enter](el.dataset.v || el.value, el); }
@@ -5412,7 +5451,7 @@ const OFFERS = [
     zone: 'Выезд по ЮЗАО',
   },
   {
-    id: 'washer1', svc: 'Диагностика и ремонт стиральных машин', ex: 'master', title: 'Ремонт стиральных машин на дому', ph: 'washer',
+    id: 'washer1', svc: 'Диагностика и ремонт стиральных машин', ex: 'master', title: 'Ремонт стиральных машин на дому', ph: 'washer', gal: ['svc|Ремонт сушильных машин', 'svc|Установка и первичная настройка отдельно стоящей бытовой техники без подключения к инженерным коммуникациям', 'svc|Профилактика и обслуживание техники'],
     desc: 'Сначала диагностика: найдём неисправность и назовём смету. Ремонтируем только после вашего согласия.',
     inc: ['Выезд мастера', 'Диагностика', 'Ремонт после согласования сметы', 'Гарантия 6 месяцев'], res: 'Машина снова стирает',
     model: 'brief', mode: 'confirm', route: 'B', formats: ['visit'], booking: 'slots', from: 900, unit: 'диагностика',
@@ -5767,8 +5806,30 @@ const photo = (key, alt = '', size = '') => { const s = phSize(size); return !PH
   : s === 'P' && PHB[key] ? `<img class="ph ph-p" src="img/P/${PHB[key]}.jpg" data-k="${esc(key)}" alt="${esc(alt)}" draggable="false">`  /* лента главной: без мутной подложки, появляется целиком (02.11) */
   : s && PHB[key] ? `<img class="ph" src="img/${s}/${PHB[key]}.jpg" data-k="${esc(key)}" alt="${esc(alt)}" draggable="false" decoding="async"${s === 'M' || VIEW() === 'desk' ? ' loading="lazy"' : ''} style="background-image:url('${PH[key].src}')">`
   : `<img class="ph" src="${PH[key].src}" alt="${esc(alt)}" draggable="false">`; };
-/* обложка услуги: крупная, по нажатию открывается на весь экран */
-const heroPh = (key, alt, extra = '') => `<div class="ohero">${PH[key] ? `<button class="ohero-b" data-a="phView" data-v="${esc(key)}" aria-label="Открыть фото на весь экран">${photo(key, alt, 'L')}<span class="ohero-z" aria-hidden="true">${ic('expand', 18, 2.2)}</span></button>` : photo(key, alt)}${extra}</div>`;
+/* галерея услуги (03.11, «как в объявлениях: листать вправо, не одна картинка»): обложка и снимки этой услуги и соседних из той же группы.
+   Телефон — листается пальцем, счётчик «1 / 5»; компьютер — стрелки по краям и миниатюры под фото. Нажатие открывает фото на весь экран */
+const phId = k => PHB[k] || (PH[k] || {}).src;
+const galOf = o => { const s = svcBy(o.svc); const sub = s && subBy(s.c, s.s); const seen = new Set();
+  const pool = [o.cover, o.ph, ...(o.gal || []), s && `svc|${s.n}`, ...OFFERS.filter(x => x.ex === o.ex && x.svc === o.svc && x.id !== o.id).map(x => x.ph),
+    ...(sub ? sub.list.filter(v => v !== s).map(v => `svc|${v.n}`) : []), s && `sub|${s.c}|${s.s}`];
+  return pool.filter(k => k && PH[k] && !GAL_SKIP.has(k) && !seen.has(phId(k)) && seen.add(phId(k))).slice(0, 5); };
+const GAL_SKIP = new Set(['svc|Аренда бытовой техники', 'svc|Аренда садовой техники']);  /* соседние услуги не по теме карточки: в аренде инструментов — гостиная и газонокосилка */
+S.gal = [];
+const heroPh = (keys, alt, extra = '') => { keys = [].concat(keys).filter(k => PH[k]); S.gal = keys; const n = keys.length;
+  if (!n) return `<div class="ohero">${photo('', alt)}${extra}</div>`;
+  const desk = VIEW() !== 'phone';
+  return `<div class="ogal-w"><div class="ohero ogal at-s${n < 2 ? ' at-e' : ''}"><div class="ogal-s">${keys.map((k, i) => `<button class="ogal-i" data-a="phView" data-v="${i}" aria-label="Фото ${i + 1} из ${n}, открыть на весь экран">${photo(k, i ? '' : alt, 'L')}</button>`).join('')}</div>
+    ${n > 1 ? `<button class="ogal-b prev" data-a="galGo" data-v="-1" aria-label="Предыдущее фото">${ic('back', 22, 2.4)}</button><button class="ogal-b next" data-a="galGo" data-v="1" aria-label="Следующее фото">${ic('arr', 22, 2.4)}</button><span class="ogal-n" aria-hidden="true">1 / ${n}</span>` : ''}
+    <span class="ohero-z" aria-hidden="true">${ic('expand', 18, 2.2)}</span>${extra}</div>
+    ${n > 1 && desk ? `<div class="ogal-t">${keys.map((k, i) => `<button class="${i ? '' : 'on'}" data-a="galTo" data-v="${i}" aria-label="Показать фото ${i + 1}">${photo(k, '', 'M')}</button>`).join('')}</div>` : ''}</div>`; };
+const galIdx = s => Math.round(s.scrollLeft / Math.max(1, s.clientWidth));
+function galSync(s) { const g = s.closest('.ogal'); const w = s.closest('.ogal-w'); const i = galIdx(s); const n = s.children.length;
+  g.classList.toggle('at-s', i <= 0); g.classList.toggle('at-e', i >= n - 1);
+  const c = g.querySelector('.ogal-n'); if (c) c.textContent = `${i + 1} / ${n}`;
+  if (w) w.querySelectorAll('.ogal-t button').forEach((b, j) => b.classList.toggle('on', j === i)); }
+A.galGo = (v, el) => { const s = el.closest('.ogal').querySelector('.ogal-s'); s.scrollTo({ left: (galIdx(s) + Math.sign(+v)) * s.clientWidth, behavior: 'smooth' }); };
+A.galTo = (v, el) => { const s = el.closest('.ogal-w').querySelector('.ogal-s'); s.scrollTo({ left: +v * s.clientWidth, behavior: 'smooth' }); };
+AFTER_RENDER.push(() => document.querySelectorAll('#screen .ogal-s').forEach(s => { galSync(s); s.addEventListener('scroll', () => galSync(s), { passive: true }); }));
 const btn = (label, act, v = '', kind = '', extra = '') => `<button class="btn ${kind}" data-a="${act}" data-v="${esc(v)}" ${extra}>${label}</button>`;
 const goBtn = (label, to, kind = 'soft block') => `<button class="btn ${kind}" data-a="go" data-v="${esc(to)}">${label} ${ic('arr', 20, 2.2)}</button>`;
 function rl(title, sub, act, v, o = {}) {
@@ -6735,7 +6796,7 @@ SCREENS.c_offer = p => {
   const bl = blockers(o, c); const agree = needsAgree(o, c); const insp = o.model === 'inspect';
   const sendLabel = insp ? 'Записаться на осмотр' : o.route === 'V' || o.priceFrom || (c.needs || []).length ? 'Отправить на согласование' : 'Отправить исполнителю';
   let main;
-  if (o.ex === 'alex' && !preview) return { tabs: false, body: `${heroPh(o.ph, o.title)}<div class="col g4"><h1 class="h1">${esc(o.title)}</h1><span class="m">${esc(s ? `${s.c} · ${s.s} · ${s.n}` : '')}</span></div><div class="info"><b>Это ваша карточка</b><span class="m">Так её видят заказчики. Заказать у себя нельзя. Изменить карточку можно в роли «Исполнитель».</span></div>${card(`<div>${esc(o.desc)}</div><div class="h2">Что входит</div>${bullets(o.inc)}`)}`, bar: `<div class="abar">${btn('Перейти в роль исполнителя', 'setRole', 'exec', 'block')}</div>` };
+  if (o.ex === 'alex' && !preview) return { tabs: false, body: `${heroPh(galOf(o), o.title)}<div class="col g4"><h1 class="h1">${esc(o.title)}</h1><span class="m">${esc(s ? `${s.c} · ${s.s} · ${s.n}` : '')}</span></div><div class="info"><b>Это ваша карточка</b><span class="m">Так её видят заказчики. Заказать у себя нельзя. Изменить карточку можно в роли «Исполнитель».</span></div>${card(`<div>${esc(o.desc)}</div><div class="h2">Что входит</div>${bullets(o.inc)}`)}`, bar: `<div class="abar">${btn('Перейти в роль исполнителя', 'setRole', 'exec', 'block')}</div>` };
   if (preview) main = `<button class="btn block" disabled>Так увидит заказчик</button>`;
   else if (routeB) main = btn(`Составить запрос ${ic('arr', 20, 2.2)}`, 'go', gv('c_brief', { id: o.id }), 'block');
   else if (bl) main = `<button class="btn block" disabled>${!agree && !insp ? 'Оплатить ' + rub(r.total) : sendLabel}</button>`;
@@ -6745,7 +6806,7 @@ SCREENS.c_offer = p => {
   const pillRow = routeB ? pill('Цена после запроса', 'warn', 'info') : insp ? pill('Сначала осмотр, потом смета', 'warn', 'info') : !agree ? pill('Оплата сразу', 'ok', 'check') : pill('Сначала подтвердит исполнитель', '', 'clock');
   return {
     tabs: false,
-    body: `${heroPh(o.cover || o.ph, o.title, preview ? '' : `<button class="heart ${favOn ? 'on' : ''}" style="top:12px;left:12px" data-a="fav" data-v="${o.id}" aria-label="${favOn ? 'Убрать из избранного' : 'В избранное'}" aria-pressed="${favOn}">${ic('heart', 20, 2)}</button>`)}
+    body: `${heroPh(galOf(o), o.title, preview ? '' : `<button class="heart ${favOn ? 'on' : ''}" style="top:12px;left:12px" data-a="fav" data-v="${o.id}" aria-label="${favOn ? 'Убрать из избранного' : 'В избранное'}" aria-pressed="${favOn}">${ic('heart', 20, 2)}</button>`)}
       <div class="col g4 ohead"><h1 class="h1">${esc(o.title)}</h1>${s ? `<span class="m">${esc(`${s.c} · ${s.s} · ${s.n}`)}</span>` : ''}</div>
       ${S.role === 'guest' ? `<button class="card c" data-a="guestNeed" data-v="увидеть имя и профиль исполнителя" style="text-align:left"><span class="row"><span class="ava">${ic('user', 22, 2)}</span><span class="grow">${exLine(o)}<span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')} · ${esc(areaText(e.area, o.ex))}</span><span class="m" style="display:block">Имя и связь с исполнителем — после входа</span></span><span class="blue">${ic('lock', 20, 2)}</span></span></button>`
         : `<div class="card c oexec" style="gap:10px"><button data-a="go" data-v="${gv('c_exec', { id: o.ex })}" style="text-align:left"><span class="row"><span class="ava">${letter(e.name)}</span><span class="grow">${exLine(o)}<span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')} · ${esc(areaText(e.area, o.ex))}</span></span><span class="blue">${ic('arr', 22, 2)}</span></span></button>${o.ex === 'alex' ? '' : `<div class="btns two">${btn(`${ic('chat', 20)} Написать`, 'chatWith', o.id, 'soft')}${btn(`${ic('phone', 20)} Позвонить`, 'callAsk', o.ex, 'soft')}</div>`}</div>`}
@@ -7852,7 +7913,7 @@ function wzStep5(w) {
 }
 function wizToOffer(w, id) {
   const s = svcBy(w.svc); const wk = w.works.map(x => S.portfolio.find(p => p.id === x)).filter(Boolean);
-  const o = { id, svc: w.svc, ex: 'alex', title: w.titleOwn || w.title || w.svc, ph: (wk[0] && wk[0].ph) || w.cover || (isTire(w) ? 'tire_mount' : svcPh(s)), desc: w.desc || sugFor(w.svc).desc[0], inc: w.inc.slice(), res: w.res,
+  const o = { id, svc: w.svc, ex: 'alex', title: w.titleOwn || w.title || w.svc, ph: (wk[0] && wk[0].ph) || w.cover || (isTire(w) ? 'tire_mount' : svcPh(s)), gal: wk.map(x => x.ph),  /* в галерее — все фото работ из карточки */ desc: w.desc || sugFor(w.svc).desc[0], inc: w.inc.slice(), res: w.res,
     mode: w.mode, route: w.priceType === 'deal' && !w.vars && !isTire(w) ? 'B' : 'A', formats: w.fmts.length ? w.fmts.slice() : ['point'], visitAdd: w.fmts.includes('visit') ? w.visitAdd : 0,
     booking: onlyOnline(w) ? 'term' : !w.fmts.includes('point') ? 'slots' : w.visit.length === 2 ? 'both' : w.visit[0] === 'free' ? 'free' : 'slots',
     zone: `${S.profile.points[0].zone}, 1,2 км от вас`, addr: `${S.profile.points[0].name}, вход со двора`, unit: w.unit,
