@@ -3782,6 +3782,8 @@ img.ph[data-k] { background-size: cover; background-position: center; background
 .chip.deal:hover { background: var(--act-press); }
 .msgcard.deal { width: min(100%, 440px); max-width: 100%; }
 .msgcard.dim { opacity: 0.62; }
+a.btn { text-decoration: none; }
+.msgimg { display: block; margin: -6px -8px 0; } .msgimg img { display: block; width: 100%; max-width: 320px; max-height: 320px; object-fit: cover; border-radius: 14px; background: var(--line); }
 .msgcard .btns.two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .incstrip { display: grid; gap: 10px; padding: 12px 14px; border-radius: 16px; background: var(--warn-soft); }
 .incstrip .grow { display: grid; gap: 2px; min-width: 0; }
@@ -5904,7 +5906,7 @@ const listCard = ({ to, t, pr = '', ps = '', s = '', m = '', mb = false, pl = ''
 /* ---------- карточка услуги (листы 19–20) ---------- */
 /* гость не видит имени исполнителя: только «проверенный исполнитель», рейтинг и район */
 const exName2 = o => S.role === 'guest' ? 'Проверенный исполнитель' : (EX[o.ex] || {}).name || '';
-const exLine = o => { const e = EX[o.ex] || {}; return `<span class="on2"><b>${esc(exName2(o))}</b>${S.role === 'guest' ? '' : `<span class="vbadge">${ic('diamond', 14, 2)} Проверен</span>`}<span class="rating">${ic('star', 15, 2)}${String(e.rating).replace('.', ',')}</span></span>`; };
+const exLine = o => { const e = EX[o.ex] || {}; return `<span class="on2"><b>${esc(exName2(o))}</b>${S.role === 'guest' ? '' : `<span class="vbadge">${ic('diamond', 14, 2)} Проверен</span>`}${e.reviews ? `<span class="rating">${ic('star', 15, 2)}${String(e.rating).replace('.', ',')}</span>` : '<span class="m">Нет отзывов</span>'}</span>`; };
 const partnerLine = o => { const p = (EX[o.ex] || {}).partner || [5, 2]; return `<span class="partner">Партнёрам до ${p[0]}% · ${pn(p[1], 'уровень', 'уровня', 'уровней')}</span>`; };
 const heartBtn = o => { const on = S.favs.includes(o.id); return `<button class="heart ${on ? 'on' : ''}" data-a="fav" data-v="${o.id}" aria-label="${on ? 'Убрать из избранного' : 'В избранное'}" aria-pressed="${on}">${ic('heart', 20, 2)}</button>`; };
 /* список: фото слева, рядом название, цена и исполнитель; под фото — описание в две строки (пустого места нет).
@@ -6299,7 +6301,7 @@ SCREENS.c_exec = p => {
   return {
     title: 'Профиль',
     body: `<div class="card" style="justify-items:center;text-align:center"><span class="ava lg">${letter(e.name)}</span><div class="h1">${esc(e.name)}</div>${e.biz ? `<div class="m">${esc(e.biz)} · с ${e.since} года</div>` : ''}
-        <div class="row" style="justify-content:center">${pill('Проверен', '', 'diamond')}<span class="rating t18">${ic('star', 18, 2)} ${String(e.rating).replace('.', ',')}</span><span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')}</span></div>
+        <div class="row" style="justify-content:center">${pill('Проверен', '', 'diamond')}${e.reviews ? `<span class="rating t18">${ic('star', 18, 2)} ${String(e.rating).replace('.', ',')}</span><span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')}</span>` : '<span class="m">Пока нет отзывов</span>'}</div>
         <div class="m">${esc(areaText(e.area, p.id))}</div></div>
       ${card(`<div class="h2">Об исполнителе</div><div>${esc(e.about)}</div>`)}
       ${exHoursCard(p.id)}
@@ -6312,10 +6314,11 @@ SCREENS.c_exec = p => {
 };
 SCREENS.c_reviews = p => {
   const e = EX[p.id];
-  const list = [...(S.myRev[p.id] || []), ...(p.id === 'alex' ? S.reviews : [{ who: 'Ольга', stars: 5, text: 'Всё сделали аккуратно и в срок.', date: dk(-4) }, { who: 'Дмитрий', stars: 5, text: 'Понятные условия, цена не изменилась.', date: dk(-12) }, { who: 'Светлана', stars: 4, text: 'Хорошо, но пришлось подождать.', date: dk(-20) }])];
+  /* в рабочей версии — только настоящие отзывы с сервера, примеры прототипа не подмешиваем */
+  const list = [...(S.myRev[p.id] || []), ...(p.id === 'alex' ? S.reviews : REAL ? [] : [{ who: 'Ольга', stars: 5, text: 'Всё сделали аккуратно и в срок.', date: dk(-4) }, { who: 'Дмитрий', stars: 5, text: 'Понятные условия, цена не изменилась.', date: dk(-12) }, { who: 'Светлана', stars: 4, text: 'Хорошо, но пришлось подождать.', date: dk(-20) }])];
   return {
     title: 'Отзывы',
-    body: `${card(`<div class="h2">Репутация</div><div class="rating" style="font-size:28px;line-height:32px;font-weight:800">${ic('star', 26, 2)} ${String(e.rating).replace('.', ',')}</div><div class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')} после завершённых заказов</div>`)}
+    body: `${card(e.reviews ? `<div class="h2">Репутация</div><div class="rating" style="font-size:28px;line-height:32px;font-weight:800">${ic('star', 26, 2)} ${String(e.rating).replace('.', ',')}</div><div class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')} после завершённых заказов</div>` : '<div class="h2">Пока нет отзывов</div><div class="m">Отзыв оставляет заказчик, когда примет работу.</div>')}
       ${list.map(r => card(`<div class="row"><b class="t18 grow">${esc(r.who)}</b><span class="m">${dayName(r.date, true)}</span></div><div class="m" aria-label="Оценка ${r.stars} из 5">${stars(r.stars)}</div>${r.tags && r.tags.length && r.text !== r.tags.join(', ') ? `<div class="m">${r.tags.map(esc).join(' · ')}</div>` : ''}<div>${esc(r.text)}</div>`, 'c')).join('')}`,
   };
 };
@@ -7077,7 +7080,7 @@ SCREENS.c_reqview = p => {
     title: 'Заявка', sub: esc(r.title),
     body: `${card(`<div class="h2">Сведения о задаче</div><div>${esc(r.what)}</div>${r.text ? `<div class="m">«${esc(r.text)}»</div>` : ''}<div class="sumline"><span>Где</span><b>${esc(r.whereText)}</b></div><div class="sumline"><span>Когда</span><b>${esc(r.whenText)}</b></div><div class="sumline"><span>Цена</span><b>${r.budgetFrom ? `${rub(r.budgetFrom)} – ${rub(r.budget)}` : r.budget ? rub(r.budget) : 'договорная'}</b></div><div class="sumline"><span>Кому</span><b>${r.to === 'all' ? 'всем подходящим' : pn(r.pick.length, 'исполнитель', 'исполнителя', 'исполнителей')}</b></div>`)}
       <div class="sec"><span class="h2">Предложения</span><span class="m">${r.offers.length}</span></div>
-      ${r.offers.length ? r.offers.map(x => card(`${fresh.has(x) ? `<span class="newtag">${ic('spark', 14, 2.4)} Новое предложение</span>` : ''}<div class="row"><span class="ava">${letter(exName(x.ex))}</span><span class="grow"><b class="t18" style="display:block">${esc(exName(x.ex))}</b><span class="m">★ ${String(EX[x.ex].rating).replace('.', ',')} · ${esc(areaText(EX[x.ex].area, x.ex))}</span></span><b class="t18 num">${rub(x.price)}</b></div><div>${esc(x.text)}</div><div class="m">${ic('clock', 16, 2)} ${esc(x.when)}</div>${r.status === 'open' ? `<div class="btns two">${btn('Написать', 'chatWith', x.offer, 'soft')}${btn('Выбрать', 'reqChoose', `${r.id}|${x.id}`)}</div>` : r.chosen === x.id ? pill('Вы выбрали', 'ok', 'check') : ''}`)).join('')
+      ${r.offers.length ? r.offers.map(x => card(`${fresh.has(x) ? `<span class="newtag">${ic('spark', 14, 2.4)} Новое предложение</span>` : ''}<div class="row"><span class="ava">${letter(exName(x.ex))}</span><span class="grow"><b class="t18" style="display:block">${esc(exName(x.ex))}</b><span class="m">${EX[x.ex].reviews ? `★ ${String(EX[x.ex].rating).replace('.', ',')}` : 'Нет отзывов'} · ${esc(areaText(EX[x.ex].area, x.ex))}</span></span><b class="t18 num">${rub(x.price)}</b></div><div>${esc(x.text)}</div><div class="m">${ic('clock', 16, 2)} ${esc(x.when)}</div>${r.status === 'open' ? `<div class="btns two">${btn('Написать', 'chatWith', x.offer, 'soft')}${btn('Выбрать', 'reqChoose', `${r.id}|${x.id}`)}</div>` : r.chosen === x.id ? pill('Вы выбрали', 'ok', 'check') : ''}`)).join('')
         : `${skel(2)}<div class="m">Предложения появятся здесь, мы пришлём уведомление.</div>`}`,
   };
 };
@@ -7090,7 +7093,7 @@ A.reqChooseOk = v => {
   const [rid, oid] = v.split('|'); const r = S.requests.find(x => x.id === rid); const x = r.offers.find(y => y.id === oid);
   r.status = 'chosen'; r.chosen = oid;
   const o = offerById(x.offer);
-  const ord = mkOrder({ offer: o.id, svc: r.title, ex: x.ex, client: myFirst(), cust: true, what: r.what, date: x.date || dk(1), time: x.when.split(', ')[1] || '10:00', dur: 60, total: x.price, lines: [[r.title, x.price]], status: 'confirmed', fmt: r.whereText === 'Онлайн' ? 'online' : 'visit', fromReq: r.id });
+  const ord = mkOrder({ offer: o.id, svc: r.title, ex: x.ex, client: myFirst(), cust: true, what: r.what, date: x.date || dk(1), time: x.slot || x.when.split(', ').pop() || '10:00', dur: 60, total: x.price, lines: [[r.title, x.price]], status: 'confirmed', fmt: r.whereText === 'Онлайн' ? 'online' : 'visit', fromReq: r.id });
   const ch = ensureChat('cust', o); ch.order = ord.id; ord.chat = ch.id; ord.echat = ch.pair || null;
   postMsg(ch, 'sys', { t: `Вы выбрали это предложение по заявке «${r.title}».` });
   go('c_checkout', { order: ord.id });
@@ -8379,11 +8382,11 @@ Object.assign(A, {
 /* ---------- заявка (листы 6–9): «Задача» → «Где и когда» → «Проверка» → «Заявка опубликована» ---------- */
 function startRequest(svcId) {
   if (S.reqDraft && !svcId) { S.req = JSON.parse(JSON.stringify(S.reqDraft)); go('c_req'); toast('Продолжаем черновик', 'info'); return; }
-  const s = svcId ? svcById(svcId) : null;
-  S.req = { step: 1, svc: s ? s.id : null, title: '', text: '', files: [], sel: {}, pr: {}, q: null, fmt: s && !canOffline(s.f) ? 'online' : 'place', addr: S.myAddrs[0].street, city: S.myAddrs[0].city, district: S.myAddrs[0].district, lat: S.myAddrs[0].lat, lng: S.myAddrs[0].lng, when: 'exact', from: null, to: null, time: '18:00', btype: 'deal', budget: 0, budgetFrom: 0, posting: false };
+  const s = svcId ? svcById(svcId) : null; const a0 = S.myAddrs[0] || { street: '', city: 'Москва', district: '' };  /* у нового человека адресов ещё нет */
+  S.req = { step: 1, svc: s ? s.id : null, title: '', text: '', files: [], sel: {}, pr: {}, q: null, fmt: s && !canOffline(s.f) ? 'online' : 'place', addr: a0.street, city: a0.city, district: a0.district, lat: a0.lat, lng: a0.lng, when: 'exact', from: null, to: null, time: '18:00', btype: 'deal', budget: 0, budgetFrom: 0, posting: false };
   go('c_req');
 }
-const reqFmtText = R => R.fmt === 'online' ? 'Онлайн' : `На месте · ${R.city}, ${R.district}`;
+const reqFmtText = R => R.fmt === 'online' ? 'Онлайн' : `На месте · ${R.city || 'Москва'}${R.district ? ', ' + R.district : ''}`;
 const reqWhenText = R => !R.from ? 'Не выбрано' : `${R.to ? `${dayName(R.from).toLowerCase()} — ${dayName(R.to).toLowerCase()}` : dayName(R.from)}${R.time ? `, ${R.time}` : ''}`;
 const reqBudgetText = R => R.btype === 'fix' ? rub(R.budget) : R.btype === 'range' ? `${rub(R.budgetFrom)} – ${rub(R.budget)}` : 'Договорная';
 function reqBlock(R) {
@@ -8463,7 +8466,7 @@ Object.assign(A, {
     setTimeout(() => {
       R.posting = false; const s = svcById(R.svc);
       const what = [R.text, (askOn(s.n) ? askWhat(s.n, R) : Object.values(R.sel).flat()).join(' · ')].filter(Boolean).join(' · ') || 'Подробности обсудим в переписке';
-      const req = { id: uid('r'), svc: s.n, title: R.title.trim() || s.n, what, text: '', files: R.files.slice(), photos: 0, whenText: reqWhenText(R), whereText: reqFmtText(R), budget: R.btype === 'deal' ? 0 : R.budget, budgetFrom: R.btype === 'range' ? R.budgetFrom : 0, to: 'all', pick: [], offers: [], status: 'open', created: dk(0), until: dk(7), day: R.from };
+      const req = { id: uid('r'), svc: s.n, title: R.title.trim() || s.n, what, text: '', files: R.files.slice(), photos: 0, whenText: reqWhenText(R), whereText: reqFmtText(R), budget: R.btype === 'deal' ? 0 : R.budget, budgetFrom: R.btype === 'range' ? R.budgetFrom : 0, to: 'all', pick: [], offers: [], status: 'open', created: dk(0), until: dk(7), day: R.from, dayTo: R.to || null, time: R.time || null };
       S.requests.unshift(req); S.reqDraft = null; S.reqSaved = false;
       offersFor(s.n).filter(o => o.ex !== 'alex').slice(0, 3).forEach((o, i) => sim(2200 + i * 2300, () => {
         const base = isDeal(o) ? (o.reply || {}).price || priceFrom(o) : calc(o, cfgOf(o)).total || priceFrom(o); const dd = req.day || [dk(1), dk(2), dk(1)][i];
@@ -8940,7 +8943,9 @@ function incStrip(ch) {
 function msgHtml(ch, m, i) {
   if (m.from === 'sys') return `<div class="sysmsg ${m.ok ? 'ok' : ''}">${esc(m.t)}</div>`;
   const me = m.from === 'me';
-  if (m.kind === 'file') return `<div class="msgcard ${me ? 'me' : ''}">${m.t ? `<div>${esc(m.t)}</div>` : ''}<div class="row">${ic('doc', 26)}<span class="grow"><b>${esc(m.name)}</b><span class="m" style="display:block">${esc(m.size || '')}</span></span></div>${btn('Открыть', 'pfOpen', '', 'text')}<span class="m">${esc(m.at || '')}</span></div>`;
+  /* в рабочей версии у файла есть адрес на сервере: картинку видно сразу, остальное открывается по кнопке */
+  if (m.kind === 'file') { const u = /^[a-f0-9]{32}$/.test(m.fid || '') ? `/api/file/${m.fid}` : '';
+    return `<div class="msgcard ${me ? 'me' : ''}">${m.t ? `<div>${esc(m.t)}</div>` : ''}${u && m.img ? `<a class="msgimg" href="${u}" target="_blank" rel="noopener"><img src="${u}" alt="${esc(m.name)}" loading="lazy"></a>` : ''}<div class="row">${ic('doc', 26)}<span class="grow"><b>${esc(m.name)}</b><span class="m" style="display:block">${esc(m.size || '')}</span></span></div>${u ? `<a class="btn text" href="${u}" target="_blank" rel="noopener">Открыть</a>` : btn('Открыть', 'pfOpen', '', 'text')}<span class="m">${esc(m.at || '')}</span></div>`; }
   if (m.kind === 'brief') return `<div class="msgcard ${me ? 'me' : ''}"><b class="t18">Запрос: ${esc(m.svc)}</b>${m.items.length ? `<div class="chips">${m.items.map(x => `<span class="pill grey">${esc(x)}</span>`).join('')}</div>` : ''}${m.photos ? `<div class="thumbs">${Array.from({ length: m.photos }, () => `<span class="thumb">${photo(offerById(ch.offer).ph)}</span>`).join('')}</div>` : ''}<div class="m">Когда удобно: ${esc(m.when)}</div>${m.budget ? `<div class="sumline"><span>${me ? 'Ваша цена' : 'Цена заказчика'}</span><b>${budText(m.budget, m.budgetFrom)}</b></div>` : ''}${m.text ? `<div>«${esc(m.text)}»</div>` : ''}<span class="m">${esc(m.at)}</span></div>`;
   if (m.kind === 'order') { const o = orderById(m.order); return `<div class="msgcard ${me ? 'me' : ''}"><b class="t18">Заказ № ${m.order}</b><div>${esc(o.svc)}: ${esc(o.what)}</div>${o.date ? `<div class="m">${when(o.date, o.time)}</div>` : ''}<div class="row">${orderPill(o)}<b class="num">${rub(o.total)}</b></div>${goBtn('Открыть заказ', gv('order', { id: o.id }))}</div>`; }
   if (m.kind === 'version') {
