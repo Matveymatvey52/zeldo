@@ -3771,6 +3771,14 @@ img.ph[data-k] { background-size: cover; background-position: center; background
 .msgcard.deal { width: min(100%, 440px); max-width: 100%; }
 .msgcard.dim { opacity: 0.62; }
 a.btn { text-decoration: none; }
+/* пока страница качается (по мобильному интернету — несколько секунд), видны логотип и полоса загрузки, а не пустой экран; первая отрисовка их заменяет */
+.boot { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 10px; padding: 24px; text-align: center; color: var(--muted); font-family: var(--font); }
+.boot b { font-size: 36px; line-height: 1; font-weight: 800; letter-spacing: 0.02em; color: var(--ink); }
+.boot span { font-size: 17px; color: var(--ink); }
+.boot small { font-size: 14px; }
+.boot i { display: block; position: relative; width: 168px; height: 4px; margin: 6px 0 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.boot i::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40%; border-radius: 2px; background: var(--act); animation: bootbar 0.9s ease-in-out infinite alternate; }
+@keyframes bootbar { from { transform: translateX(0); } to { transform: translateX(150%); } }  /* с первого кадра на дорожке: пока браузер разбирает код, анимация может стоять */
 .msgimg { display: block; margin: -6px -8px 0; } .msgimg img { display: block; width: 100%; max-width: 320px; max-height: 320px; object-fit: cover; border-radius: 14px; background: var(--line); }
 .msgcard .btns.two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .incstrip { display: grid; gap: 10px; padding: 12px 14px; border-radius: 16px; background: var(--warn-soft); }
@@ -4777,7 +4785,7 @@ img, svg, a { -webkit-user-drag: none; }
 <div class="stage" lang="ru">
   <div class="phone" id="phone">
     <div id="top"></div>
-    <div id="screen"></div>
+    <div id="screen"><div class="boot" role="status"><b>ZELDO</b><span>Загружаем каталог услуг</span><i aria-hidden="true"></i><small>В первый раз это займёт несколько секунд</small></div></div>
     <div id="bar"></div>
     <nav id="tabs" aria-label="Разделы"></nav>
     <div id="overlay"></div>
@@ -9576,6 +9584,7 @@ SCREENS.notifs = () => {
 };
 
 /* ---------- настройки (лист 09) ---------- */
+A.settings = () => go('settings');  /* шестерёнка в шапке и строка «Настройки» в кабинете (до 04.11 не открывались) */
 SCREENS.settings = () => ({
   title: 'Настройки',
   body: `${card(`<div class="h2">Параметры аккаунта</div><div class="list">${rl('Профиль', '', S.role === 'exec' ? 'go' : 'tab', S.role === 'exec' ? 'e_profile' : 'c_cab')}${rl('Уведомления', '', 'go', 'notifset')}${rl('Конфиденциальность', '', 'go', 'privacy')}</div>`, 'c')}
