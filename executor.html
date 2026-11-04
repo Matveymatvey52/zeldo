@@ -3380,6 +3380,8 @@ window.ZMAP_STYLE = {"version":8,"sources":{"openmaptiles":{"type":"vector","url
   --shadow: 0 8px 24px rgba(16, 33, 61, 0.055);
   --shadow-lg: 0 16px 48px rgba(16, 33, 61, 0.16);
   --font: "Onest", "Segoe UI", system-ui, sans-serif;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -4679,18 +4681,36 @@ input, textarea, select { font-size: max(16px, 1em); }
 /* кабинет: меню роли слева, содержимое справа */
 .phone[data-view="desk"][data-lay="cab"] #screen { overflow: hidden; }
 .phone[data-view="desk"] .page.cabp { position: absolute; inset: 0; display: block; max-width: none; margin: 0; padding: 0; }
-.cabw { display: grid; grid-template-columns: 288px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); height: 100%; }
-.cabnav { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 8px; min-height: 0; padding: 14px 14px 16px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; background: var(--card); box-shadow: 1px 0 0 var(--line); }
+.cabw { display: grid; grid-template-columns: 288px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); height: 100%; transition: grid-template-columns 0.24s var(--ease-drawer); }
+.cabnav { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 8px; min-height: 0; padding: 14px 14px 16px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; background: var(--card); box-shadow: 1px 0 0 var(--line); }
 .cabnav > * { flex: none; }
-.phone[data-view="desk"][data-lay="cab"] #bar { margin-left: 288px; box-shadow: 0 -1px 0 var(--line), -288px 0 0 var(--card); }
-.cabme { display: flex; align-items: center; gap: 12px; padding: 2px 2px 4px; }
-.cabme .ava.lg { width: 52px; height: 52px; font-size: 22px; background: linear-gradient(135deg, #0B6CF2, #0A55C4); color: #fff; }
-.cabme b { display: block; }
-.cabme .m { display: block; font-size: 14px; line-height: 18px; }
-.cabsw { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; border-radius: 12px; background: var(--soft); color: var(--act); font-size: 14px; font-weight: 600; }
+.phone[data-view="desk"][data-lay="cab"] #bar { margin-left: 288px; box-shadow: 0 -1px 0 var(--line), -288px 0 0 var(--card); transition: margin-left 0.24s var(--ease-drawer), box-shadow 0.24s var(--ease-drawer); }
+/* меню кабинета сворачивается в полоску квадратиков (04.11): квадратики стоят на месте, панель задвигается на них, как шторка; кнопка — справа сверху */
+.phone.navmini .cabw { grid-template-columns: 72px minmax(0, 1fr); }
+.phone.navmini[data-view="desk"][data-lay="cab"] #bar { margin-left: 72px; box-shadow: 0 -1px 0 var(--line), -72px 0 0 var(--card); }
+.cabtop { position: relative; height: 36px; }
+.cabtog { position: absolute; top: 0; left: 4px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; color: var(--muted); transform: translateX(220px); transition: transform 0.24s var(--ease-drawer); }
+.phone.navmini .cabtog { transform: none; }
+@media (hover: hover) and (pointer: fine) { .cabtog:hover { background: var(--soft2); color: var(--ink); } }
+.cabme > *, .cni .grow, .cni .cnum, .cabsw .cs-t { transition: opacity 0.16s var(--ease-out); }
+.phone.navmini .cabme > *, .phone.navmini .cni .grow, .phone.navmini .cni .cnum, .phone.navmini .cabsw .cs-t { opacity: 0; }
+/* профиль уходит — квадратики поднимаются под кнопку: высота профиля 60 + отступ 8 */
+.cabsw, .cnl { transition: transform 0.24s var(--ease-drawer); }
+.phone.navmini .cabsw, .phone.navmini .cnl { transform: translateY(-68px); }
+.phone.navmini .cni .cnt { position: absolute; left: 26px; top: 0; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; font-size: 11px; line-height: 18px; }
+/* у профиля постоянная ширина и высота: пока панель едет, имя не переносится и квадратики не прыгают */
+.cabme { display: flex; align-items: center; gap: 12px; height: 60px; padding: 0 2px; }
+.cabme .grow { flex: none; width: 194px; }
+.cabme .ava.lg { flex: none; width: 52px; height: 52px; font-size: 22px; background: linear-gradient(135deg, #0B6CF2, #0A55C4); color: #fff; }
+.cabme b { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.cabme .m { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 14px; line-height: 18px; }
+/* слева 13 px: иконка смены роли стоит по центру полоски, когда меню свёрнуто (14 + 13 + 9 = 36) */
+.cabsw { display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 6px 0 13px; border-radius: 12px; background: var(--soft); color: var(--act); font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; }
+.cabsw .cs-i { display: grid; place-items: center; flex: none; }
 .cabsw:hover { background: #DCEBFF; }
 .cnl { display: grid; gap: 2px; }
-.cni { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 40px; padding: 4px 10px 4px 6px; border-radius: 14px; text-align: left; font-size: 14px; line-height: 18px; font-weight: 500; color: var(--ink); }
+.cni { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 40px; padding: 4px 10px 4px 6px; border-radius: 14px; text-align: left; font-size: 14px; line-height: 18px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; }
+.cni .ci { flex: none; }
 .cni .ci { width: 32px; height: 32px; border-radius: 10px; }
 .cni:hover { background: var(--soft2); }
 .cni.on { background: var(--soft); color: var(--act); font-weight: 700; }
@@ -4848,6 +4868,7 @@ const P = {
   copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',
   wallet: '<rect x="3" y="6" width="18" height="14" rx="2.5"/><path d="M16 13h2M3 10h18"/>',
   retry: '<path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.5"/><path d="M4 4v4.5h4.5"/>',
+  panel: '<rect x="3.5" y="4.5" width="17" height="15" rx="3"/><path d="M9.5 4.5v15"/>',
   send: '<path d="M4 12 20 4l-6 16-3-7z"/>',
   clip: '<path d="m20 11.5-8 8a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"/>',
   camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
@@ -8854,8 +8875,10 @@ const ROLE_ROOT = { msgs: { cust: 'c_msgs', exec: 'e_msgs' }, orders: { cust: 'c
 /* компьютер (01.11): меню кабинета у левого края — профиль, смена роли и все разделы роли со счётчиками; уведомления и настройки — в шапке */
 function cabNav() {
   const ex = S.role === 'exec'; const n = cur().n; const r0 = S.stack[0].n; const reqTab = n === 'c_orders' && S.cOrdersTab === 'req';
+  /* в свёрнутом меню остаются квадратики: подпись — во всплывающей подсказке */
+  const tip = l => `data-tip="${esc(l)}"${S.navMini ? ` title="${esc(l)}"` : ''}`;
   const it = (to, icn, label, cnt, hue, o = {}) => { const on = o.on != null ? o.on : (n === to || r0 === to);
-    return `<button class="cni ${on ? 'on' : ''}" data-a="${o.act || 'tab'}" data-v="${to}" ${on ? 'aria-current="page"' : ''}><span class="ci ci-${hue}">${ic(icn, 20, 2)}</span><span class="grow">${label}</span>${cnt ? `<b class="${o.num ? 'cnum' : 'cnt'}">${cnt}</b>` : ''}</button>`; };
+    return `<button class="cni ${on ? 'on' : ''}" data-a="${o.act || 'tab'}" data-v="${to}" ${tip(label)} ${on ? 'aria-current="page"' : ''}><span class="ci ci-${hue}">${ic(icn, 20, 2)}</span><span class="grow">${label}</span>${cnt ? `<b class="${o.num ? 'cnum' : 'cnt'}">${cnt}</b>` : ''}</button>`; };
   const cr = clientRating(myFirst());
   const items = ex ? [
     it('e_home', 'home', 'Главная', 0, 'blue'), it('e_feed', 'search', 'Найти заказ', 0, 'blue'),
@@ -8868,10 +8891,22 @@ function cabNav() {
     it('req', 'send', 'Мои заявки', homeNew('cust'), 'violet', { act: 'myReqs', on: reqTab }), it('c_msgs', 'chat', 'Сообщения', unreadMsgs('cust'), 'teal'),
     it('c_fav', 'heart', 'Избранное', S.favs.length, 'pink', { num: true }), it('c_sched', 'calok', 'Мои записи', 0, 'orange'), it('c_aboutme', 'star', 'Отзывы обо мне', 0, 'orange'),
   ];
-  return `<div class="cabme"><span class="ava lg">${letter(myName())}</span><span class="grow"><b class="t18">${esc(myName())}</b><span class="m">${ex ? `Исполнитель · ${REAL ? ratingText('alex') : '★ 4,9 · 214 отзывов'}` : `Заказчик${cr ? ` · ★ ${String(cr.avg).replace('.', ',')} от исполнителей` : ''}`}</span></span></div>
-    <button class="cabsw" data-a="setRole" data-v="${ex ? 'cust' : 'exec'}">${ic('retry', 18, 2.2)}Перейти в роль «${ex ? 'Заказчик' : 'Исполнитель'}»</button>
+  const tl = S.navMini ? 'Развернуть меню' : 'Свернуть меню'; const sw = `Перейти в роль «${ex ? 'Заказчик' : 'Исполнитель'}»`;
+  return `<div class="cabtop"><button class="cabtog" data-a="navMini" aria-label="${tl}" title="${tl}" aria-expanded="${!S.navMini}">${ic('panel', 20, 2)}</button></div>
+    <div class="cabme"><span class="ava lg">${letter(myName())}</span><span class="grow"><b class="t18">${esc(myName())}</b><span class="m">${ex ? `Исполнитель · ${REAL ? ratingText('alex') : '★ 4,9 · 214 отзывов'}` : `Заказчик${cr ? ` · ★ ${String(cr.avg).replace('.', ',')} от исполнителей` : ''}`}</span></span></div>
+    <button class="cabsw" data-a="setRole" data-v="${ex ? 'cust' : 'exec'}" ${tip(sw)}><span class="cs-i">${ic('retry', 18, 2.2)}</span><span class="cs-t">${sw}</span></button>
     <nav class="cnl">${items.join('')}${it(ex ? 'e_cab' : 'c_cab', 'user', 'Кабинет', 0, 'grey')}</nav>`;
 }
+/* меню кабинета на компьютере сворачивается в полоску квадратиков (04.11); выбор помнит этот браузер.
+   Без перерисовки: класс на #phone, и CSS задвигает панель плавно, как шторку */
+try { S.navMini = localStorage.getItem('zeldo-nav') === 'mini'; } catch (e) { S.navMini = false; }
+$('#phone').classList.toggle('navmini', S.navMini);
+A.navMini = () => {
+  S.navMini = !S.navMini; $('#phone').classList.toggle('navmini', S.navMini);
+  try { localStorage.setItem('zeldo-nav', S.navMini ? 'mini' : ''); } catch (e) { /* без памяти — до перезагрузки */ }
+  const t = $('.cabtog'); if (t) { const l = S.navMini ? 'Развернуть меню' : 'Свернуть меню'; t.setAttribute('aria-label', l); t.title = l; t.setAttribute('aria-expanded', String(!S.navMini)); }
+  document.querySelectorAll('.cabnav [data-tip]').forEach(b => { if (S.navMini) b.title = b.dataset.tip; else b.removeAttribute('title'); });
+};
 function switchRole(r, rootScreen) {
   S.stacks[S.role] = S.stack; S.role = r;
   S.stack = rootScreen ? [{ n: rootScreen, p: {} }] : (S.stacks[r] || [{ n: r === 'exec' ? 'e_home' : 'c_home', p: {} }]);
