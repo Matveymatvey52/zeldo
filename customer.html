@@ -5928,10 +5928,11 @@ const hitWords = (text, q) => { const t = norm(text); return norm(q).trim().spli
 const offerHit = (o, q) => !q.trim() || hitWords(`${o.title} ${o.svc} ${exName(o.ex)} ${o.desc || ''}`, q);
 function listSearch(key, ph, draw) {
   LS[key] = draw; const q = (S.lsq || {})[key] || '';
-  return `<span class="search">${ic('search', 22)}<input data-in="lsq|${key}" value="${esc(q)}" placeholder="${ph}" autocomplete="off"><button class="clr ${q ? '' : 'hide'}" data-a="lsClear" data-v="${key}" aria-label="Очистить">${ic('x', 20, 2.2)}</button></span><div id="ls_${key}" class="col g12">${draw(q)}</div>`;
+  return `<span class="search">${ic('search', 22)}<input data-in="lsq|${key}" value="${esc(q)}" placeholder="${ph}" autocomplete="off"><button class="clr ${q ? '' : 'hide'}" data-a="lsClear" data-v="${key}" aria-label="Очистить">${ic('x', 20, 2.2)}</button></span><div id="ls_${esc(key)}" class="col g12">${draw(q)}</div>`;
 }
 const noHits = () => emptyBox('Ничего не нашли', 'Попробуйте другое слово.', '', '', '');
-IN.lsq = (v, key) => { (S.lsq = S.lsq || {})[key] = v; const el = $('#ls_' + key); if (el) el.innerHTML = LS[key](v); const b = el && el.previousElementSibling && el.previousElementSibling.querySelector('.clr'); if (b) b.classList.toggle('hide', !v); };
+/* список ищем по id напрямую: в ключе — название подкатегории с пробелами и «+», как CSS-селектор оно не работает (до 04.11 поиск в группе молчал) */
+IN.lsq = (v, key) => { (S.lsq = S.lsq || {})[key] = v; const el = document.getElementById('ls_' + key); if (el) el.innerHTML = LS[key](v); const b = el && el.previousElementSibling && el.previousElementSibling.querySelector('.clr'); if (b) b.classList.toggle('hide', !v); };
 A.lsClear = key => { S.lsq[key] = ''; render(); };
 
 /* ---------- фото-плитки каталога (лист 21) ---------- */
