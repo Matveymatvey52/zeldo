@@ -4793,6 +4793,12 @@ const PH = {"d_repair":{"src":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAA
 /* большие версии фото на сайте: ключ → имя файла в img/L и img/M (dl_big.py) */
 const PHB = window.ZPHB || {};
 const APP = 'exec'; /* 'cust' — приложение заказчика, 'exec' — приложение исполнителя */
+/* рабочая версия (04.11): данные на сервере, второй человек настоящий — имитаций нет (часть 10-real.js) */
+const REAL = !!window.ZREAL;
+/* имя владельца аккаунта: в прототипе — демо, в рабочей версии — того, кто вошёл */
+let ME_NAME = 'Алексей Смирнов';
+const myName = () => ME_NAME;
+const myFirst = () => ME_NAME.split(' ')[0];
 
 /* ---------- иконки (24×24, линии) ---------- */
 const P = {
@@ -4919,7 +4925,9 @@ const pn = (n, a, b, c) => `${fmtN(n)}${NB}${plural(n, a, b, c)}`;
 const mins = m => m >= 60 ? `${Math.floor(m / 60)}${NB}ч${m % 60 ? ' ' + (m % 60) + NB + 'мин' : ''}` : `${m}${NB}мин`;
 const norm = s => String(s).toLowerCase().replace(/ё/g, 'е');
 const $ = s => document.querySelector(s);
-const uid = (() => { let n = 100; return p => (p || 'id') + (++n); })();
+/* в рабочей версии к номеру добавляется приставка пользователя: номера с двух телефонов не совпадут */
+let UIDP = '';
+const uid = (() => { let n = 100; return p => (p || 'id') + UIDP + (++n); })();
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 /* даты: всё считается от сегодняшнего дня */
@@ -4962,6 +4970,8 @@ function sheet(title, body) { S.sheet = { title, body }; S.panel = null; renderO
 function closeSheet() { S.sheet = null; renderOverlay(); }
 function dialog(d) { S.dialog = d; renderOverlay(); }
 function later(ms, fn) { return setTimeout(() => { fn(); render(); }, ms); }
+/* ответ второй стороны в прототипе; в рабочей версии отвечает живой человек */
+function sim(ms, fn) { return REAL ? 0 : later(ms, fn); }
 
 const TABS = {
   cust: [['c_home', 'home', 'Главная'], ['c_orders', 'orders', 'Заказы'], ['c_fav', 'heart', 'Избранное'], ['c_msgs', 'chat', 'Сообщения'], ['c_cab', 'user', 'Кабинет']],
@@ -6353,20 +6363,20 @@ function orderCard(o) {
 /* ---------- кабинет заказчика ---------- */
 SCREENS.c_cab = () => ({
   title: 'Кабинет', cls: 'cabh',
-  body: `<div class="card"><div class="row"><span class="ava lg">А</span><span class="grow"><span class="h2" style="display:block;font-size:28px;line-height:32px">Алексей Смирнов</span><span class="m">+7 916 •••-••-42 · одна учётная запись для всех ролей</span></span></div></div>
+  body: `<div class="card"><div class="row"><span class="ava lg">${letter(myName())}</span><span class="grow"><span class="h2" style="display:block;font-size:28px;line-height:32px">${esc(myName())}</span><span class="m">+7 916 •••-••-42 · одна учётная запись для всех ролей</span></span></div></div>
     ${card(`<div class="list">
       ${rl('Мои данные', 'Имя, телефон, почта', 'cabSoon', 'Мои данные', { icon: 'user' })}
       ${rl('Мои адреса', `${esc(S.myAddrs.map(a => a.name).join(', '))} · для поиска и заявок`, 'myAddrs', 'cab', { icon: 'home' })}
       ${rl('Способы оплаты', 'СБП и карта', 'cabSoon', 'Способы оплаты', { icon: 'card' })}
       ${rl('Мои отзывы', 'Оценки выполненных заказов', 'go', gv('order', { id: 1038 }), { icon: 'star' })}
-      ${rl('Отзывы исполнителей о вас', clientLine('Алексей'), 'go', gv('c_aboutme', {}), { icon: 'user' })}
+      ${rl('Отзывы исполнителей о вас', clientLine(myFirst()), 'go', gv('c_aboutme', {}), { icon: 'user' })}
     </div>`, 'c')}
     ${card(`<div class="h2">Вы также исполнитель</div><div class="m">Шиномонтаж на Профсоюзной: заявки, заказы и расписание — в роли «Исполнитель». Сообщения и события обеих ролей видны в счётчиках.</div>${btn(`Перейти в роль исполнителя ${ic('arr', 20, 2.2)}`, 'setRole', 'exec', 'soft block')}`, 'soft')}
     ${card(`<div class="list">${rl('Настройки', '', 'settings', '', { icon: 'gear' })}${rl('Помощь', 'Как работает защищённая оплата', 'helpPay', '', { icon: 'info' })}</div>`, 'c')}`,
 });
 /* что исполнители написали о заказчике: после каждого заказа, выполненного или отменённого */
 SCREENS.c_aboutme = () => {
-  const list = S.clientRev['Алексей'] || []; const r = clientRating('Алексей');
+  const list = S.clientRev[myFirst()] || []; const r = clientRating(myFirst());
   return { title: 'Отзывы исполнителей о вас', tabs: false,
     body: `${card(`<div class="row"><b class="h2 grow">${r ? `★${NB}${String(r.avg).replace('.', ',')}` : 'Пока нет оценок'}</b><span class="m">${r ? pn(r.n, 'отзыв', 'отзыва', 'отзывов') : ''}</span></div><div class="m">Исполнитель может оставить отзыв после заказа — выполненного или отменённого. Его видят другие исполнители, когда вы к ним обращаетесь.</div>`)}
       ${list.map(x => card(`<div class="row"><b class="grow">${esc(x.who)}</b><span class="m">${dayName(x.date)}</span></div><div class="row">${'★'.repeat(x.stars)}<span class="m">${RATE_WORD[x.stars]}</span></div>${x.tags.length ? `<div class="chips">${x.tags.map(t => `<span class="pill grey">${esc(t)}</span>`).join('')}</div>` : ''}<div>${esc(x.text)}</div>`, 'c')).join('')}` };
@@ -6865,10 +6875,10 @@ Object.assign(A, {
     if (S.role === 'guest') return needLogin('отправить заказ');
     const o = offerById(id); const c = cfgOf(o); const r = calc(o, c); const insp = o.model === 'inspect';
     const note = [...c.note, ...(c.noteText.trim() ? [c.noteText.trim()] : [])];
-    const ord = mkOrder({ offer: o.id, svc: o.svc, ex: o.ex, client: 'Алексей', cust: true, what: r.what || o.title, date: c.day, time: c.time, dur: r.dur, total: r.total, lines: r.L, status: 'request', fmt: c.fmt, days: r.days, note, files: c.files, kind: insp ? 'inspect' : null, insp: insp ? JSON.parse(JSON.stringify(c)) : null, needs: (c.needs || []).slice(), stages: o.model === 'design' ? stagesOf(o, c).map(s => Object.assign(s, { st: 'wait' })) : null });
+    const ord = mkOrder({ offer: o.id, svc: o.svc, ex: o.ex, client: myFirst(), cust: true, what: r.what || o.title, date: c.day, time: c.time, dur: r.dur, total: r.total, lines: r.L, status: 'request', fmt: c.fmt, days: r.days, note, files: c.files, kind: insp ? 'inspect' : null, insp: insp ? JSON.parse(JSON.stringify(c)) : null, needs: (c.needs || []).slice(), stages: o.model === 'design' ? stagesOf(o, c).map(s => Object.assign(s, { st: 'wait' })) : null });
     const ch = ensureChat('cust', o); ch.order = ord.id; ord.chat = ch.id;
     postMsg(ch, 'me', { kind: 'order', order: ord.id, t: insp ? 'Записываюсь на осмотр' : 'Отправляю заказ на подтверждение' });
-    later(2600, () => {
+    sim(2600, () => {
       let msg = 'Подтверждаю, всё получится. Можно оплачивать.';
       if (insp) msg = `Подтверждаю осмотр ${when(ord.date, ord.time)}. Возьмём лазерный дальномер, замер займёт около часа.`;
       if (ord.needs.length) {
@@ -6919,12 +6929,12 @@ A.pay = v => {
       if (ord.stages) {
         const st = ord.stages.find(s => s.st === 'wait'); st.st = 'work'; ord.status = 'work';
         if (ch) postMsg(ch, 'sys', { t: `Этап «${st.name}» оплачен: ${rub(st.price)} на защищённом счёте.`, ok: true });
-        later(4200, () => { st.st = 'result'; ord.status = 'result'; if (ch) postMsg(ch, 'them', { kind: 'file', name: `${st.name}.pdf`, size: 'PDF · 8 МБ', t: `Этап «${st.name}» готов, посмотрите` }); notify('cust', 'Этап сдан', `${o.title}: «${st.name}» ждёт приёмки`, gv('order', { id: ord.id })); toast(`${exName(ord.ex)}: этап «${st.name}» готов`); });
+        sim(4200, () => { st.st = 'result'; ord.status = 'result'; if (ch) postMsg(ch, 'them', { kind: 'file', name: `${st.name}.pdf`, size: 'PDF · 8 МБ', t: `Этап «${st.name}» готов, посмотрите` }); notify('cust', 'Этап сдан', `${o.title}: «${st.name}» ждёт приёмки`, gv('order', { id: ord.id })); toast(`${exName(ord.ex)}: этап «${st.name}» готов`); });
       } else { ord.status = 'paid'; if (ch) postMsg(ch, 'sys', { t: `Заказ № ${ord.id} оплачен. Вся переписка сохранена в заказе.`, ok: true }); simExec(ord); }
     } else {
       const o = offerById(id); const c = cfgOf(o); const r = calc(o, c); const free = c.visit === 'free';
       const rent = o.booking === 'range';
-      ord = mkOrder({ offer: o.id, svc: o.svc, ex: o.ex, client: 'Алексей', cust: true, what: r.what || o.title, date: rent ? c.from : free ? null : c.day, dateTo: rent ? c.to : null, time: free || rent ? null : c.time, free, dur: r.dur, total: r.total, lines: r.L, status: 'paid', fmt: c.fmt, days: r.days, note: [...c.note, ...(c.noteText.trim() ? [c.noteText.trim()] : [])], files: c.files, kind: rent ? 'rent' : null });
+      ord = mkOrder({ offer: o.id, svc: o.svc, ex: o.ex, client: myFirst(), cust: true, what: r.what || o.title, date: rent ? c.from : free ? null : c.day, dateTo: rent ? c.to : null, time: free || rent ? null : c.time, free, dur: r.dur, total: r.total, lines: r.L, status: 'paid', fmt: c.fmt, days: r.days, note: [...c.note, ...(c.noteText.trim() ? [c.noteText.trim()] : [])], files: c.files, kind: rent ? 'rent' : null });
       if (o.sub && c.sub) ord.sub = mkSub(o.sub);
       const ch = ensureChat('cust', o); ch.order = ord.id; ord.chat = ch.id; ord.echat = ch.pair || null;
       postMsg(ch, 'sys', { t: `Заказ № ${ord.id} оплачен. Вся переписка сохранена в заказе.`, ok: true });
@@ -6998,7 +7008,7 @@ Object.assign(A, {
     postMsg(ch, 'me', { kind: 'brief', items: askOn(o.svc) ? askWhat(o.svc, b) : Object.values(b.sel).flat(), photos: b.photos, when: whenText(b), text: txt.t, svc: o.svc, budget, budgetFrom });
     postMsg(ch, 'sys', { t: 'Запрос у исполнителя. Он ответит здесь же.' });
     S.brief[id] = null;
-    later(1800, () => {
+    sim(1800, () => {
       /* имитация ответа: цена заказчика подходит — исполнитель соглашается, нет — называет свою */
       const rp = replyOf(o); let price = rp.price; let t = rp.text;
       if (budget && !rp.stages) {
@@ -7037,7 +7047,7 @@ Object.assign(A, {
     const req = { id: uid('r'), svc: s.n, title: s.n, what, text: R.text, photos: R.photos, whenText: whenText(R), whereText: R.place === 'me' ? `Москва, ${S.district}` : R.place === 'online' ? 'Онлайн' : 'У исполнителя', budget: R.budget, budgetFrom: R.budgetFrom || 0, docs: R.docs || 0, to: R.to, pick: R.pick.slice(), offers: [], status: 'open', created: dk(0), day: R.when === 'date' ? R.day : null };
     S.requests.unshift(req);
     const pool = offersFor(s.n).filter(o => R.to === 'all' || R.pick.includes(o.ex));
-    pool.slice(0, 3).forEach((o, i) => later(2200 + i * 2300, () => {
+    pool.slice(0, 3).forEach((o, i) => sim(2200 + i * 2300, () => {
       const base = calc(o, cfgOf(o)).total || priceFrom(o);
       const dd = req.day || [dk(1), dk(2), dk(1)][i];
       const x = { id: uid('ro'), ex: o.ex, offer: o.id, price: Math.round(base * (0.9 + i * 0.12) / 100) * 100, when: `${dayName(dd)}, ${['10:00', '15:00', '18:30'][i]}`, date: dd, text: ['Сделаю аккуратно, всё нужное привезу.', 'Могу раньше, если освободится окно.', 'Даю гарантию, фото работ в профиле.'][i] };
@@ -7068,7 +7078,7 @@ A.reqChooseOk = v => {
   const [rid, oid] = v.split('|'); const r = S.requests.find(x => x.id === rid); const x = r.offers.find(y => y.id === oid);
   r.status = 'chosen'; r.chosen = oid;
   const o = offerById(x.offer);
-  const ord = mkOrder({ offer: o.id, svc: r.title, ex: x.ex, client: 'Алексей', cust: true, what: r.what, date: x.date || dk(1), time: x.when.split(', ')[1] || '10:00', dur: 60, total: x.price, lines: [[r.title, x.price]], status: 'confirmed', fmt: r.whereText === 'Онлайн' ? 'online' : 'visit', fromReq: r.id });
+  const ord = mkOrder({ offer: o.id, svc: r.title, ex: x.ex, client: myFirst(), cust: true, what: r.what, date: x.date || dk(1), time: x.when.split(', ')[1] || '10:00', dur: 60, total: x.price, lines: [[r.title, x.price]], status: 'confirmed', fmt: r.whereText === 'Онлайн' ? 'online' : 'visit', fromReq: r.id });
   const ch = ensureChat('cust', o); ch.order = ord.id; ord.chat = ch.id; ord.echat = ch.pair || null;
   postMsg(ch, 'sys', { t: `Вы выбрали это предложение по заявке «${r.title}».` });
   go('c_checkout', { order: ord.id });
@@ -7115,7 +7125,7 @@ SCREENS.e_home = () => {
       return row(gv('e_service', { id: s.id }), thumb(o ? o.ph : sv ? svcPh(sv) : ''), esc(s.title), o ? priceLabel(o) : esc(s.need || (s.status === 'fix' ? `Исправьте шаг ${s.fixStep}` : 'Цена появится после проверки')), svcPill(s)); }).join('');
     return {
       deskBare: true,
-      body: '', deskBody: `<div class="dhero"><div class="grow"><h1 class="dhero-t">Здравствуйте, Алексей</h1><span class="dhero-s">Заявки заказчиков по вашим услугам и в других темах.</span></div>
+      body: '', deskBody: `<div class="dhero"><div class="grow"><h1 class="dhero-t">Здравствуйте, ${esc(myFirst())}</h1><span class="dhero-s">Заявки заказчиков по вашим услугам и в других темах.</span></div>
           <button class="dhero-q" data-a="go" data-v="${gv('e_feed', { scope: 'all' })}">${ic('search', 20, 2.2)}<span>Например: шиномонтаж R17 или сборка шкафа</span><b>Найти заказ</b></button></div>
         <div class="dstats">${stat('calok', 'green', today.length, 'заказов сегодня', 'e_schedule')}${stat('docsearch', 'orange', S.incLoaded ? inc.length : '…', 'новых личных заявок', 'e_incoming')}${stat('send', 'violet', offersN, 'заявок по вашим услугам', 'e_offers')}${stat('star', 'blue', '4,9', '214 отзывов', gv('c_reviews', { id: 'alex' }))}</div>
         <div class="dgrid2">${card(`<div class="sec"><span class="h2">Сегодня</span><button class="lnk" data-a="go" data-v="e_schedule">Расписание ${ic('arr', 16, 2.2)}</button></div><div class="drows">${todayL}</div>`)}
@@ -7237,11 +7247,11 @@ Object.assign(A, {
     x.my = { price: o.price, day: o.day, slot: o.slot }; x.offers = (x.offers || 0) + 1;
     if (x.req) {
       const r = S.requests.find(q => q.id === x.req);
-      if (r) { r.offers.unshift({ id: uid('ro'), ex: 'alex', offer: 'my_tire', price: o.price, when: `${dayName(o.day)}, ${o.slot}`, date: o.day, text: OFFER_MSGS[o.msg] }); notify('cust', 'Новое предложение по заявке', `Алексей Смирнов · ${rub(o.price)}`, gv('c_reqview', { id: r.id })); }
+      if (r) { r.offers.unshift({ id: uid('ro'), ex: 'alex', offer: 'my_tire', price: o.price, when: `${dayName(o.day)}, ${o.slot}`, date: o.day, text: OFFER_MSGS[o.msg] }); notify('cust', 'Новое предложение по заявке', `${myName()} · ${rub(o.price)}`, gv('c_reqview', { id: r.id })); }
       toast('Предложение отправлено');
     } else {
       toast('Предложение отправлено');
-      later(4000, () => {
+      sim(4000, () => {
         const ord = mkOrder({ offer: 'my_tire', svc: x.svc, ex: 'alex', client: x.client, what: x.what, date: o.day, time: o.slot, dur: 60, total: o.price, lines: [[x.svc, o.price]], status: 'paid', fmt: /выезд/.test(x.what) ? 'visit' : 'point' });
         const ch = { id: uid('ch'), role: 'exec', with: x.client, offer: 'my_tire', order: ord.id, unread: 1, msgs: [{ from: 'sys', t: `${x.client}: выбрали ваше предложение по заявке «${x.title}».` }, { from: 'sys', t: `Заказ № ${ord.id} оплачен. Переписка сохранена в заказе.`, ok: true }, { from: 'them', t: 'Здравствуйте! Буду вовремя.', at: nowTime() }] };
         S.chats.unshift(ch); ord.echat = ch.id;
@@ -7275,7 +7285,7 @@ function confirmInc(id) {
     const ord = mkOrder({ offer: i.offer, svc: i.svc, ex: 'alex', client: i.client, what: i.what, date: i.date, time: i.time, dur: i.dur || 60, total: i.total, lines: [[`${i.svc}: ${i.what}`, i.total]], status: 'confirmed', fmt: of ? of.formats[0] : 'point', echat: ch ? ch.id : null, note: i.note });
     i.order = ord.id;
     if (ch) { ch.order = ord.id; postMsg(ch, 'me', { t: 'Подтверждаю, жду вас. Можно оплачивать.' }); postMsg(ch, 'sys', { t: `Вы подтвердили заявку. Это заказ № ${ord.id}: вся переписка сохранена в нём. Ждём оплату.` }); }
-    later(3500, () => {
+    sim(3500, () => {
       if (ord.status !== 'confirmed') return; ord.status = 'paid';
       if (ch) postMsg(ch, 'sys', { t: `Заказ № ${ord.id} оплачен. Деньги на защищённом счёте до приёмки работы.`, ok: true });
       notify('exec', `Заказ № ${ord.id} оплачен`, `${i.client} · ${i.svc}`, gv('order', { id: ord.id })); toast(`Заказ № ${ord.id} оплачен`);
@@ -7642,7 +7652,7 @@ SCREENS.e_fav = () => ({
 /* ---------- кабинет исполнителя и финансы (лист 37: деньги и баллы раздельно) ---------- */
 SCREENS.e_cab = () => ({
   title: 'Кабинет', cls: 'cabh',
-  body: `<div class="card"><div class="row"><span class="ava lg">А</span><span class="grow"><span class="h2" style="display:block;font-size:28px;line-height:32px">Алексей Смирнов</span><span class="row wrap">${pill('Проверен', '', 'diamond')}<span class="rating">${ic('star', 16, 2)} 4,9</span><span class="m">214 отзывов</span></span></span></div></div>
+  body: `<div class="card"><div class="row"><span class="ava lg">${letter(myName())}</span><span class="grow"><span class="h2" style="display:block;font-size:28px;line-height:32px">${esc(myName())}</span><span class="row wrap">${pill('Проверен', '', 'diamond')}<span class="rating">${ic('star', 16, 2)} 4,9</span><span class="m">214 отзывов</span></span></span></div></div>
     ${card(`<div class="list">
       ${rl('Профиль и направления', 'Заполняется один раз для всех карточек', 'go', 'e_profile', { icon: 'user' })}
       ${rl('Статус и счёт', `${esc(S.profile.status)} · счёт подключён`, 'statusInfo', '', { icon: 'case' })}
@@ -7812,7 +7822,7 @@ function wzStep3(w) {
   const s = svcBy(w.svc); const P = S.profile;
   const fmtOpt = [['point', 'У себя', canOffline(s.f)], ['visit', 'Выезд к заказчику', canOffline(s.f)], ['online', 'Онлайн', canOnline(s.f)]];
   return `${card(`<div class="row"><span class="h2 grow">Из профиля</span><button class="lnk" data-a="go" data-v="e_profile">Изменить</button></div>
-      ${sumLines([['Точка', `${esc(P.points[0].name)}, ${esc(P.points[0].zone)}`], ['Выезд', P.visit.length ? `${P.visit.map(esc).join(', ')}, до ${P.radius}${NB}км` : 'нет'], ['График', schedText()]])}
+      ${sumLines([['Точка', P.points[0] ? `${esc(P.points[0].name)}, ${esc(P.points[0].zone)}` : 'не указана — добавьте в профиле'], ['Выезд', P.visit.length ? `${P.visit.map(esc).join(', ')}, до ${P.radius}${NB}км` : 'нет'], ['График', schedText()]])}
       <div class="m">Заказчик до оплаты видит только район. Точный адрес — после оплаты.</div>`, 'soft')}
     ${field('Где работаете', `<div class="chips">${fmtOpt.map(([v, l, ok]) => chip('wzFmt', v, l, w.fmts.includes(v), { dis: !ok })).join('')}</div>`, { hint: canOnline(s.f) ? '' : 'По каталогу эта услуга выполняется только на месте.' })}
     ${w.fmts.includes('visit') ? card(`<div class="h2">Выезд</div><div class="m">Территория — из профиля: ${P.visit.map(esc).join(', ') || 'не указана'}, до ${P.radius}${NB}км.</div>${field('Доплата за выезд', stepper('wzVisitAdd', 'v', w.visitAdd, 0, 5000, x => x ? rub(x) : 'Без доплаты'))}`) : ''}
@@ -7936,7 +7946,7 @@ function wizToOffer(w, id) {
   const o = { id, svc: w.svc, ex: 'alex', title: w.titleOwn || w.title || w.svc, ph: (wk[0] && wk[0].ph) || w.cover || (isTire(w) ? 'tire_mount' : svcPh(s)), gal: wk.map(x => x.ph),  /* в галерее — все фото работ из карточки */ desc: w.desc || sugFor(w.svc).desc[0], inc: w.inc.slice(), res: w.res,
     mode: w.mode, route: w.priceType === 'deal' && !w.vars && !isTire(w) ? 'B' : 'A', formats: w.fmts.length ? w.fmts.slice() : ['point'], visitAdd: w.fmts.includes('visit') ? w.visitAdd : 0,
     booking: onlyOnline(w) ? 'term' : !w.fmts.includes('point') ? 'slots' : w.visit.length === 2 ? 'both' : w.visit[0] === 'free' ? 'free' : 'slots',
-    zone: `${S.profile.points[0].zone}, 1,2 км от вас`, addr: `${S.profile.points[0].name}, вход со двора`, unit: w.unit,
+    zone: REAL ? (S.profile.points[0] || {}).zone || '' : `${S.profile.points[0].zone}, 1,2 км от вас`, addr: REAL ? (S.profile.points[0] || {}).name || '' : `${S.profile.points[0].name}, вход со двора`, unit: w.unit,
     need: w.fmts.includes('online') && w.onl.mat.length ? w.onl.mat.slice() : null,
     addons: w.addons.filter(a => a.name.trim()).map((a, i) => ({ id: 'a' + i, name: a.name, desc: a.desc || '', price: a.price, multi: a.multi, max: a.multi ? a.max : 1, unit: a.unit, time: a.tm ? { k: a.multi ? 'each' : 'once', m: a.tm } : { k: 'none' }, vars: w.vars && a.vars.length ? a.vars.map(k => 'p' + k) : null })) };
   if (isTire(w)) {
@@ -8443,7 +8453,7 @@ Object.assign(A, {
       const what = [R.text, (askOn(s.n) ? askWhat(s.n, R) : Object.values(R.sel).flat()).join(' · ')].filter(Boolean).join(' · ') || 'Подробности обсудим в переписке';
       const req = { id: uid('r'), svc: s.n, title: R.title.trim() || s.n, what, text: '', files: R.files.slice(), photos: 0, whenText: reqWhenText(R), whereText: reqFmtText(R), budget: R.btype === 'deal' ? 0 : R.budget, budgetFrom: R.btype === 'range' ? R.budgetFrom : 0, to: 'all', pick: [], offers: [], status: 'open', created: dk(0), until: dk(7), day: R.from };
       S.requests.unshift(req); S.reqDraft = null; S.reqSaved = false;
-      offersFor(s.n).filter(o => o.ex !== 'alex').slice(0, 3).forEach((o, i) => later(2200 + i * 2300, () => {
+      offersFor(s.n).filter(o => o.ex !== 'alex').slice(0, 3).forEach((o, i) => sim(2200 + i * 2300, () => {
         const base = isDeal(o) ? (o.reply || {}).price || priceFrom(o) : calc(o, cfgOf(o)).total || priceFrom(o); const dd = req.day || [dk(1), dk(2), dk(1)][i];
         const x = { id: uid('ro'), ex: o.ex, offer: o.id, price: Math.round(base * (0.9 + i * 0.12) / 100) * 100, when: `${dayName(dd)}, ${R.time || ['10:00', '15:00', '18:30'][i]}`, date: dd, text: ['Сделаю аккуратно, всё нужное привезу.', 'Могу раньше, если освободится окно.', 'Даю гарантию, фото работ в профиле.'][i] };
         req.offers.push(x); notify('cust', 'Новое предложение по заявке', `${exName(o.ex)} · ${rub(x.price)}`, gv('c_reqview', { id: req.id })); toast(`${exName(o.ex)} прислал предложение`);
@@ -8814,7 +8824,7 @@ function ensureChat(role, o) {
 }
 function postMsg(ch, from, m) {
   if (!ch) return;
-  const msg = Object.assign({ from, at: nowTime() }, m);
+  const msg = Object.assign({ from, at: nowTime(), mid: uid('m') }, m);
   ch.msgs.push(msg);
   const viewing = c => cur() && cur().n === 'chat' && cur().p.id === c.id;
   if (from === 'them' && !viewing(ch)) ch.unread = (ch.unread || 0) + 1;
@@ -8834,7 +8844,7 @@ function cabNav() {
   const ex = S.role === 'exec'; const n = cur().n; const r0 = S.stack[0].n; const reqTab = n === 'c_orders' && S.cOrdersTab === 'req';
   const it = (to, icn, label, cnt, hue, o = {}) => { const on = o.on != null ? o.on : (n === to || r0 === to);
     return `<button class="cni ${on ? 'on' : ''}" data-a="${o.act || 'tab'}" data-v="${to}" ${on ? 'aria-current="page"' : ''}><span class="ci ci-${hue}">${ic(icn, 20, 2)}</span><span class="grow">${label}</span>${cnt ? `<b class="${o.num ? 'cnum' : 'cnt'}">${cnt}</b>` : ''}</button>`; };
-  const cr = clientRating('Алексей');
+  const cr = clientRating(myFirst());
   const items = ex ? [
     it('e_home', 'home', 'Главная', 0, 'blue'), it('e_feed', 'search', 'Найти заказ', 0, 'blue'),
     it('e_incoming', 'docsearch', 'Поступившие заявки', newIncoming().length, 'orange'), it('e_offers', 'send', 'Заявки по услугам', S.feed.filter(x => !x.my).length, 'violet'),
@@ -8846,7 +8856,7 @@ function cabNav() {
     it('req', 'send', 'Мои заявки', homeNew('cust'), 'violet', { act: 'myReqs', on: reqTab }), it('c_msgs', 'chat', 'Сообщения', unreadMsgs('cust'), 'teal'),
     it('c_fav', 'heart', 'Избранное', S.favs.length, 'pink', { num: true }), it('c_sched', 'calok', 'Мои записи', 0, 'orange'), it('c_aboutme', 'star', 'Отзывы обо мне', 0, 'orange'),
   ];
-  return `<div class="cabme"><span class="ava lg">А</span><span class="grow"><b class="t18">Алексей Смирнов</b><span class="m">${ex ? 'Исполнитель · ★ 4,9 · 214 отзывов' : `Заказчик${cr ? ` · ★ ${String(cr.avg).replace('.', ',')} от исполнителей` : ''}`}</span></span></div>
+  return `<div class="cabme"><span class="ava lg">${letter(myName())}</span><span class="grow"><b class="t18">${esc(myName())}</b><span class="m">${ex ? `Исполнитель · ${REAL ? ratingText('alex') : '★ 4,9 · 214 отзывов'}` : `Заказчик${cr ? ` · ★ ${String(cr.avg).replace('.', ',')} от исполнителей` : ''}`}</span></span></div>
     <button class="cabsw" data-a="setRole" data-v="${ex ? 'cust' : 'exec'}">${ic('retry', 18, 2.2)}Перейти в роль «${ex ? 'Заказчик' : 'Исполнитель'}»</button>
     <nav class="cnl">${items.join('')}${it(ex ? 'e_cab' : 'c_cab', 'user', 'Кабинет', 0, 'grey')}</nav>`;
 }
@@ -8967,14 +8977,14 @@ function autoReply(ch) {
   if (ch.pair) return;
   const o = ch.role === 'cust' && canDeal(ch) && offerById(ch.offer); const vers = ch.msgs.filter(m => m.kind === 'version');
   if (o && !vers.length) {
-    later(1500, () => postMsg(ch, 'them', { t: 'Здравствуйте! Да, сделаю. Пришлю предложение с ценой и временем: примете его, и это станет заказом.' }));
-    later(3000, () => { const rp = replyOf(o); sendVersion(ch, 'them', { offer: o.id, title: o.title, price: rp.price, dur: rp.dur, inc: rp.inc, stages: rp.stages ? rp.stages.map(x => Object.assign({}, x)) : null, days: rp.days || 0, date: dk(1), time: '12:00' }); notify('cust', 'Пришло предложение', `${exName(o.ex)}: ${rub(rp.price)}`, gv('chat', { id: ch.id })); });
+    sim(1500, () => postMsg(ch, 'them', { t: 'Здравствуйте! Да, сделаю. Пришлю предложение с ценой и временем: примете его, и это станет заказом.' }));
+    sim(3000, () => { const rp = replyOf(o); sendVersion(ch, 'them', { offer: o.id, title: o.title, price: rp.price, dur: rp.dur, inc: rp.inc, stages: rp.stages ? rp.stages.map(x => Object.assign({}, x)) : null, days: rp.days || 0, date: dk(1), time: '12:00' }); notify('cust', 'Пришло предложение', `${exName(o.ex)}: ${rub(rp.price)}`, gv('chat', { id: ch.id })); });
     return;
   }
   const pending = vers.some(m => m.v.st === 'new');
   const t = ch.role === 'cust' ? (pending ? 'Если условия подходят, примите предложение: оно сразу станет заказом. Если нет, нажмите «Изменить условия».' : 'Здравствуйте! Да, всё получится. Уточню детали и отвечу.')
     : canDeal(ch) && !pending ? 'Хорошо. Пришлите предложение с ценой и временем, я приму его здесь.' : 'Спасибо, договорились!';
-  later(1500, () => postMsg(ch, 'them', { t }));
+  sim(1500, () => postMsg(ch, 'them', { t }));
 }
 /* новое предложение заменяет прежнее: у каждого свой номер, старые остаются в истории */
 function sendVersion(ch, from, v) {
@@ -8988,7 +8998,7 @@ function sendVersion(ch, from, v) {
 function simCustDeal(ch, v) {
   if (ch.pair) return;
   const inc = ch.inc && S.incoming.find(x => x.id === ch.inc); const budget = ch.budget || (inc && inc.budget) || 0;
-  later(2600, () => {
+  sim(2600, () => {
     if (v.st !== 'new') return;
     if (budget && v.price > budget && !v.asked) {
       postMsg(ch, 'them', { kind: 'ask', a: { ver: v.ver, price: budget, date: v.date, time: v.time, was: { price: v.price, date: v.date, time: v.time }, text: `Можно за ${rub(budget)}? На большее не рассчитывал.`, st: 'new' } });
@@ -9008,7 +9018,7 @@ function simCustDeal(ch, v) {
 /* приложение заказчика: исполнитель отвечает на просьбу изменить условия новым предложением */
 function simExecDeal(ch, a) {
   if (ch.pair) return;
-  later(2200, () => {
+  sim(2200, () => {
     const old = (ch.msgs.find(m => m.kind === 'version' && m.v.ver === a.ver) || {}).v;
     if (!old || old.st !== 'new') return;
     const price = a.price >= old.price * 0.85 ? a.price : r100((a.price + old.price) / 2);
@@ -9024,10 +9034,10 @@ function askSheet() {
     ${field('Цена', stepper('askPrice', 'p', a.price, 100, 500000, rub), { hint: `Сейчас в предложении ${rub(a.was.price)}.` })}
     <div class="field"><span class="lbl">День</span>${chips('askDay', Array.from({ length: 7 }, (_, n) => [dk(n), dayName(dk(n), true)]), v => v === a.date)}</div>
     <div class="field"><span class="lbl">Время</span>${chips('askTime', times, v => v === a.time)}</div>
-    ${field('Что ещё поменять, если нужно', `<textarea class="textarea" data-in="askText" rows="3" placeholder="Например: добавить кресло или начать пораньше">${esc(a.text)}</textarea>`)}
+    ${field('Что ещё поменять, если нужно', `<textarea class="textarea" data-in="dealAskText" rows="3" placeholder="Например: добавить кресло или начать пораньше">${esc(a.text)}</textarea>`)}
     ${btn('Отправить просьбу', 'askSend', '', 'block')}${btn('Отмена', 'closeSheet', '', 'text block')}`);
 }
-IN.askText = v => { S.askDraft.text = v; };
+IN.dealAskText = v => { S.askDraft.text = v; };
 IN.dealText = v => { S.dealDraft.text = v; };
 /* исполнитель: предложение заказом из переписки — услуга, что сделает, цена, день и время из расписания */
 function newDeal(ch, from) {
@@ -9083,7 +9093,7 @@ Object.assign(A, {
   verNo(v) {
     const [cid, i] = v.split('|'); const ch = chatById(cid); ch.msgs[Number(i)].v.st = 'no';
     postMsg(ch, 'sys', { t: 'Вы отказались от предложения. Переписка остаётся: можно договориться заново.' }); render();
-    if (!ch.pair) later(1500, () => postMsg(ch, 'them', { t: 'Понял. Если передумаете или нужно что-то другое, напишите.' }));
+    if (!ch.pair) sim(1500, () => postMsg(ch, 'them', { t: 'Понял. Если передумаете или нужно что-то другое, напишите.' }));
   },
 });
 Object.assign(A, {
@@ -9102,7 +9112,7 @@ Object.assign(A, {
   acceptVersion(v) {
     const [cid, i] = v.split('|'); const ch = chatById(cid); const m = ch.msgs[Number(i)]; const ver = m.v; const o = offerById(ver.offer);
     ver.st = 'ok';
-    const ord = mkOrder({ offer: o.id, svc: o.svc, ex: o.ex, client: 'Алексей', cust: true, what: ver.what || ver.inc.join(', '), date: ver.date, time: ver.time, dur: ver.dur, total: ver.price, lines: ver.lines ? ver.lines.slice() : [[ver.title, ver.price]], status: 'confirmed', fmt: o.formats[0], chat: ch.id, echat: ch.pair || null, stages: ver.stages ? ver.stages.map(x => Object.assign({}, x, { st: 'wait' })) : null, days: ver.days || 0, fromVer: ver.ver || 1 });
+    const ord = mkOrder({ offer: o.id, svc: o.svc, ex: o.ex, client: myFirst(), cust: true, what: ver.what || ver.inc.join(', '), date: ver.date, time: ver.time, dur: ver.dur, total: ver.price, lines: ver.lines ? ver.lines.slice() : [[ver.title, ver.price]], status: 'confirmed', fmt: o.formats[0], chat: ch.id, echat: ch.pair || null, stages: ver.stages ? ver.stages.map(x => Object.assign({}, x, { st: 'wait' })) : null, days: ver.days || 0, fromVer: ver.ver || 1 });
     ver.order = ord.id; ch.order = ord.id; ch.msgs.forEach(x => { if (x.kind === 'ask' && x.a.st === 'new') x.a.st = 'done'; });
     postMsg(ch, 'sys', { t: `Вы приняли предложение${ver.ver > 1 ? ' ' + ver.ver : ''}. Это заказ № ${ord.id}: вся переписка сохранена в нём. Осталось оплатить.` });
     go('c_checkout', { order: ord.id });
@@ -9126,13 +9136,13 @@ function simExec(o) {
   if (o.ex === 'alex' || o.stages) return;
   const w = codeWin(o);
   if (w.k === 'early') { o.simWait = true; return; }  /* исполнитель придёт к записи: код откроется за 2 часа */
-  if (w.k === 'open') { later(6000, () => { if (o.status !== 'paid') return; const t = hhmm(new Date()); const who = exName(o.ex); const msg = o.kind === 'rent' ? `${who} считал ваш код и выдал вещь.` : `${who} ввёл ваш код. Работа началась в ${t}.`; setSt(o, 'work', msg); o.startedAt = t; notify('cust', o.kind === 'rent' ? 'Вещь выдана' : 'Работа началась', `${msg} Заказ № ${o.id}`, gv('order', { id: o.id })); toast(msg); simResult(o); }); return; }
+  if (w.k === 'open') { sim(6000, () => { if (o.status !== 'paid') return; const t = hhmm(new Date()); const who = exName(o.ex); const msg = o.kind === 'rent' ? `${who} считал ваш код и выдал вещь.` : `${who} ввёл ваш код. Работа началась в ${t}.`; setSt(o, 'work', msg); o.startedAt = t; notify('cust', o.kind === 'rent' ? 'Вещь выдана' : 'Работа началась', `${msg} Заказ № ${o.id}`, gv('order', { id: o.id })); toast(msg); simResult(o); }); return; }
   if (w.k !== 'none') return;
-  later(6000, () => { if (o.status !== 'paid') return; const t = (SIM[o.kind] || [])[0]; setSt(o, 'startReq', t || `${exName(o.ex)} нажал «Начать работу». Подтвердите, что работа началась.`); notify('cust', 'Исполнитель начал работу', `Подтвердите начало: заказ № ${o.id}`, gv('order', { id: o.id })); toast(t || `${exName(o.ex)} начал работу. Подтвердите начало`); });
+  sim(6000, () => { if (o.status !== 'paid') return; const t = (SIM[o.kind] || [])[0]; setSt(o, 'startReq', t || `${exName(o.ex)} нажал «Начать работу». Подтвердите, что работа началась.`); notify('cust', 'Исполнитель начал работу', `Подтвердите начало: заказ № ${o.id}`, gv('order', { id: o.id })); toast(t || `${exName(o.ex)} начал работу. Подтвердите начало`); });
 }
 function simResult(o) {
   if (o.ex === 'alex') return;
-  later(6000, () => { if (!['work', 'rework'].includes(o.status)) return; o.resultText = (SIM[o.kind] || [])[1] || 'Работа выполнена по списку. Фото приложены.'; setSt(o, 'result', `${exName(o.ex)} передал результат и фото.`); notify('cust', 'Работа готова', `Проверьте и примите: заказ № ${o.id}`, gv('order', { id: o.id })); toast('Исполнитель передал результат. Проверьте и примите работу'); });
+  sim(6000, () => { if (!['work', 'rework'].includes(o.status)) return; o.resultText = (SIM[o.kind] || [])[1] || 'Работа выполнена по списку. Фото приложены.'; setSt(o, 'result', `${exName(o.ex)} передал результат и фото.`); notify('cust', 'Работа готова', `Проверьте и примите: заказ № ${o.id}`, gv('order', { id: o.id })); toast('Исполнитель передал результат. Проверьте и примите работу'); });
 }
 function orderActions(o) {
   const ex = S.role === 'exec'; const cust = !ex;
@@ -9232,7 +9242,8 @@ SCREENS.order = p => {
 /* ---------- код начала работы (28.10): QR или 4 цифры от заказчика подтверждают, что стороны встретились ---------- */
 const START_LEAD = 120, NO_SHOW = 15, CODE_TRIES = 5;  /* код виден за 2 часа; «не пришёл» — через 15 минут после начала; 5 попыток ввода */
 const visitNo = o => (o.sub ? o.sub.used : 0);
-const startCode = o => String(1000 + hash(`${o.id}|${visitNo(o)}|start`) % 9000);
+/* в рабочей версии код выдаёт сервер и показывает только заказчику; исполнитель отправляет его на проверку (10-real.js) */
+const startCode = o => REAL ? String(o.startCode || '····') : String(1000 + hash(`${o.id}|${visitNo(o)}|start`) % 9000);
 const hhmm = d => tstr(d.getHours() * 60 + d.getMinutes());
 const atText = d => `${dayName(dkey(d)).toLowerCase()}, ${hhmm(d)}`;
 const fmtOf = o => o.fmt || ((offerById(o.offer) || {}).formats || [])[0];
@@ -9250,7 +9261,7 @@ function codeWin(o) {
 function qrSvg(o) {
   if (typeof qrcode !== 'function') return '';
   const hour = Math.floor(Date.now() / 3600000);
-  const q = qrcode(0, 'M'); q.addData(`https://zeldo.ru/s/${o.id}-${visitNo(o)}-${(hash(`${o.id}|${visitNo(o)}|${hour}`) % 1679616).toString(36)}`); q.make();
+  const q = qrcode(0, 'M'); q.addData(REAL ? `${location.origin}/#start=${o.id}.${startCode(o)}` : `https://zeldo.ru/s/${o.id}-${visitNo(o)}-${(hash(`${o.id}|${visitNo(o)}|${hour}`) % 1679616).toString(36)}`); q.make();
   return q.createSvgTag({ cellSize: 6, margin: 0, scalable: true });
 }
 function codeBlock(o) {
@@ -9365,7 +9376,7 @@ Object.assign(A, {
   stNoCodeSend() {
     const o = orderById(S.stx.id); closeSheet(); S.stx = null;
     setSt(o, 'startReq', 'Исполнитель не смог получить код и отправил фото с места работы. Ждём, когда заказчик подтвердит начало.');
-    toast('Фото отправлено. Ждём подтверждения заказчика'); later(2200, () => { if (o.status !== 'startReq') return; setSt(o, 'work', 'Заказчик подтвердил начало работы.'); toast(`${o.client} подтвердил начало работы`); }); render();
+    toast('Фото отправлено. Ждём подтверждения заказчика'); sim(2200, () => { if (o.status !== 'startReq') return; setSt(o, 'work', 'Заказчик подтвердил начало работы.'); toast(`${o.client} подтвердил начало работы`); }); render();
   },
   stNoShow(id) { const o = orderById(id); closeSheet(); dialog({ title: 'Клиент не пришёл?', text: o.sub.miss.k === 'move' ? 'По правилу вашего абонемента визит переносится: клиент запишется на другой день.' : 'По правилу вашего абонемента визит сгорает: он спишется, оплата за него придёт вам.', actions: [['Отметить неявку', 'stNoShowOk', id, 'danger'], ['Отмена', 'closeDialog', '', 'soft']] }); },
   stNoShowOk(id) { S.dialog = null; const r = missVisit(orderById(id)); render(); toast(r === 'moved' ? 'Неявка отмечена. Визит переносится' : 'Неявка отмечена. Визит сгорел'); },
@@ -9392,7 +9403,7 @@ Object.assign(A, {
     const o = orderById(id);
     if (codeWin(o).k !== 'none') { S.stx = { id, mode: 'menu', code: '', err: '', photo: false }; startSheet(); return; }
     setSt(o, 'startReq', 'Исполнитель нажал «Начать работу». Ждём подтверждения заказчика.');
-    toast('Запрос отправлен заказчику'); later(2200, () => { setSt(o, 'work', 'Заказчик подтвердил начало работы.'); toast(`${o.client} подтвердил начало работы`); });
+    toast('Запрос отправлен заказчику'); sim(2200, () => { setSt(o, 'work', 'Заказчик подтвердил начало работы.'); toast(`${o.client} подтвердил начало работы`); });
     render();
   },
   confirmStart(id) { const o = orderById(id); setSt(o, 'work', 'Заказчик подтвердил начало работы.'); simResult(o); render(); toast('Начало работы подтверждено'); },
@@ -9402,7 +9413,7 @@ Object.assign(A, {
   resSend() {
     const d = S.resDraft; const o = orderById(d.id); o.resultText = d.tags.join('. ') + '.'; closeSheet();
     setSt(o, 'result', `Исполнитель передал результат${d.photo ? ' и фото' : ''}. Заказчик проверяет.`);
-    { toast('Результат передан. Ждём приёмки'); later(2600, () => { if (visitAccepted(o)) { setSt(o, 'paid', `${o.client} принял визит ${o.sub.used} из ${o.sub.total}. Вам переведено ${rub(perVisit(o))}.`); toast(`${o.client} принял визит. Деньги за визит переведены`); return; } setSt(o, 'done', 'Заказчик принял работу. Деньги переведены исполнителю.'); notify('exec', `Заказ № ${o.id} принят`, `Вам: ${rub(payout(o).net)}`, gv('order', { id: o.id })); toast(`${o.client} принял работу. Деньги переведены`); }); }
+    { toast('Результат передан. Ждём приёмки'); sim(2600, () => { if (visitAccepted(o)) { setSt(o, 'paid', `${o.client} принял визит ${o.sub.used} из ${o.sub.total}. Вам переведено ${rub(perVisit(o))}.`); toast(`${o.client} принял визит. Деньги за визит переведены`); return; } setSt(o, 'done', 'Заказчик принял работу. Деньги переведены исполнителю.'); notify('exec', `Заказ № ${o.id} принят`, `Вам: ${rub(payout(o).net)}`, gv('order', { id: o.id })); toast(`${o.client} принял работу. Деньги переведены`); }); }
     render();
   },
   acceptWork(id) { dialog({ title: 'Принять работу?', text: 'Деньги с защищённого счёта уйдут исполнителю. Если что-то не так, лучше попросите доработку.', actions: [['Принять работу', 'acceptOk', id, ''], ['Ещё проверю', 'closeDialog', '', 'soft']] }); },
@@ -9410,7 +9421,7 @@ Object.assign(A, {
     S.dialog = null; const o = orderById(id);
     if (visitAccepted(o)) { setSt(o, 'paid', `Визит ${o.sub.used} из ${o.sub.total} принят. Исполнителю переведено ${rub(perVisit(o))}. Следующий визит — когда удобно.`); render(); toast('Визит принят. Запишитесь на следующий'); return; }
     setSt(o, 'done', o.kind === 'rent' ? 'Заказ закрыт. Деньги переведены прокату.' : 'Заказчик принял работу. Деньги переведены исполнителю.'); render(); toast(o.kind === 'rent' ? 'Заказ закрыт' : 'Работа принята. Деньги ушли исполнителю');
-    if (o.kind === 'inspect') later(2500, () => { const ch = chatById(o.chat); const sm = smetaFor(o); postMsg(ch, 'them', { t: 'Смета по замеру. Каждая позиция отдельно, этапы оплачиваются по очереди.' }); postMsg(ch, 'them', { kind: 'version', v: sm }); notify('cust', 'Пришла смета', `${exName(o.ex)}: ${rub(sm.price)}`, gv('chat', { id: ch.id })); toast('Бригада прислала смету'); });
+    if (o.kind === 'inspect') sim(2500, () => { const ch = chatById(o.chat); const sm = smetaFor(o); postMsg(ch, 'them', { t: 'Смета по замеру. Каждая позиция отдельно, этапы оплачиваются по очереди.' }); postMsg(ch, 'them', { kind: 'version', v: sm }); notify('cust', 'Пришла смета', `${exName(o.ex)}: ${rub(sm.price)}`, gv('chat', { id: ch.id })); toast('Бригада прислала смету'); });
   },
   reworkAsk(id) { sheet('Что доработать', `<div class="m">Доработка — это исправление того, что уже входило в заказ. Новую работу так добавить нельзя.</div><div class="optlist">${['Не всё сделано по списку', 'Есть дефект, нужно исправить', 'Не тот результат, о котором договорились'].map(t => opt('reworkSend', `${id}|${t}`, t, '', false)).join('')}</div>`); },
   reworkSend(v) {
@@ -9448,7 +9459,7 @@ Object.assign(A, {
     const q = a.multi ? 4 : 1; const name = a.multi ? `${a.name} × ${q}` : a.name;
     o.change = { kind: 'add', name, sum: a.price * q, by: S.role, text: `Добавить: ${name.toLowerCase()} за ${rub(a.price * q)}` };
     setSt(o, o.status, `${S.role === 'exec' ? 'Исполнитель' : 'Заказчик'} предложил добавить: ${name.toLowerCase()}, ${rub(a.price * q)}.`); render();
-    later(2500, () => { o.change.agreed = true; if (S.role === 'exec') { toast(`${o.client} согласился, оплачивает доплату`); later(2500, () => { changeApply(o); notify('exec', 'Доплата получена', `Заказ № ${o.id}: ${name}`, gv('order', { id: o.id })); toast('Доплата на защищённом счёте, заказ обновлён'); }); } else toast(`${exName(o.ex)} согласен. Осталось доплатить`); });
+    sim(2500, () => { o.change.agreed = true; if (S.role === 'exec') { toast(`${o.client} согласился, оплачивает доплату`); sim(2500, () => { changeApply(o); notify('exec', 'Доплата получена', `Заказ № ${o.id}: ${name}`, gv('order', { id: o.id })); toast('Доплата на защищённом счёте, заказ обновлён'); }); } else toast(`${exName(o.ex)} согласен. Осталось доплатить`); });
   },
   rate(v) { const [id, n] = v.split('|'); orderById(id).rateTmp = Number(n); render(); },
   crate(v) { const [id, n] = v.split('|'); orderById(id).crTmp = Number(n); render(); },
@@ -9465,7 +9476,7 @@ Object.assign(A, {
     const o = orderById(id); const txt = String(o.rateText || '').trim();
     if (modCheck(txt).length) { toast('Уберите из отзыва контакты, ссылки или мат', 'info'); return; }
     o.reviewed = true;
-    const rv = { who: 'Алексей', stars: o.rateTmp, tags: (o.rateTags || []).slice(), text: txt || (o.rateTags || []).join(', ') || 'Без комментария', date: dk(0) };
+    const rv = { who: myFirst(), stars: o.rateTmp, tags: (o.rateTags || []).slice(), text: txt || (o.rateTags || []).join(', ') || 'Без комментария', date: dk(0) };
     if (o.ex === 'alex') S.reviews.unshift(rv); else (S.myRev[o.ex] = S.myRev[o.ex] || []).unshift(rv);
     render(); toast('Спасибо! Отзыв отправлен');
   },
@@ -9589,7 +9600,7 @@ Object.assign(A, {
 function rolePanel() {
   const row = (r, title, sub, cur) => `<button class="rl" data-a="setRole" data-v="${r}"><span class="grow"><span class="rt">${title}</span><span class="rs">${sub}</span></span>${!cur && r !== 'partner' && r !== 'guest' && allNew(r) ? `<span class="cnt" style="min-width:30px;height:30px;font-size:14px">${allNew(r)}</span>` : `<span class="ra">${ic(cur ? 'check' : 'arr', 22, 2.2)}</span>`}</button>`;
   const sub = r => S.role === r ? 'Текущая роль' : allNew(r) ? `Новых сообщений и событий: ${allNew(r)}` : 'Доступна в аккаунте';
-  return `<div class="card c soft"><span class="m">Алексей Смирнов · одна учётная запись</span><b class="t18">Сейчас: ${ROLE_NAME[S.role]}</b></div>
+  return `<div class="card c soft"><span class="m">${esc(myName())} · одна учётная запись</span><b class="t18">Сейчас: ${ROLE_NAME[S.role]}</b></div>
     <div class="h2">Выберите роль</div>
     <div class="list">${row('cust', 'Заказчик', sub('cust'), S.role === 'cust')}${row('exec', 'Исполнитель', sub('exec'), S.role === 'exec')}${row('partner', 'Партнёр', 'Активация отдельно', false)}${row('guest', 'Посмотреть как гость', 'Без входа в аккаунт', false)}</div>
     ${btn('Закрыть', 'closeAll', '', 'soft block')}`;
@@ -9653,7 +9664,7 @@ fitPhone();
 document.documentElement.dataset.theme = S.theme;
 document.documentElement.dataset.style = 'bold';
 window.__z = { S, A, SCREENS, CATS, DIRS, SERVICES, OFFERS, offerById, offersFor, svcBy, render, go, root, stackTo, startRequest, openWizard, ZP, calc, cfgOf, dk, fromKey, blockers };
-render('new');
+if (!REAL) render('new');
 
 /* ---------- защита от копирования (01.11, решение владельца) ----------
    Компьютер: нет меню правой кнопки, текст не выделяется и не копируется, картинки не перетаскиваются,
