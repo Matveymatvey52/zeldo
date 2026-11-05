@@ -3592,6 +3592,9 @@ a.lnk, .lnk { color: var(--act); font-weight: 600; display: inline-flex; align-i
 .stepper button { height: 100%; min-height: 44px; display: grid; place-items: center; color: var(--act); }
 .stepper button:disabled { color: var(--line2); }
 .stepper b { text-align: center; font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; padding: 0 6px; white-space: nowrap; }
+/* значение, которое можно вписать: выглядит как число, пунктир подсказывает, что на него нажимают */
+.stepper .stpv { min-width: 0; padding: 0 6px; color: var(--ink); font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; text-decoration: underline dotted var(--muted); text-underline-offset: 5px; }
+.pr2 .stepper.sm .stpv { font-size: 14px; }
 
 /* выбор (лист 33) */
 .opt { display: flex; align-items: flex-start; gap: 12px; width: 100%; padding: 14px 16px; border-radius: 18px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line2); text-align: left; }
@@ -5888,7 +5891,18 @@ function chip(act, v, label, on, o = {}) { return `<button class="chip ${on ? 'o
 const chips = (act, opts, isOn, o = {}) => `<div class="chips ${o.scroll ? 'scroll' : ''}">${opts.map(x => { const [v, l, sm] = Array.isArray(x) ? x : [x, x]; return chip(act, v, esc(l), isOn(v), { small: sm, cls: o.cls }); }).join('')}${o.extra || ''}</div>`;
 const ltabs = (act, items, val) => `<div class="ltabs" role="tablist">${items.map(([v, l, n]) => `<button class="${String(v) === String(val) ? 'on' : ''}" data-a="${act}" data-v="${esc(v)}" role="tab" aria-selected="${String(v) === String(val)}">${l}${n ? ` <span class="pill">${n}</span>` : ''}</button>`).join('')}</div>`;
 const seg = (act, items, val, cls = '') => `<div class="seg ${cls}" role="radiogroup">${items.map(([v, l, sm]) => `<button class="${String(v) === String(val) ? 'on' : ''}" data-a="${act}" data-v="${esc(v)}" role="radio" aria-checked="${String(v) === String(val)}">${l}${sm ? `<small>${sm}</small>` : ''}</button>`).join('')}</div>`;
-const stepper = (act, key, val, min, max, fmt = x => x, sm = false) => `<div class="stepper ${sm ? 'sm' : ''}"><button data-a="${act}" data-v="${esc(key)}|-1" ${val <= min ? 'disabled' : ''} aria-label="Меньше">${ic('minus', 20, 2.4)}</button><b>${fmt(val)}</b><button data-a="${act}" data-v="${esc(key)}|1" ${val >= max ? 'disabled' : ''} aria-label="Больше">${ic('plus', 20, 2.4)}</button></div>`;
+/* счётчик «−  значение  +». Если передан шаг, на значение можно нажать и вписать своё число (05.11, «ничего не ограничено»).
+   step — шаг кнопок при текущем значении: число или функция от значения; по нему вписанное число превращается в нажатия */
+const stepper = (act, key, val, min, max, fmt = x => x, sm = false, step = 0) => { const st = typeof step === 'function' ? step(val) : step;
+  return `<div class="stepper ${sm ? 'sm' : ''}"><button data-a="${act}" data-v="${esc(key)}|-1" ${val <= min ? 'disabled' : ''} aria-label="Меньше">${ic('minus', 20, 2.4)}</button>${st ? `<button class="stpv" data-a="stpEdit" data-v="${esc(JSON.stringify([act, key, val, st, min, max === Infinity ? null : max]))}" aria-label="${esc(String(fmt(val)))}. Вписать своё значение">${fmt(val)}</button>` : `<b>${fmt(val)}</b>`}<button data-a="${act}" data-v="${esc(key)}|1" ${val >= max ? 'disabled' : ''} aria-label="Больше">${ic('plus', 20, 2.4)}</button></div>`; };
+S.stp = null;
+IN.stpX = v => { S.stp.x = v; };
+A.stpEdit = v => { const [act, key, val, step, min, max] = JSON.parse(v); S.stp = { act, key, val, step, min, max: max == null ? Infinity : max, x: String(val) };
+  sheet('Своё значение', `${field('Сколько', `<input class="input num" id="stpin" inputmode="numeric" data-in="stpX" data-enter="stpOk" value="${esc(String(val))}" autocomplete="off">`, { hint: `Не меньше ${min}` })}${btn('Готово', 'stpOk', '', 'block')}${btn('Отмена', 'closeSheet', '', 'text block')}`);
+  setTimeout(() => { const i = $('#stpin'); if (i) { i.focus(); i.select(); } }, 60); };
+A.stpOk = () => { const s = S.stp; const n = Math.round(Number(String(s.x).replace(/\s/g, '').replace(',', '.')));
+  if (!String(s.x).trim() || !isFinite(n)) { toast('Впишите число', 'info'); return; }
+  const t = Math.min(Math.max(n, s.min), s.max, 99999999); closeSheet(); A[s.act](`${s.key}|${(t - s.val) / s.step}`); };
 const sw = (act, v, on, label = 'Переключить') => `<button class="switch ${on ? 'on' : ''}" data-a="${act}" data-v="${esc(v)}" role="switch" aria-checked="${!!on}" aria-label="${esc(label)}"></button>`;
 const opt = (act, v, title, sub, on, o = {}) => `<button class="opt ${on ? 'on' : ''}" data-a="${act}" data-v="${esc(v)}" aria-pressed="${!!on}"><span class="mark ${o.multi ? 'sq' : ''}"></span><span class="grow"><span class="ot">${title}</span>${sub ? `<span class="os">${sub}</span>` : ''}</span>${o.right ? `<span class="oprice">${o.right}</span>` : ''}</button>`;
 const field = (label, inner, o = {}) => `<label class="field ${o.bad ? 'bad' : ''}"><span class="lbl">${label}</span>${inner}${o.hint ? `<span class="m">${o.hint}</span>` : ''}${o.err ? `<span class="err">${o.err}</span>` : ''}</label>`;
@@ -6455,6 +6469,8 @@ const QTY = {
   'за пару': [1, 1, 1, 20, x => pn(x, 'пара', 'пары', 'пар')], 'за пробу': [1, 1, 1, 50, x => pn(x, 'проба', 'пробы', 'проб')],
   'за лид': [20, 5, 5, 1000, x => pn(x, 'лид', 'лида', 'лидов')], 'за вакансию': [1, 1, 1, 20, x => pn(x, 'вакансия', 'вакансии', 'вакансий')],
 };
+/* шаг бюджета: до 10 000 ₽ — по 500, дальше — по 1 000 */
+const budStep = x => x >= 10000 ? 1000 : 500;
 const qtyOf = o => o.model === 'generic' && o.unit && QTY[o.unit] && unitParam(o.unit) ? QTY[o.unit] : null;
 function defaultCfg(o) {
   const c = { fmt: o.formats[0], day: null, time: null, add: {}, visit: o.booking === 'free' ? 'free' : 'slot', note: [], noteText: '', noteOpen: false, files: 0 };
@@ -6648,7 +6664,7 @@ function paramsBlock(o, c) {
     if (p.t === 'да / нет') return `<div class="row prrow"><span class="grow">${esc(p.n)}${pp.yes ? `<span class="m" style="display:block">${plus(pp.yes, o, c)}</span>` : ''}</span>${sw('prYes', k, !!v, p.n)}</div>`;
     if (p.t === 'число') {
       const each = p.r === 'each' && pp.each; const hint = each ? (p.inc ? `${p.inc} входит в цену, каждый следующий +${rub(pp.each)}` : `+${rub(pp.each)} за каждый`) : '';
-      return field(p.n, stepper('prNum', k, v == null ? 1 : v, p.r === 'each' ? Math.min(p.inc, 1) : 0, p.inc >= 10 ? 500 : 50, x => x), { hint });
+      return field(p.n, stepper('prNum', k, v == null ? 1 : v, p.r === 'each' ? Math.min(p.inc, 1) : 0, Infinity, x => x, false, 1), { hint });
     }
     return field(p.n, `<input class="input" data-in="prText|${k}" value="${esc(v || '')}" placeholder="${PR_PH[p.id] || ''}" maxlength="60" autocomplete="off">`);
   }).join('')}<span class="m">${priced && ps.some(p => p.r !== 'info') ? 'Доплаты назначил исполнитель, они уже в итоге. ' : ''}Исполнитель увидит ваши ответы в заказе.</span></div>`;
@@ -6656,7 +6672,7 @@ function paramsBlock(o, c) {
 /* «сколько каждого»: диван, кресла, стулья — у каждого своя цена */
 function qtyList(o, c, p) {
   const v = (c.pr || {})[p.id] || {}; const pp = (o.prp || {})[p.id] || { v: {} }; const vals = p.r === 'pick' ? pickVals(o) : p.v;
-  return `<div class="list">${vals.map(x => `<div class="rlx"><div class="row"><span class="grow"><span class="t18 sb" style="display:block">${esc(x)}</span><span class="m">${pp.v[x] ? rub(pp.v[x]) + ' за шт.' : ''}</span></span>${stepper('prQty', `${o.id}|${p.id}|${x}`, v[x] || 0, 0, 20, n => n, true)}</div></div>`).join('')}</div>`;
+  return `<div class="list">${vals.map(x => `<div class="rlx"><div class="row"><span class="grow"><span class="t18 sb" style="display:block">${esc(x)}</span><span class="m">${pp.v[x] ? rub(pp.v[x]) + ' за шт.' : ''}</span></span>${stepper('prQty', `${o.id}|${p.id}|${x}`, v[x] || 0, 0, Infinity, n => n, true, 1)}</div></div>`).join('')}</div>`;
 }
 /* ответы — в состав заказа */
 const paramWhat = (o, c) => !prOn(o) || !c.pr ? [] : svcParams(o.svc).filter(p => p.id !== o.varParam).map(p => { const v = c.pr[p.id];
@@ -6678,12 +6694,12 @@ function askForm(n, k) {
     const kk = `${k}|${p.id}`; if (p.t === 'число' && st.pr[p.id] == null) st.pr[p.id] = 1; const v = st.pr[p.id];
     if (p.t === 'один из списка') return field(p.n, chips('askSet', p.v.map((x, i) => [`${kk}|${x}`, x, p.h[i] || '']), x => x === `${kk}|${v}`, { scroll: p.v.length > 4 }));
     if (p.t === 'несколько из списка') return field(p.n, chips('askTog', p.v.map(x => [`${kk}|${x}`, x]), x => (v || []).includes(x.split('|')[2])), { hint: 'Можно несколько' });
-    if (p.t === QTYS_T) return field(p.n, `<div class="list">${p.v.map(x => `<div class="rlx"><div class="row"><span class="grow t18 sb">${esc(x)}</span>${stepper('askQty', `${kk}|${x}`, (v || {})[x] || 0, 0, 20, m => m, true)}</div></div>`).join('')}</div>`);
+    if (p.t === QTYS_T) return field(p.n, `<div class="list">${p.v.map(x => `<div class="rlx"><div class="row"><span class="grow t18 sb">${esc(x)}</span>${stepper('askQty', `${kk}|${x}`, (v || {})[x] || 0, 0, Infinity, m => m, true, 1)}</div></div>`).join('')}</div>`);
     if (p.t === 'да / нет') return `<div class="row prrow"><span class="grow">${esc(p.n)}</span>${sw('askYes', kk, !!v, p.n)}</div>`;
-    if (p.t === 'число') return field(p.n, stepper('askNum', kk, v, 0, p.inc >= 10 ? 500 : 50, x => x));
+    if (p.t === 'число') return field(p.n, stepper('askNum', kk, v, 0, Infinity, x => x, false, 1));
     return field(p.n, `<input class="input" data-in="askText|${kk}" value="${esc(v || '')}" placeholder="${PR_PH[p.id] || ''}" maxlength="60" autocomplete="off">`);
   });
-  if (u) rows.unshift(field(unitParam(u), stepper('askAmt', k, st.q, QTY[u][2], QTY[u][3], QTY[u][4])));
+  if (u) rows.unshift(field(unitParam(u), stepper('askAmt', k, st.q, QTY[u][2], Infinity, QTY[u][4], false, QTY[u][1])));
   return rows.join('');
 }
 /* ответы строками: «Квартира: 2 комнаты», «Диван × 1» — в сообщение, заявку и заказ */
@@ -6701,9 +6717,9 @@ Object.assign(A, {
   askSet(v) { const [k, p, x] = v.split('|'); askSt(k).pr[p] = x; render(); },
   askTog(v) { const [k, p, x] = v.split('|'); const pr = askSt(k).pr; const l = pr[p] || (pr[p] = []); const i = l.indexOf(x); i < 0 ? l.push(x) : l.splice(i, 1); render(); },
   askYes(v) { const [k, p] = v.split('|'); const pr = askSt(k).pr; pr[p] = !pr[p]; render(); },
-  askNum(v) { const [k, p, d] = v.split('|'); const pr = askSt(k).pr; pr[p] = clamp((pr[p] == null ? 1 : pr[p]) + Number(d), 0, 500); render(); },
-  askQty(v) { const [k, p, x, d] = v.split('|'); const pr = askSt(k).pr; const m = pr[p] && typeof pr[p] === 'object' ? pr[p] : (pr[p] = {}); m[x] = clamp((m[x] || 0) + Number(d), 0, 20); render(); },
-  askAmt(v) { const [k, d] = v.split('|'); const st = askSt(k); const q = QTY[st.u]; st.q = clamp(st.q + Number(d) * q[1], q[2], q[3]); render(); },
+  askNum(v) { const [k, p, d] = v.split('|'); const pr = askSt(k).pr; pr[p] = clamp((pr[p] == null ? 1 : pr[p]) + Number(d), 0, Infinity); render(); },
+  askQty(v) { const [k, p, x, d] = v.split('|'); const pr = askSt(k).pr; const m = pr[p] && typeof pr[p] === 'object' ? pr[p] : (pr[p] = {}); m[x] = clamp((m[x] || 0) + Number(d), 0, Infinity); render(); },
+  askAmt(v) { const [k, d] = v.split('|'); const st = askSt(k); const q = QTY[st.u]; st.q = clamp(st.q + Number(d) * q[1], q[2], Infinity); render(); },
 });
 /* акции исполнителя в карточке услуги: какая скидка и при каком условии; «Приведи друга» — с приглашением */
 /* разово или абонементом: исполнитель задал число визитов, срок, скидку и правило пропуска */
@@ -6740,7 +6756,7 @@ function configBlock(o, c) {
     const hint = t.big ? `Больше ${last[1]}${NB}м² — цена за метр: ${rub(o.clean.perM2[deep ? 1 : 0])}.` : t.bumped ? `${t.area}${NB}м² — много для ${FLAT_RU[pr.flat][0]}, поэтому цена как за ${FLAT_RU[t.F[t.i][0]][1]}.` : 'Цена — по типу квартиры. Если площадь больше обычной для него, считаем по площади.';
     return `${field('Вариант уборки', `<div class="optlist">${o.variants.map(v => opt('cfgSet', `${o.id}|v|${v.id}`, v.name, v.note, c.v === v.id)).join('')}</div>`)}
       ${field('Квартира', chips('prSet', t.F.map(f => [`${o.id}|flat|${f[0]}`, f[0], `до ${f[1]}${NB}м² · ${rub(deep ? f[3] : f[2])}`]), x => x === `${o.id}|flat|${pr.flat}`, { scroll: true }))}
-      ${field('Площадь', stepper('prStep', `${o.id}|area|5|15|300`, t.area, 15, 300, x => `${x}${NB}м²`), { hint })}`;
+      ${field('Площадь', stepper('prStep', `${o.id}|area|5|10|Infinity|${t.area}`, t.area, 10, Infinity, x => `${x}${NB}м²`, false, 5), { hint })}`;
   }
   if (o.model === 'hair') {
     const ms = (o.masters || []).filter(m => m.p[c.v]);
@@ -6756,7 +6772,7 @@ function configBlock(o, c) {
       ${o.extraNeeds ? field('Нужно что-то ещё?', chips('needTog', o.extraNeeds.map(x => [`${o.id}|${x}`, x]), x => (c.needs || []).includes(x.split('|')[1])), { hint: (c.needs || []).length ? 'Этих пунктов нет в прайсе. Исполнитель оценит их и подтвердит цену до оплаты.' : 'Пункты вне прайса: исполнитель оценит их до оплаты.' }) : ''}`;
   }
   if (o.model === 'design') return `${field('Объект', chips('cfgSet', o.objs.map(x => [`${o.id}|obj|${x}`, x]), v => v === `${o.id}|obj|${c.obj}`))}
-      <div class="grid2">${field('Площадь', stepper('cfgStep', `${o.id}|area|5|30|160`, c.area, 30, 160, x => `${x}${NB}м²`, true))}${field('Помещений', stepper('cfgStep', `${o.id}|rooms|1|1|8`, c.rooms, 1, 8, x => x, true))}</div>
+      <div class="grid2">${field('Площадь', stepper('cfgStep', `${o.id}|area|5|10|Infinity`, c.area, 10, Infinity, x => `${x}${NB}м²`, true, 5))}${field('Помещений', stepper('cfgStep', `${o.id}|rooms|1|1|Infinity`, c.rooms, 1, Infinity, x => x, true, 1))}</div>
       ${field('Пакет', `<div class="optlist">${o.variants.map(x => `<button class="opt ${c.v === x.id ? 'on' : ''}" data-a="cfgSet" data-v="${o.id}|v|${x.id}" aria-pressed="${c.v === x.id}"><span class="mark"></span><span class="grow"><span class="ot">${x.name}</span><span class="os">${x.inc.join(' · ')}</span><span class="os">Результат: ${esc(lcFirst(x.res))}</span><span class="os">${rub(x.per)} за м² · ${pn(x.term, 'день', 'дня', 'дней')}</span></span></button>`).join('')}</div>`, { hint: 'Цена пакета — за квадратный метр, но не меньше ' + rub(o.min) + '.' })}
       ${field('Как работаем', `<div class="optlist">${o.ways.map(([id, n, pr, sub]) => opt('cfgSet', `${o.id}|way|${id}`, n, sub, c.way === id, { right: pr ? rub(pr) : 'без доплаты' })).join('')}</div>`, { hint: 'Выезд на замер платный: цена указана заранее.' })}
       ${field('Пожелания', chips('wishTog', o.wishes.map(x => [`${o.id}|${x}`, x]), x => c.wish.includes(x.split('|')[1])))}
@@ -6765,7 +6781,7 @@ function configBlock(o, c) {
   if (o.model === 'inspect') {
     const I = o.inspect;
     return `${field('Что ремонтируем', chips('cfgSet', I.rooms.map(([id, n]) => [`${o.id}|room|${id}`, n]), v => v === `${o.id}|room|${c.room}`))}
-      ${field('Площадь пола', stepper('cfgStep', `${o.id}|area|1|4|120`, c.area, 4, 120, x => `${x}${NB}м²`))}
+      ${field('Площадь пола', stepper('cfgStep', `${o.id}|area|1|4|Infinity`, c.area, 4, Infinity, x => `${x}${NB}м²`, false, 1))}
       ${field('Состояние', chips('condTog', I.cond.map(x => [`${o.id}|${x}`, x]), x => c.cond.includes(x.split('|')[1])))}
       ${field('Какие работы нужны', `<div class="optlist">${I.works.map(([id, n, pr, u]) => opt('workTog', `${o.id}|${id}`, n, `${rub(pr)} за ${u}`, c.works.includes(id), { multi: true })).join('')}</div>`, { hint: 'Объёмы посчитают на замере. В смете будет каждая позиция: объём, цена и срок.' })}
       ${field('Материалы', `<div class="optlist">${I.mat.map(([id, n]) => opt('cfgSet', `${o.id}|mat|${id}`, n, id === 'exec' ? 'В смете отдельной строкой, сверка по чекам' : 'Бригада скажет, сколько и чего купить', c.mat === id)).join('')}</div>`)}
@@ -6774,15 +6790,15 @@ function configBlock(o, c) {
   }
   if (o.model === 'rent') return `${field('Что берёте', `<div class="optlist">${o.variants.map(v => opt('cfgSet', `${o.id}|v|${v.id}`, v.name, '', c.v === v.id, { right: `${rub(v.price)}/сутки` })).join('')}</div>`)}<div class="info"><b>Получение и возврат</b><span class="m">${esc(o.terms)}</span></div>`;
   if (o.model === 'tutor') return field('Формат', `<div class="optlist">${o.variants.map(v => opt('cfgSet', `${o.id}|v|${v.id}`, v.name, v.visits ? `${pn(v.visits, 'занятие', 'занятия', 'занятий')} на ${v.period}. Платите сразу, преподаватель получает деньги после каждого занятия` : `${mins(v.dur)} по видеосвязи`, c.v === v.id, { right: rub(v.price) })).join('')}</div>`);
-  if (o.model === 'hours') return field('Сколько часов', stepper('cfgStep', `${o.id}|h|1|1|8`, c.h, 1, 8, x => pn(x, 'час', 'часа', 'часов')), { hint: 'Не уверены? Возьмите меньше: если не хватит, мастер предложит продлить.' });
-  if (o.model === 'period') return `${field('Период', seg('cfgSet', ['1 месяц', '2 месяца', '3 месяца'].map(p => [`${o.id}|per|${p}`, p]), `${o.id}|per|${c.per}`, 'sm'))}${field('Сколько посещений', stepper('cfgStep', `${o.id}|visits|1|1|24`, c.visits, 1, 24, x => pn(x, 'посещение', 'посещения', 'посещений')), { hint: 'Период и число посещений выбираются отдельно: месяц не равен четырём визитам.' })}`;
+  if (o.model === 'hours') return field('Сколько часов', stepper('cfgStep', `${o.id}|h|1|1|Infinity`, c.h, 1, Infinity, x => pn(x, 'час', 'часа', 'часов'), false, 1), { hint: 'Не уверены? Возьмите меньше: если не хватит, мастер предложит продлить.' });
+  if (o.model === 'period') return `${field('Период', seg('cfgSet', ['1 месяц', '2 месяца', '3 месяца'].map(p => [`${o.id}|per|${p}`, p]), `${o.id}|per|${c.per}`, 'sm'))}${field('Сколько посещений', stepper('cfgStep', `${o.id}|visits|1|1|Infinity`, c.visits, 1, Infinity, x => pn(x, 'посещение', 'посещения', 'посещений'), false, 1), { hint: 'Период и число посещений выбираются отдельно: месяц не равен четырём визитам.' })}`;
   const Q = qtyOf(o);
   if (o.pick) { const p = pickOf(o); const u = Q ? ' ' + o.unit : '';
     const pf = field(p.n, p.t === QTYS_T ? qtyList(o, c, p) : chips('prTog', pickVals(o).map(x => [`${o.id}|${p.id}|${x}`, x, rub(o.prp[p.id].v[x]) + u]), x => (c.pr[p.id] || []).includes(x.split('|')[2])), { hint: Q ? `Цены ${o.unit} назначил исполнитель. Итог — сумма выбранного × ${lcFirst(unitParam(o.unit))}.` : 'Цены назначил исполнитель. Итог — сумма выбранного.' });
-    return Q ? pf + field(unitParam(o.unit), stepper('cfgStep', `${o.id}|q|${Q[1]}|${Q[2]}|${Q[3]}`, c.q || Q[0], Q[2], Q[3], Q[4])) : pf; }
+    return Q ? pf + field(unitParam(o.unit), stepper('cfgStep', `${o.id}|q|${Q[1]}|${Q[2]}|Infinity`, c.q || Q[0], Q[2], Infinity, Q[4], false, Q[1])) : pf; }
   const vp = o.variants && o.varParam && ZP.p[o.varParam];
   const varF = vp ? field(vp.n, chips('cfgSet', o.variants.map(v => [`${o.id}|v|${v.id}`, v.name, `${rub(v.price)}${Q ? ' ' + o.unit : ''}`]), x => x === `${o.id}|v|${c.v}`, { scroll: o.variants.length > 4 })) : '';
-  if (Q) return varF + field(unitParam(o.unit), stepper('cfgStep', `${o.id}|q|${Q[1]}|${Q[2]}|${Q[3]}`, c.q || Q[0], Q[2], Q[3], Q[4]), { hint: `Цена ${o.unit}: ${rub(vOf(o, c) && o.variants ? vOf(o, c).price : o.from)}. Итог считается сам.` });
+  if (Q) return varF + field(unitParam(o.unit), stepper('cfgStep', `${o.id}|q|${Q[1]}|${Q[2]}|Infinity`, c.q || Q[0], Q[2], Infinity, Q[4], false, Q[1]), { hint: `Цена ${o.unit}: ${rub(vOf(o, c) && o.variants ? vOf(o, c).price : o.from)}. Итог считается сам.` });
   return varF;
 }
 function addonsBlock(o, c) {
@@ -6790,8 +6806,8 @@ function addonsBlock(o, c) {
   return card(`<div class="h2">Дополнительно</div><div class="m">Добавьте, если нужно. То, что уже входит в работу, второй раз не продаётся.</div>
     <div class="list">${list.map(a => {
       const q = c.add[a.id] || 0; const t = a.time.k === 'each' ? ` · +${a.time.m}${NB}мин за шт.` : a.time.k === 'once' ? ` · +${a.time.m}${NB}мин` : a.time.k === 'days' ? ` · +${pn(a.time.d, 'день', 'дня', 'дней')}` : '';
-      return `<div class="rlx"><div class="row"><span class="grow"><span class="t18 sb" style="display:block">${esc(a.name)}</span><span class="m">${rub(a.price)}${a.multi ? ' за ' + a.unit + ', до ' + a.max : ''}${t}${a.desc ? ' · ' + esc(a.desc) : ''}</span></span>
-        ${a.multi ? stepper('addQ', `${o.id}|${a.id}`, q, 0, a.max, x => x, true) : sw('addTog', `${o.id}|${a.id}`, !!q, a.name)}</div></div>`;
+      return `<div class="rlx"><div class="row"><span class="grow"><span class="t18 sb" style="display:block">${esc(a.name)}</span><span class="m">${rub(a.price)}${a.multi ? ' за ' + a.unit : ''}${t}${a.desc ? ' · ' + esc(a.desc) : ''}</span></span>
+        ${a.multi ? stepper('addQ', `${o.id}|${a.id}`, q, 0, Infinity, x => x, true, 1) : sw('addTog', `${o.id}|${a.id}`, !!q, a.name)}</div></div>`;
     }).join('')}</div>`, 'c');
 }
 function needBlock(o, c) {
@@ -6876,11 +6892,11 @@ const togKey = (v, k) => { const [id, x] = v.split('|'); const c = cfgOf(offerBy
 Object.assign(A, {
   prSet(v) { const [id, p, x] = v.split('|'); const o = offerById(id); const c = cfgOf(o); c.pr = c.pr || {}; const pm = svcParams(o.svc).find(q => q.id === p);
     c.pr[p] = c.pr[p] === x && (!pm || pm.r === 'info') ? null : x; c.time = null; render(); },  /* у доплаты всегда выбрано значение: первое — без доплаты */
-  prQty(v) { const [id, p, x, d] = v.split('|'); const c = cfgOf(offerById(id)); c.pr = c.pr || {}; c.pr[p] = c.pr[p] || {}; c.pr[p][x] = clamp((c.pr[p][x] || 0) + Number(d), 0, 20); c.time = null; render(); },
-  prStep(v) { const [id, p, step, min, max, d] = v.split('|'); const c = cfgOf(offerById(id)); c.pr = c.pr || {}; c.pr[p] = clamp((c.pr[p] || Number(min)) + Number(step) * Number(d), Number(min), Number(max)); c.time = null; render(); },
+  prQty(v) { const [id, p, x, d] = v.split('|'); const c = cfgOf(offerById(id)); c.pr = c.pr || {}; c.pr[p] = c.pr[p] || {}; c.pr[p][x] = clamp((c.pr[p][x] || 0) + Number(d), 0, Infinity); c.time = null; render(); },
+  prStep(v) { const [id, p, step, min, max, base, d] = v.split('|'); const c = cfgOf(offerById(id)); c.pr = c.pr || {}; c.pr[p] = clamp((c.pr[p] || Number(base) || Number(min)) + Number(step) * Number(d), Number(min), Number(max));  /* от того, что на экране: у квартиры площадь по умолчанию, а не нижняя граница */ c.time = null; render(); },
   prTog(v) { const [id, p, x] = v.split('|'); const c = cfgOf(offerById(id)); c.pr = c.pr || {}; c.pr[p] = c.pr[p] || []; togIn(c.pr[p], x); render(); },
   prYes(v) { const [id, p] = v.split('|'); const c = cfgOf(offerById(id)); c.pr = c.pr || {}; c.pr[p] = !c.pr[p]; render(); },
-  prNum(v) { const [id, p, d] = v.split('|'); const c = cfgOf(offerById(id)); c.pr = c.pr || {}; c.pr[p] = clamp((c.pr[p] == null ? 1 : c.pr[p]) + Number(d), 0, 500); render(); },
+  prNum(v) { const [id, p, d] = v.split('|'); const c = cfgOf(offerById(id)); c.pr = c.pr || {}; c.pr[p] = clamp((c.pr[p] == null ? 1 : c.pr[p]) + Number(d), 0, Infinity); render(); },
   cfgSet(v) {
     const [id, k, val] = v.split('|'); const o = offerById(id); const c = cfgOf(o); c[k] = val !== '' && !isNaN(val) ? Number(val) : val;
     if (['master', 'fmt', 'v', 'g', 'd', 'tr'].includes(k)) c.time = null;
@@ -6900,7 +6916,7 @@ Object.assign(A, {
   noteOpen(id) { cfgOf(offerById(id)).noteOpen = true; render(); setTimeout(() => { const t = document.querySelector('[data-in^="cfgNote"]'); if (t) t.focus(); }, 30); },
   wheel(v) { const [id, i] = v.split('|'); const c = cfgOf(offerById(id)); c.wh[i] = !c.wh[i]; c.time = null; render(); },
   wheelAll(id) { const c = cfgOf(offerById(id)); const all = c.wh.every(Boolean); c.wh = c.wh.map(() => !all); c.time = null; render(); },
-  addQ(v) { const [id, aid, d] = v.split('|'); const o = offerById(id); const a = o.addons.find(x => x.id === aid); const c = cfgOf(o); c.add[aid] = clamp((c.add[aid] || 0) + Number(d), 0, a.max); c.time = null; render(); },
+  addQ(v) { const [id, aid, d] = v.split('|'); const o = offerById(id); const a = o.addons.find(x => x.id === aid); const c = cfgOf(o); c.add[aid] = clamp((c.add[aid] || 0) + Number(d), 0, Infinity); c.time = null; render(); },
   addTog(v) { const [id, aid] = v.split('|'); const c = cfgOf(offerById(id)); c.add[aid] = c.add[aid] ? 0 : 1; c.time = null; render(); },
   pickTime(t) { cfgOf(offerById(cur().p.id)).time = t; render(); },
   checkout(id) { if (S.role === 'guest') return needLogin('оформить заказ'); go('c_checkout', { id }); },
@@ -7012,7 +7028,7 @@ SCREENS.c_brief = p => {
       ${field('Фото', `<div class="thumbs">${Array.from({ length: b.photos }, () => `<span class="thumb">${photo(o.ph)}<span class="tk">${ic('check', 14, 3)}</span></span>`).join('')}<button class="thumb add" data-a="briefPhoto" data-v="${o.id}" aria-label="Добавить фото">${ic('camera', 26)}</button></div>`, { hint: 'С фото исполнитель назовёт точную цену без выезда.' })}
       <div class="field"><span class="lbl">Когда удобно</span>${whenPick('brief', b, 'briefWhen')}</div>
       ${field('Ваша цена', `<div class="optlist">${opt('briefBt', `${o.id}|deal`, 'Пусть назовёт исполнитель', `Ориентир в карточке: ${priceLabel(o)}`, b.btype === 'deal')}${opt('briefBt', `${o.id}|fix`, 'Своя сумма', 'Сколько готовы заплатить', b.btype === 'fix')}${opt('briefBt', `${o.id}|range`, 'От и до', 'В какую сумму хотите уложиться', b.btype === 'range')}</div>
-        ${b.btype === 'fix' ? stepper('briefBudget', `${o.id}|budget`, b.budget, 500, 500000, rub) : b.btype === 'range' ? `<div class="grid2">${field('От', stepper('briefBudget', `${o.id}|budgetFrom`, b.budgetFrom, 500, 500000, rub, true))}${field('До', stepper('briefBudget', `${o.id}|budget`, b.budget, 500, 500000, rub, true))}</div>` : ''}`, { hint: b.btype === 'deal' ? '' : 'Исполнитель согласится на вашу цену или предложит свою.' })}
+        ${b.btype === 'fix' ? stepper('briefBudget', `${o.id}|budget`, b.budget, 500, Infinity, rub, false, budStep) : b.btype === 'range' ? `<div class="grid2">${field('От', stepper('briefBudget', `${o.id}|budgetFrom`, b.budgetFrom, 500, Infinity, rub, true, budStep))}${field('До', stepper('briefBudget', `${o.id}|budget`, b.budget, 500, Infinity, rub, true, budStep))}</div>` : ''}`, { hint: b.btype === 'deal' ? '' : 'Исполнитель согласится на вашу цену или предложит свою.' })}
       ${field('Комментарий, если нужно', `<textarea class="textarea" data-in="briefText|${o.id}" placeholder="Например: диван у окна, пятна от кофе" rows="3">${esc(b.text)}</textarea>`)}`,
     bar: `<div class="abar">${btn(`Отправить запрос ${ic('send', 20)}`, 'sendBrief', o.id, 'block')}</div>`,
   };
@@ -7030,7 +7046,7 @@ Object.assign(A, {
     render();
   },
   briefBudget(v) {
-    const [id, k, dir] = v.split('|'); const b = S.brief[id]; const x = b[k] || 0; b[k] = clamp(x + Number(dir) * (x >= 10000 ? 1000 : 500), 500, 500000);
+    const [id, k, dir] = v.split('|'); const b = S.brief[id]; const x = b[k] || 0; b[k] = clamp(x + Number(dir) * (x >= 10000 ? 1000 : 500), 500, Infinity);
     if (b.btype === 'range' && b.budget <= b.budgetFrom) { if (k === 'budget') b.budgetFrom = Math.max(500, b.budget - 500); else b.budget = b.budgetFrom + 500; }
     render();
   },
@@ -7071,7 +7087,7 @@ Object.assign(A, {
   reqTog(v) { const [gi, x] = v.split('|'); const l = S.req.sel[gi] || (S.req.sel[gi] = []); const i = l.indexOf(x); if (i < 0) { if (/колес|колёс|^R\d|На автомобиле|Снятые/.test(x)) l.length = 0; l.push(x); } else l.splice(i, 1); render(); },
   reqSet(v) { const [k, x] = v.split('|'); S.req[k] = k === 'budget' ? (x === '1' ? 3000 : 0) : x; if (k === 'when' && (x === 'date' || x === 'until') && !S.req.day) S.req.day = x === 'until' ? dk(7) : dk(1); render(); },
   reqBt(v) { const R = S.req; R.btype = v; if (v === 'deal') { R.budget = 0; R.budgetFrom = 0; } if (v === 'fix') { R.budget = R.budget || 3000; R.budgetFrom = 0; } if (v === 'range') { R.budgetFrom = R.budgetFrom || 2000; R.budget = Math.max(R.budget || 0, R.budgetFrom + 1000); } render(); },
-  reqBudget(v) { const [k, dir] = v.split('|'); const R = S.req; const x = R[k] || 0; R[k] = clamp(x + Number(dir) * (x >= 10000 ? 1000 : 500), 500, 500000); if (R.btype === 'range' && R.budget <= R.budgetFrom) { if (k === 'budget') R.budgetFrom = Math.max(500, R.budget - 500); else R.budget = R.budgetFrom + 500; } render(); },
+  reqBudget(v) { const [k, dir] = v.split('|'); const R = S.req; const x = R[k] || 0; R[k] = clamp(x + Number(dir) * (x >= 10000 ? 1000 : 500), 500, Infinity); if (R.btype === 'range' && R.budget <= R.budgetFrom) { if (k === 'budget') R.budgetFrom = Math.max(500, R.budget - 500); else R.budget = R.budgetFrom + 500; } render(); },
   reqDoc() { S.req.docs = (S.req.docs || 0) + 1; render(); toast('Документ прикреплён'); },
   reqPhoto() { S.req.photos = Math.min(4, S.req.photos + 1); render(); },
   reqPick(x) { const l = S.req.pick; const i = l.indexOf(x); i < 0 ? l.push(x) : l.splice(i, 1); render(); },
@@ -7265,14 +7281,14 @@ SCREENS.e_task = p => {
       <div class="info"><b>${x.personal ? 'Вас выбрали в подборку' : 'Общая заявка'}</b><span class="m">Почему вы её видите: ${whyFeed(x)}. ${feedAudience(x)} Заказчик сравнит предложения и выберет одно.</span></div>
       ${x.my ? card(`${pill('Предложение отправлено', 'ok', 'check')}<div class="t18 b">${rub(x.my.price)} · ${dayName(x.my.day)}, ${x.my.slot}</div><div class="m">Ждём решения заказчика. Если он выберет вас, придёт уведомление и заказ появится в «Заказах».</div>`, 'soft')
         : card(`<div class="h2">Ваше предложение</div>
-          ${field('Цена', stepper('offerPrice', 'p', o.price, 100, 200000, rub), { hint: `Подставили из вашего прайса.${x.budget && o.price > x.budget ? ' Выше бюджета заказчика — он может выбрать другого.' : ''}` })}
+          ${field('Цена', stepper('offerPrice', 'p', o.price, 100, Infinity, rub, false, 100), { hint: `Подставили из вашего прайса.${x.budget && o.price > x.budget ? ' Выше бюджета заказчика — он может выбрать другого.' : ''}` })}
           ${pickDayTime('task', o, 60, x.date, x.part)}
           ${field('Сообщение заказчику', `<div class="optlist">${OFFER_MSGS.map((t, i) => opt('offerMsg', i, t, '', o.msg === i)).join('')}</div>`)}`)}`,
     bar: x.my ? '' : `<div class="abar">${o.slot ? btn('Отправить предложение', 'offerSend', x.id, 'block') : `<button class="btn block" disabled>Отправить предложение</button><div class="why center">Причина: выберите время.</div>`}${btn('Задать вопрос', 'feedAsk', x.id, 'text block')}</div>`,
   };
 };
 Object.assign(A, {
-  offerPrice(v) { const d = Number(v.split('|')[1]); S.offerDraft.price = clamp(S.offerDraft.price + d * 100, 100, 200000); render(); },
+  offerPrice(v) { const d = Number(v.split('|')[1]); S.offerDraft.price = clamp(S.offerDraft.price + d * 100, 100, Infinity); render(); },
   offerMsg(i) { S.offerDraft.msg = Number(i); render(); },
   feedAsk(id) { const x = reqById(id); const ch = { id: uid('ch'), role: 'exec', with: x.client, offer: 'my_tire', unread: 0, msgs: [{ from: 'sys', t: `По заявке «${x.title}»` }] }; S.chats.unshift(ch); go('chat', { id: ch.id }); },
   offerSend(id) {
@@ -7340,7 +7356,7 @@ SCREENS.e_request = p => {
   else if (i.kind === 'confirm') actions = card(`<div class="h2">Действия</div><div class="list">${rl('Подтвердить заказ', 'Заказчик сможет оплатить', 'incConfirm', i.id, { icon: 'check' })}${rl('Предложить другое время', 'День и время из вашего расписания', 'incOtherTime', i.id, { icon: 'clock' })}${i.chat ? rl('Переписка', 'Если нужно уточнить детали', 'go', gv('chat', { id: i.chat }), { icon: 'chat' }) : ''}</div>`);
   else if (i.kind === 'brief') actions = card(`<div class="h2">Ответить предложением</div><div class="m">Заказчик увидит состав, цену и время одной карточкой и сможет сразу оплатить.</div>
       ${field('Что сделаете', chips('replyInc', REPLY_INC, v => rd.inc.includes(v)))}
-      ${field('Цена', stepper('replyPrice', 'p', rd.price, 100, 50000, rub), { hint: i.budget ? `Заказчик предложил ${budText(i.budget, i.budgetFrom)}. Согласитесь или назовите свою цену.` : '' })}
+      ${field('Цена', stepper('replyPrice', 'p', rd.price, 100, Infinity, rub, false, 100), { hint: i.budget ? `Заказчик предложил ${budText(i.budget, i.budgetFrom)}. Согласитесь или назовите свою цену.` : '' })}
       ${pickDayTime('reply', rd, 40, null, '')}
       ${rd.slot ? btn('Отправить предложение', 'replySend', i.id, 'block') : `<button class="btn block" disabled>Отправить предложение</button><div class="why center">Причина: выберите день и время.</div>`}${i.chat ? btn('Открыть переписку', 'go', gv('chat', { id: i.chat }), 'text block') : ''}`);
   else actions = card(`<div class="h2">Быстрый ответ</div><div class="optlist">${Q_ANS.map((t, k) => opt('qAnswer', `${i.id}|${k}`, t, '', false)).join('')}</div>`);
@@ -7365,7 +7381,7 @@ Object.assign(A, {
     S.altTime = null; toast('Предложили другое время'); back();
   },
   replyInc(v) { togIn(S.replyDraft.inc, v); render(); },
-  replyPrice(v) { S.replyDraft.price = clamp(S.replyDraft.price + Number(v.split('|')[1]) * 100, 100, 50000); render(); },
+  replyPrice(v) { S.replyDraft.price = clamp(S.replyDraft.price + Number(v.split('|')[1]) * 100, 100, Infinity); render(); },
   replySend(id) {
     const i = S.incoming.find(x => x.id === id); const rd = S.replyDraft; i.status = 'ok';
     const ch = chatById(i.chat);
@@ -7421,7 +7437,7 @@ SCREENS.e_profile = () => {
       ${card(`<div class="h2">Чем занимаетесь</div><div class="m">По направлениям мы показываем только ваши услуги и поля, а не весь каталог.</div>${chips('profDir', P.dirs.map(d => [d, d]), () => true, { extra: `<button class="chip add" data-a="profDirAdd">${ic('plus', 16, 2.4)} Направление</button>` })}`)}
       ${P.dirs.includes('Авто') ? card(`<div class="h2">Вопросы по направлению «Авто»</div>${field('С какими машинами работаете', chips('profCar', ['Легковые', 'Кроссоверы', 'Внедорожники', 'Минивэны', 'Коммерческие'], v => P.cars.includes(v)))}`) : ''}
       ${card(`<div class="h2">Где принимаете</div><div class="list">${P.points.map(pt => rl(esc(pt.name), `${esc(pt.zone)} · заказчик видит район, адрес — после оплаты`, 'stop', '', { icon: 'pin', noArr: true })).join('')}</div><button class="chip add" data-a="profPoint" style="justify-self:start">${ic('plus', 16, 2.4)} Точка</button>
-        ${field('Выезд к заказчику', chips('profVisit', ['ЮЗАО', 'ЗАО', 'ЮАО', 'ЦАО', 'Новая Москва'], v => P.visit.includes(v)))}${field('Радиус выезда', stepper('profRad', 'r', P.radius, 0, 50, x => x ? `до ${x}${NB}км` : 'без выезда'))}`)}
+        ${field('Выезд к заказчику', chips('profVisit', ['ЮЗАО', 'ЗАО', 'ЮАО', 'ЦАО', 'Новая Москва'], v => P.visit.includes(v)))}${field('Радиус выезда', stepper('profRad', 'r', P.radius, 0, Infinity, x => x ? `до ${x}${NB}км` : 'без выезда', false, 5))}`)}
       ${card(`<div class="list">${rl('Расписание', schedText(), 'go', 'e_schedule', { icon: 'cal' })}</div>`, 'c')}
       ${field('О себе', `<textarea class="textarea" data-in="profAbout" rows="3">${esc(P.about)}</textarea>`, { hint: 'Этот текст увидят в вашем профиле.' })}
       ${btn(`${ic('spark', 20)} Помочь написать`, 'profAI', '', 'soft block')}`,
@@ -7433,7 +7449,7 @@ Object.assign(A, {
   profSet(v) { const [k, x] = v.split('|'); S.profile[k] = x; render(); },
   profCar(v) { togIn(S.profile.cars, v); render(); },
   profVisit(v) { togIn(S.profile.visit, v); render(); },
-  profRad(v) { S.profile.radius = clamp(S.profile.radius + Number(v.split('|')[1]) * 5, 0, 50); render(); },
+  profRad(v) { S.profile.radius = clamp(S.profile.radius + Number(v.split('|')[1]) * 5, 0, Infinity); render(); },
   profDir(v) { if (S.profile.dirs.length > 1) { togIn(S.profile.dirs, v); render(); } else toast('Нужно хотя бы одно направление', 'info'); },
   profDirAdd() { sheet('Добавить направление', `<div class="chips">${CATS.map(c => chip('profDirPick', c.name, esc(c.name), S.profile.dirs.includes(c.name))).join('')}</div>${btn('Готово', 'closeSheetRender', '', 'block')}`); },
   profDirPick(v) { togIn(S.profile.dirs, v); A.profDirAdd(); },
@@ -7858,7 +7874,7 @@ function wzStep3(w) {
       ${sumLines([['Точка', P.points[0] ? `${esc(P.points[0].name)}, ${esc(P.points[0].zone)}` : 'не указана — добавьте в профиле'], ['Выезд', P.visit.length ? `${P.visit.map(esc).join(', ')}, до ${P.radius}${NB}км` : 'нет'], ['График', schedText()]])}
       <div class="m">Заказчик до оплаты видит только район. Точный адрес — после оплаты.</div>`, 'soft')}
     ${field('Где работаете', `<div class="chips">${fmtOpt.map(([v, l, ok]) => chip('wzFmt', v, l, w.fmts.includes(v), { dis: !ok })).join('')}</div>`, { hint: canOnline(s.f) ? '' : 'По каталогу эта услуга выполняется только на месте.' })}
-    ${w.fmts.includes('visit') ? card(`<div class="h2">Выезд</div><div class="m">Территория — из профиля: ${P.visit.map(esc).join(', ') || 'не указана'}, до ${P.radius}${NB}км.</div>${field('Доплата за выезд', stepper('wzVisitAdd', 'v', w.visitAdd, 0, 5000, x => x ? rub(x) : 'Без доплаты'))}`) : ''}
+    ${w.fmts.includes('visit') ? card(`<div class="h2">Выезд</div><div class="m">Территория — из профиля: ${P.visit.map(esc).join(', ') || 'не указана'}, до ${P.radius}${NB}км.</div>${field('Доплата за выезд', stepper('wzVisitAdd', 'v', w.visitAdd, 0, Infinity, x => x ? rub(x) : 'Без доплаты', false, 100))}`) : ''}
     ${w.fmts.includes('online') ? card(`<div class="h2">Онлайн</div>${field('Что передаёт заказчик', chips('wzOnl', ONL_MAT.map(x => [`mat|${x}`, x]), x => w.onl.mat.includes(x.split('|')[1])))}${field('Как получает результат', chips('wzOnl', ONL_GET.map(x => [`get|${x}`, x]), x => w.onl.get.includes(x.split('|')[1])))}`) : ''}
     ${w.fmts.includes('point') ? field('Как записываться к вам', chips('wzVisit', [['slot', 'По записи'], ['free', 'Без записи']], v => w.visit.includes(v)), { hint: 'По записи заказчик выбирает свободное время в вашем календаре. Без записи — живая очередь в часы работы, только у вас в точке.' }) : ''}
     ${field('Как принимать заказы', `<div class="optlist">${opt('wzMode', 'instant', 'Сразу оплата', 'Заказчик выбирает время и платит, подтверждать не нужно', w.mode === 'instant')}${opt('wzMode', 'confirm', 'С подтверждением', 'Сначала вы подтверждаете заказ, потом заказчик платит', w.mode === 'confirm')}</div>`, { hint: 'Настройка действует только на эту карточку. Начало работы в любом случае подтверждает код заказчика.' })}
@@ -7867,7 +7883,7 @@ function wzStep3(w) {
       ${field('Особенности шин', chips('wzTireF', [['rf', 'RunFlat'], ['lp', 'Низкий профиль'], ...(w.tire.rf && w.tire.lp ? [['both', 'Оба признака сразу']] : [])], v => w.tire[v]), { hint: 'Что не отмечено, не берёте. Тип диска не спрашиваем.' })}
       ${field('Как передают колёса', chips('wzTr', [['car', 'На автомобиле'], ['off', 'Снятые колёса']], v => w.tire.transfers.includes(v)), { hint: 'Для каждого способа на шаге 4 будет своя цена.' })}
       <div class="info"><span class="m">Количество колёс заказчик отметит сам: 1, 2, 3 или 4. Для комплекта из четырёх зададите свою цену.</span></div>`)
-      : w.vars ? '' : field(byTerm(w) ? 'Срок результата' : 'Сколько длится работа', byTerm(w) ? stepper('wzTermS', '1', w.term, 1, 365, x => pn(x, 'день', 'дня', 'дней')) : stepper('wzDurS', '15', w.dur, 15, 600, mins), { hint: byTerm(w) ? 'Через сколько дней заказчик получит результат.' : 'Сколько занимает работа. Шаг 15 минут, после двух часов — 30.' })}${docCard(w)}`;
+      : w.vars ? '' : field(byTerm(w) ? 'Срок результата' : 'Сколько длится работа', byTerm(w) ? stepper('wzTermS', '1', w.term, 1, Infinity, x => pn(x, 'день', 'дня', 'дней'), false, 1) : stepper('wzDurS', '15', w.dur, 15, Infinity, mins), { hint: byTerm(w) ? 'Через сколько дней заказчик получит результат.' : 'Сколько занимает работа. Шаг 15 минут, после двух часов — 30.' })}${docCard(w)}`;
 }
 
 /* единица цены — только те, что подходят услуге по таблице; одна — без выбора */
@@ -7886,22 +7902,22 @@ function wzStep4(w) {
     const ds = w.tire.diams.slice().sort((a, b) => a - b); const t = w.tp; const trs = w.tire.transfers; const tab = trs.includes(t.tab) ? t.tab : trs[0];
     price = card(`<div class="h2">Цены по диаметрам</div><div class="m">Для каждого диаметра — цена за одно колесо и за комплект из четырёх. 2 и 3 колеса считаются по цене за колесо.</div>
       ${trs.length > 1 ? seg('wzTpTab', trs.map(x => [x, TR_NAME[x]]), tab) : ''}
-      <div class="grid2">${field(`Заготовка: от R${ds[0]}`, stepper('wzTp', 'base|50', t.base, 100, 5000, rub, true))}${field('+ за каждый дюйм', stepper('wzTp', 'step|10', t.step, 0, 1000, rub, true))}</div>
+      <div class="grid2">${field(`Заготовка: от R${ds[0]}`, stepper('wzTp', 'base|50', t.base, 100, Infinity, rub, true, 50))}${field('+ за каждый дюйм', stepper('wzTp', 'step|10', t.step, 0, Infinity, rub, true, 10))}</div>
       ${btn('Заполнить таблицу заготовкой', 'wzFill', '', 'soft block')}
-      <div class="ptab">${ds.map(d => { const pr = (t.p[tab] || {})[d] || [0, 0]; return `<div class="pr2"><b class="t18">R${d}</b><div class="grid2"><span class="col g4"><span class="m">За колесо</span>${stepper('wzPer', `${tab}|${d}|0|50`, pr[0], 0, 20000, rub, true)}</span><span class="col g4"><span class="m">Комплект 4</span>${stepper('wzPer', `${tab}|${d}|1|100`, pr[1], 0, 80000, rub, true)}</span></div></div>`; }).join('')}</div>
+      <div class="ptab">${ds.map(d => { const pr = (t.p[tab] || {})[d] || [0, 0]; return `<div class="pr2"><b class="t18">R${d}</b><div class="grid2"><span class="col g4"><span class="m">За колесо</span>${stepper('wzPer', `${tab}|${d}|0|50`, pr[0], 0, Infinity, rub, true, 50)}</span><span class="col g4"><span class="m">Комплект 4</span>${stepper('wzPer', `${tab}|${d}|1|100`, pr[1], 0, Infinity, rub, true, 100)}</span></div></div>`; }).join('')}</div>
       <div class="m">Цена комплекта не обязана равняться четырём колёсам.</div>
-      ${w.tire.rf ? field('Доплата за RunFlat, за колесо', stepper('wzTp', 'rf|50', t.rf, 0, 3000, rub, true)) : ''}${w.tire.lp ? field('Доплата за низкий профиль, за колесо', stepper('wzTp', 'lp|50', t.lp, 0, 3000, rub, true)) : ''}${w.tire.rf && w.tire.lp && w.tire.both ? field('Доплата, если оба признака сразу, за колесо', stepper('wzTp', 'both|50', t.both, 0, 5000, rub, true)) : ''}
-      <div class="grid2">${field(`Время, колесо (${TR_NAME[tab].toLowerCase()})`, stepper('wzTDur', `${tab}|0|1`, t.dur[tab][0], 3, 60, mins, true))}${field('Время, комплект', stepper('wzTDur', `${tab}|1|5`, t.dur[tab][1], 10, 180, mins, true))}</div>`);
+      ${w.tire.rf ? field('Доплата за RunFlat, за колесо', stepper('wzTp', 'rf|50', t.rf, 0, Infinity, rub, true, 50)) : ''}${w.tire.lp ? field('Доплата за низкий профиль, за колесо', stepper('wzTp', 'lp|50', t.lp, 0, Infinity, rub, true, 50)) : ''}${w.tire.rf && w.tire.lp && w.tire.both ? field('Доплата, если оба признака сразу, за колесо', stepper('wzTp', 'both|50', t.both, 0, Infinity, rub, true, 50)) : ''}
+      <div class="grid2">${field(`Время, колесо (${TR_NAME[tab].toLowerCase()})`, stepper('wzTDur', `${tab}|0|1`, t.dur[tab][0], 3, Infinity, mins, true, 1))}${field('Время, комплект', stepper('wzTDur', `${tab}|1|5`, t.dur[tab][1], 10, Infinity, mins, true, 5))}</div>`);
   } else if (w.vars) {
-    price = card(`<div class="h2">Цена каждого варианта</div>${priceParam(w.svc) ? '<div class="m">Полная цена за вариант — ваша. Площадка ничего не прибавляет.</div>' : ''}${w.vr.map((v, i) => `<div class="addon"><b class="t18">${esc(v.name || 'Без названия')}</b><span class="m">${v.inc.map(esc).join(' · ')}</span><div class="col g8">${field('Цена', stepper('wzVr', `${i}|price|${v.price >= 10000 ? 1000 : 100}`, v.price, 100, 1000000, rub, true))}${onlyOnline(w) ? field('Срок результата', stepper('wzVr', `${i}|term|1`, v.term, 1, 60, x => pn(x, 'день', 'дня', 'дней'), true)) : field('Длительность', stepper('wzVr', `${i}|dur|5`, v.dur, 10, 480, mins, true))}</div></div>`).join('')}<div class="m">Цену набора задаёте сами: она не обязана равняться сумме частей.</div>`);
+    price = card(`<div class="h2">Цена каждого варианта</div>${priceParam(w.svc) ? '<div class="m">Полная цена за вариант — ваша. Площадка ничего не прибавляет.</div>' : ''}${w.vr.map((v, i) => `<div class="addon"><b class="t18">${esc(v.name || 'Без названия')}</b><span class="m">${v.inc.map(esc).join(' · ')}</span><div class="col g8">${field('Цена', stepper('wzVr', `${i}|price|${v.price >= 10000 ? 1000 : 100}`, v.price, 100, Infinity, rub, true, v.price >= 10000 ? 1000 : 100))}${onlyOnline(w) ? field('Срок результата', stepper('wzVr', `${i}|term|1`, v.term, 1, Infinity, x => pn(x, 'день', 'дня', 'дней'), true, 1)) : field('Длительность', stepper('wzVr', `${i}|dur|5`, v.dur, 10, Infinity, mins, true, 5))}</div></div>`).join('')}<div class="m">Цену набора задаёте сами: она не обязана равняться сумме частей.</div>`);
   } else if (w.pick) {
     price = pickCard(w);
   } else {
     price = card(`<div class="h2">Как считать цену</div><div class="optlist">${opt('wzPT', 'fixed', 'Точная цена', 'Заказчик видит итог и может оплатить сразу', w.priceType === 'fixed')}${opt('wzPT', 'from', 'От — зависит от объёма', 'Заказчик отправит условия, вы подтвердите окончательную цену до оплаты', w.priceType === 'from')}${opt('wzPT', 'deal', 'После описания задачи', 'Заказчик опишет задачу, вы пришлёте предложение с ценой', w.priceType === 'deal')}</div>
-      ${w.priceType !== 'deal' ? `${field(w.priceType === 'from' ? 'Цена от' : 'Цена', stepper('wzPrice', 'p', w.price, 100, 1000000, rub))}${wzUnitField(w)}` : `${field('Ориентир для заказчика, от', stepper('wzPrice', 'p', w.price, 100, 1000000, rub))}`}`);
+      ${w.priceType !== 'deal' ? `${field(w.priceType === 'from' ? 'Цена от' : 'Цена', stepper('wzPrice', 'p', w.price, 100, Infinity, rub, false, x => x >= 10000 ? 1000 : x >= 2000 ? 500 : 100))}${wzUnitField(w)}` : `${field('Ориентир для заказчика, от', stepper('wzPrice', 'p', w.price, 100, Infinity, rub, false, x => x >= 10000 ? 1000 : x >= 2000 ? 500 : 100))}`}`);
   }
   const stages = w.stages || isProject(w) ? card(`<div class="row"><span class="grow"><span class="h2" style="display:block">Оплата по этапам</span><span class="m">Для крупных работ: у этапа свой результат и цена. Деньги за этап придут после его приёмки, следующий этап начнётся после приёмки предыдущего.</span></span>${sw('wzStages', '', w.stages, 'Оплата по этапам')}</div>
-      ${w.stages ? `${w.st.map((s, i) => `<div class="addon"><div class="ah"><input class="input" data-in="wzStName|${i}" value="${esc(s.name)}" aria-label="Название этапа"><button class="iconbtn" data-a="wzStDel" data-v="${i}" aria-label="Удалить этап">${ic('x', 20, 2.2)}</button></div>${stepper('wzStPrice', `${i}|1000`, s.price, 1000, 5000000, rub, true)}</div>`).join('')}<button class="chip add" data-a="wzStAdd" style="justify-self:start">${ic('plus', 16, 2.4)} Этап</button><div class="sumline total"><span>Весь проект</span><b>${rub(w.st.reduce((a, s) => a + s.price, 0))}</b></div>` : ''}`) : '';
+      ${w.stages ? `${w.st.map((s, i) => `<div class="addon"><div class="ah"><input class="input" data-in="wzStName|${i}" value="${esc(s.name)}" aria-label="Название этапа"><button class="iconbtn" data-a="wzStDel" data-v="${i}" aria-label="Удалить этап">${ic('x', 20, 2.2)}</button></div>${stepper('wzStPrice', `${i}|1000`, s.price, 1000, Infinity, rub, true, 1000)}</div>`).join('')}<button class="chip add" data-a="wzStAdd" style="justify-self:start">${ic('plus', 16, 2.4)} Этап</button><div class="sumline total"><span>Весь проект</span><b>${rub(w.st.reduce((a, s) => a + s.price, 0))}</b></div>` : ''}`) : '';
   const incN = w.inc.map(norm);
   const sug = sugFor(w.svc).add.filter(([n]) => !w.addons.some(a => a.name === n) && !incN.includes(norm(n)));
   const addons = card(`<div class="h2">Допы</div><div class="m">Нажмите на подсказку или «Свой доп» — строка появится прямо здесь. То, что уже входит в работу, допом не делайте.</div>
@@ -7909,10 +7925,9 @@ function wzStep4(w) {
     ${w.addons.map((a, i) => `<div class="addon">
       <div class="ah"><input class="input" data-in="wzAdName|${i}" value="${esc(a.name)}" placeholder="Название допа" aria-label="Название допа"><button class="iconbtn" data-a="wzAdDel" data-v="${i}" aria-label="Удалить доп">${ic('x', 20, 2.2)}</button></div>
       <input class="input" style="min-height:44px;font-size:14px;padding:8px 12px;border-radius:13px" data-in="wzAdDesc|${i}" value="${esc(a.desc || '')}" placeholder="Что входит в одну единицу (по желанию)" maxlength="60" aria-label="Краткое описание допа">
-      <div class="row wrap">${stepper('wzAdPrice', `${i}`, a.price, 0, 100000, rub, true)}<span class="m">${a.multi ? 'за ' + esc(a.unit) : 'за раз'}</span></div>
-      ${seg('wzAdMulti', [[`${i}|0`, 'Один раз', 'нельзя взять дважды'], [`${i}|1`, 'Несколько', `до ${Math.max(a.max, 2)} ${esc(a.unit)}`]], `${i}|${a.multi ? 1 : 0}`)}
-      ${a.multi ? `<div class="row"><span class="m grow">Максимум в одном заказе</span>${stepper('wzAdMax', `${i}`, a.max, 2, 50, x => x, true)}</div>` : ''}
-      ${field('Время', stepper('wzAdTm', `${i}`, a.tm, 0, 240, m => m ? `+${mins(m)}` : 'не добавляет'), { hint: a.tm ? (a.multi ? 'Добавится к работе за каждую штуку.' : 'Добавится к работе один раз.') : 'Работа не станет дольше.' })}
+      <div class="row wrap">${stepper('wzAdPrice', `${i}`, a.price, 0, Infinity, rub, true, x => x >= 1000 ? 100 : x >= 200 ? 50 : 10)}<span class="m">${a.multi ? 'за ' + esc(a.unit) : 'за раз'}</span></div>
+      ${seg('wzAdMulti', [[`${i}|0`, 'Один раз', 'нельзя взять дважды'], [`${i}|1`, 'Несколько', 'сколько угодно в одном заказе']], `${i}|${a.multi ? 1 : 0}`)}
+      ${field('Время', stepper('wzAdTm', `${i}`, a.tm, 0, Infinity, m => m ? `+${mins(m)}` : 'не добавляет', false, 5), { hint: a.tm ? (a.multi ? 'Добавится к работе за каждую штуку.' : 'Добавится к работе один раз.') : 'Работа не станет дольше.' })}
       ${w.vars && w.vr.length > 1 ? `<span class="lbl">Для каких вариантов</span><div class="chips">${chip('wzAdVar', `${i}|*`, 'Для всех', !a.vars.length, { noCheck: true })}${w.vr.map((v, k) => chip('wzAdVar', `${i}|${k}`, esc(v.name || `Вариант ${k + 1}`), a.vars.includes(k))).join('')}</div>` : ''}
       ${incN.includes(norm(a.name)) ? `<span class="err">Это уже входит в работу: второй раз за доплату продавать нельзя.</span>` : ''}
     </div>`).join('')}
@@ -7930,13 +7945,13 @@ function prpCard(w) {
   return card(`<div class="h2">Доплаты по ответам заказчика</div><div class="m">Заказчик отвечает на эти вопросы в карточке и сразу видит вашу доплату${per ? `, она тоже ${esc(w.unit)}` : ''}. Площадка ничего не прибавляет.</div>
     ${ps.map(p => { const pp = w.prp[p.id];
       const rows = p.t === 'да / нет' ? [['yes', 'Если «да»']] : p.r === 'each' ? [['each', p.inc ? `За каждый сверх ${p.inc}` : 'За каждый']] : p.v.slice(p.t === 'один из списка' ? 1 : 0).map(x => [x, x]);
-      return `<div class="addon"><b class="t18">${esc(p.n)}</b>${p.t === 'один из списка' ? `<span class="m">«${esc(p.v[0])}» — без доплаты</span>` : ''}${rows.map(([k, l]) => { const x = prpVal(pp, k); return `<div class="row"><span class="grow">${esc(l)}</span>${stepper('wzPrp', `${p.id}|${k}|${prpStep(x)}`, x, 0, 200000, y => y ? '+' + rub(y) : 'без доплаты', true)}</div>`; }).join('')}</div>`; }).join('')}`);
+      return `<div class="addon"><b class="t18">${esc(p.n)}</b>${p.t === 'один из списка' ? `<span class="m">«${esc(p.v[0])}» — без доплаты</span>` : ''}${rows.map(([k, l]) => { const x = prpVal(pp, k); return `<div class="row"><span class="grow">${esc(l)}</span>${stepper('wzPrp', `${p.id}|${k}|${prpStep(x)}`, x, 0, Infinity, y => y ? '+' + rub(y) : 'без доплаты', true, prpStep(x))}</div>`; }).join('')}</div>`; }).join('')}`);
 }
 function pickCard(w) {
   const p = svcParams(w.svc).find(x => x.id === w.pick); const pp = w.prp[p.id];
   const per = unitParam(w.unit) ? ` ${w.unit}` : '';
   return card(`<div class="h2">Цены по прайсу${per ? `, ${esc(w.unit)}` : ''}</div><div class="m">Заказчик отметит, ${p.t === QTYS_T ? 'что и сколько' : 'что'} нужно${per ? `, и укажет ${esc(lcFirst(unitParam(w.unit)))}` : ''}, итог сложится из ваших цен. 0 ₽ — этот пункт вы не делаете, заказчик его не увидит.</div>
-    ${p.v.map(x => { const y = pp.v[x] || 0; return `<div class="row"><span class="grow">${esc(x)}</span>${stepper('wzPrp', `${p.id}|${x}|${prpStep(y)}`, y, 0, 500000, z => z ? rub(z) : 'не делаю', true)}</div>`; }).join('')}`);
+    ${p.v.map(x => { const y = pp.v[x] || 0; return `<div class="row"><span class="grow">${esc(x)}</span>${stepper('wzPrp', `${p.id}|${x}|${prpStep(y)}`, y, 0, Infinity, z => z ? rub(z) : 'не делаю', true, prpStep(y))}</div>`; }).join('')}`);
 }
 
 /* шаг 5: проверка глазами заказчика */
@@ -8066,7 +8081,7 @@ Object.assign(A, {
   wzVr(v) { const [i, k, step, d] = v.split('|'); const x = S.wiz.vr[Number(i)]; x[k] = Math.max(k === 'price' ? 100 : 1, x[k] + Number(step) * Number(d)); wzTouch(); render(); },
   wzFmt(v) { togIn(S.wiz.fmts, v); wzTouch(); render(); },
   wzVisit(v) { togIn(S.wiz.visit, v); wzTouch(); render(); },
-  wzVisitAdd(v) { const d = Number(v.split('|')[1]); S.wiz.visitAdd = clamp(S.wiz.visitAdd + d * 100, 0, 5000); wzTouch(); render(); },
+  wzVisitAdd(v) { const d = Number(v.split('|')[1]); S.wiz.visitAdd = clamp(S.wiz.visitAdd + d * 100, 0, Infinity); wzTouch(); render(); },
   wzOnl(v) { const [k, x] = v.split('|'); togIn(S.wiz.onl[k], x); wzTouch(); render(); },
   wzMode(v) { S.wiz.mode = v; wzTouch(); render(); },
   wzDiam(v) { const w = S.wiz; const d = Number(v); togIn(w.tire.diams, d); ['car', 'off'].forEach(tr => { if (!w.tp.p[tr][d]) { const one = Math.max(100, w.tp.base + Math.max(0, d - 14) * w.tp.step - (tr === 'off' ? 150 : 0)); w.tp.p[tr][d] = [one, Math.round(one * 3.75 / 100) * 100]; } }); wzTouch(); render(); },
@@ -8074,15 +8089,15 @@ Object.assign(A, {
   wzTr(v) { togIn(S.wiz.tire.transfers, v); wzTouch(); render(); },
   wzTpTab(v) { S.wiz.tp.tab = v; render(); },
   /* время ячейкой «−/+»: до двух часов шаг 15 минут, дальше 30 */
-  wzDurS(v) { const d = Number(v.split('|')[1]); const w = S.wiz; const st = (d > 0 ? w.dur >= 120 : w.dur > 120) ? 30 : 15; w.dur = clamp(w.dur + st * d, 15, 600); wzTouch(); render(); },
-  wzTermS(v) { const d = Number(v.split('|')[1]); S.wiz.term = clamp(S.wiz.term + d, 1, 60); wzTouch(); render(); },
+  wzDurS(v) { const d = Number(v.split('|')[1]); const w = S.wiz; const st = (d > 0 ? w.dur >= 120 : w.dur > 120) ? 30 : 15; w.dur = clamp(w.dur + st * d, 15, Infinity); wzTouch(); render(); },
+  wzTermS(v) { const d = Number(v.split('|')[1]); S.wiz.term = clamp(S.wiz.term + d, 1, Infinity); wzTouch(); render(); },
   wzTp(v) { const [k, step, d] = v.split('|'); S.wiz.tp[k] = Math.max(0, S.wiz.tp[k] + Number(step) * Number(d)); wzTouch(); render(); },
   wzTDur(v) { const [tr, k, step, d] = v.split('|'); const a = S.wiz.tp.dur[tr]; a[Number(k)] = Math.max(1, a[Number(k)] + Number(step) * Number(d)); wzTouch(); render(); },
   wzFill() { const w = S.wiz; if (w.tp.manual) { dialog({ title: 'Заменить цены в таблице?', text: 'Вы меняли цены вручную. Если заполнить заготовкой, ваши цены за колесо и за комплект заменятся.', actions: [['Заменить', 'wzFillOk', '', ''], ['Оставить мои цены', 'closeDialog', '', 'soft']] }); return; } fillTire(w); wzTouch(); render(); toast('Таблица заполнена заготовкой. Любую цену можно поправить'); },
   wzFillOk() { S.dialog = null; fillTire(S.wiz); wzTouch(); render(); },
   wzPer(v) { const [tr, d, k, step, dir] = v.split('|'); const w = S.wiz; const row = w.tp.p[tr][d] || (w.tp.p[tr][d] = [0, 0]); row[Number(k)] = Math.max(0, row[Number(k)] + Number(step) * Number(dir)); w.tp.manual = true; wzTouch(); render(); },
   wzPT(v) { S.wiz.priceType = v; wzTouch(); render(); },
-  wzPrice(v) { const d = Number(v.split('|')[1]); const w = S.wiz; const step = w.price >= 10000 ? 1000 : w.price >= 2000 ? 500 : 100; w.price = clamp(w.price + d * step, 100, 1000000); wzTouch(); render(); },
+  wzPrice(v) { const d = Number(v.split('|')[1]); const w = S.wiz; const step = w.price >= 10000 ? 1000 : w.price >= 2000 ? 500 : 100; w.price = clamp(w.price + d * step, 100, Infinity); wzTouch(); render(); },
   wzUnit(v) { S.wiz.unit = v; wzTouch(); render(); },
   wzStages() { const w = S.wiz; w.stages = !w.stages; if (w.stages && !w.st.length) w.st = [{ name: 'Первый этап', price: 10000 }, { name: 'Второй этап', price: 20000 }]; wzTouch(); render(); },
   wzStAdd() { S.wiz.st.push({ name: `Этап ${S.wiz.st.length + 1}`, price: 10000 }); wzTouch(); render(); },
@@ -8094,7 +8109,7 @@ Object.assign(A, {
   wzAdPrice(v) { const [i, d] = v.split('|'); const a = S.wiz.addons[Number(i)]; const step = a.price >= 1000 ? 100 : a.price >= 200 ? 50 : 10; a.price = Math.max(0, a.price + step * Number(d)); wzTouch(); render(); },
   wzAdMulti(v) { const [i, m] = v.split('|'); const a = S.wiz.addons[Number(i)]; a.multi = m === '1'; if (a.multi && a.max < 2) a.max = 4; wzTouch(); render(); },
   wzAdMax(v) { const [i, d] = v.split('|'); const a = S.wiz.addons[Number(i)]; a.max = clamp(a.max + Number(d), 2, 50); wzTouch(); render(); },
-  wzAdTm(v) { const [i, d] = v.split('|').map(Number); const a = S.wiz.addons[i]; a.tm = clamp(a.tm + 5 * d, 0, 240); wzTouch(); render(); },
+  wzAdTm(v) { const [i, d] = v.split('|').map(Number); const a = S.wiz.addons[i]; a.tm = clamp(a.tm + 5 * d, 0, Infinity); wzTouch(); render(); },
   wzAdVar(v) { const [i, k] = v.split('|'); const a = S.wiz.addons[Number(i)]; if (k === '*') a.vars = []; else togIn(a.vars, Number(k)); wzTouch(); render(); },
   wzSubmit() {
     const w = S.wiz; wizSave();
@@ -8121,7 +8136,7 @@ function subW(w) {
   if (!subFits(w)) return '';
   const b = subOf(w);
   return card(`<div class="row"><span class="grow"><span class="h2" style="display:block">Абонемент на визиты</span><span class="m">Клиент платит сразу за несколько визитов, вы получаете деньги после каждого. Каждый визит подтверждается кодом клиента.</span></span>${sw('wzSubTog', '', b.on, 'Продавать абонемент')}</div>
-    ${b.on ? `<div class="grid2">${field('Сколько визитов', stepper('wzSub', 'n', b.n, 2, 20, x => x, true))}${field('Скидка, %', stepper('wzSub', 'disc', b.disc, 0, 30, x => x, true))}</div>
+    ${b.on ? `<div class="grid2">${field('Сколько визитов', stepper('wzSub', 'n', b.n, 2, Infinity, x => x, true, 1))}${field('Скидка, %', stepper('wzSub', 'disc', b.disc, 0, 30, x => x, true))}</div>
       ${field('Действует', seg('wzSubPer', ['1 месяц', '3 месяца', '6 месяцев', '12 месяцев'].map(x => [x, x]), b.per, 'sm'))}
       ${field('Если клиент пропустил визит', `<div class="optlist">${opt('wzSubMiss', 'move', 'Визит переносится', 'Клиент запишется на другой день', b.miss === 'move')}${opt('wzSubMiss', 'late', 'Сгорает, если не предупредил заранее', `Бесплатный перенос — не позже чем за ${pn(b.h, 'час', 'часа', 'часов')}`, b.miss === 'late')}${opt('wzSubMiss', 'burn', 'Визит сгорает', 'Перенести нельзя: не пришёл — визит списан', b.miss === 'burn')}</div>`)}
       ${b.miss === 'late' ? field('Предупредить не позже чем за', stepper('wzSub', 'h', b.h, 1, 72, x => pn(x, 'час', 'часа', 'часов'), true)) : ''}
@@ -8132,7 +8147,7 @@ Object.assign(A, {
   wzSub(v) {
     const [k, d] = v.split('|'); const b = subOf(S.wiz);
     if (k === 'h') b.h = SUB_H[clamp(SUB_H.indexOf(b.h) + Number(d), 0, SUB_H.length - 1)];
-    else b[k] = clamp(b[k] + (k === 'disc' ? 5 : 1) * Number(d), k === 'n' ? 2 : 0, k === 'n' ? 20 : 30);
+    else b[k] = clamp(b[k] + (k === 'disc' ? 5 : 1) * Number(d), k === 'n' ? 2 : 0, k === 'n' ? Infinity : 30);
     wzTouch(); render();
   },
   wzSubPer(v) { subOf(S.wiz).per = v; wzTouch(); render(); },
@@ -8380,7 +8395,7 @@ SCREENS.c_sfilters = () => {
       ${card(`<div class="h2">Дата: точная или период</div><span class="m">Это пожелание, не подтверждение свободного времени. Для точной даты нажмите один день, для периода — начало и конец.</span>
         ${calendarHtml('sf')}<div class="m">${f.from ? (f.to ? `Период: ${dayName(f.from).toLowerCase()} — ${dayName(f.to).toLowerCase()}` : `Дата: ${dayName(f.from).toLowerCase()}`) : 'Дата не выбрана'}${f.from ? ` · <button class="lnk" data-a="sfDateClear" style="display:inline">Убрать</button>` : ''}</div>
         ${timeField('sf', { label: 'Время', title: 'Желаемое время', ph: 'Любое время', list: () => HALF_HOURS(), get: () => f.time, set: t => { f.time = t; }, clear: 'Любое время', note: 'Это пожелание: исполнитель подтвердит время отдельно.' })}`, 'c')}
-      ${card(`<div class="h2">Цена</div>${numeric ? `${field('Не дороже', stepper('sfPrice', 'p', f.pmax || Math.max(...offers.map(priceFrom)), 500, 1000000, rub))}<span class="m">Учитывается цена «от» в карточке.</span>` : s ? '<div class="m">У этой услуги есть договорная цена: сумму и условия согласуют до оплаты, числовой фильтр не применяется.</div>' : '<div class="m">Выберите услугу, чтобы фильтровать по цене.</div>'}`, 'c')}`,
+      ${card(`<div class="h2">Цена</div>${numeric ? `${field('Не дороже', stepper('sfPrice', 'p', f.pmax || Math.max(...offers.map(priceFrom)), 500, Infinity, rub, false, budStep))}<span class="m">Учитывается цена «от» в карточке.</span>` : s ? '<div class="m">У этой услуги есть договорная цена: сумму и условия согласуют до оплаты, числовой фильтр не применяется.</div>' : '<div class="m">Выберите услугу, чтобы фильтровать по цене.</div>'}`, 'c')}`,
     bar: `<div class="abar"><div class="btns two">${btn('Сбросить фильтры', 'sfReset', '', 'outline')}${btn('Применить', 'sfApply', '', '')}</div>${btn('Отмена', 'back', '', 'text block')}</div>`,
   };
 };
@@ -8392,7 +8407,7 @@ Object.assign(CH, {
 });
 Object.assign(A, {
   sfDateClear() { S.fd.from = null; S.fd.to = null; render(); },
-  sfPrice(v) { const s = svcById(S.fd.svc); const cur0 = S.fd.pmax || Math.max(...offersFor(s.n).map(priceFrom)); S.fd.pmax = clamp(cur0 + Number(v.split('|')[1]) * (cur0 >= 10000 ? 1000 : 500), 500, 1000000); render(); },
+  sfPrice(v) { const s = svcById(S.fd.svc); const cur0 = S.fd.pmax || Math.max(...offersFor(s.n).map(priceFrom)); S.fd.pmax = clamp(cur0 + Number(v.split('|')[1]) * (cur0 >= 10000 ? 1000 : 500), 500, Infinity); render(); },
   sfReset() { S.fd = { mode: 'all', radius: 0 }; render(); toast('Поля очищены. Нажмите «Применить», чтобы обновить выдачу', 'info'); },
   sfApply() { S.loc = { mode: S.fd.mode || 'all', radius: S.fd.radius || 0 }; S.mapView = null; const f2 = Object.assign({}, S.fd); delete f2.mode; delete f2.radius; S.srch.f = f2; S.srch.on = true; S.srch.tab = 'svc'; back(); if (cur().n !== 'c_home') { S.stack = [{ n: 'c_home', p: {} }]; render('new'); } },
 });
@@ -8435,7 +8450,7 @@ SCREENS.c_req = () => {
       <div class="field"><span class="lbl">Когда?</span>${seg('reqWhen', [['exact', 'Точная дата'], ['range', 'Интервал']], R.when)}${calendarHtml('rq')}<span class="m">${R.when === 'range' ? (R.from ? (R.to ? `С ${dayName(R.from).toLowerCase()} по ${dayName(R.to).toLowerCase()}` : `Начало: ${dayName(R.from).toLowerCase()}. Нажмите конец периода.`) : 'Нажмите начало периода, затем конец.') : R.from ? `Дата: ${dayName(R.from).toLowerCase()}` : 'Нажмите на число.'}</span></div>
       ${timeField('rqt', { label: 'Время', title: 'Желаемое время', ph: 'Любое время', list: () => HALF_HOURS(), get: () => R.time, set: t => { R.time = t; }, clear: 'Любое время', hint: 'Время — ваше пожелание, не подтверждение свободного времени.' })}
       ${field('Бюджет', `<div class="optlist">${opt('reqBt', 'fix', 'Сумма', 'Сколько готовы заплатить', R.btype === 'fix')}${opt('reqBt', 'range', 'Диапазон', 'От и до', R.btype === 'range')}${opt('reqBt', 'deal', 'Договорная', 'Исполнители предложат свою цену', R.btype === 'deal')}</div>
-        ${R.btype === 'fix' ? stepper('reqBudget', 'budget', R.budget, 500, 500000, rub) : R.btype === 'range' ? `<div class="grid2">${field('От', stepper('reqBudget', 'budgetFrom', R.budgetFrom, 500, 500000, rub, true))}${field('До', stepper('reqBudget', 'budget', R.budget, 500, 500000, rub, true))}</div>` : ''}`, { hint: 'Бюджет — ваше пожелание, а не цена исполнителя.' })}`;
+        ${R.btype === 'fix' ? stepper('reqBudget', 'budget', R.budget, 500, Infinity, rub, false, budStep) : R.btype === 'range' ? `<div class="grid2">${field('От', stepper('reqBudget', 'budgetFrom', R.budgetFrom, 500, Infinity, rub, true, budStep))}${field('До', stepper('reqBudget', 'budget', R.budget, 500, Infinity, rub, true, budStep))}</div>` : ''}`, { hint: 'Бюджет — ваше пожелание, а не цена исполнителя.' })}`;
     bar = `<div class="abar">${bl ? `<button class="btn block" disabled>Проверить заявку</button><div class="why center">Причина: ${bl}.</div>` : btn('Проверить заявку', 'reqStep', '3', 'block')}<div class="btns two">${btn('Назад', 'reqStep', '1', 'outline')}${btn('Сохранить черновик', 'reqSave', '', 'outline')}</div></div>`;
   } else {
     const rows = [['Услуга', esc(s.n)], ['Что нужно', esc(R.text || '—')], ...(askOn(s.n) && askWhat(s.n, R).length ? [['Параметры', esc(askWhat(s.n, R).join(', '))]] : Object.values(R.sel).flat().length ? [['Уточнения', esc(Object.values(R.sel).flat().join(', '))]] : []), ['Формат и место', esc(reqFmtText(R))], ['Когда', esc(reqWhenText(R))], ['Бюджет', esc(reqBudgetText(R))], ['Материалы', R.files.length ? esc(R.files.join(', ')) : 'нет']];
@@ -9080,7 +9095,7 @@ const ASK_TIMES = ['09:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'
 function askSheet() {
   const a = S.askDraft; const times = [...new Set([...ASK_TIMES, a.was.time].filter(Boolean))].sort();
   sheet('Изменить условия', `<div class="m">Исполнитель увидит просьбу в переписке и пришлёт новое предложение. Пока вы не примете его, заказа нет.</div>
-    ${field('Цена', stepper('askPrice', 'p', a.price, 100, 500000, rub), { hint: `Сейчас в предложении ${rub(a.was.price)}.` })}
+    ${field('Цена', stepper('askPrice', 'p', a.price, 100, Infinity, rub, false, x => x >= 10000 ? 500 : 100), { hint: `Сейчас в предложении ${rub(a.was.price)}.` })}
     <div class="field"><span class="lbl">День</span>${chips('askDay', Array.from({ length: 7 }, (_, n) => [dk(n), dayName(dk(n), true)]), v => v === a.date)}</div>
     <div class="field"><span class="lbl">Время</span>${chips('askTime', times, v => v === a.time)}</div>
     ${field('Что ещё поменять, если нужно', `<textarea class="textarea" data-in="dealAskText" rows="3" placeholder="Например: добавить кресло или начать пораньше">${esc(a.text)}</textarea>`)}
@@ -9101,7 +9116,7 @@ SCREENS.deal_offer = p => {
     body: `<div class="m">${esc(ch.with)} увидит предложение в переписке. Примет — и переписка станет заказом с номером, а цена и время зафиксируются.</div>
       ${card(`<div class="field"><span class="lbl">Услуга</span>${chips('dealSvc', mine.map(x => [x.id, x.title]), v => v === d.offer, { cls: 'wrapok' })}</div>
         <div class="field"><span class="lbl">Что сделаете</span>${chips('dealInc', o.inc || [], v => d.inc.includes(v), { cls: 'wrapok' })}</div>
-        ${field('Цена', stepper('dealPrice', 'p', d.price, 100, 200000, rub), { hint: d.budget ? `${esc(ch.with)} рассчитывает на ${rub(d.budget)}.` : 'Подставили из вашего прайса.' })}
+        ${field('Цена', stepper('dealPrice', 'p', d.price, 100, Infinity, rub, false, x => x >= 10000 ? 500 : 100), { hint: d.budget ? `${esc(ch.with)} рассчитывает на ${rub(d.budget)}.` : 'Подставили из вашего прайса.' })}
         ${pickDayTime('deal', d, d.dur, null, '')}
         ${field('Комментарий, если нужно', `<textarea class="textarea" data-in="dealText" rows="3" placeholder="Например: балансировка входит, грузики наши">${esc(d.text)}</textarea>`)}`)}
       <div class="m">Предложение действует 2 дня. Новое предложение заменит прежнее, а прежнее останется в истории.</div>`,
@@ -9113,7 +9128,7 @@ Object.assign(A, {
   dealBrief(id) { const ch = chatById(id); S.briefFromChat = id; go('c_brief', { id: ch.offer }); },
   dealSvc(id) { const d = S.dealDraft; const o = offerById(id); const rp = replyOf(o); Object.assign(d, { offer: id, inc: (o.inc || rp.inc).slice(0, 3), dur: rp.dur || 40, slot: null }); if (!d.budget && !d.fromAsk) d.price = rp.price || d.price; render(); },
   dealInc(v) { togIn(S.dealDraft.inc, v); render(); },
-  dealPrice(v) { const d = S.dealDraft; d.price = clamp(d.price + Number(v.split('|')[1]) * (d.price >= 10000 ? 500 : 100), 100, 200000); render(); },
+  dealPrice(v) { const d = S.dealDraft; d.price = clamp(d.price + Number(v.split('|')[1]) * (d.price >= 10000 ? 500 : 100), 100, Infinity); render(); },
   dealSend(id) {
     const ch = chatById(id); const d = S.dealDraft; const o = offerById(d.offer); const note = maskContacts(d.text); if (note.hit) contactsHidden();
     const v = sendVersion(ch, 'me', { offer: o.id, title: o.title, price: d.price, dur: d.dur, inc: d.inc.slice(), date: d.day, time: d.slot, note: note.t.trim(), asked: !!d.fromAsk });
@@ -9129,7 +9144,7 @@ Object.assign(A, {
   },
   askOwn(v) { const [cid, i] = v.split('|'); const ch = chatById(cid); const a = ch.msgs[Number(i)].a; S.dealDraft = newDeal(ch, { price: a.price, day: a.date, fromAsk: true }); go('deal_offer', { id: cid }); },
   verAsk(v) { const [cid, i] = v.split('|'); const ver = chatById(cid).msgs[Number(i)].v; S.askDraft = { ch: cid, ver: ver.ver, price: ver.price, date: ver.date, time: ver.time, text: '', was: { price: ver.price, date: ver.date, time: ver.time } }; askSheet(); },
-  askPrice(v) { const a = S.askDraft; a.price = clamp(a.price + Number(v.split('|')[1]) * (a.price >= 10000 ? 500 : 100), 100, 500000); askSheet(); },
+  askPrice(v) { const a = S.askDraft; a.price = clamp(a.price + Number(v.split('|')[1]) * (a.price >= 10000 ? 500 : 100), 100, Infinity); askSheet(); },
   askDay(k) { S.askDraft.date = k; askSheet(); },
   askTime(t) { S.askDraft.time = t; askSheet(); },
   askSend() {
