@@ -4903,7 +4903,12 @@ img, svg, a { -webkit-user-drag: none; }
 .asum-safe > svg { flex: none; color: var(--act); margin-top: 1px; }
 .asum-safe b { display: block; }
 .asum-safe .m { display: block; font-size: 14px; line-height: 20px; }
-.phone .asum .asum-pt { grid-column: auto; grid-row: auto; padding: 0; border: 0; background: none; min-height: 0; }
+/* строка «Партнёрам до …» в заказе и в правой колонке услуги */
+.pline { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 10px 14px; border-radius: 12px; background: var(--soft2); color: var(--act); font-size: 14px; line-height: 18px; text-align: left; }
+.pline > span { min-width: 0; }
+.pline svg { flex: none; }
+.pline.bare { padding: 0; background: none; border-radius: 0; }
+@media (hover: hover) and (pointer: fine) { .pline:not(.bare):hover { background: var(--soft); } .pline.bare:hover > span { text-decoration: underline; } }
 .phone[data-view="desk"][data-lay="aside"] #bar { max-height: calc(100% - var(--hh) - 52px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 @media print {
   body > * { display: none !important; }
@@ -5225,7 +5230,10 @@ function render(mode) {
   const ribX = mode ? [] : [...document.querySelectorAll('.rib-s, .ogal-s')].map(x => x.scrollLeft);  /* ленты не прыгают в начало, когда экран перерисовался на месте */
   const view = VIEW(); let lay = scr.lay || LAY[c.n] || 'form'; const ph = $('#phone');
   if (lay === 'aside' && !scr.bar) lay = 'form';  /* справа нечего показать — обычная колонка */
-  const desk = view === 'desk'; const cabL = desk && lay === 'cab';
+  /* главная заказчика на компьютере — с тем же меню слева, что в кабинете, его можно свернуть в полоску (запись 48, 90:34–94:54:
+     «я бы всё-таки меню сделал… мои заказы, заявки, мои бонусы, мои записи»). Сетки карточек остаются широкими: data-lay="wide" */
+  const homeCab = view === 'desk' && c.n === 'c_home' && S.role === 'cust' && !S.srch.on;
+  const desk = view === 'desk'; const cabL = desk && (lay === 'cab' || homeCab);
   ph.dataset.view = view; ph.dataset.lay = lay; ph.classList.toggle('raw', !!scr.raw && !cabL);
   /* у экрана может быть своё тело и своя нижняя панель для компьютера (мессенджер, сводка исполнителя) */
   const body = desk && scr.deskBody != null ? scr.deskBody : scr.body;
@@ -5235,7 +5243,7 @@ function render(mode) {
   const head = scr.title ? `<div class="h1-wrap"><h1 class="h1">${scr.title}</h1>${scr.sub ? `<div class="h1-sub">${scr.sub}</div>` : ''}</div>` : '';
   /* компьютер: у выдачи слева колонка с разделом, местом, сортировкой и фильтрами */
   const main = view === 'desk' && scr.side ? `<div class="dcols"><aside class="dside">${scr.side}</aside><div class="dmain">${body}</div></div>` : body;
-  if (cabL) el.innerHTML = `<div class="page cabp ${scr.cls || ''}"><div class="cabw"><aside class="cabnav" aria-label="Кабинет">${cabNav()}</aside><div class="cabmain"><div class="cabin">${scr.deskBare ? '' : backLink + head}${main}</div></div></div></div>`;
+  if (cabL) el.innerHTML = `<div class="page cabp ${scr.cls || ''}${homeCab ? ' cabh homecab' : ''}"><div class="cabw"><aside class="cabnav" aria-label="Кабинет">${cabNav()}</aside><div class="cabmain"><div class="cabin">${scr.deskBare ? '' : backLink + head}${main}</div></div></div></div>`;
   else el.innerHTML = scr.raw ? (backLink ? `<div class="page" style="padding-bottom:0">${backLink}${head}</div>` : '') + main : `<div class="page ${scr.cls || ''}">${backLink}${head}${main}</div>`;
   if (view !== 'phone') gridCards(el);
   const box = scrollEl(); if (box !== el) el.scrollTop = 0;
@@ -6340,12 +6348,13 @@ A.resTab = v => { const i = v.indexOf('|'); replace(v.slice(0, i), parseP(v.slic
 
 const CITY_D = { 'Москва': ['Тёплый Стан', 'Беляево', 'Профсоюзная', 'Калужская', 'Новые Черёмушки', 'Ясенево'], 'Санкт-Петербург': ['Центральный', 'Василеостровский', 'Приморский', 'Московский'], 'Казань': ['Вахитовский', 'Ново-Савиновский', 'Приволжский', 'Советский'], 'Екатеринбург': ['Центр', 'ВИЗ', 'Уралмаш', 'Академический'] };
 /* ---------- фильтры и сортировка (лист 14) ---------- */
-const SORTS2 = [['def', 'По умолчанию'], ['near', 'Сначала ближе'], ['cheap', 'Сначала дешевле'], ['rating', 'Сначала по рейтингу']];
+const SORTS2 = [['def', 'По умолчанию'], ['near', 'Сначала ближе'], ['soon', 'Кто раньше свободен'], ['cheap', 'Сначала дешевле'], ['rating', 'Сначала по рейтингу']];
 function applyFilters(list) {
   let r = list.filter(o => o.ex !== 'alex' && locOk(o));
   if (S.fFav) r = r.filter(o => S.favs.includes(o.id));
   const dk2 = o => { const d = distKm(o.ex); return d == null ? 999 : d; };
   if (S.sort === 'near') r.sort((a, b) => dk2(a) - dk2(b));
+  if (S.sort === 'soon') bySoon(r);
   if (S.sort === 'cheap') r.sort((a, b) => priceFrom(a) - priceFrom(b));
   if (S.sort === 'rating') r.sort((a, b) => (EX[b.ex].rating - EX[a.ex].rating) || (EX[b.ex].reviews - EX[a.ex].reviews));
   return r;
@@ -6459,6 +6468,11 @@ A.setView = v => { S.view = v; render(); };
 /* ---------- профиль исполнителя для заказчика (лист 36): видны все его направления ---------- */
 /* часы работы исполнителя и ближайшее свободное время — заказчик видит его расписание (28.10) */
 /* ближайшее свободное время исполнителя на две недели вперёд: «завтра, 10:00»; нет окон — пустая строка */
+/* сортировка «кто раньше свободен» (запись 48, 11:00: «фильтр… по скорости работы»): минуты до ближайшего окна исполнителя,
+   считаются один раз на исполнителя за сортировку; без окон на две недели — в конец */
+function bySoon(list) { const m = new Map();
+  const key = id => { if (!m.has(id)) { let v = 1e9; for (let n = 0; n < 14 && v === 1e9; n++) { const f = freeSlots(id, dk(n), 60).find(x => x.ok); if (f) { const [h, mi] = String(f.t).split(':').map(Number); v = n * 1440 + (h || 0) * 60 + (mi || 0); } } m.set(id, v); } return m.get(id); };
+  return list.sort((a, b) => key(a.ex) - key(b.ex)); }
 function nearSlot(exId) { for (let n = 0; n < 14; n++) { const d = dk(n); const f = freeSlots(exId, d, 60).find(x => x.ok); if (f) return `${dayName(d).toLowerCase()}, ${f.t}`; } return ''; }
 function exHoursCard(exId) {
   const w = Array(7).fill(null);
@@ -7003,11 +7017,11 @@ function wayField(o, c) {
 /* правая колонка услуги на компьютере (06.11, Максим: «может, что-то ещё справа добавить»):
    факты об исполнителе и ближайшее свободное время, как защищены деньги, строка «Партнёрам до …» */
 function asideMore(o) {
-  const near = nearSlot(o.ex); const p = (EX[o.ex] || {}).partner || [5, 2];
+  const near = nearSlot(o.ex);
   const facts = [...exFacts(o.ex), ...(near ? [['clock', `Ближайшее свободное время: ${near}`]] : [])];
   return `${factRows(facts, 'asum-f')}
     <div class="asum-safe">${ic('shield', 22, 2)}<span><b>Оплата через ZELDO</b><span class="m">Деньги ждут на защищённом счёте, пока вы не примете работу.</span></span></div>
-    ${S.role === 'guest' ? '' : `<button class="pc-partner asum-pt" data-a="partnerInfo" data-v="${o.ex}"><span>Партнёрам <b>до ${p[0]}%</b> · ${pn(p[1], 'уровень', 'уровня', 'уровней')}</span>${ic('right', 18, 2.2)}</button>`}`;
+    ${partnerBtn(o.ex, 'bare')}`;
 }
 SCREENS.c_offer = p => {
   const o = offerById(p.id); const e = EX[o.ex]; const c = cfgOf(o); const s = svcBy(o.svc);
@@ -8347,7 +8361,11 @@ const avaByName = (n, cls = '') => { const id = Object.keys(EX).find(k => EX[k].
 /* факты об исполнителе для карточки в списке и правой колонки услуги — те же числа, что в профиле (exStats). В рабочей версии их пока нет */
 const exFacts = id => { const e = EX[id] || {}; if (REAL || !e.name) return [];
   return [['calok', `На ZELDO с ${e.since || 2020} года`], ['check', pn(Math.round((e.reviews || 0) * 1.35), 'заказ выполнен', 'заказа выполнено', 'заказов выполнено')]]; };
-const factRows = (l, cls) => l.length ? `<span class="${cls}">${l.map(([i, t]) => `<span>${ic(i, 18, 2)}<span>${t}</span></span>`).join('')}</span>` : '';
+/* строка «Партнёрам до 5% · 2 уровня» вне карточек выдачи: в правой колонке услуги и в заказе (запись 48, 47:00: «в заказах… везде»).
+   Своя разметка, а не .pc-partner: тот на компьютере встаёт во вторую колонку сетки карточки */
+const partnerBtn = (exId, cls = '') => { if (S.role === 'guest') return ''; const p = (EX[exId] || {}).partner || [5, 2];
+  return `<button class="pline ${cls}" data-a="partnerInfo" data-v="${esc(exId)}"><span>Партнёрам <b>до ${p[0]}%</b> · ${pn(p[1], 'уровень', 'уровня', 'уровней')}</span>${ic('right', 18, 2.2)}</button>`; };
+const factRows = (l, cls) =>l.length ? `<span class="${cls}">${l.map(([i, t]) => `<span>${ic(i, 18, 2)}<span>${t}</span></span>`).join('')}</span>` : '';
 
 /* карточка как в документе: фото слева с сердцем, название, описание, формат и цена; ниже — исполнитель, статус, отзывы; строка партнёрам */
 /* значок акции на фото: самая выгодная скидка исполнителя на эту услугу */
@@ -8497,7 +8515,7 @@ Object.assign(A, {
 });
 
 /* ---------- выдача (лист 3): на месте витрины Главной ---------- */
-const SORTS = [['pop', 'Популярные'], ['near', 'Ближе'], ['cheap', 'Дешевле'], ['dear', 'Дороже'], ['rating', 'С высоким рейтингом']];
+const SORTS = [['pop', 'Популярные'], ['near', 'Ближе'], ['soon', 'Раньше свободен'], ['cheap', 'Дешевле'], ['dear', 'Дороже'], ['rating', 'С высоким рейтингом']];
 function srchPool() {
   const f = S.srch.f; const q = S.srch.q;
   let svcs;
@@ -8514,6 +8532,7 @@ function srchPool() {
   const s = S.srch.sort;
   if (s === 'near') list.sort((a, b) => (distKm(a.ex) ?? 999) - (distKm(b.ex) ?? 999));
   if (s === 'pop') list.sort((a, b) => (EX[b.ex].reviews || 0) - (EX[a.ex].reviews || 0));
+  if (s === 'soon') bySoon(list);
   if (s === 'rating') list.sort((a, b) => (EX[b.ex].rating - EX[a.ex].rating) || (EX[b.ex].reviews - EX[a.ex].reviews));
   if (s === 'cheap' || s === 'dear') list.sort((a, b) => { const x = pr(a), y = pr(b); if (x == null) return 1; if (y == null) return -1; return s === 'cheap' ? x - y : y - x; });
   return list;
@@ -9081,7 +9100,9 @@ function cabNav() {
   ] : [
     it('c_home', 'home', 'Главная', 0, 'blue'), it('c_orders', 'orders', 'Заказы', actOrders('cust'), 'green', { on: n === 'c_orders' && !reqTab }),
     it('req', 'send', 'Мои заявки', homeNew('cust'), 'violet', { act: 'myReqs', on: reqTab }), it('c_msgs', 'chat', 'Сообщения', unreadMsgs('cust'), 'teal'),
-    it('c_fav', 'heart', 'Избранное', S.favs.length, 'pink', { num: true }), it('c_sched', 'calok', 'Мои записи', 0, 'orange'), it('c_aboutme', 'star', 'Отзывы обо мне', 0, 'orange'),
+    it('c_fav', 'heart', 'Избранное', S.favs.length, 'pink', { num: true }), it('c_sched', 'calok', 'Мои записи', 0, 'orange'),
+    /* «мои бонусы» под рукой, как просил Максим (запись 48, 93:51) */
+    it('bonus', 'gift', 'Мои бонусы', bonusLive().length, 'orange', { act: 'myBonuses', on: false, num: true }), it('c_aboutme', 'star', 'Отзывы обо мне', 0, 'orange'),
   ];
   const tl = S.navMini ? 'Развернуть меню' : 'Свернуть меню'; const sw = `Перейти в роль «${ex ? 'Заказчик' : 'Исполнитель'}»`;
   return `<div class="cabtop"><button class="cabtog" data-a="navMini" aria-label="${tl}" title="${tl}" aria-expanded="${!S.navMini}">${ic('panel', 20, 2)}</button></div>
@@ -9565,7 +9586,8 @@ SCREENS.order = p => {
     body: `${card(`<div class="row top"><span class="bigth" style="width:56px;height:56px;border-radius:14px;overflow:hidden;flex:none">${photo(of.ph, '', 'M')}</span><span class="grow"><span class="h2" style="display:block">${esc(o.svc)}</span><span class="m">${esc(o.what)}</span></span><b class="t18 num">${rub(o.total)}</b></div><div class="row wrap">${orderPill(o)}${nextStepText(o) ? `<span class="m">${nextStepText(o)}</span>` : ''}</div>
         <div class="ocontact">${ex ? `<span class="ava">${letter(o.client)}</span>` : exAva(o.ex)}<span class="grow"><span class="m" style="display:block">${ex ? 'Заказчик' : 'Исполнитель'}</span><button class="plink" data-a="go" data-v="${ex ? gv('c_client', { name: o.client }) : gv('c_exec', { id: o.ex })}" aria-label="Профиль: ${esc(ex ? o.client : exName(o.ex))}"><b>${esc(ex ? o.client : exName(o.ex))}</b></button>${ex ? `<span class="m" style="display:block">${clientLine(o.client)}</span>` : ''}</span>
           ${ch ? `<button class="cbtn" data-a="go" data-v="${gv('chat', { id: ch.id })}" aria-label="Написать">${ic('chat', 22, 2)}${ch.unread ? `<i class="cdot"></i>` : ''}</button>` : `<button class="cbtn" data-a="orderChat" data-v="${o.id}" aria-label="Написать">${ic('chat', 22, 2)}</button>`}
-          <button class="cbtn" data-a="callAsk" data-v="${ex ? '' : o.ex}" aria-label="Позвонить через ZELDO">${ic('phone', 22, 2)}</button></div>`)}
+          <button class="cbtn" data-a="callAsk" data-v="${ex ? '' : o.ex}" aria-label="Позвонить через ZELDO">${ic('phone', 22, 2)}</button></div>
+        ${ex ? '' : partnerBtn(o.ex)}`)}
       ${orderActions(o)}
       ${subCard(o)}
       ${card(`<div class="h2">${o.stages ? 'Этапы' : 'Ход заказа'}</div>${steps}`)}
