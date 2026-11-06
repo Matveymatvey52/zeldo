@@ -4660,7 +4660,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 .phone[data-view="desk"] .thumb { aspect-ratio: 4 / 3; }
 .phone[data-view="desk"] .rth { width: 120px; height: 90px; }
 .phone[data-view="desk"] .rth.sm { width: 96px; height: 72px; }
-.phone[data-view="desk"] .ohero { max-height: 560px; }
+.phone[data-view="desk"] .ohero { max-height: 420px; }
 .phone[data-view="desk"][data-lay="wide"] .grid2:has(> .cat) { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
 .phone[data-view="desk"][data-lay="wide"] .grid3 { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
 .phone[data-view="desk"] .sub-t.ph .sc { font-size: 18px; line-height: 24px; }
@@ -4863,6 +4863,48 @@ img, svg, a { -webkit-user-drag: none; }
 #shield.on { display: grid; }
 #shield .sh-in { display: grid; gap: 8px; justify-items: center; max-width: 360px; }
 #shield .logo { font-size: 28px; line-height: 32px; margin: 0 0 8px; }
+/* ---------- 06.11, сообщение Максима: кнопки вида, плитка, исполнитель в списке, страница услуги ---------- */
+/* аватар: фото исполнителя или буква */
+.ava { overflow: hidden; }
+.ava img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: inherit; }
+.ava.xs { width: 20px; height: 20px; font-size: 11px; }
+.pct-m { align-items: center; }
+.pc-ava { width: 28px; height: 28px; font-size: 13px; }
+.pc-x { display: none; }
+/* переключатель вида: значок и подпись; на телефоне — отдельной строкой во всю ширину */
+.vtog button { width: auto; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 12px; font-size: 15px; line-height: 20px; font-weight: 600; white-space: nowrap; }
+@media (hover: hover) and (pointer: fine) { .vtog button:not(.on):hover { color: var(--ink); background: var(--soft2); } }
+.phone[data-view="phone"] .lhead:has(.vtog) { flex-wrap: wrap; row-gap: 8px; }
+.phone[data-view="phone"] .vtog { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
+/* плитка: строка «Партнёрам до …» внизу, как в списке */
+.pct .pc-partner { padding: 8px 12px; min-height: 0; font-size: 13px; line-height: 17px; }
+.pct .pc-partner > span { white-space: normal; }
+.phone[data-view="desk"] .pct .pc-partner { padding: 10px 14px; border-top: 1px solid var(--line); background: var(--soft2); font-size: 14px; line-height: 18px; }
+/* список на компьютере: справа фото, имя и статус, рейтинг, с какого года на ZELDO и сколько заказов */
+.phone[data-view="desk"] .pc-foot { grid-template-columns: auto minmax(0, 1fr); column-gap: 12px; row-gap: 10px; }
+.phone[data-view="desk"] .pc-ava { width: 56px; height: 56px; font-size: 22px; }
+.phone[data-view="desk"] .pc-who { grid-column: 2; align-self: center; }
+.phone[data-view="desk"] .pc-foot:not(:has(.pc-ava)) .pc-who { grid-column: 1 / -1; }
+.phone[data-view="desk"] .pc-r { grid-column: 1 / -1; }
+.phone[data-view="desk"] .pc-x { display: grid; gap: 6px; grid-column: 1 / -1; }
+.pc-x > span, .asum-f > span { display: flex; align-items: center; gap: 8px; font-size: 14px; line-height: 20px; color: var(--muted); }
+.pc-x svg, .asum-f svg { flex: none; color: var(--act); }
+/* страница услуги на компьютере: мозаика вместо фото на весь экран */
+.omos { position: relative; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 8px; height: 400px; border-radius: 24px; overflow: hidden; }
+.omos.n2 { grid-template-rows: minmax(0, 1fr); }
+.omos-i { position: relative; display: block; width: 100%; height: 100%; min-height: 0; padding: 0; border: 0; background: var(--soft); cursor: zoom-in; overflow: hidden; }
+.omos-i:first-child { grid-row: 1 / -1; }
+.omos-i:focus-visible { outline: 3px solid var(--brand); outline-offset: -3px; }
+.omos-more { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(16, 33, 61, .52); color: #fff; font-size: 18px; line-height: 24px; font-weight: 700; }
+@media (hover: hover) and (pointer: fine) { .omos-i .ph { transition: filter .2s ease; } .omos-i:hover .ph { filter: brightness(.92); } }
+/* правая колонка услуги: факты, защита оплаты, партнёрам */
+.asum-f { display: grid; gap: 8px; }
+.asum-safe { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; background: var(--soft2); }
+.asum-safe > svg { flex: none; color: var(--act); margin-top: 1px; }
+.asum-safe b { display: block; }
+.asum-safe .m { display: block; font-size: 14px; line-height: 20px; }
+.phone .asum .asum-pt { grid-column: auto; grid-row: auto; padding: 0; border: 0; background: none; min-height: 0; }
+.phone[data-view="desk"][data-lay="aside"] #bar { max-height: calc(100% - var(--hh) - 52px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 @media print {
   body > * { display: none !important; }
   body::before { content: "Печать страниц ZELDO недоступна"; display: block; padding: 48px; font: 600 18px/24px "Onest", sans-serif; color: #10213D; }
@@ -4954,6 +4996,9 @@ const P = {
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
   share: '<path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11v8a1.5 1.5 0 0 0 1.5 1.5h9A1.5 1.5 0 0 0 18 19v-8"/>',
   grid: '<path d="M5 5h4v4H5zM15 5h4v4h-4zM5 15h4v4H5zM15 15h4v4h-4z"/>',
+  /* вид выдачи (06.11): список — строки «картинка и текст», плитка — четыре карточки */
+  vlist: '<rect x="3.5" y="4.5" width="6" height="6" rx="1.5"/><rect x="3.5" y="13.5" width="6" height="6" rx="1.5"/><path d="M13 6.5h7.5M13 9h4.5M13 15.5h7.5M13 18h4.5"/>',
+  tiles: '<rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/>',
   map: '<path d="m3.5 6.5 5-2 7 2.5 5-2v13l-5 2-7-2.5-5 2z"/><path d="M8.5 4.5v13M15.5 7v13"/>',
   globe: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.3 3.6 5.2 3.6 8.5s-1.1 6.2-3.6 8.5c-2.5-2.3-3.6-5.2-3.6-8.5S9.5 5.8 12 3.5z"/>',
   car: '<path d="M5 16.5V12l1.8-4.5h10.4L19 12v4.5"/><path d="M3.5 12h17v4.5h-17zM7 16.5V19M17 16.5V19"/><circle cx="7.5" cy="14.3" r=".6"/><circle cx="16.5" cy="14.3" r=".6"/>',
@@ -5435,6 +5480,10 @@ const EX = {
 const GEN_EX = ['Мастерская «Лад»', 'Андрей Козлов', 'Студия «Точка»', 'Екатерина Миронова', 'Сервис «Опора»', 'Наталья Гусева', 'Игорь Белов', 'Команда «Профи»', 'Ольга Сорокина', 'Павел Тихонов', 'Мария Смирнова', 'Иван Петров'];
 const hash = s => [...String(s)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
 GEN_EX.forEach((n, i) => { EX['g' + i] = { name: n, biz: '', rating: [4.7, 4.8, 4.9, 5.0, 4.6][i % 5], reviews: 12 + (hash(n) % 240), area: ['м. Тёплый Стан', 'м. Беляево', 'онлайн и выезд', 'вся Москва'][i % 4], dist: 1 + (hash(n) % 60) / 10, since: 2012 + (i % 10), about: 'Работаю аккуратно, сроки соблюдаю.', partner: [5, 2], x: 10 + (hash(n) % 80), y: 12 + (hash(n + 'y') % 76) }; });
+/* портреты исполнителей-людей (06.11, Максим: «если будет у продавца картинка, чтобы его картинка там тоже была»).
+   Фото Unsplash, квадрат по лицу, лежат на сайте в img/A (скачивает z2/dl_ava.py). У компаний вместо фото — буква */
+const AVA = {"alex": "1576558656222-ba66febe3dec", "ruslan": "1506794778202-cad84cf45f1d", "dmitry": "1590086782957-93c06ef21604", "oleg": "1651684215020-f7a5b6610f23", "irina": "1780733058027-680a7c841fe5", "anna": "1760552069633-c05f246a5d8c", "elena": "1701728667207-54b43dbdab97", "g1": "1531750026848-8ada78f641c2", "g3": "1685760259914-ee8d2c92d2e0", "g5": "1652471949169-9c587e8898cd", "g6": "1568316674077-d72ee56de61c", "g8": "1586522434115-38d718beeca5", "g9": "1500648767791-00dcc994a43e", "g10": "1589729132389-8f0e0b55b91e", "g11": "1791573454554-97062d350ab0"};
+Object.keys(AVA).forEach(k => { if (EX[k]) EX[k].ava = AVA[k]; });
 const exName = id => (EX[id] || {}).name || 'Исполнитель';
 const letter = n => (String(n).replace(/[«»"]/g, '').replace(/^(Салон|Студия|Сервис|Клининг|Автомойка|Мастерская|Команда)\s+/, '')[0] || 'Z').toUpperCase();
 
@@ -5953,6 +6002,10 @@ const GAL_SKIP = new Set(['svc|Аренда бытовой техники', 'svc
 S.gal = [];
 const heroPh = (keys, alt, extra = '') => { keys = [].concat(keys).filter(k => PH[k]); S.gal = keys; const n = keys.length;
   if (!n) return `<div class="ohero">${photo('', alt)}${extra}</div>`;
+  /* компьютер (06.11, Максим: «картинка на весь экран… поменьше»): мозаика высотой 400 — большое фото и два поменьше,
+     на последнем «Ещё N фото». Любое открывается на весь экран */
+  if (VIEW() === 'desk' && n > 1) { const k3 = keys.slice(0, 3);
+    return `<div class="omos n${k3.length}">${k3.map((k, i) => `<button class="omos-i" data-a="phView" data-v="${i}" aria-label="Фото ${i + 1} из ${n}, открыть на весь экран">${photo(k, i ? '' : alt, i ? '' : 'L')}${i === k3.length - 1 && n > k3.length ? `<span class="omos-more">Ещё ${n - k3.length} фото</span>` : ''}</button>`).join('')}${extra}</div>`; }
   const desk = VIEW() !== 'phone';
   return `<div class="ogal-w"><div class="ohero ogal at-s${n < 2 ? ' at-e' : ''}"><div class="ogal-s">${keys.map((k, i) => `<button class="ogal-i" data-a="phView" data-v="${i}" aria-label="Фото ${i + 1} из ${n}, открыть на весь экран">${photo(k, i ? '' : alt, 'L')}</button>`).join('')}</div>
     ${n > 1 ? `<button class="ogal-b prev" data-a="galGo" data-v="-1" aria-label="Предыдущее фото">${ic('back', 22, 2.4)}</button><button class="ogal-b next" data-a="galGo" data-v="1" aria-label="Следующее фото">${ic('arr', 22, 2.4)}</button><span class="ogal-n" aria-hidden="true">1 / ${n}</span>` : ''}
@@ -6405,13 +6458,14 @@ A.setView = v => { S.view = v; render(); };
 
 /* ---------- профиль исполнителя для заказчика (лист 36): видны все его направления ---------- */
 /* часы работы исполнителя и ближайшее свободное время — заказчик видит его расписание (28.10) */
+/* ближайшее свободное время исполнителя на две недели вперёд: «завтра, 10:00»; нет окон — пустая строка */
+function nearSlot(exId) { for (let n = 0; n < 14; n++) { const d = dk(n); const f = freeSlots(exId, d, 60).find(x => x.ok); if (f) return `${dayName(d).toLowerCase()}, ${f.t}`; } return ''; }
 function exHoursCard(exId) {
   const w = Array(7).fill(null);
   for (let i = 0; i < 7; i++) { const d = dk(i); w[(fromKey(d).getDay() + 6) % 7] = workHours(exId, d); }
   const key = x => x ? `${tstr(x[0])}–${tstr(x[1])}` : 'выходной'; const out = []; let i = 0;
   while (i < 7) { let j = i; while (j + 1 < 7 && key(w[j + 1]) === key(w[i])) j++; out.push(`${WDS[i]}${j > i ? '–' + WDS[j] : ''} ${key(w[i])}`); i = j + 1; }
-  let near = '';
-  for (let n = 0; n < 14 && !near; n++) { const d = dk(n); const f = freeSlots(exId, d, 60).find(x => x.ok); if (f) near = `${dayName(d).toLowerCase()}, ${f.t}`; }
+  const near = nearSlot(exId);
   return card(`<div class="h2">Часы работы</div><div>${out.join(', ')}</div>${near ? `<div class="m">Ближайшее свободное время: ${near}</div>` : ''}`);
 }
 SCREENS.c_exec = p => {
@@ -6420,7 +6474,7 @@ SCREENS.c_exec = p => {
   const works = p.id === 'alex' ? S.portfolio.filter(w => w.ph) : offers.slice(0, 4).map(o => ({ ph: o.ph, name: o.title }));
   return {
     title: 'Профиль',
-    body: `<div class="card" style="justify-items:center;text-align:center"><span class="ava lg">${letter(e.name)}</span><div class="h1">${esc(e.name)}</div>${e.biz ? `<div class="m">${esc(e.biz)} · с ${e.since} года</div>` : ''}
+    body: `<div class="card" style="justify-items:center;text-align:center">${exAva(p.id, 'lg')}<div class="h1">${esc(e.name)}</div>${e.biz ? `<div class="m">${esc(e.biz)} · с ${e.since} года</div>` : ''}
         <div class="row" style="justify-content:center">${pill('Проверен', '', 'diamond')}${e.reviews ? `<span class="rating t18">${ic('star', 18, 2)} ${String(e.rating).replace('.', ',')}</span><span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')}</span>` : '<span class="m">Пока нет отзывов</span>'}</div>
         <div class="m">${esc(areaText(e.area, p.id))}</div></div>
       ${card(`<div class="h2">Об исполнителе</div><div>${esc(e.about)}</div>`)}${exStats(p.id)}
@@ -6946,6 +7000,15 @@ function wayField(o, c) {
   const opts = [['A', 'По цене исполнителя', main === 'A' ? 'выбрать и оплатить' : 'выбрать, исполнитель подтвердит'], ['B', 'Свой запрос', 'ваши условия и цена']];
   return field('Как заказать', seg('cfgSet', opts.map(([k, l, s]) => [`${o.id}|way|${k}`, l, s]), `${o.id}|way|${w}`), { hint: `${main === 'B' ? 'Обычно здесь сначала присылают запрос: отметьте, что нужно, и приложите фото. Исполнитель назовёт точную цену.' : 'Нужны другие условия или своя цена? Отправьте запрос: исполнитель согласится или предложит свою.'} Вопросы до заказа — кнопка «Написать».` });
 }
+/* правая колонка услуги на компьютере (06.11, Максим: «может, что-то ещё справа добавить»):
+   факты об исполнителе и ближайшее свободное время, как защищены деньги, строка «Партнёрам до …» */
+function asideMore(o) {
+  const near = nearSlot(o.ex); const p = (EX[o.ex] || {}).partner || [5, 2];
+  const facts = [...exFacts(o.ex), ...(near ? [['clock', `Ближайшее свободное время: ${near}`]] : [])];
+  return `${factRows(facts, 'asum-f')}
+    <div class="asum-safe">${ic('shield', 22, 2)}<span><b>Оплата через ZELDO</b><span class="m">Деньги ждут на защищённом счёте, пока вы не примете работу.</span></span></div>
+    ${S.role === 'guest' ? '' : `<button class="pc-partner asum-pt" data-a="partnerInfo" data-v="${o.ex}"><span>Партнёрам <b>до ${p[0]}%</b> · ${pn(p[1], 'уровень', 'уровня', 'уровней')}</span>${ic('right', 18, 2.2)}</button>`}`;
+}
 SCREENS.c_offer = p => {
   const o = offerById(p.id); const e = EX[o.ex]; const c = cfgOf(o); const s = svcBy(o.svc);
   const r = calc(o, c); const preview = p.preview === '1'; const routeB = wayOf(o, c) === 'B' || o.model === 'brief';
@@ -6966,15 +7029,16 @@ SCREENS.c_offer = p => {
     body: `${heroPh(galOf(o), o.title, preview ? '' : `<button class="heart ${favOn ? 'on' : ''}" style="top:12px;left:12px" data-a="fav" data-v="${o.id}" aria-label="${favOn ? 'Убрать из избранного' : 'В избранное'}" aria-pressed="${favOn}">${ic('heart', 20, 2)}</button>`)}
       <div class="col g4 ohead"><h1 class="h1">${esc(o.title)}</h1>${s ? `<span class="m">${esc(`${s.c} · ${s.s} · ${s.n}`)}</span>` : ''}</div>
       ${S.role === 'guest' ? `<button class="card c" data-a="guestNeed" data-v="увидеть имя и профиль исполнителя" style="text-align:left"><span class="row"><span class="ava">${ic('user', 22, 2)}</span><span class="grow">${exLine(o)}<span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')} · ${esc(areaText(e.area, o.ex))}</span><span class="m" style="display:block">Имя и связь с исполнителем — после входа</span></span><span class="blue">${ic('lock', 20, 2)}</span></span></button>`
-        : `<div class="card c oexec" style="gap:10px"><button data-a="go" data-v="${gv('c_exec', { id: o.ex })}" style="text-align:left"><span class="row"><span class="ava">${letter(e.name)}</span><span class="grow">${exLine(o)}<span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')} · ${esc(areaText(e.area, o.ex))}</span></span><span class="blue">${ic('arr', 22, 2)}</span></span></button>${o.ex === 'alex' ? '' : `<div class="btns two">${btn(`${ic('chat', 20)} Написать`, 'chatWith', o.id, 'soft')}${btn(`${ic('phone', 20)} Позвонить`, 'callAsk', o.ex, 'soft')}</div>`}</div>`}
+        : `<div class="card c oexec" style="gap:10px"><button data-a="go" data-v="${gv('c_exec', { id: o.ex })}" style="text-align:left"><span class="row">${exAva(o.ex)}<span class="grow">${exLine(o)}<span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')} · ${esc(areaText(e.area, o.ex))}</span></span><span class="blue">${ic('arr', 22, 2)}</span></span></button>${o.ex === 'alex' ? '' : `<div class="btns two">${btn(`${ic('chat', 20)} Написать`, 'chatWith', o.id, 'soft')}${btn(`${ic('phone', 20)} Позвонить`, 'callAsk', o.ex, 'soft')}</div>`}</div>`}
       ${card(`<div>${esc(o.desc)}</div><div class="h2">Что входит</div>${bullets(o.inc)}<div class="h2">Что вы получите</div><div>${esc(o.res)}</div>${bounds.length ? `<div class="h2">Заказывается отдельно</div><div class="m">${bounds.map((x, i) => esc(i ? lcFirst(x) : x)).join(', ')}. Это другие услуги: в эту карточку они не входят.</div>` : ''}`)}
       ${preview || o.model === 'brief' || o.model === 'inspect' ? '' : wayField(o, c)}
       <div class="row wrap">${pillRow}${o.formats.includes('online') ? pill('Можно онлайн', '', 'globe') : ''}${o.docs ? pill('Документы проверены', 'ok', 'shield') : ''}</div>
       ${promoInfo(o, c)}
       ${routeB ? card(`<div class="h2">Как договоримся</div>${bullets(replyOf(o).stages ? ['Вы отмечаете, что нужно, и прикладываете фото', 'Исполнитель присылает план по этапам: у каждого этапа свой результат, цена и срок', 'Платите за текущий этап — деньги уходят исполнителю после его приёмки'] : ['Вы отмечаете, что нужно, прикладываете фото и, если хотите, называете свою цену', 'Исполнитель соглашается или присылает свои условия с ценой', 'Соглашаетесь и оплачиваете — переписка становится заказом с номером'])}${svcCard(o.svc).why ? `<div class="m"><b>Почему так:</b> ${esc(lcFirst(svcCard(o.svc).why))}</div>` : ''}<div class="m">${(() => { const est = calc(o, c).total; return est > 0 ? `<b>Предварительно: ≈ ${rub(est)}</b> — считается по вашим ответам ниже. Ориентир исполнителя: ${priceLabel(o)}. Окончательную цену он назовёт в ответе.` : `Ориентир: ${priceLabel(o)}. Это не окончательная цена.`; })()}</div>`, 'soft') + paramsBlock(o, c) : `${configBlock(o, c)}${paramsBlock(o, c)}${subBlock(o, c)}${addonsBlock(o, c)}${needBlock(o, c)}${placeBlock(o, c)}${whenBlock(o, c, r)}${noteBlock(o, c)}${totalCard(o, c, r)}`}
       ${related.length ? `<div class="col g12"><div class="h2">Другие услуги этой тематики у исполнителя</div><div class="hscroll">${related.map(x => offerCard(x, 'h')).join('')}</div><button class="lnk" data-a="go" data-v="${gv('c_exec', { id: o.ex })}">Все услуги исполнителя ${ic('arr', 18, 2.2)}</button><span class="m">Это отдельные услуги: в текущий заказ они не добавляются.</span></div>` : ''}`,
-    bar: `<div class="abar">${routeB && !preview ? `<div class="asum-p"><span class="m">Ориентир</span><b>${priceLabel(o)}</b></div>` : ''}${!routeB && !preview ? `<div class="tot"><span>${insp ? 'Осмотр' : agree ? 'Предварительно' : 'Итого'}</span><b>${rub(r.total)}</b></div>` : ''}<div class="two"><button class="btn outline" data-a="chatWith" data-v="${o.id}" aria-label="Написать исполнителю" ${preview ? 'disabled' : ''}>${ic('chat', 22)}</button>${main}</div>${bl && !preview && !routeB ? `<div class="why center">Причина: ${bl}.</div>` : ''}<div class="asum"><span class="m">${routeB ? 'Исполнитель назовёт цену после запроса' : agree ? 'Сначала подтвердит исполнитель, потом оплата' : 'Деньги ждут на защищённом счёте до приёмки работы'}</span>
-      ${S.role === 'guest' || preview ? '' : `<button class="asum-ex" data-a="go" data-v="${gv('c_exec', { id: o.ex })}"><span class="ava">${letter(e.name)}</span><span class="grow"><b>${esc(e.name)}</b><span class="m">${ratingText(o.ex)} · ${esc(areaText(e.area, o.ex))}</span></span>${ic('arr', 20, 2)}</button>${o.ex === 'alex' ? '' : `<div class="btns two">${btn(`${ic('chat', 20)} Написать`, 'chatWith', o.id, 'soft')}${btn(`${ic('phone', 20)} Позвонить`, 'callAsk', o.ex, 'soft')}</div>`}`}</div></div>`,
+    bar: `<div class="abar">${routeB && !preview ? `<div class="asum-p"><span class="m">Ориентир</span><b>${priceLabel(o)}</b></div>` : ''}${!routeB && !preview ? `<div class="tot"><span>${insp ? 'Осмотр' : agree ? 'Предварительно' : 'Итого'}</span><b>${rub(r.total)}</b></div>` : ''}<div class="two"><button class="btn outline" data-a="chatWith" data-v="${o.id}" aria-label="Написать исполнителю" ${preview ? 'disabled' : ''}>${ic('chat', 22)}</button>${main}</div>${bl && !preview && !routeB ? `<div class="why center">Причина: ${bl}.</div>` : ''}<div class="asum">${routeB || agree ? `<span class="m">${routeB ? 'Исполнитель назовёт цену после запроса' : 'Сначала подтвердит исполнитель, потом оплата'}</span>` : ''}
+      ${S.role === 'guest' || preview ? '' : `<button class="asum-ex" data-a="go" data-v="${gv('c_exec', { id: o.ex })}">${exAva(o.ex)}<span class="grow"><b>${esc(e.name)}</b><span class="m">${ratingText(o.ex)} · ${esc(areaText(e.area, o.ex))}</span></span>${ic('arr', 20, 2)}</button>${o.ex === 'alex' ? '' : `<div class="btns two">${btn(`${ic('chat', 20)} Написать`, 'chatWith', o.id, 'soft')}${btn(`${ic('phone', 20)} Позвонить`, 'callAsk', o.ex, 'soft')}</div>`}`}
+      ${preview || VIEW() !== 'desk' ? '' : asideMore(o)}</div></div>`,
   };
 };
 IN.cfgNote = (v, id) => { cfgOf(offerById(id)).noteText = v; };
@@ -7205,7 +7269,7 @@ SCREENS.c_reqview = p => {
     title: 'Заявка', sub: esc(r.title),
     body: `${card(`<div class="h2">Сведения о задаче</div><div>${esc(r.what)}</div>${r.text ? `<div class="m">«${esc(r.text)}»</div>` : ''}<div class="sumline"><span>Где</span><b>${esc(r.whereText)}</b></div><div class="sumline"><span>Когда</span><b>${esc(r.whenText)}</b></div><div class="sumline"><span>Цена</span><b>${r.budgetFrom ? `${rub(r.budgetFrom)} – ${rub(r.budget)}` : r.budget ? rub(r.budget) : 'договорная'}</b></div><div class="sumline"><span>Кому</span><b>${r.to === 'all' ? 'всем подходящим' : pn(r.pick.length, 'исполнитель', 'исполнителя', 'исполнителей')}</b></div>`)}
       <div class="sec"><span class="h2">Предложения</span><span class="m">${r.offers.length}</span></div>
-      ${r.offers.length ? r.offers.map(x => card(`${fresh.has(x) ? `<span class="newtag">${ic('spark', 14, 2.4)} Новое предложение</span>` : ''}<div class="row"><span class="ava">${letter(exName(x.ex))}</span><span class="grow"><b class="t18" style="display:block">${esc(exName(x.ex))}</b><span class="m">${EX[x.ex].reviews ? `★ ${String(EX[x.ex].rating).replace('.', ',')}` : 'Нет отзывов'} · ${esc(areaText(EX[x.ex].area, x.ex))}</span></span><b class="t18 num">${rub(x.price)}</b></div><div>${esc(x.text)}</div><div class="m">${ic('clock', 16, 2)} ${esc(x.when)}</div>${r.status === 'open' ? `<div class="btns two">${btn('Написать', 'chatWith', x.offer, 'soft')}${btn('Выбрать', 'reqChoose', `${r.id}|${x.id}`)}</div>` : r.chosen === x.id ? pill('Вы выбрали', 'ok', 'check') : ''}`)).join('')
+      ${r.offers.length ? r.offers.map(x => card(`${fresh.has(x) ? `<span class="newtag">${ic('spark', 14, 2.4)} Новое предложение</span>` : ''}<div class="row">${exAva(x.ex)}<span class="grow"><b class="t18" style="display:block">${esc(exName(x.ex))}</b><span class="m">${EX[x.ex].reviews ? `★ ${String(EX[x.ex].rating).replace('.', ',')}` : 'Нет отзывов'} · ${esc(areaText(EX[x.ex].area, x.ex))}</span></span><b class="t18 num">${rub(x.price)}</b></div><div>${esc(x.text)}</div><div class="m">${ic('clock', 16, 2)} ${esc(x.when)}</div>${r.status === 'open' ? `<div class="btns two">${btn('Написать', 'chatWith', x.offer, 'soft')}${btn('Выбрать', 'reqChoose', `${r.id}|${x.id}`)}</div>` : r.chosen === x.id ? pill('Вы выбрали', 'ok', 'check') : ''}`)).join('')
         : `${skel(2)}<div class="m">Предложения появятся здесь, мы пришлём уведомление.</div>`}`,
   };
 };
@@ -8275,6 +8339,15 @@ const isDeal = o => o.model === 'brief';  /* у каждой услуги ест
 /* цена в карточке: договорная — словом, иначе «от N ₽» и единица */
 const priceHtml = o => isDeal(o) ? 'Договорная' : o.model === 'inspect' ? `осмотр ${rub(priceFrom(o))}` : `${fromWord(o) ? 'от ' : ''}${rub(priceFrom(o))}${o.unit ? ` <small>${esc(o.unit)}</small>` : ''}`;
 const ratingText = id => { const e = EX[id] || {}; return e.reviews ? `★ ${String(e.rating).replace('.', ',')} (${e.reviews})` : 'Нет отзывов'; };
+/* аватар исполнителя (06.11, Максим: «если будет у продавца картинка, чтобы его картинка там тоже была»): фото, если есть, иначе первая буква.
+   ava — id снимка в img/A (демо) или готовый адрес */
+const avaSrc = e => e && e.ava ? (/[/:]/.test(e.ava) ? e.ava : `img/A/${e.ava}.jpg`) : '';
+const exAva = (id, cls = '') => { const e = EX[id] || {}; const s = avaSrc(e); return `<span class="ava ${cls}">${s ? `<img src="${esc(s)}" alt="" loading="lazy" decoding="async" draggable="false">` : letter(e.name || '')}</span>`; };
+const avaByName = (n, cls = '') => { const id = Object.keys(EX).find(k => EX[k].name === n); return id ? exAva(id, cls) : `<span class="ava ${cls}">${letter(n)}</span>`; };
+/* факты об исполнителе для карточки в списке и правой колонки услуги — те же числа, что в профиле (exStats). В рабочей версии их пока нет */
+const exFacts = id => { const e = EX[id] || {}; if (REAL || !e.name) return [];
+  return [['calok', `На ZELDO с ${e.since || 2020} года`], ['check', pn(Math.round((e.reviews || 0) * 1.35), 'заказ выполнен', 'заказа выполнено', 'заказов выполнено')]]; };
+const factRows = (l, cls) => l.length ? `<span class="${cls}">${l.map(([i, t]) => `<span>${ic(i, 18, 2)}<span>${t}</span></span>`).join('')}</span>` : '';
 
 /* карточка как в документе: фото слева с сердцем, название, описание, формат и цена; ниже — исполнитель, статус, отзывы; строка партнёрам */
 /* значок акции на фото: самая выгодная скидка исполнителя на эту услугу */
@@ -8283,12 +8356,14 @@ function offerCard(o, layout = 'list', x = {}) {
   const e = EX[o.ex] || {}; const st = exStatus(o.ex); const price = x.price || priceHtml(o);
   const who = `<span class="pc-who"><b>${esc(exName2(o))}</b>${S.role === 'guest' ? '' : `<span class="pill ${st[1] === 'new' ? '' : 'ok'} sm">${st[0]}</span>`}</span>`;
   const partner = S.role === 'guest' ? '' : `<button class="pc-partner" data-a="partnerInfo" data-v="${o.ex}"><span>Партнёрам <b>до ${(e.partner || [5])[0]}%</b> · ${pn((e.partner || [5, 2])[1], 'уровень', 'уровня', 'уровней')}</span>${ic('right', 18, 2.2)}</button>`;
-  if (layout === 'tile') return `<div class="pct">${heartBtn(o)}<button data-a="openOffer" data-v="${o.id}" class="pct-b"><span class="pct-p">${photo(o.ph, o.title, 'M')}${ownMark(o)}${discMark(o)}</span><span class="pct-in"><span class="pct-t">${esc(o.title)}</span><span class="pct-pr">${price}</span><span class="pct-m"><span class="nm">${esc(exName2(o))}</span><span>${e.reviews ? '★' + NB + String(e.rating).replace('.', ',') : 'нет отзывов'}</span></span></span></button></div>`;
+  const guest = S.role === 'guest';
+  /* плитка (06.11): маленькое фото исполнителя у имени и строка «Партнёрам до …» внизу, как в списке */
+  if (layout === 'tile') return `<div class="pct">${heartBtn(o)}<button data-a="openOffer" data-v="${o.id}" class="pct-b"><span class="pct-p">${photo(o.ph, o.title, 'M')}${ownMark(o)}${discMark(o)}</span><span class="pct-in"><span class="pct-t">${esc(o.title)}</span><span class="pct-pr">${price}</span><span class="pct-m">${guest ? '' : exAva(o.ex, 'xs')}<span class="nm">${esc(exName2(o))}</span><span>${e.reviews ? '★' + NB + String(e.rating).replace('.', ',') : 'нет отзывов'}</span></span></span></button>${partner}</div>`;
   return `<div class="pc ${layout === 'h' ? 'h' : ''}"><div class="pc-top">${heartBtn(o)}<button data-a="openOffer" data-v="${o.id}" class="pc-b"><span class="pc-g">
       <span class="pc-p">${photo(o.ph, o.title, 'M')}${ownMark(o)}${discMark(o)}</span>
       <span class="pc-c"><span class="pc-t">${esc(o.title)}</span><span class="pc-d"><b class="pc-f">${locLine(o)}</b> · ${esc(o.desc)}</span><span class="pc-pr">${price}</span></span>
     </span></button></div>
-    <button class="pc-foot" data-a="openOffer" data-v="${o.id}">${who}<span class="pc-r">${ratingText(o.ex)}</span></button>${partner}</div>`;
+    <button class="pc-foot" data-a="openOffer" data-v="${o.id}">${guest ? '' : exAva(o.ex, 'pc-ava')}${who}<span class="pc-r">${ratingText(o.ex)}</span>${guest ? '' : factRows(exFacts(o.ex), 'pc-x')}</button>${partner}</div>`;
 }
 A.partnerInfo = id => sheet('Партнёрская программа', `<div class="m">${esc(exName(id))} делится частью оплаты с партнёрами, которые приводят заказчиков: до ${(EX[id].partner || [5])[0]}% на ${pn((EX[id].partner || [5, 2])[1], 'уровень', 'уровня', 'уровней')}. Партнёрская роль подключается отдельно.</div>${btn('Понятно', 'closeSheet', '', 'soft block')}`);
 
@@ -8722,7 +8797,8 @@ function locChips() {
   if (S.loc.radius && S.loc.mode !== 'online' && S.loc.mode !== 'visit') out.push(['radius', `до ${kmText(S.loc.radius)}`]);
   return out.map(([k, l]) => `<button class="chip on" data-a="locDrop" data-v="${k}" aria-label="Убрать условие: ${esc(l)}">${esc(l)} <span class="x">×</span></button>`).join('');
 }
-const viewToggle = (act, cur0) => `<div class="vtog">${[['list', 'Список', 'orders'], ['tile', 'Плитка', 'image'], ['map', 'Карта', 'map']].map(([v, l, i]) => `<button class="${cur0 === v ? 'on' : ''}" data-a="${act}" data-v="${v}" aria-label="${l}" aria-pressed="${cur0 === v}">${ic(i, 20, 2)}</button>`).join('')}</div>`;
+/* вид выдачи (06.11, Максим: «три кнопки… вообще непонятно, что какая что»): у каждой кнопки подпись, значки — строки, плитки 2×2 и карта */
+const viewToggle = (act, cur0) => `<div class="vtog" role="group" aria-label="Как показать">${[['list', 'Список', 'vlist'], ['tile', 'Плитка', 'tiles'], ['map', 'Карта', 'map']].map(([v, l, i]) => `<button class="${cur0 === v ? 'on' : ''}" data-a="${act}" data-v="${v}" aria-pressed="${cur0 === v}">${ic(i, 18, 2)}<span>${l}</span></button>`).join('')}</div>`;
 
 /* ---------- карта: настоящая, с улицами; если нет сети — схема ---------- */
 /* векторная карта с русскими подписями; нет WebGL или стиль не загрузился за 8 секунд — растровая подложка */
@@ -9048,7 +9124,7 @@ function maskContacts(t) { const src = String(t || ''); const out = CONTACT_RE.r
 const contactsHidden = () => toast('Контакты скрыты: номера, почта и ссылки в переписке не передаются. Звоните через ZELDO', 'info');
 /* компьютер (01.11): одно окно мессенджера во всю высоту — диалоги слева, переписка справа, поле ввода внизу */
 const chatRow = (c, curId) => { const [last, lt] = lastOf(c); const on = c.id === curId;
-  return `<button class="mrow ${on ? 'on' : ''}" data-a="openChat" data-v="${c.id}" ${on ? 'aria-current="true"' : ''}><span class="ava">${letter(c.with)}</span><span class="grow"><span class="mrow-h"><b>${esc(c.with)}</b><small>${esc(last.at || '')}</small></span><span class="mrow-s">${esc(lt || '')}</span>${c.order ? `<span class="mrow-o">Заказ № ${c.order}</span>` : ''}</span>${c.unread ? `<span class="cnt">${c.unread}</span>` : ''}</button>`; };
+  return `<button class="mrow ${on ? 'on' : ''}" data-a="openChat" data-v="${c.id}" ${on ? 'aria-current="true"' : ''}>${avaByName(c.with)}<span class="grow"><span class="mrow-h"><b>${esc(c.with)}</b><small>${esc(last.at || '')}</small></span><span class="mrow-s">${esc(lt || '')}</span>${c.order ? `<span class="mrow-o">Заказ № ${c.order}</span>` : ''}</span>${c.unread ? `<span class="cnt">${c.unread}</span>` : ''}</button>`; };
 const chatRows = (role, curId) => { const l = chatFilter(role); return l.length ? l.map(c => chatRow(c, curId)).join('') : '<div class="msgr-none m">Диалогов нет</div>'; };
 const composerHtml = ch => `<div class="composer"><div class="chips scroll" style="margin:0 -12px;padding:0 12px 2px">${dealChip(ch)}${QUICK[ch.role].map(t => `<button class="chip" data-a="quickSend" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</div>
       ${composeRow(ch)}</div>`;
@@ -9156,7 +9232,7 @@ function chatPane(ch) {
   const o = offerById(ch.offer); const ord = ch.order && orderById(ch.order);
   const sub = ord ? `${esc(ord.svc)} · заказ № ${ord.id}` : o ? `По услуге «${esc(o.title)}»` : '';
   const act = ord ? btn('Открыть заказ', 'go', gv('order', { id: ord.id }), 'soft sm') : o && ch.role === 'cust' ? btn('Карточка услуги', 'openOffer', o.id, 'soft sm') : '';
-  return `<div class="msgr-r"><div class="msgr-h"><span class="ava">${letter(ch.with)}</span><span class="grow">${ch.with === 'Администратор ZELDO' ? `<b class="t18">${esc(ch.with)}</b>` : `<button class="plink" data-a="go" data-v="${ch.role === 'cust' ? gv('c_exec', { id: ch.ex }) : gv('c_client', { name: ch.with })}" aria-label="Профиль: ${esc(ch.with)}"><b class="t18">${esc(ch.with)}</b></button>`}<span class="m">${sub}</span></span>${ord ? orderPill(ord) : ''}${act}<button class="iconbtn" data-a="callAsk" data-v="${esc(ch.ex || '')}" aria-label="Позвонить через ZELDO" title="Позвонить через ZELDO">${ic('phone', 22, 2)}</button></div>
+  return `<div class="msgr-r"><div class="msgr-h">${avaByName(ch.with)}<span class="grow">${ch.with === 'Администратор ZELDO' ? `<b class="t18">${esc(ch.with)}</b>` : `<button class="plink" data-a="go" data-v="${ch.role === 'cust' ? gv('c_exec', { id: ch.ex }) : gv('c_client', { name: ch.with })}" aria-label="Профиль: ${esc(ch.with)}"><b class="t18">${esc(ch.with)}</b></button>`}<span class="m">${sub}</span></span>${ord ? orderPill(ord) : ''}${act}<button class="iconbtn" data-a="callAsk" data-v="${esc(ch.ex || '')}" aria-label="Позвонить через ZELDO" title="Позвонить через ZELDO">${ic('phone', 22, 2)}</button></div>
     <div class="msgr-b"><div class="chat">${incStrip(ch)}${ch.msgs.map((m, i) => msgHtml(ch, m, i)).join('')}</div></div><div class="msgr-f">${composerHtml(ch)}</div></div>`;
 }
 function messenger(role, ch) {
@@ -9487,7 +9563,7 @@ SCREENS.order = p => {
   return {
     title: `Заказ № ${o.id}`,
     body: `${card(`<div class="row top"><span class="bigth" style="width:56px;height:56px;border-radius:14px;overflow:hidden;flex:none">${photo(of.ph, '', 'M')}</span><span class="grow"><span class="h2" style="display:block">${esc(o.svc)}</span><span class="m">${esc(o.what)}</span></span><b class="t18 num">${rub(o.total)}</b></div><div class="row wrap">${orderPill(o)}${nextStepText(o) ? `<span class="m">${nextStepText(o)}</span>` : ''}</div>
-        <div class="ocontact"><span class="ava">${letter(ex ? o.client : exName(o.ex))}</span><span class="grow"><span class="m" style="display:block">${ex ? 'Заказчик' : 'Исполнитель'}</span><button class="plink" data-a="go" data-v="${ex ? gv('c_client', { name: o.client }) : gv('c_exec', { id: o.ex })}" aria-label="Профиль: ${esc(ex ? o.client : exName(o.ex))}"><b>${esc(ex ? o.client : exName(o.ex))}</b></button>${ex ? `<span class="m" style="display:block">${clientLine(o.client)}</span>` : ''}</span>
+        <div class="ocontact">${ex ? `<span class="ava">${letter(o.client)}</span>` : exAva(o.ex)}<span class="grow"><span class="m" style="display:block">${ex ? 'Заказчик' : 'Исполнитель'}</span><button class="plink" data-a="go" data-v="${ex ? gv('c_client', { name: o.client }) : gv('c_exec', { id: o.ex })}" aria-label="Профиль: ${esc(ex ? o.client : exName(o.ex))}"><b>${esc(ex ? o.client : exName(o.ex))}</b></button>${ex ? `<span class="m" style="display:block">${clientLine(o.client)}</span>` : ''}</span>
           ${ch ? `<button class="cbtn" data-a="go" data-v="${gv('chat', { id: ch.id })}" aria-label="Написать">${ic('chat', 22, 2)}${ch.unread ? `<i class="cdot"></i>` : ''}</button>` : `<button class="cbtn" data-a="orderChat" data-v="${o.id}" aria-label="Написать">${ic('chat', 22, 2)}</button>`}
           <button class="cbtn" data-a="callAsk" data-v="${ex ? '' : o.ex}" aria-label="Позвонить через ZELDO">${ic('phone', 22, 2)}</button></div>`)}
       ${orderActions(o)}
