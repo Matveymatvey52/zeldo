@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="cust.webmanifest">
+<meta name="theme-color" content="#10213D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ZELDO">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="preload" as="image" href="img/P/photo-1560869713-7d0a29430803.jpg" media="(min-width: 1100px)">
 <link rel="preload" as="image" href="img/M/photo-1560869713-7d0a29430803.jpg" media="(max-width: 1099px)">
 <link rel="preload" as="image" href="img/P/photo-1758273705438-2bb9e0eb21b7.jpg" media="(min-width: 1100px)">
@@ -3431,7 +3439,7 @@ img { display: block; max-width: 100%; }
 .side p { margin: 0; color: var(--muted); }
 .tour-g { font-weight: 700; color: var(--muted); margin: 8px 2px 0; }
 .tour-b { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 11px 14px; border-radius: 14px; background: var(--card); box-shadow: var(--shadow); font-weight: 600; color: var(--ink); }
-.tour-b:hover { color: var(--act); }
+@media (hover: hover) and (pointer: fine) { .tour-b:hover { color: var(--act); } }
 .tour-b svg { color: var(--act); flex: none; }
 .side details { background: var(--card); border-radius: 18px; padding: 12px 14px; box-shadow: var(--shadow); }
 .side summary { font-weight: 700; cursor: pointer; }
@@ -3450,7 +3458,7 @@ img { display: block; max-width: 100%; }
 .role { display: inline-flex; align-items: center; gap: 4px; background: var(--soft); color: var(--act); font-weight: 600; padding: 6px 10px; border-radius: 10px; white-space: nowrap; }
 .hgap { flex: 1; }
 .hbtn { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; position: relative; color: var(--ink); }
-.hbtn:hover { background: var(--soft2); }
+@media (hover: hover) and (pointer: fine) { .hbtn:hover { background: var(--soft2); } }
 .hbtn .dot { position: absolute; top: 3px; right: 2px; min-width: 16px; height: 16px; border-radius: 8px; background: var(--brand); color: #fff; font-size: 11px; line-height: 16px; font-weight: 700; text-align: center; padding: 0 4px; border: 2px solid var(--card); box-sizing: content-box; }
 
 /* экран */
@@ -3520,14 +3528,14 @@ img { display: block; max-width: 100%; }
 
 /* кнопки (листы 15–16) */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 18px; border-radius: 15px; background: var(--act); color: #fff; font-size: 18px; line-height: 24px; font-weight: 600; text-align: center; transition: background 0.15s ease, transform 0.1s ease; user-select: none; }
-.btn:hover { background: var(--act-press); }
+@media (hover: hover) and (pointer: fine) { .btn:hover { background: var(--act-press); } }
 .btn:active { transform: scale(0.985); }
 .btn.soft { background: var(--soft); color: var(--act); }
-.btn.soft:hover { background: #DCEBFF; }
+@media (hover: hover) and (pointer: fine) { .btn.soft:hover { background: #DCEBFF; } }
 .btn.outline { background: var(--card); color: var(--act); box-shadow: inset 0 0 0 1.5px var(--line2); }
-.btn.outline:hover { background: var(--soft2); }
+@media (hover: hover) and (pointer: fine) { .btn.outline:hover { background: var(--soft2); } }
 .btn.text { background: none; color: var(--act); min-height: 44px; padding: 0 6px; }
-.btn.text:hover { background: none; text-decoration: underline; }
+@media (hover: hover) and (pointer: fine) { .btn.text:hover { background: none; text-decoration: underline; } }
 .btn.danger { background: var(--bad-soft); color: var(--bad); }
 .btn.ok { background: var(--ok-soft); color: var(--ok); }
 .btn.white { background: #fff; color: var(--act); }
@@ -3559,7 +3567,7 @@ a.lnk, .lnk { color: var(--act); font-weight: 600; display: inline-flex; align-i
 .chips.scroll::-webkit-scrollbar { display: none; }
 .chip { min-height: 44px; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 14px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line2); font-weight: 500; white-space: nowrap; flex: none; max-width: 100%; transition: background 0.12s ease, box-shadow 0.12s ease; }
 .chip.wrapok { white-space: normal; text-align: left; padding: 10px 14px; line-height: 20px; }
-.chip:hover { background: var(--soft2); }
+@media (hover: hover) and (pointer: fine) { .chip:hover { background: var(--soft2); } }
 .chip.on { background: var(--soft); box-shadow: inset 0 0 0 1.5px var(--act); color: var(--act); font-weight: 600; }
 .chip.add { color: var(--act); box-shadow: inset 0 0 0 1px var(--line2); border-style: dashed; }
 .chip:disabled { opacity: 0.45; }
@@ -3643,13 +3651,14 @@ img.ph[data-k] { background-size: cover; background-position: center; background
 .ogal-b { position: absolute; top: calc(50% - 22px); width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, .94); color: var(--ink); box-shadow: 0 4px 16px rgba(14, 29, 54, .22); opacity: 0; transition: opacity .15s ease; }
 .ogal-b.prev { left: 12px; }
 .ogal-b.next { right: 12px; }
-.ogal:hover .ogal-b, .ogal-b:focus-visible { opacity: 1; }
+@media (hover: hover) and (pointer: fine) { .ogal:hover .ogal-b { opacity: 1; } }
+.ogal-b:focus-visible { opacity: 1; }
 .ogal.at-s .ogal-b.prev, .ogal.at-e .ogal-b.next { opacity: 0; pointer-events: none; }
 @media (hover: none) { .ogal-b { display: none; } }
 .ogal-t { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
 .ogal-t::-webkit-scrollbar { display: none; }
 .ogal-t button { position: relative; flex: none; width: 96px; height: 72px; border-radius: 12px; overflow: hidden; background: var(--soft); opacity: .65; transition: opacity .15s ease; }
-.ogal-t button:hover, .ogal-t button.on { opacity: 1; }
+@media (hover: hover) and (pointer: fine) { .ogal-t button:hover, .ogal-t button.on { opacity: 1; } }
 .ogal-t button.on::after { content: ''; position: absolute; inset: 0; border-radius: 12px; box-shadow: inset 0 0 0 3px var(--act); }
 /* на весь экран: та же галерея крупно */
 .lbox { position: absolute; inset: 0; background: #0A1424; animation: fade .18s ease-out; }
@@ -3660,7 +3669,7 @@ img.ph[data-k] { background-size: cover; background-position: center; background
 .lbox-i img { width: min(100cqw, calc(100cqh * 4 / 3)); height: auto; aspect-ratio: 4 / 3; object-fit: cover; background-size: cover; background-position: center; background-repeat: no-repeat; cursor: default; }
 .lbox-n { position: absolute; top: 20px; left: 16px; color: #fff; font-size: 16px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .lbox-b { position: absolute; top: calc(50% - 26px); width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, .16); color: #fff; transition: background .15s ease, opacity .15s ease; }
-.lbox-b:hover { background: rgba(255, 255, 255, .28); }
+@media (hover: hover) and (pointer: fine) { .lbox-b:hover { background: rgba(255, 255, 255, .28); } }
 .lbox-b.prev { left: 16px; }
 .lbox-b.next { right: 16px; }
 .lbox.at-s .lbox-b.prev, .lbox.at-e .lbox-b.next { opacity: 0; pointer-events: none; }
@@ -3746,8 +3755,10 @@ img.ph[data-k] { background-size: cover; background-position: center; background
 .cal-g { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
 .cal-g .wd { color: var(--muted); font-size: 14px; padding: 4px 0; }
 .cal-d { height: 44px; border-radius: 12px; font-size: 18px; font-variant-numeric: tabular-nums; position: relative; display: grid; place-items: center; }
-.cal-d:hover:not(:disabled) { background: var(--soft2); }
-.cal-d.sel { background: var(--act); color: #fff; font-weight: 600; }
+@media (hover: hover) and (pointer: fine) { .cal-d:hover:not(:disabled) { background: var(--soft2); } }
+/* подсветка наведения — только там, где есть мышь: на телефоне после касания она залипала, и у выбранного дня белая цифра пропадала на белом (6224) */
+* { -webkit-tap-highlight-color: transparent; }
+.cal-d.sel, .cal-d.sel:hover { background: var(--act); color: #fff; font-weight: 600; }
 .cal-d.rng { background: var(--soft); color: var(--act); font-weight: 600; }
 .cal-d.today:not(.sel) { box-shadow: inset 0 0 0 1.5px var(--line2); }
 .cal-d:disabled { color: #A9B4C5; }
@@ -3784,9 +3795,17 @@ img.ph[data-k] { background-size: cover; background-position: center; background
 .ctx { display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: var(--card); box-shadow: 0 1px 0 var(--line); }
 /* договорились в переписке (03.11): кнопка сделки стоит первой среди быстрых ответов, старые предложения приглушены */
 .chip.deal { background: var(--act); color: #fff; box-shadow: none; font-weight: 600; }
-.chip.deal:hover { background: var(--act-press); }
+@media (hover: hover) and (pointer: fine) { .chip.deal:hover { background: var(--act-press); } }
 .msgcard.deal { width: min(100%, 440px); max-width: 100%; }
 .msgcard.dim { opacity: 0.62; }
+/* фото результата: миниатюры с «убрать» и плитка «Добавить фото» */
+.resph { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+.resph .thumb, .resph-add { position: relative; aspect-ratio: 1; border-radius: 14px; overflow: hidden; }
+.resph .thumb img, .resthumbs img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.resph-x { position: absolute; top: 4px; right: 4px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: rgba(16, 33, 61, 0.6); color: #fff; }
+.resph-add { display: grid; place-items: center; align-content: center; gap: 4px; border: 1.5px dashed var(--line2); color: var(--act); font-size: 13px; font-weight: 600; text-align: center; cursor: pointer; }
+.resthumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; margin-top: 6px; }
+.resthumbs a { aspect-ratio: 1; border-radius: 10px; overflow: hidden; }
 /* голосовые (05.11): пустое поле — микрофон, набран текст — «Отправить» */
 .compose:has(#msgin:placeholder-shown) [data-a="chatSend"] { display: none; }
 .compose:has(#msgin:not(:placeholder-shown)) .vmic { display: none; }
@@ -3842,7 +3861,7 @@ a.btn { text-decoration: none; }
 .addon .ah { display: flex; gap: 8px; align-items: flex-start; }
 .addon .ah .input { min-height: 44px; font-size: 18px; padding: 8px 12px; border-radius: 13px; }
 .iconbtn { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; color: var(--muted); flex: none; }
-.iconbtn:hover { background: var(--soft2); color: var(--ink); }
+@media (hover: hover) and (pointer: fine) { .iconbtn:hover { background: var(--soft2); color: var(--ink); } }
 .ptab { display: grid; gap: 0; }
 .ptab .pr2 { display: grid; gap: 6px; padding: 10px 0; border-top: 1px solid var(--line); }
 .ptab .pr { display: grid; grid-template-columns: 44px minmax(0, 1fr) 82px; align-items: center; gap: 10px; padding: 6px 0; border-top: 1px solid var(--line); }
@@ -3898,6 +3917,23 @@ a.btn { text-decoration: none; }
 @keyframes fade { from { opacity: 0; } }
 .sheet { background: var(--card); border-radius: 26px 26px 0 0; padding: 8px 20px 20px; max-height: 88%; overflow-y: auto; display: grid; gap: 14px; animation: up 0.22s cubic-bezier(0.2, 0.8, 0.2, 1); }
 @keyframes up { from { transform: translateY(40px); opacity: 0.4; } }
+.sheet.still, .scrim.still { animation: none; }
+/* ярлык на экране «Домой»: шапка заходит под часы и вырез, нижние вкладки — над полоской жестов */
+@media (display-mode: standalone) { #top { padding-top: env(safe-area-inset-top); background: var(--navy); } #tabs { padding-bottom: env(safe-area-inset-bottom); } }
+.a2hs { display: grid; gap: 10px; margin: 0; padding-left: 22px; font-size: 17px; line-height: 24px; }
+.a2hs svg { vertical-align: -3px; color: var(--act); }
+/* боковое меню на телефоне */
+.hmenu { color: #fff; margin-right: -6px; }
+.scrim.drw { display: flex; justify-content: flex-start; align-items: stretch; padding: 0; }
+.drawer { width: min(86vw, 320px); height: 100%; overflow-y: auto; padding-top: calc(14px + env(safe-area-inset-top)); animation: drwIn 0.24s var(--ease-drawer); }
+.drawer .cabtop { display: none; }
+@keyframes drwIn { from { transform: translateX(-100%); } }
+/* профиль: имя — ссылка, цифры исполнителя, избранное */
+.plink { text-align: left; color: inherit; } .plink b { text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 4px; }
+.exst { display: flex; align-items: center; gap: 12px; padding: 8px 0; } .exst .ri { flex: none; }
+.favtog { display: inline-flex; align-items: center; gap: 8px; justify-self: start; min-height: 40px; padding: 0 14px; border-radius: 12px; background: var(--soft); color: var(--act); font-weight: 600; }
+.favtog.on { color: #D6336C; }
+
 .grip { width: 40px; height: 5px; border-radius: 3px; background: var(--line); justify-self: center; }
 .sh-h { display: flex; align-items: center; gap: 10px; }
 .sh-h .h2 { flex: 1; }
@@ -4110,7 +4146,7 @@ mark { background: none; color: var(--act); font-weight: 700; }
 [data-style="bold"] #top .logo { color: #fff; letter-spacing: 0.04em; }
 [data-style="bold"] #top .role { background: rgba(255,255,255,.1); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
 [data-style="bold"] #top .hbtn { color: #fff; }
-[data-style="bold"] #top .hbtn:hover { background: rgba(255,255,255,.08); }
+@media (hover: hover) and (pointer: fine) { [data-style="bold"] #top .hbtn:hover { background: rgba(255,255,255,.08); } }
 [data-style="bold"] .sec-t, [data-style="bold"] .h1 { font-weight: 800; letter-spacing: -0.03em; }
 [data-style="bold"] .page.home > .hband { background: radial-gradient(120% 140% at 100% 0%, rgba(11,108,242,.55) 0%, rgba(11,108,242,0) 55%), #0E1D36; margin: -12px -16px 4px; padding: 14px 16px 22px; border-radius: 0 0 30px 30px; }
 [data-style="bold"] .hb-main { background: linear-gradient(135deg, #2E8BFF 0%, #0B6CF2 100%); box-shadow: 0 10px 24px rgba(11,108,242,.45); }
@@ -4547,23 +4583,23 @@ input, textarea, select { font-size: max(16px, 1em); }
 .dh-top { height: 48px; font-size: 17px; line-height: 22px; color: var(--muted); }
 .dh-top .dh-w { gap: 24px; }
 .dh-l { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); white-space: nowrap; }
-.dh-l:hover { color: var(--ink); }
+@media (hover: hover) and (pointer: fine) { .dh-l:hover { color: var(--ink); } }
 .dh-plus { color: var(--act); font-weight: 600; }
-.dh-plus:hover { color: var(--act-press); }
+@media (hover: hover) and (pointer: fine) { .dh-plus:hover { color: var(--act-press); } }
 .dh-role { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 12px; background: var(--soft); color: var(--act); white-space: nowrap; }
 .dh-role .dh-n { position: static; }
 .dh-main { height: 76px; }
 .dh-main .dh-w { gap: 12px; }
 .dh-logo { font-size: 28px; line-height: 32px; font-weight: 800; letter-spacing: 0.02em; color: var(--brand); margin-right: 12px; }
 .dh-cats { display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 18px; border-radius: 12px; background: var(--act); color: #fff; font-size: 18px; font-weight: 600; white-space: nowrap; flex: none; }
-.dh-cats:hover, .dh-q:hover b { background: var(--act-press); }
+@media (hover: hover) and (pointer: fine) { .dh-cats:hover, .dh-q:hover b { background: var(--act-press); } }
 .dh-q { flex: 1 1 auto; min-width: 180px; max-width: 860px; display: flex; align-items: stretch; height: 48px; border-radius: 12px; box-shadow: inset 0 0 0 2px var(--act); background: var(--card); color: var(--muted); overflow: hidden; text-align: left; }
 .dh-q > svg { align-self: center; margin: 0 10px 0 16px; flex: none; }
 .dh-q span { flex: 1; min-width: 0; align-self: center; font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dh-q b { display: grid; place-items: center; padding: 0 24px; background: var(--act); color: #fff; font-size: 18px; font-weight: 600; }
 .dh-nav { display: flex; gap: 2px; flex: none; margin-left: auto; }
 .dh-i { position: relative; display: grid; justify-items: center; gap: 2px; padding: 4px 8px; border-radius: 12px; color: var(--muted); font-size: 15px; line-height: 20px; white-space: nowrap; }
-.dh-i:hover { color: var(--ink); background: var(--soft2); }
+@media (hover: hover) and (pointer: fine) { .dh-i:hover { color: var(--ink); background: var(--soft2); } }
 .dh-i.on { color: var(--act); font-weight: 600; }
 .dh-n { position: absolute; top: 0; left: calc(50% + 6px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--brand); color: #fff; font-size: 12px; line-height: 18px; font-weight: 700; text-align: center; }
 .dh-cta { display: inline-flex; align-items: center; gap: 6px; height: 48px; padding: 0 18px; border-radius: 12px; background: var(--soft); color: var(--act); font-size: 18px; font-weight: 600; white-space: nowrap; flex: none; }
@@ -4572,7 +4608,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 .phone[data-view="desk"] .page { padding-top: 28px; }
 .phone[data-view="desk"] .card, .phone[data-view="desk"] .lc, .phone[data-view="desk"] .oc { box-shadow: var(--sh); border: 0; border-radius: 20px; }
 .phone[data-view="desk"] .card.soft, .phone[data-view="desk"] .card.flat { box-shadow: none; }
-.phone[data-view="desk"] .pc:hover, .phone[data-view="desk"] .pct:hover, .phone[data-view="desk"] .lc:hover, .phone[data-view="desk"] .oc:hover, .phone[data-view="desk"] .entry:hover, .phone[data-view="desk"] .dcat:hover { box-shadow: var(--sh2); transform: translateY(-2px); }
+@media (hover: hover) and (pointer: fine) { .phone[data-view="desk"] .pc:hover, .phone[data-view="desk"] .pct:hover, .phone[data-view="desk"] .lc:hover, .phone[data-view="desk"] .oc:hover, .phone[data-view="desk"] .entry:hover, .phone[data-view="desk"] .dcat:hover { box-shadow: var(--sh2); transform: translateY(-2px); } }
 .phone[data-view="desk"] .pc, .phone[data-view="desk"] .pct, .phone[data-view="desk"] .lc, .phone[data-view="desk"] .oc, .phone[data-view="desk"] .entry, .phone[data-view="desk"] .dcat { transition: box-shadow 0.18s ease, transform 0.18s ease; }
 .phone[data-view="desk"][data-lay="wide"] .cgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .phone[data-view="desk"] .scrim.topp { padding-top: calc(var(--hh) - 8px); background: rgba(16, 33, 61, 0.28); }
@@ -4584,7 +4620,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 .mega-l { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px 16px; }
 .mega-i { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: 10px; text-align: left; font-size: 14px; line-height: 18px; font-weight: 500; }
 .mega-i small { color: var(--muted); font-variant-numeric: tabular-nums; }
-.mega-i:hover { background: var(--soft2); color: var(--act); }
+@media (hover: hover) and (pointer: fine) { .mega-i:hover { background: var(--soft2); color: var(--act); } }
 /* цветные значки разделов */
 .ci { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 11px; }
 .ci-blue { background: #E7F1FF; color: #0864D4; } .ci-green { background: #E3F5EA; color: #17733F; } .ci-orange { background: #FFF0DB; color: #B45F00; }
@@ -4594,7 +4630,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 .phone[data-view="desk"] .pct { border-radius: 20px; box-shadow: var(--sh); overflow: hidden; }
 .phone[data-view="desk"] .pct-in { padding: 12px 14px 16px; gap: 4px; }
 .phone[data-view="desk"] .pct-t { font-size: 18px; line-height: 24px; font-weight: 600; min-height: 48px; }
-.phone[data-view="desk"] .pct:hover .pct-t { color: var(--act); }
+@media (hover: hover) and (pointer: fine) { .phone[data-view="desk"] .pct:hover .pct-t { color: var(--act); } }
 .phone[data-view="desk"] .cgrid.tiles, .phone[data-view="desk"][data-lay="wide"] .cgrid.tiles { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
 /* широкая карточка в выдаче */
 .phone[data-view="desk"] .cgrid.pcs, .phone[data-view="desk"][data-lay="wide"] .cgrid.pcs { grid-template-columns: minmax(0, 1fr); gap: 16px; }
@@ -4605,7 +4641,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 .phone[data-view="desk"] .pc-p { width: 340px; height: 255px; border-radius: 16px; }
 .phone[data-view="desk"] .pc-c { gap: 6px; padding-top: 2px; }
 .phone[data-view="desk"] .pc-t { order: 1; min-height: 0; }
-.phone[data-view="desk"] .pc-b:hover .pc-t { color: var(--act); }
+@media (hover: hover) and (pointer: fine) { .phone[data-view="desk"] .pc-b:hover .pc-t { color: var(--act); } }
 .phone[data-view="desk"] .pc-pr { order: 2; height: auto; }
 .phone[data-view="desk"] .pc-d { order: 3; -webkit-line-clamp: 6; min-height: 0; }
 .phone[data-view="desk"] .pc-foot { grid-column: 2; grid-row: 1; display: grid; align-content: start; gap: 8px; padding: 14px 16px; border: 0; border-radius: 16px; background: var(--soft2); min-height: 0; }
@@ -4657,7 +4693,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 .rib-b { position: absolute; z-index: 2; top: calc(50% - var(--rib-up)); display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: var(--card); color: var(--ink); box-shadow: 0 6px 22px rgba(14, 29, 54, 0.2); transition: opacity 0.15s ease, color 0.15s ease; }
 .rib-b.prev { left: -12px; }
 .rib-b.next { right: -12px; }
-.rib-b:hover { color: var(--act); }
+@media (hover: hover) and (pointer: fine) { .rib-b:hover { color: var(--act); } }
 .rib.at-s .rib-b.prev, .rib.at-e .rib-b.next { opacity: 0; pointer-events: none; }
 .dcat { position: relative; display: block; aspect-ratio: 4 / 5; border-radius: 22px; padding: 1px; background: #263043 content-box; box-shadow: var(--sh); overflow: hidden; text-align: left; transform: translateZ(0); backface-visibility: hidden; }
 /* слои по порядку: фото, затемнение снизу, подпись. Без отрицательных z-index: на них Safari мигал при наведении (02.11) */
@@ -4669,7 +4705,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 .dcat-t { position: absolute; z-index: 2; left: 18px; right: 18px; bottom: 16px; display: grid; gap: 4px; color: #fff; font-size: 21px; line-height: 25px; font-weight: 800; letter-spacing: -0.01em; text-wrap: balance; }
 .dcat-t small { font-size: 15px; line-height: 20px; font-weight: 500; letter-spacing: 0; color: rgba(255, 255, 255, 0.82); }
 /* наведение — как у всех карточек: плитка чуть приподнимается, тень глубже; сам снимок не масштабируется */
-.phone[data-view="desk"] .dcat:hover { transform: translate3d(0, -3px, 0); }
+@media (hover: hover) and (pointer: fine) { .phone[data-view="desk"] .dcat:hover { transform: translate3d(0, -3px, 0); } }
 .phone[data-view="desk"] .dfind { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 36px; padding: 32px 36px; border-radius: 28px; color: #fff;
   background: radial-gradient(90% 140% at 100% 0%, rgba(11, 108, 242, 0.6) 0%, rgba(11, 108, 242, 0) 60%), #0E1D36; }
 .dfind .h2 { font-size: 28px; line-height: 34px; font-weight: 800; }
@@ -4677,8 +4713,8 @@ input, textarea, select { font-size: max(16px, 1em); }
 .df-a, .df-r { display: grid; gap: 16px; align-content: start; }
 .df-q { display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 18px; border-radius: 14px; background: #fff; color: var(--muted); font-size: 18px; text-align: left; }
 .df-b { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 12px; background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24); color: #fff; font-weight: 600; }
-.df-b:hover { background: rgba(255, 255, 255, 0.18); }
-.df-q:hover { box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35); }
+@media (hover: hover) and (pointer: fine) { .df-b:hover { background: rgba(255, 255, 255, 0.18); } }
+@media (hover: hover) and (pointer: fine) { .df-q:hover { box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35); } }
 .df-r { border-left: 1px solid rgba(255, 255, 255, 0.16); padding-left: 36px; }
 .df-r .btn { justify-self: start; }
 /* заявки, бонусы и расписание — один ряд на всю ширину под панелью поиска */
@@ -4692,14 +4728,14 @@ input, textarea, select { font-size: max(16px, 1em); }
 .ds-b + .ds-b { padding-top: 16px; border-top: 1px solid var(--line); }
 .ds-h { font-size: 18px; line-height: 24px; font-weight: 700; }
 .ds-up { display: inline-flex; align-items: center; gap: 4px; justify-self: start; color: var(--muted); font-size: 14px; }
-.ds-up:hover { color: var(--act); }
+@media (hover: hover) and (pointer: fine) { .ds-up:hover { color: var(--act); } }
 .ds-tree { display: grid; }
 .ds-t { text-align: left; padding: 6px 10px; border-radius: 10px; font-size: 14px; line-height: 18px; }
-.ds-t:hover { background: var(--soft2); }
+@media (hover: hover) and (pointer: fine) { .ds-t:hover { background: var(--soft2); } }
 .ds-t.on { background: var(--soft); color: var(--act); font-weight: 600; }
 .dside .ds-opts { display: grid; gap: 2px; }
 .dside .opt { padding: 7px 10px; border-radius: 10px; box-shadow: none; background: none; gap: 10px; align-items: center; }
-.dside .opt:hover { background: var(--soft2); }
+@media (hover: hover) and (pointer: fine) { .dside .opt:hover { background: var(--soft2); } }
 .dside .opt.on { background: var(--soft); box-shadow: none; }
 .dside .opt .ot { font-size: 14px; line-height: 18px; font-weight: 500; }
 .dside .mark { width: 18px; height: 18px; margin: 0; }
@@ -4722,7 +4758,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 .asum-p b { font-size: 28px; line-height: 32px; font-weight: 800; }
 .asum-ex { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; border-radius: 14px; background: var(--soft2); text-align: left; }
 .asum-ex b { display: block; }
-.asum-ex:hover { box-shadow: inset 0 0 0 1.5px var(--line2); }
+@media (hover: hover) and (pointer: fine) { .asum-ex:hover { box-shadow: inset 0 0 0 1.5px var(--line2); } }
 /* кабинет: меню роли слева, содержимое справа */
 .phone[data-view="desk"][data-lay="cab"] #screen { overflow: hidden; }
 .phone[data-view="desk"] .page.cabp { position: absolute; inset: 0; display: block; max-width: none; margin: 0; padding: 0; }
@@ -4752,12 +4788,12 @@ input, textarea, select { font-size: max(16px, 1em); }
 /* слева 13 px: иконка смены роли стоит по центру полоски, когда меню свёрнуто (14 + 13 + 9 = 36) */
 .cabsw { display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 6px 0 13px; border-radius: 12px; background: var(--soft); color: var(--act); font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; }
 .cabsw .cs-i { display: grid; place-items: center; flex: none; }
-.cabsw:hover { background: #DCEBFF; }
+@media (hover: hover) and (pointer: fine) { .cabsw:hover { background: #DCEBFF; } }
 .cnl { display: grid; gap: 2px; }
 .cni { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 40px; padding: 4px 10px 4px 6px; border-radius: 14px; text-align: left; font-size: 14px; line-height: 18px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; }
 .cni .ci { flex: none; }
 .cni .ci { width: 32px; height: 32px; border-radius: 10px; }
-.cni:hover { background: var(--soft2); }
+@media (hover: hover) and (pointer: fine) { .cni:hover { background: var(--soft2); } }
 .cni.on { background: var(--soft); color: var(--act); font-weight: 700; }
 .cni .cnt { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; font-size: 12px; line-height: 22px; }
 .cnum { color: var(--muted); font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
@@ -4785,7 +4821,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 .msgr-list { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 6px; scrollbar-width: thin; }
 .msgr-none { padding: 16px; }
 .mrow { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px; border-radius: 14px; text-align: left; }
-.mrow:hover { background: var(--soft2); }
+@media (hover: hover) and (pointer: fine) { .mrow:hover { background: var(--soft2); } }
 .mrow.on { background: var(--soft); }
 .mrow-h { display: flex; align-items: baseline; gap: 8px; }
 .mrow-h b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -4818,12 +4854,12 @@ input, textarea, select { font-size: max(16px, 1em); }
 .dstat .ci { width: 44px; height: 44px; border-radius: 14px; }
 .dstat b { display: block; font-size: 28px; line-height: 32px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .dstat .m { display: block; font-size: 14px; line-height: 18px; }
-.dstat:hover { box-shadow: var(--sh2); }
+@media (hover: hover) and (pointer: fine) { .dstat:hover { box-shadow: var(--sh2); } }
 .dgrid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
 .drows { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
 .drows.two { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; }
 .drow { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 10px; margin: 0 -10px; width: calc(100% + 20px); border-radius: 14px; text-align: left; }
-.drow:hover { background: var(--soft2); }
+@media (hover: hover) and (pointer: fine) { .drow:hover { background: var(--soft2); } }
 .drow .grow b, .drow .grow .m { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .drow .grow .m { font-size: 14px; line-height: 18px; }
 .drow-t { display: flex; margin-top: 6px; min-width: 0; }
@@ -4928,6 +4964,7 @@ const P = {
   filter: '<path d="M4 5h16l-6 7.5V19l-4 1.5v-8z"/>',
   sort: '<path d="M7 4v16M3.5 16.5 7 20l3.5-3.5M17 20V4M13.5 7.5 17 4l3.5 3.5"/>',
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+  share: '<path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11v8a1.5 1.5 0 0 0 1.5 1.5h9A1.5 1.5 0 0 0 18 19v-8"/>',
   grid: '<path d="M5 5h4v4H5zM15 5h4v4h-4zM5 15h4v4H5zM15 15h4v4h-4z"/>',
   map: '<path d="m3.5 6.5 5-2 7 2.5 5-2v13l-5 2-7-2.5-5 2z"/><path d="M8.5 4.5v13M15.5 7v13"/>',
   globe: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.3 3.6 5.2 3.6 8.5s-1.1 6.2-3.6 8.5c-2.5-2.3-3.6-5.2-3.6-8.5S9.5 5.8 12 3.5z"/>',
@@ -4942,7 +4979,8 @@ const P = {
   wrench: '<path d="M14.5 4a4.5 4.5 0 0 0-4.2 6.1L4 16.4V20h3.6l6.3-6.3A4.5 4.5 0 0 0 20 9.5l-3 3-3-3 3-3a4.5 4.5 0 0 0-2.5-2.5z"/>',
   bolt: '<path d="M13 3 5 13.5h6L10 21l8-10.5h-6z"/>',
   paw: '<circle cx="7" cy="10" r="1.8"/><circle cx="10.5" cy="6.5" r="1.8"/><circle cx="14.5" cy="6.5" r="1.8"/><circle cx="18" cy="10" r="1.8"/><path d="M12.5 11.5c-2.5 0-5 3.5-5 5.5 0 2.5 3 2 5 2s5 .5 5-2c0-2-2.5-5.5-5-5.5z"/>',
-  phone: '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>',
+  /* трубка, а не смартфон: кнопка звонка была непонятной (запись 48, 15:14) */
+  phone: '<path d="M6.2 3.5h2.6c.5 0 .9.3 1 .8l.9 3.4c.1.4 0 .8-.3 1.1l-1.6 1.5a13.5 13.5 0 0 0 4.9 4.9l1.5-1.6c.3-.3.7-.4 1.1-.3l3.4.9c.5.1.8.5.8 1v2.6c0 .9-.7 1.6-1.6 1.6A16.6 16.6 0 0 1 4.6 5.1c0-.9.7-1.6 1.6-1.6z"/>',
   music: '<path d="M9 18V5.5l11-2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
   leaf: '<path d="M5 19c0-8 5-13 15-14-1 10-6 15-14 15"/><path d="M5 19 13 11"/>',
   code: '<path d="m8.5 7-5 5 5 5M15.5 7l5 5-5 5M13.5 4.5l-3 15"/>',
@@ -5073,17 +5111,21 @@ const VIEW = () => innerWidth >= 1100 ? 'desk' : innerWidth >= 768 ? 'tab' : 'ph
 const LAY = {
   c_home: 'wide', c_results: 'wide', c_catalog: 'wide', c_dir: 'wide', c_cat: 'wide', c_sub: 'wide', c_service: 'wide', c_map: 'wide', c_online: 'wide', g_home: 'wide',
   c_offer: 'aside',
-  c_orders: 'cab', c_reqview: 'cab', order: 'cab', c_fav: 'cab', c_cab: 'cab', c_aboutme: 'cab', c_sched: 'cab', c_msgs: 'cab', e_msgs: 'cab', chat: 'cab', notifs: 'cab', notifset: 'cab', settings: 'cab', privacy: 'cab',
+  c_orders: 'cab', c_reqview: 'cab', order: 'cab', c_fav: 'cab', c_cab: 'cab', c_aboutme: 'cab', c_sched: 'cab', c_msgs: 'cab', e_msgs: 'cab', chat: 'cab', notifs: 'cab', notifset: 'cab', settings: 'cab', mydata: 'cab', c_client: 'cab', privacy: 'cab',
   e_home: 'cab', e_feed: 'cab', e_offers: 'cab', e_incoming: 'cab', e_orders: 'cab', e_fav: 'cab', e_cab: 'cab', e_services: 'cab', e_schedule: 'cab',
   e_request: 'cab', deal_offer: 'cab', e_task: 'cab', e_service: 'cab', e_work: 'cab', e_schedset: 'cab', e_promo: 'cab', e_portfolio: 'cab', e_promos: 'cab', e_money: 'cab', e_package: 'cab', e_profile: 'cab',
 };
 /* разделы: внизу на телефоне и планшете, в шапке на компьютере */
+/* какой раздел подсвечен: заказ, оплата и перенос — это «Заказы», даже если пришли из переписки (запись 48, 44:41) */
+const navRoot = () => { const n = S.stack[S.stack.length - 1].n; return ['order', 'c_checkout', 'resched'].includes(n) ? (S.role === 'exec' ? 'e_orders' : 'c_orders') : S.stack[0].n; };
+/* заказы — общей цифрой по обеим ролям, как сообщения (запись 48, 56:26) */
+const ordersAll = () => actOrders('cust') + actOrders('exec');
 function navItems(cls) {
-  const rootN = S.stack[0].n;
+  const rootN = navRoot(); const ordAll = ordersAll();
   const msgsAll = unreadMsgs('cust') + unreadMsgs('exec'); const homeAll = homeNew('cust') + homeNew('exec');
   return TABS[S.role].map(([n, i, l]) => {
     const on = rootN === n;
-    const badge = (n === 'c_msgs' || n === 'e_msgs') && msgsAll ? `<span class="tb">${msgsAll}</span>` : (n === 'c_home' || n === 'e_home') && homeAll ? `<span class="tb" aria-label="Новое на главной: ${homeAll}">${homeAll}</span>` : '';
+    const badge = (n === 'c_msgs' || n === 'e_msgs') && msgsAll ? `<span class="tb">${msgsAll}</span>` : (n === 'c_orders' || n === 'e_orders') && ordAll ? `<span class="tb" aria-label="Заказы, где нужно действие: ${ordAll}">${ordAll}</span>` : (n === 'c_home' || n === 'e_home') && homeAll ? `<span class="tb" aria-label="Новое на главной: ${homeAll}">${homeAll}</span>` : '';
     return `<button class="${cls} ${on ? 'on' : ''}" data-a="tab" data-v="${n}" ${on ? 'aria-current="page"' : ''}>${on ? icf(i) : ic(i, 26, 1.8)}<span class="tl">${l}</span>${badge}</button>`;
   }).join('');
 }
@@ -5091,12 +5133,12 @@ const hsq = () => `<button class="hsq" data-a="openSearch">${ic('search', 20, 2.
 /* шапка компьютера (01.11, по образцу больших досок объявлений): сверху роль, место, главное действие роли и настройки;
    ниже логотип, «Все категории», поиск с кнопкой «Найти» и разделы со счётчиками */
 function deskHeader() {
-  const g = S.role === 'guest'; const ex = S.role === 'exec'; const rootN = S.stack[0].n;
+  const g = S.role === 'guest'; const ex = S.role === 'exec'; const rootN = navRoot();
   const msgs = unreadMsgs('cust') + unreadMsgs('exec'); const bell = unreadNotifs('cust') + unreadNotifs('exec');
   const other = g ? 0 : ROLES.filter(([r]) => r !== S.role && r !== 'partner').reduce((a, [r]) => a + allNew(r), 0);
   const item = (n, i, l, cnt, act = 'tab') => `<button class="dh-i ${rootN === n ? 'on' : ''}" data-a="${act}" data-v="${n}" title="${l}" ${rootN === n ? 'aria-current="page"' : ''}>${rootN === n ? icf(i, 22) : ic(i, 22, 1.9)}<span>${l}</span>${cnt ? `<b class="dh-n">${cnt}</b>` : ''}</button>`;
   const pre = ex ? 'e_' : 'c_';
-  const nav = g ? '' : `${item(pre + 'orders', 'orders', 'Заказы', actOrders(S.role))}${item(pre + 'fav', 'heart', 'Избранное')}${item(pre + 'msgs', 'chat', 'Сообщения', msgs)}${item('notifs', 'bell', 'Уведомления', bell, 'bell')}${item(pre + 'cab', 'user', 'Кабинет')}`;
+  const nav = g ? '' : `${item(pre + 'orders', 'orders', 'Заказы', ordersAll())}${item(pre + 'fav', 'heart', 'Избранное')}${item(pre + 'msgs', 'chat', 'Сообщения', msgs)}${item('notifs', 'bell', 'Уведомления', bell, 'bell')}${item(pre + 'cab', 'user', 'Кабинет')}`;
   const place = typeof meText === 'function' ? meText() : 'Москва';
   return `<div class="dh"><div class="dh-top"><div class="dh-w">
       ${g ? '' : `<button class="dh-role" data-a="roleMenu" aria-haspopup="dialog">Вы: <b>${ROLE_NAME[S.role]}</b>${other ? `<b class="dh-n">${other}</b>` : ''}${ic('down', 14, 2.4)}</button>`}
@@ -5123,7 +5165,7 @@ function header() {
   const unread = unreadNotifs('cust') + unreadNotifs('exec');
   const other = ROLES.filter(([r]) => r !== S.role && r !== 'partner').reduce((a, [r]) => a + allNew(r), 0);
   return `<div class="hdr">
-    <button class="logo" data-a="logoHome" aria-label="ZELDO, на главную">ZELDO</button>
+    <button class="iconbtn hmenu" data-a="drawer" aria-label="Меню">${ic('menu', 24, 2.2)}</button><button class="logo" data-a="logoHome" aria-label="ZELDO, на главную">ZELDO</button>
     <button class="role" data-a="roleMenu" aria-haspopup="dialog" aria-label="Роль: ${ROLE_NAME[S.role]}${other ? `, в других ролях новых: ${other}` : ''}">${ROLE_NAME[S.role]}${other ? `<span class="rdot">${other}</span>` : ''} ${ic('down', 16, 2.4)}</button>
     ${hsq()}<span class="hgap"></span>
     <nav class="hnav" aria-label="Разделы">${navItems('hn')}</nav>
@@ -5205,8 +5247,11 @@ const lboxHtml = ({ keys, i }) => `<div class="lbox${i <= 0 ? ' at-s' : ''}${i >
 function lbSync() { const s = $('.lbox-s'); if (!s || !S.lbox) return; const n = S.lbox.keys.length; const i = Math.round(s.scrollLeft / Math.max(1, s.clientWidth)); S.lbox.i = i;
   const c = $('.lbox-n'); if (c) c.textContent = `${i + 1} / ${n}`; const b = $('.lbox'); b.classList.toggle('at-s', i <= 0); b.classList.toggle('at-e', i >= n - 1); }
 function renderOverlay() {
-  const o = $('#overlay'); let h = '';
+  /* то же окно обновилось (выбрали день, время, цену) — не выезжает заново и не прыгает наверх (6214: «заново не надо, чтобы открывалось окно») */
+  const o = $('#overlay'); let h = ''; const prev = o.querySelector('.sheet'); const same = !!(prev && S.sheet && prev.getAttribute('aria-label') === S.sheet.title); const top = prev ? prev.scrollTop : 0;
   if (S.panel) h += `<div class="scrim topp" data-a="closeAll"><div class="panel" data-a="stop" role="dialog" aria-modal="true">${S.panel}</div></div>`;
+  /* боковое меню на телефоне (запись 48, 92:40: «я бы всё-таки меню сделал»): те же разделы, что слева на компьютере */
+  if (S.drawer) h += `<div class="scrim drw" data-a="closeAll"><nav class="drawer cabnav" data-a="stop" aria-label="Меню">${cabNav()}</nav></div>`;
   if (S.sheet) h += `<div class="scrim" data-a="closeAll"><div class="sheet" data-a="stop" role="dialog" aria-modal="true" aria-label="${esc(S.sheet.title)}"><div class="grip"></div><div class="sh-h"><div class="h2">${esc(S.sheet.title)}</div><button class="iconbtn" data-a="closeSheet" aria-label="Закрыть">${ic('x', 22, 2.2)}</button></div>${S.sheet.body}</div></div>`;
   if (S.dialog) {
     const d = S.dialog;
@@ -5215,6 +5260,7 @@ function renderOverlay() {
   if (S.lbox && S.lbox.keys.length) h += lboxHtml(S.lbox);
   if (S.toast) h += `<div class="toast ${S.toast.kind || ''}" role="status">${ic(S.toast.kind === 'info' ? 'info' : 'check', 20, 2.4)}<span>${esc(S.toast.t)}</span></div>`;
   o.innerHTML = h;
+  if (same) { const sh = o.querySelector('.sheet'); if (sh) { sh.classList.add('still'); sh.parentElement.classList.add('still'); sh.scrollTop = top; } }
   const ls = $('.lbox-s'); if (ls) { ls.scrollLeft = S.lbox.i * ls.clientWidth; ls.addEventListener('scroll', lbSync, { passive: true }); }  /* снимок не прыгает на первый, когда окно перерисовалось */
 }
 
@@ -5222,7 +5268,8 @@ function renderOverlay() {
 Object.assign(A, {
   stop() {},
   back() { back(); },
-  closeAll() { S.sheet = null; S.panel = null; renderOverlay(); },
+  closeAll() { S.sheet = null; S.panel = null; S.drawer = false; renderOverlay(); },
+  drawer() { S.drawer = true; S.sheet = null; S.panel = null; renderOverlay(); },
   closeSheet() { closeSheet(); },
   closeDialog() { S.dialog = null; renderOverlay(); },
   phView(v) { const keys = /^\d+$/.test(v) && S.gal.length ? S.gal : PH[v] ? [v] : []; if (!keys.length) return;
@@ -5596,7 +5643,9 @@ const unitShown = l => (l === 'за работу' ? '' : l);
 const ZP = (typeof window !== 'undefined' && window.ZPARAMS) || { p: {}, s: {}, a: {} };
 /* роль параметра в цене (перепроверка 01.11, правило R-13): var — вариант с полной ценой, pick — у каждого пункта своя цена,
    sur — доплата за значение, each — доплата за каждую штуку сверх входящих, info — для сведения. Все суммы ставит исполнитель */
-const svcParams = n => (ZP.s[n] || []).map(id => { const p = Object.assign({ id }, ZP.p[id]); p.r = ((ZP.sr || {})[n] || {})[id] || p.r || (p.price ? 'sur' : 'info'); p.h = p.h || []; return p; }).filter(x => x.n);
+/* комнаты, санузлы и «чьи материалы» влияют на цену (запись 50, Максим: «добавка на санузлы, на комнаты… коэффициент»): доплату назначает исполнитель */
+const PRICED_P = { rooms: ['each', 1], bath_n: ['each', 1], materials: ['sur', 0] };
+const svcParams = n => (ZP.s[n] || []).map(id => { const p = Object.assign({ id }, ZP.p[id]); p.r = ((ZP.sr || {})[n] || {})[id] || p.r || (p.price ? 'sur' : 'info'); if (p.r === 'info' && PRICED_P[id]) { p.r = PRICED_P[id][0]; p.inc = PRICED_P[id][1]; } p.h = p.h || []; return p; }).filter(x => x.n);
 /* параметр, от которого зависит цена: его значения — варианты, полную цену каждого исполнитель задаёт сам, без наценок */
 const priceParam = n => svcParams(n).find(p => p.r === 'var' && p.t === 'один из списка');
 /* прайс по пунктам: диван и два кресла, зоны эпиляции — итог как сумма выбранного */
@@ -5609,7 +5658,7 @@ function prpDefault(n, base) {
   svcParams(n).forEach(p => {
     if (p.r === 'sur' && p.t === 'да / нет') out[p.id] = { yes: rnd(base * 0.2) };
     else if (p.r === 'sur' && p.v.length) out[p.id] = { v: Object.fromEntries(p.v.map((x, k) => [x, p.t === 'один из списка' ? (k ? rnd(base * 0.15 * k) : 0) : rnd(base * 0.15)])) };
-    else if (p.r === 'each') out[p.id] = { each: rnd(base * (p.inc >= 10 ? 0.02 : 0.2)) };
+    else if (p.r === 'each') out[p.id] = { each: rnd(base * (p.inc >= 10 ? 0.02 : PRICED_P[p.id] && base < 3000 ? 6 : 0.2)) };  /* у цены «за м²» лишняя комната — заметная доплата, а не 20 % цены метра */
     else if (p.r === 'pick') out[p.id] = { v: Object.fromEntries(p.v.map((x, k) => [x, p.pr ? p.pr[k] : rnd(base * (0.6 + 0.25 * k))])) };  /* ориентир по рынку из таблицы */
   });
   return out;
@@ -5953,7 +6002,10 @@ A.stpOk = () => { const s = S.stp; const n = Math.round(Number(String(s.x).repla
   const t = Math.min(Math.max(n, s.min), s.max, 99999999); closeSheet(); A[s.act](`${s.key}|${(t - s.val) / s.step}`); };
 const sw = (act, v, on, label = 'Переключить') => `<button class="switch ${on ? 'on' : ''}" data-a="${act}" data-v="${esc(v)}" role="switch" aria-checked="${!!on}" aria-label="${esc(label)}"></button>`;
 const opt = (act, v, title, sub, on, o = {}) => `<button class="opt ${on ? 'on' : ''}" data-a="${act}" data-v="${esc(v)}" aria-pressed="${!!on}"><span class="mark ${o.multi ? 'sq' : ''}"></span><span class="grow"><span class="ot">${title}</span>${sub ? `<span class="os">${sub}</span>` : ''}</span>${o.right ? `<span class="oprice">${o.right}</span>` : ''}</button>`;
-const field = (label, inner, o = {}) => `<label class="field ${o.bad ? 'bad' : ''}"><span class="lbl">${label}</span>${inner}${o.hint ? `<span class="m">${o.hint}</span>` : ''}${o.err ? `<span class="err">${o.err}</span>` : ''}</label>`;
+/* <label> — только когда в поле есть ввод и он стоит раньше кнопок: иначе касание пустого места внутри label браузер передаёт первой кнопке
+   (у счётчика — «−», у выбора — первому варианту). Из-за этого на телефоне всё «дрыгалось» и срабатывало со второго раза (запись 50) */
+const field = (label, inner, o = {}) => { const ix = inner.search(/<(input|textarea|select)\b/), bx = inner.search(/<button\b/); const tag = ix >= 0 && (bx < 0 || ix < bx) ? 'label' : 'div';
+  return `<${tag} class="field ${o.bad ? 'bad' : ''}"><span class="lbl">${label}</span>${inner}${o.hint ? `<span class="m">${o.hint}</span>` : ''}${o.err ? `<span class="err">${o.err}</span>` : ''}</${tag}>`; };
 const card = (inner, cls = '') => `<div class="card ${cls}">${inner}</div>`;
 const sec = (title, right = '') => `<div class="sec"><span class="h2">${title}</span>${right}</div>`;
 const sumLines = lines => lines.map(([a, b, cls]) => `<div class="sumline ${cls || ''}"><span>${a}</span><b>${b}</b></div>`).join('');
@@ -6383,7 +6435,7 @@ SCREENS.c_exec = p => {
     body: `<div class="card" style="justify-items:center;text-align:center"><span class="ava lg">${letter(e.name)}</span><div class="h1">${esc(e.name)}</div>${e.biz ? `<div class="m">${esc(e.biz)} · с ${e.since} года</div>` : ''}
         <div class="row" style="justify-content:center">${pill('Проверен', '', 'diamond')}${e.reviews ? `<span class="rating t18">${ic('star', 18, 2)} ${String(e.rating).replace('.', ',')}</span><span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')}</span>` : '<span class="m">Пока нет отзывов</span>'}</div>
         <div class="m">${esc(areaText(e.area, p.id))}</div></div>
-      ${card(`<div class="h2">Об исполнителе</div><div>${esc(e.about)}</div>`)}
+      ${card(`<div class="h2">Об исполнителе</div><div>${esc(e.about)}</div>`)}${exStats(p.id)}
       ${exHoursCard(p.id)}
       <div class="h2">Услуги исполнителя</div>
       ${listSearch(`ex_${p.id}`, 'Найти среди услуг исполнителя', q => { const ents = Object.entries(byCat).map(([c, l]) => [c, l.filter(o => offerHit(o, q))]).filter(([, l]) => l.length); return ents.length ? ents.map(([c, list]) => `<div class="col g12"><div class="sec"><span class="h2">${esc(c)}</span><span class="m">${pn(list.length, 'услуга', 'услуги', 'услуг')}</span></div>${list.map(o => offerCard(o)).join('')}</div>`).join('') : noHits(); })}
@@ -6440,12 +6492,13 @@ SCREENS.c_fav = () => {
 SCREENS.c_orders = () => {
   const mine = S.orders.filter(o => o.cust);
   const active = mine.filter(o => !['done', 'cancel'].includes(o.status)); const past = mine.filter(o => ['done', 'cancel'].includes(o.status));
-  const tab = S.cOrdersTab;
+  const tab = S.cOrdersTab === 'req' ? 'req' : ORD_GROUPS[S.cOrdersTab] ? S.cOrdersTab : 'all'; const shown = tab === 'all' ? null : mine.filter(ORD_GROUPS[tab] || (() => false));
   const body = tab === 'req'
     ? (S.requests.length ? S.requests.map(r => listCard({ img: svcBy(r.svc) ? svcPh(svcBy(r.svc)) : '', to: gv('c_reqview', { id: r.id }), t: esc(r.title), pr: cardBudget(r), ps: r.offers.length ? `предложений: ${r.offers.length}` : 'пока без предложений', s: esc(r.what), m: `${esc(r.whenText)} · ${esc(r.whereText)}`, pl: r.status === 'open' ? pill('Ждём предложения', '', 'clock') : pill('Исполнитель выбран', 'ok', 'check') })).join('')
       : emptyBox('Заявок пока нет', 'Опишите задачу — исполнители сами предложат цену.', 'Разместить заявку', 'newRequest', ''))
-    : (active.length || past.length ? `${active.map(orderCard).join('')}${past.length ? `<div class="h2">Завершённые</div>${past.map(orderCard).join('')}` : ''}` : emptyBox('Заказов пока нет', 'Найдите услугу и оформите первый заказ.', 'Найти услугу', 'go', 'c_find'));
-  return { title: 'Заказы', body: `${roleTabs('orders')}${ltabs('cOrdTab', [['orders', 'Заказы', active.length || ''], ['req', 'Заявки', S.requests.filter(r => r.status === 'open').length || '']], tab)}${body}` };
+    : shown ? (shown.length ? shown.map(orderCard).join('') : emptyBox(ORD_EMPTY[tab], 'Загляните на вкладку «Все».', '', '', ''))
+    : (active.length || past.length ? `${active.map(orderCard).join('')}${past.length ? `<div class="h2">Завершённые и отменённые</div>${past.map(orderCard).join('')}` : ''}` : emptyBox('Заказов пока нет', 'Найдите услугу и оформите первый заказ.', 'Найти услугу', 'go', 'c_find'));
+  return { title: 'Заказы', body: `${roleTabs('orders')}${ordTabs('cOrdTab', mine, tab, [['req', 'Заявки', S.requests.filter(r => r.status === 'open').length || '']])}${body}` };
 };
 A.cOrdTab = v => { S.cOrdersTab = v; render(); };
 function orderCard(o) {
@@ -6460,9 +6513,9 @@ SCREENS.c_cab = () => ({
   title: 'Кабинет', cls: 'cabh',
   body: `<div class="card"><div class="row"><span class="ava lg">${letter(myName())}</span><span class="grow"><span class="h2" style="display:block;font-size:28px;line-height:32px">${esc(myName())}</span><span class="m">+7 916 •••-••-42 · одна учётная запись для всех ролей</span></span></div></div>
     ${card(`<div class="list">
-      ${rl('Мои данные', 'Имя, телефон, почта', 'cabSoon', 'Мои данные', { icon: 'user' })}
+      ${rl('Мои данные', 'Имя, телефон, почта, карты', 'go', 'mydata', { icon: 'user' })}
       ${rl('Мои адреса', `${esc(S.myAddrs.map(a => a.name).join(', '))} · для поиска и заявок`, 'myAddrs', 'cab', { icon: 'home' })}
-      ${rl('Способы оплаты', 'СБП и карта', 'cabSoon', 'Способы оплаты', { icon: 'card' })}
+      ${rl('Способы оплаты', 'СБП и карта', 'go', 'mydata', { icon: 'card' })}
       ${rl('Мои отзывы', 'Оценки выполненных заказов', 'go', gv('order', { id: 1038 }), { icon: 'star' })}
       ${rl('Отзывы исполнителей о вас', clientLine(myFirst()), 'go', gv('c_aboutme', {}), { icon: 'user' })}
     </div>`, 'c')}
@@ -6561,7 +6614,9 @@ function cleanTier(o, c) {
   return { F, fi, i, area, big, bumped: !big && i > fi };
 }
 /* доплаты исполнителя по ответам заказчика; у цены за единицу доплата тоже за единицу */
-const prPer = (o, c) => { const Q = qtyOf(o); return Q ? (c.q || Q[0]) : 1; };
+/* количество для цены «за единицу»: у карточек «по запросу» это ответ заказчика на «Площадь, м²» (запись 50: «цена не меняется») */
+const qtyIn = (o, c) => { const Q = qtyOf(o); if (!Q) return 1; const up = unitParam(o.unit); const p = o.route !== 'A' && up && svcParams(o.svc).find(x => x.t === 'число' && x.n === up); const v = p && c.pr && Number(c.pr[p.id]); return v > 0 ? v : (c.q || Q[0]); };
+const prPer = (o, c) => qtyIn(o, c);
 function prLines(o, c) {
   if (!o.prp || !c.pr) return [];
   const L = []; const per = prPer(o, c); const u = qtyOf(o) ? ` × ${qtyOf(o)[4](per)}` : '';
@@ -6634,7 +6689,7 @@ function calc(o, c) {
   } else if (o.model === 'period') {
     L.push([`${pn(c.visits, 'посещение', 'посещения', 'посещений')} за ${c.per}`, o.from * c.visits]); dur = o.dur || 60; what.push(c.per, pn(c.visits, 'посещение', 'посещения', 'посещений'));
   } else {
-    const Q = qtyOf(o); const q = Q ? (c.q || Q[0]) : 1; const vv = o.variants ? vOf(o, c) : null;
+    const Q = qtyOf(o); const q = Q ? qtyIn(o, c) : 1; const vv = o.variants ? vOf(o, c) : null;
     if (o.pick && Q) { const pl = pickLines(o, c); if (pl.length) L.push([`${pl.map(l => l[0]).join(', ')}: ${Q[4](q)}`, pl.reduce((s, l) => s + l[1], 0) * q]); }
     else if (o.pick) L.push(...pickLines(o, c));
     else L.push([`${o.title}${vv ? `, ${lcFirst(vv.name)}` : ''}${Q ? `: ${Q[4](q)}` : ''}`, (vv ? vv.price : o.from) * q]);
@@ -6928,7 +6983,7 @@ SCREENS.c_offer = p => {
       ${preview || o.model === 'brief' || o.model === 'inspect' ? '' : wayField(o, c)}
       <div class="row wrap">${pillRow}${o.formats.includes('online') ? pill('Можно онлайн', '', 'globe') : ''}${o.docs ? pill('Документы проверены', 'ok', 'shield') : ''}</div>
       ${promoInfo(o, c)}
-      ${routeB ? card(`<div class="h2">Как договоримся</div>${bullets(replyOf(o).stages ? ['Вы отмечаете, что нужно, и прикладываете фото', 'Исполнитель присылает план по этапам: у каждого этапа свой результат, цена и срок', 'Платите за текущий этап — деньги уходят исполнителю после его приёмки'] : ['Вы отмечаете, что нужно, прикладываете фото и, если хотите, называете свою цену', 'Исполнитель соглашается или присылает свои условия с ценой', 'Соглашаетесь и оплачиваете — переписка становится заказом с номером'])}${svcCard(o.svc).why ? `<div class="m"><b>Почему так:</b> ${esc(lcFirst(svcCard(o.svc).why))}</div>` : ''}<div class="m">Ориентир: ${priceLabel(o)}. Это не окончательная цена.</div>`, 'soft') + paramsBlock(o, c) : `${configBlock(o, c)}${paramsBlock(o, c)}${subBlock(o, c)}${addonsBlock(o, c)}${needBlock(o, c)}${placeBlock(o, c)}${whenBlock(o, c, r)}${noteBlock(o, c)}${totalCard(o, c, r)}`}
+      ${routeB ? card(`<div class="h2">Как договоримся</div>${bullets(replyOf(o).stages ? ['Вы отмечаете, что нужно, и прикладываете фото', 'Исполнитель присылает план по этапам: у каждого этапа свой результат, цена и срок', 'Платите за текущий этап — деньги уходят исполнителю после его приёмки'] : ['Вы отмечаете, что нужно, прикладываете фото и, если хотите, называете свою цену', 'Исполнитель соглашается или присылает свои условия с ценой', 'Соглашаетесь и оплачиваете — переписка становится заказом с номером'])}${svcCard(o.svc).why ? `<div class="m"><b>Почему так:</b> ${esc(lcFirst(svcCard(o.svc).why))}</div>` : ''}<div class="m">${(() => { const est = calc(o, c).total; return est > 0 ? `<b>Предварительно: ≈ ${rub(est)}</b> — считается по вашим ответам ниже. Ориентир исполнителя: ${priceLabel(o)}. Окончательную цену он назовёт в ответе.` : `Ориентир: ${priceLabel(o)}. Это не окончательная цена.`; })()}</div>`, 'soft') + paramsBlock(o, c) : `${configBlock(o, c)}${paramsBlock(o, c)}${subBlock(o, c)}${addonsBlock(o, c)}${needBlock(o, c)}${placeBlock(o, c)}${whenBlock(o, c, r)}${noteBlock(o, c)}${totalCard(o, c, r)}`}
       ${related.length ? `<div class="col g12"><div class="h2">Другие услуги этой тематики у исполнителя</div><div class="hscroll">${related.map(x => offerCard(x, 'h')).join('')}</div><button class="lnk" data-a="go" data-v="${gv('c_exec', { id: o.ex })}">Все услуги исполнителя ${ic('arr', 18, 2.2)}</button><span class="m">Это отдельные услуги: в текущий заказ они не добавляются.</span></div>` : ''}`,
     bar: `<div class="abar">${routeB && !preview ? `<div class="asum-p"><span class="m">Ориентир</span><b>${priceLabel(o)}</b></div>` : ''}${!routeB && !preview ? `<div class="tot"><span>${insp ? 'Осмотр' : agree ? 'Предварительно' : 'Итого'}</span><b>${rub(r.total)}</b></div>` : ''}<div class="two"><button class="btn outline" data-a="chatWith" data-v="${o.id}" aria-label="Написать исполнителю" ${preview ? 'disabled' : ''}>${ic('chat', 22)}</button>${main}</div>${bl && !preview && !routeB ? `<div class="why center">Причина: ${bl}.</div>` : ''}<div class="asum"><span class="m">${routeB ? 'Исполнитель назовёт цену после запроса' : agree ? 'Сначала подтвердит исполнитель, потом оплата' : 'Деньги ждут на защищённом счёте до приёмки работы'}</span>
       ${S.role === 'guest' || preview ? '' : `<button class="asum-ex" data-a="go" data-v="${gv('c_exec', { id: o.ex })}"><span class="ava">${letter(e.name)}</span><span class="grow"><b>${esc(e.name)}</b><span class="m">${ratingText(o.ex)} · ${esc(areaText(e.area, o.ex))}</span></span>${ic('arr', 20, 2)}</button>${o.ex === 'alex' ? '' : `<div class="btns two">${btn(`${ic('chat', 20)} Написать`, 'chatWith', o.id, 'soft')}${btn(`${ic('phone', 20)} Позвонить`, 'callAsk', o.ex, 'soft')}</div>`}`}</div></div>`,
@@ -7224,7 +7279,7 @@ SCREENS.e_home = () => {
       deskBare: true,
       body: '', deskBody: `<div class="dhero"><div class="grow"><h1 class="dhero-t">Здравствуйте, ${esc(myFirst())}</h1><span class="dhero-s">Заявки заказчиков по вашим услугам и в других темах.</span></div>
           <button class="dhero-q" data-a="go" data-v="${gv('e_feed', { scope: 'all' })}">${ic('search', 20, 2.2)}<span>Например: шиномонтаж R17 или сборка шкафа</span><b>Найти заказ</b></button></div>
-        <div class="dstats">${stat('calok', 'green', today.length, 'заказов сегодня', 'e_schedule')}${stat('docsearch', 'orange', S.incLoaded ? inc.length : '…', 'новых личных заявок', 'e_incoming')}${stat('send', 'violet', offersN, 'заявок по вашим услугам', 'e_offers')}${stat('star', 'blue', '4,9', '214 отзывов', gv('c_reviews', { id: 'alex' }))}</div>
+        <div class="dstats">${stat('calok', 'green', today.length, `${plural(today.length, 'заказ', 'заказа', 'заказов')} сегодня`, 'e_schedule')}${stat('docsearch', 'orange', S.incLoaded ? inc.length : '…', S.incLoaded ? plural(inc.length, 'новая личная заявка', 'новые личные заявки', 'новых личных заявок') : 'новых личных заявок', 'e_incoming')}${stat('send', 'violet', offersN, `${plural(offersN, 'заявка', 'заявки', 'заявок')} по вашим услугам`, 'e_offers')}${stat('star', 'blue', '4,9', '214 отзывов', gv('c_reviews', { id: 'alex' }))}</div>
         <div class="dgrid2">${card(`<div class="sec"><span class="h2">Сегодня</span><button class="lnk" data-a="go" data-v="e_schedule">Расписание ${ic('arr', 16, 2.2)}</button></div><div class="drows">${todayL}</div>`)}
           ${card(`<div class="sec"><span class="h2">Поступившие заявки</span><button class="lnk" data-a="go" data-v="e_incoming">Все ${ic('arr', 16, 2.2)}</button></div><div class="drows">${incL}</div>`)}</div>
         ${card(`<div class="sec"><span class="h2">Мои услуги</span><span class="row">${btn(`${ic('plus', 18, 2.4)} Добавить услугу`, 'newService', '', 'soft sm')}<button class="lnk" data-a="go" data-v="e_services">Все ${ic('arr', 16, 2.2)}</button></span></div><div class="drows two">${svcL}</div>`)}`,
@@ -7326,7 +7381,7 @@ SCREENS.e_task = p => {
   return {
     title: 'Заявка', sub: esc(x.title),
     body: `${card(`<div class="h2">Сведения о задаче</div><div>${esc(x.what)}</div><div class="sumline"><span>Где</span><b>${esc(x.where)}</b></div><div class="sumline"><span>Когда</span><b>${dayName(x.date)}, ${esc(x.part)}</b></div><div class="sumline"><span>Бюджет</span><b>${budgetText(x)}</b></div><div class="sumline"><span>Заказчик</span><b>${esc(x.client)}</b></div><div class="m">Точный адрес вы увидите после оплаты.</div>`)}
-      <div class="info"><b>${x.personal ? 'Вас выбрали в подборку' : 'Общая заявка'}</b><span class="m">Почему вы её видите: ${whyFeed(x)}. ${feedAudience(x)} Заказчик сравнит предложения и выберет одно.</span></div>
+      ${favBtn(x.id)}<div class="info"><b>${x.personal ? 'Вас выбрали в подборку' : 'Общая заявка'}</b><span class="m">Почему вы её видите: ${whyFeed(x)}. ${feedAudience(x)} Заказчик сравнит предложения и выберет одно.</span></div>
       ${x.my ? card(`${pill('Предложение отправлено', 'ok', 'check')}<div class="t18 b">${rub(x.my.price)} · ${dayName(x.my.day)}, ${x.my.slot}</div><div class="m">Ждём решения заказчика. Если он выберет вас, придёт уведомление и заказ появится в «Заказах».</div>`, 'soft')
         : card(`<div class="h2">Ваше предложение</div>
           ${field('Цена', stepper('offerPrice', 'p', o.price, 100, Infinity, rub, false, 100), { hint: `Подставили из вашего прайса.${x.budget && o.price > x.budget ? ' Выше бюджета заказчика — он может выбрать другого.' : ''}` })}
@@ -7730,21 +7785,28 @@ Object.assign(A, {
 });
 
 /* ---------- заказы исполнителя (лист 22) ---------- */
-const ORD_GROUPS = { all: () => true, wait: o => ['paid', 'confirmed', 'request', 'startReq'].includes(o.status), work: o => ['work', 'result', 'rework'].includes(o.status), done: o => ['done', 'cancel'].includes(o.status) };
+/* вкладки заказов по статусам — одинаковые у заказчика и исполнителя (запись 48, 58:45–62:54: «ждёт оплаты», «завершены», «отменены») */
+const ORD_GROUPS = { all: () => true, pay: o => ['request', 'confirmed'].includes(o.status), wait: o => ['paid', 'startReq'].includes(o.status), work: o => ['work', 'result', 'rework', 'dispute'].includes(o.status), done: o => o.status === 'done', cancel: o => o.status === 'cancel' };
+const ordTabs = (act, list, t, extra = []) => ltabs(act, [['all', 'Все'], ['pay', 'Ждут оплаты', list.filter(ORD_GROUPS.pay).length || ''], ['wait', 'Ждут начала', list.filter(ORD_GROUPS.wait).length || ''], ['work', 'В работе', list.filter(ORD_GROUPS.work).length || ''], ['done', 'Завершены'], ['cancel', 'Отменены'], ...extra], t);
+const ORD_EMPTY = { pay: 'Нет заказов, которые ждут оплаты', wait: 'Нет заказов, которые ждут начала', work: 'Сейчас ничего не в работе', done: 'Завершённых заказов пока нет', cancel: 'Отменённых заказов нет' };
 SCREENS.e_orders = () => {
-  const t = S.eOrdersTab; const all = myOrders(); const list = all.filter(ORD_GROUPS[t]);
+  const t = ORD_GROUPS[S.eOrdersTab] ? S.eOrdersTab : 'all'; const all = myOrders(); const list = all.filter(ORD_GROUPS[t]);
   return {
     title: 'Заказы',
-    body: `${roleTabs('orders')}${ltabs('eOrdTab', [['all', 'Все'], ['wait', 'Ждут начала', all.filter(ORD_GROUPS.wait).length || ''], ['work', 'В работе', all.filter(ORD_GROUPS.work).length || ''], ['done', 'Завершённые']], t)}
-      ${list.length ? list.map(orderCard).join('') : emptyBox('Здесь пусто', 'Заказы появятся, когда заказчик оплатит вашу услугу.', 'Найти заказ', 'go', 'e_feed')}`,
+    body: `${roleTabs('orders')}${ordTabs('eOrdTab', all, t)}
+      ${list.length ? list.map(orderCard).join('') : t !== 'all' ? emptyBox(ORD_EMPTY[t], 'Загляните на вкладку «Все».', '', '', '') : emptyBox('Здесь пусто', 'Заказы появятся, когда заказчик оплатит вашу услугу.', 'Найти заказ', 'go', 'e_feed')}`,
   };
 };
 A.eOrdTab = v => { S.eOrdersTab = v; render(); };
-SCREENS.e_fav = () => ({
-  title: 'Избранное',
-  body: `${card(`<div class="h2">Сохранённые поиски</div><div class="list">${rl('Шиномонтаж R17–R19', `${esc(S.district)} и рядом · новых: ${S.feed.length}`, 'go', 'e_feed', { icon: 'search' })}${rl('Ремонт проколов, сегодня', 'новых нет', 'go', 'e_feed', { icon: 'search' })}</div>`, 'c')}
-    <div class="m">Здесь же будут заявки, которые вы отметили.</div>`,
-});
+/* избранное исполнителя (запись 48, 74:23: «надо сразу, чтобы были эти»): отмеченные заявки — сверху, сохранённые поиски — ниже */
+S.favReqs = ['f1', 'f3'];
+const favBtn = id => { const on = S.favReqs.includes(id); return `<button class="favtog ${on ? 'on' : ''}" data-a="reqFav" data-v="${esc(id)}" aria-pressed="${on}">${on ? icf('heart', 20) : ic('heart', 20, 2)}<span>${on ? 'В избранном' : 'В избранное'}</span></button>`; };
+A.reqFav = id => { togIn(S.favReqs, id); render(); toast(S.favReqs.includes(id) ? 'Заявка в избранном' : 'Заявку убрали из избранного', 'info'); };
+SCREENS.e_fav = () => { const favs = allReqs().filter(x => S.favReqs.includes(x.id));
+  return { title: 'Избранное',
+    body: `<div class="sec"><span class="h2">Отмеченные заявки</span><span class="m">${favs.length || ''}</span></div>
+    ${favs.length ? `<div class="col g12">${feedList(favs)}</div>` : emptyBox('Отмеченных заявок нет', 'Нажмите «В избранное» в заявке — она появится здесь.', 'Найти заказ', 'go', 'e_feed')}
+    ${card(`<div class="h2">Сохранённые поиски</div><div class="list">${rl('Шиномонтаж R17–R19', `${esc(S.district)} и рядом · новых: ${S.feed.length}`, 'go', 'e_feed', { icon: 'search' })}${rl('Ремонт проколов, сегодня', 'новых нет', 'go', 'e_feed', { icon: 'search' })}</div>`, 'c')}` }; };
 
 /* ---------- кабинет исполнителя и финансы (лист 37: деньги и баллы раздельно) ---------- */
 SCREENS.e_cab = () => ({
@@ -7762,9 +7824,12 @@ SCREENS.e_cab = () => ({
 });
 Object.assign(A, {
   statusInfo() { sheet('Статус и счёт', `${sumLines([['Статус', esc(S.profile.status)], ['Расчётный счёт', 'подключён'], ['Чеки', 'формирует банк']])}<div class="m">Исполнителем может быть самозанятый, ИП или ООО. Счёт, оферты и чеки подключаются вместе с банком.</div>${btn('Понятно', 'closeSheet', '', 'soft block')}`); },
-  helpExec() { sheet('Как устроены деньги', `${bullets(['Пользоваться площадкой бесплатно', 'Комиссия ZELDO — 10% с заказа', 'Эквайринг банка платит исполнитель: по карте около 2,5%, по СБП около 0,3%', 'Деньги приходят после того, как заказчик примет работу', 'Если заказ отменили, комиссию банка не вернут: баланс может уйти в минус'])}${btn('Понятно', 'closeSheet', '', 'soft block')}`); },
+  helpExec() { sheet('Как устроены деньги', `${bullets(['Пользоваться площадкой бесплатно', 'Комиссия ZELDO — 10% с заказа, а первые три заказа — без комиссии', 'Эквайринг банка платит исполнитель: по карте около 2,5%, по СБП около 0,3%', 'Деньги приходят после того, как заказчик примет работу', 'Если заказ отменили, комиссию банка не вернут: баланс может уйти в минус'])}${btn('Понятно', 'closeSheet', '', 'soft block')}`); },
 });
-const payout = o => { const fee = Math.round(o.total * 0.1); const acq = Math.round(o.total * 0.025); return { fee, acq, net: o.total - fee - acq }; };
+/* комиссия ZELDO — 10 %, но первые три заказа нового исполнителя — без неё, только эквайринг банка (запись 48, 53:08–53:47) */
+const FREE_N = 3;
+const freeOrder = o => { const l = S.orders.filter(x => x.ex === o.ex && x.status !== 'cancel').sort((a, b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true })); const i = l.indexOf(o); return i >= 0 && i < FREE_N; };
+const payout = o => { const free = freeOrder(o); const fee = free ? 0 : Math.round(o.total * 0.1); const acq = Math.round(o.total * 0.025); return { fee, acq, net: o.total - fee - acq, free }; };
 SCREENS.e_money = () => {
   const done = myOrders().filter(o => o.status === 'done'); const wait = myOrders().filter(o => !['done', 'cancel', 'request', 'confirmed'].includes(o.status));
   const sum = (l, f) => l.reduce((a, o) => a + f(o), 0);
@@ -7773,7 +7838,7 @@ SCREENS.e_money = () => {
     body: `${card(`<div class="h2">Исполнитель · деньги</div><div class="sec-t num">${rub(sum(done, o => payout(o).net))}</div><div class="m">Доступно к выводу. Пример: сумма посчитана по демозаказам.</div>`)}
       ${card(`<div class="sumline"><span>Ждут приёмки заказчиком</span><b>${rub(sum(wait, o => payout(o).net))}</b></div><div class="m">Деньги лежат на защищённом счёте и придут после приёмки работы.</div>`, 'c')}
       <div class="h2">Операции</div>
-      ${[...done, ...wait].map(o => { const p = payout(o); return card(`<div class="row"><b class="t18 grow">Заказ № ${o.id}</b>${orderPill(o)}</div><div class="m">${esc(o.svc)} · ${esc(o.client)}</div>${sumLines([['Сумма заказа', rub(o.total)], ['Комиссия ZELDO, 10%', '−' + rub(p.fee)], ['Эквайринг банка, ~2,5%', '−' + rub(p.acq)], ['Вам', rub(p.net), 'total']])}`, 'c'); }).join('')}
+      ${[...done, ...wait].map(o => { const p = payout(o); return card(`<div class="row"><b class="t18 grow">Заказ № ${o.id}</b>${orderPill(o)}</div><div class="m">${esc(o.svc)} · ${esc(o.client)}</div>${sumLines([['Сумма заказа', rub(o.total)], [p.free ? 'Комиссия ZELDO: первые 3 заказа без неё' : 'Комиссия ZELDO, 10%', p.free ? rub(0) : '−' + rub(p.fee)], ['Эквайринг банка, ~2,5%', '−' + rub(p.acq)], ['Вам', rub(p.net), 'total']])}`, 'c'); }).join('')}
       <div class="m">Баллы партнёрской программы — отдельно, в кабинете партнёра. С деньгами они не складываются.</div>`,
   };
 };
@@ -8937,7 +9002,7 @@ function roleTabs(kind) {
 const ROLE_ROOT = { msgs: { cust: 'c_msgs', exec: 'e_msgs' }, orders: { cust: 'c_orders', exec: 'e_orders' } };
 /* компьютер (01.11): меню кабинета у левого края — профиль, смена роли и все разделы роли со счётчиками; уведомления и настройки — в шапке */
 function cabNav() {
-  const ex = S.role === 'exec'; const n = cur().n; const r0 = S.stack[0].n; const reqTab = n === 'c_orders' && S.cOrdersTab === 'req';
+  const ex = S.role === 'exec'; const n = cur().n; const r0 = navRoot(); const reqTab = n === 'c_orders' && S.cOrdersTab === 'req';
   /* в свёрнутом меню остаются квадратики: подпись — во всплывающей подсказке */
   const tip = l => `data-tip="${esc(l)}"${S.navMini ? ` title="${esc(l)}"` : ''}`;
   const it = (to, icn, label, cnt, hue, o = {}) => { const on = o.on != null ? o.on : (n === to || r0 === to);
@@ -9083,7 +9148,7 @@ function celebrate(o, sum, title = 'Заказ закрыт') {
   const C = ['var(--brand)', '#F5A524', '#17B26A', '#EE46BC'];
   el.innerHTML = `<div class="party-card"><div class="party-burst" aria-hidden="true">${Array.from({ length: 18 }, (_, i) => `<i style="--a:${i * 20}deg;--d:${96 + (i % 4) * 22}px;--c:${C[i % 4]};--t:${(i % 5) * 25}ms"></i>`).join('')}</div>
     <span class="party-ic">${ic('check', 40, 2.6)}</span><b class="party-t" id="partyT">${title}</b><span class="party-s">Деньги ваши</span><b class="party-sum num">${rub(sum)}</b>
-    <span class="m">Заказ № ${o.id} · ${esc(o.client)}${o.sub ? `<br>Визит ${o.sub.used} из ${o.sub.total}` : sum !== o.total ? `<br>Из ${rub(o.total)} — за вычетом комиссии и эквайринга` : ''}</span>
+    <span class="m">Заказ № ${o.id} · ${esc(o.client)}${o.sub ? `<br>Визит ${o.sub.used} из ${o.sub.total}` : sum !== o.total ? `<br>Из ${rub(o.total)} — за вычетом ${payout(o).free ? 'эквайринга банка: первые три заказа без комиссии ZELDO' : 'комиссии и эквайринга'}` : ''}</span>
     <div class="party-b">${btn('Отлично', 'partyClose', '', 'block')}${o.status === 'done' ? btn('Оценить заказчика', 'partyRate', String(o.id), 'text block') : ''}</div></div>`;
   ($('#phone') || document.body).appendChild(el);
   /* сумма набегает от нуля за 0,7 с, к концу медленнее */
@@ -9103,7 +9168,7 @@ function chatPane(ch) {
   const o = offerById(ch.offer); const ord = ch.order && orderById(ch.order);
   const sub = ord ? `${esc(ord.svc)} · заказ № ${ord.id}` : o ? `По услуге «${esc(o.title)}»` : '';
   const act = ord ? btn('Открыть заказ', 'go', gv('order', { id: ord.id }), 'soft sm') : o && ch.role === 'cust' ? btn('Карточка услуги', 'openOffer', o.id, 'soft sm') : '';
-  return `<div class="msgr-r"><div class="msgr-h"><span class="ava">${letter(ch.with)}</span><span class="grow"><b class="t18">${esc(ch.with)}</b><span class="m">${sub}</span></span>${ord ? orderPill(ord) : ''}${act}<button class="iconbtn" data-a="callAsk" data-v="${esc(ch.ex || '')}" aria-label="Позвонить через ZELDO" title="Позвонить через ZELDO">${ic('phone', 22, 2)}</button></div>
+  return `<div class="msgr-r"><div class="msgr-h"><span class="ava">${letter(ch.with)}</span><span class="grow">${ch.with === 'Администратор ZELDO' ? `<b class="t18">${esc(ch.with)}</b>` : `<button class="plink" data-a="go" data-v="${ch.role === 'cust' ? gv('c_exec', { id: ch.ex }) : gv('c_client', { name: ch.with })}" aria-label="Профиль: ${esc(ch.with)}"><b class="t18">${esc(ch.with)}</b></button>`}<span class="m">${sub}</span></span>${ord ? orderPill(ord) : ''}${act}<button class="iconbtn" data-a="callAsk" data-v="${esc(ch.ex || '')}" aria-label="Позвонить через ZELDO" title="Позвонить через ZELDO">${ic('phone', 22, 2)}</button></div>
     <div class="msgr-b"><div class="chat">${incStrip(ch)}${ch.msgs.map((m, i) => msgHtml(ch, m, i)).join('')}</div></div><div class="msgr-f">${composerHtml(ch)}</div></div>`;
 }
 function messenger(role, ch) {
@@ -9140,7 +9205,7 @@ function msgHtml(ch, m, i) {
   const me = m.from === 'me';
   if (m.kind === 'voice') return voiceHtml(ch, m, i, me);
   /* в рабочей версии у файла есть адрес на сервере: картинку видно сразу, остальное открывается по кнопке */
-  if (m.kind === 'file') { const u = /^[a-f0-9]{32}$/.test(m.fid || '') ? `/api/file/${m.fid}` : '';
+  if (m.kind === 'file') { const u = /^[a-f0-9]{32}$/.test(m.fid || '') ? `/api/file/${m.fid}` : /^(blob:|data:image\/)/.test(m.src || '') ? m.src : '';
     return `<div class="msgcard ${me ? 'me' : ''}">${m.t ? `<div>${esc(m.t)}</div>` : ''}${u && m.img ? `<a class="msgimg" href="${u}" target="_blank" rel="noopener"><img src="${u}" alt="${esc(m.name)}" loading="lazy"></a>` : ''}<div class="row">${ic('doc', 26)}<span class="grow"><b>${esc(m.name)}</b><span class="m" style="display:block">${esc(m.size || '')}</span></span></div>${u ? `<a class="btn text" href="${u}" target="_blank" rel="noopener">Открыть</a>` : btn('Открыть', 'pfOpen', '', 'text')}<span class="m">${esc(m.at || '')}</span></div>`; }
   if (m.kind === 'brief') return `<div class="msgcard ${me ? 'me' : ''}"><b class="t18">Запрос: ${esc(m.svc)}</b>${m.items.length ? `<div class="chips">${m.items.map(x => `<span class="pill grey">${esc(x)}</span>`).join('')}</div>` : ''}${m.photos ? `<div class="thumbs">${Array.from({ length: m.photos }, () => `<span class="thumb">${photo(offerById(ch.offer).ph)}</span>`).join('')}</div>` : ''}<div class="m">Когда удобно: ${esc(m.when)}</div>${m.budget ? `<div class="sumline"><span>${me ? 'Ваша цена' : 'Цена заказчика'}</span><b>${budText(m.budget, m.budgetFrom)}</b></div>` : ''}${m.text ? `<div>«${esc(m.text)}»</div>` : ''}<span class="m">${esc(m.at)}</span></div>`;
   if (m.kind === 'order') { const o = orderById(m.order); return `<div class="msgcard ${me ? 'me' : ''}"><b class="t18">Заказ № ${m.order}</b><div>${esc(o.svc)}: ${esc(o.what)}</div>${o.date ? `<div class="m">${when(o.date, o.time)}</div>` : ''}<div class="row">${orderPill(o)}<b class="num">${rub(o.total)}</b></div>${goBtn('Открыть заказ', gv('order', { id: o.id }))}</div>`; }
@@ -9348,15 +9413,21 @@ const TL_IDX = { request: -1, confirmed: -1, paid: 0, startReq: 0, work: 1, resu
 function simExec(o) {
   if (o.ex === 'alex' || o.stages) return;
   const w = codeWin(o);
-  if (w.k === 'early') { o.simWait = true; return; }  /* исполнитель придёт к записи: код откроется за 2 часа */
-  if (w.k === 'open') { sim(6000, () => { if (o.status !== 'paid') return; const t = hhmm(new Date()); const who = exName(o.ex); const msg = o.kind === 'rent' ? `${who} считал ваш код и выдал вещь.` : `${who} ввёл ваш код. Работа началась в ${t}.`; setSt(o, 'work', msg); o.startedAt = t; notify('cust', o.kind === 'rent' ? 'Вещь выдана' : 'Работа началась', `${msg} Заказ № ${o.id}`, gv('order', { id: o.id })); toast(msg); simResult(o); }); return; }
+  /* работа начинается только по коду заказчика: раньше в прототипе заказ через 6 секунд после оплаты сам «начинался» и сдавался (запись 48, 40:29–42:04).
+     В прототипе второго человека нет — под QR есть кнопка «Исполнитель на месте» */
+  if (w.k === 'early' || w.k === 'open') { o.simWait = true; return; }
   if (w.k !== 'none') return;
   sim(6000, () => { if (o.status !== 'paid') return; const t = (SIM[o.kind] || [])[0]; setSt(o, 'startReq', t || `${exName(o.ex)} нажал «Начать работу». Подтвердите, что работа началась.`); notify('cust', 'Исполнитель начал работу', `Подтвердите начало: заказ № ${o.id}`, gv('order', { id: o.id })); toast(t || `${exName(o.ex)}: работа начата. Подтвердите начало`); });
+}
+function simStart(o) {
+  o.simWait = false;
+  sim(1500, () => { if (o.status !== 'paid') return; const t = hhmm(new Date()); const who = exName(o.ex); const msg = o.kind === 'rent' ? `${who}: код считан, вещь выдана.` : `${who}: код введён, работа началась в ${t}.`; setSt(o, 'work', msg); o.startedAt = t; notify('cust', o.kind === 'rent' ? 'Вещь выдана' : 'Работа началась', `${msg} Заказ № ${o.id}`, gv('order', { id: o.id })); toast(msg); simResult(o); });
 }
 function simResult(o) {
   if (o.ex === 'alex') return;
   sim(6000, () => { if (!['work', 'rework'].includes(o.status)) return; o.resultText = (SIM[o.kind] || [])[1] || 'Работа выполнена по списку. Фото приложены.'; setSt(o, 'result', `${exName(o.ex)} передал результат и фото.`); notify('cust', 'Работа готова', `Проверьте и примите: заказ № ${o.id}`, gv('order', { id: o.id })); toast('Исполнитель передал результат. Проверьте и примите работу'); });
 }
+const resPhotosHtml = o => (o.resultPhotos || []).length ? `<div class="resthumbs">${o.resultPhotos.map((u, i) => `<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="Фото результата ${i + 1}" loading="lazy"></a>`).join('')}</div>` : '';
 function orderActions(o) {
   const ex = S.role === 'exec'; const cust = !ex;
   const st = o.status; let h = '';
@@ -9375,7 +9446,7 @@ function orderActions(o) {
     if (st === 'confirmed') h += btn(`Оплатить ${rub(o.total)}`, 'go', gv('c_checkout', { order: o.id }), 'block');
     if (st === 'paid') h += noShowBlock(o) + codeBlock(o);
     if (st === 'startReq') h += `<div class="info warn"><b>Исполнитель начал работу</b><span class="m">${codeWin(o).k === 'none' ? 'Подтвердите, что он приступил.' : 'Исполнитель на месте, но не получил ваш код и прислал фото. Подтвердите, если он действительно приступил.'} Без вашего подтверждения работа не считается начатой.</span></div>${btn('Подтвердить начало', 'confirmStart', o.id, 'block')}`;
-    if (st === 'result') h += `<div class="info"><b>Результат передан</b><span class="m">${esc(o.resultText || 'Работа выполнена по списку.')}</span></div><div class="btns">${btn(o.kind === 'rent' ? 'Закрыть заказ' : 'Принять работу', 'acceptWork', o.id, 'block')}${o.kind === 'rent' ? '' : !o.reworks ? btn('Попросить доработку', 'reworkAsk', o.id, 'soft block') : `<div class="m">Бесплатная доработка уже была. Если результат не устраивает, откройте спор.</div>`}${btn('Открыть спор', 'disputeAsk', o.id, 'text block')}</div>`;
+    if (st === 'result') h += `<div class="info"><b>Результат передан</b><span class="m">${esc(o.resultText || 'Работа выполнена по списку.')}</span>${resPhotosHtml(o)}</div><div class="btns">${btn(o.kind === 'rent' ? 'Закрыть заказ' : 'Принять работу', 'acceptWork', o.id, 'block')}${o.kind === 'rent' ? '' : !o.reworks ? btn('Попросить доработку', 'reworkAsk', o.id, 'soft block') : `<div class="m">Бесплатная доработка уже была. Если результат не устраивает, откройте спор.</div>`}${btn('Открыть спор', 'disputeAsk', o.id, 'text block')}</div>`;
     if (st === 'done' && !o.reviewed) h += card(`<div class="row"><span class="h2 grow">Оцените работу</span>${o.rateTmp ? `<b class="rs-w">${RATE_WORD[o.rateTmp]}</b>` : ''}</div>${starPick('rate', o.id, o.rateTmp || 0)}${o.rateTmp ? `<div class="chips">${['Вовремя', 'Аккуратно', 'Цена как в карточке', 'Вежливо'].map(x => chip('rateTag', `${o.id}|${x}`, x, (o.rateTags || []).includes(x))).join('')}</div>
       <label class="field"><span class="lbl">Отзыв, если хотите</span><textarea class="textarea" data-in="rateText|${o.id}" rows="3" maxlength="600" placeholder="Расскажите, как всё прошло: что понравилось, что можно улучшить">${esc(o.rateText || '')}</textarea><span id="ratemod_${o.id}">${rateWarn(o.rateText)}</span></label>
       ${btn('Отправить отзыв', 'rateSend', o.id, 'block')}` : ''}`, 'soft');
@@ -9388,7 +9459,7 @@ function orderActions(o) {
     if (st === 'work' || st === 'rework') h += `${st === 'rework' ? `<div class="info warn"><b>Нужна доработка</b><span class="m">${esc(o.reworkText || '')}</span></div>` : ''}${btn('Передать результат', 'resultAsk', o.id, 'block')}`;
     if (st === 'result') h += `<div class="info"><b>Ждём приёмки</b><span class="m">Деньги придут, когда заказчик примет работу.</span></div>`;
     if (['done', 'cancel'].includes(st)) h += clientRateBlock(o);
-    if (st === 'done') { const p = payout(o); h += card(`<div class="h2">Деньги переведены</div>${sumLines([['Сумма заказа', rub(o.total)], ['Комиссия ZELDO, 10%', '−' + rub(p.fee)], ['Эквайринг банка, ~2,5%', '−' + rub(p.acq)], ['Вам', rub(p.net), 'total']])}`, 'c'); }
+    if (st === 'done') { const p = payout(o); h += card(`<div class="h2">Деньги переведены</div>${sumLines([['Сумма заказа', rub(o.total)], [p.free ? 'Комиссия ZELDO: первые 3 заказа без неё' : 'Комиссия ZELDO, 10%', p.free ? rub(0) : '−' + rub(p.fee)], ['Эквайринг банка, ~2,5%', '−' + rub(p.acq)], ['Вам', rub(p.net), 'total']])}`, 'c'); }
   }
   return h;
 }
@@ -9428,7 +9499,7 @@ SCREENS.order = p => {
   return {
     title: `Заказ № ${o.id}`,
     body: `${card(`<div class="row top"><span class="bigth" style="width:56px;height:56px;border-radius:14px;overflow:hidden;flex:none">${photo(of.ph, '', 'M')}</span><span class="grow"><span class="h2" style="display:block">${esc(o.svc)}</span><span class="m">${esc(o.what)}</span></span><b class="t18 num">${rub(o.total)}</b></div><div class="row wrap">${orderPill(o)}${nextStepText(o) ? `<span class="m">${nextStepText(o)}</span>` : ''}</div>
-        <div class="ocontact"><span class="ava">${letter(ex ? o.client : exName(o.ex))}</span><span class="grow"><span class="m" style="display:block">${ex ? 'Заказчик' : 'Исполнитель'}</span><b>${esc(ex ? o.client : exName(o.ex))}</b>${ex ? `<span class="m" style="display:block">${clientLine(o.client)}</span>` : ''}</span>
+        <div class="ocontact"><span class="ava">${letter(ex ? o.client : exName(o.ex))}</span><span class="grow"><span class="m" style="display:block">${ex ? 'Заказчик' : 'Исполнитель'}</span><button class="plink" data-a="go" data-v="${ex ? gv('c_client', { name: o.client }) : gv('c_exec', { id: o.ex })}" aria-label="Профиль: ${esc(ex ? o.client : exName(o.ex))}"><b>${esc(ex ? o.client : exName(o.ex))}</b></button>${ex ? `<span class="m" style="display:block">${clientLine(o.client)}</span>` : ''}</span>
           ${ch ? `<button class="cbtn" data-a="go" data-v="${gv('chat', { id: ch.id })}" aria-label="Написать">${ic('chat', 22, 2)}${ch.unread ? `<i class="cdot"></i>` : ''}</button>` : `<button class="cbtn" data-a="orderChat" data-v="${o.id}" aria-label="Написать">${ic('chat', 22, 2)}</button>`}
           <button class="cbtn" data-a="callAsk" data-v="${ex ? '' : o.ex}" aria-label="Позвонить через ZELDO">${ic('phone', 22, 2)}</button></div>`)}
       ${orderActions(o)}
@@ -9488,6 +9559,7 @@ function codeBlock(o) {
     <div class="qrbox" role="img" aria-label="QR-код начала работы">${qrSvg(o)}</div>
     <div class="scode" aria-label="Код ${code.split('').join(' ')}">${code.split('').map(x => `<b>${x}</b>`).join('')}</div>
     <div class="m center">QR обновится в ${hhmm(nextH)}. Цифры не меняются до начала работы.</div>
+    ${!REAL && o.simWait && S.role !== 'exec' ? btn('Исполнитель на месте: ввести код за него (прототип)', 'demoCode', String(o.id), 'soft block') : ''}
     <div class="info warn"><span class="m">Не отправляйте код в переписке и не диктуйте по телефону. Его знаете только вы и ZELDO.</span></div>
     ${w.start && !o.free ? `<div class="m">${point ? 'Если вас не примут вовремя' : 'Если исполнитель не придёт'}, через 15 минут после начала здесь появится кнопка «${point ? 'Меня не приняли' : 'Исполнитель не пришёл'}».</div>` : ''}`, 'codec');
 }
@@ -9573,7 +9645,8 @@ function subBookScreen(o, r) {
   };
 }
 Object.assign(A, {
-  codeNow(id) { const o = orderById(id); o.codeNow = true; render(); if (o.simWait) { o.simWait = false; simExec(o); } },
+  codeNow(id) { const o = orderById(id); o.codeNow = true; render(); },
+  demoCode(id) { const o = orderById(id); toast('Исполнитель вводит ваш код…', 'info'); simStart(o); render(); },
   cNoShowAsk(id) { const o = orderById(id); dialog({ title: 'Отменить заказ?', text: `Деньги${o.sub ? ' за неиспользованные визиты' : ''} вернутся на карту в течение 1–3 дней. Исполнитель получит отметку о неявке.`, actions: [['Отменить заказ', 'cNoShowOk', id, 'danger'], ['Подождать ещё', 'closeDialog', '', 'soft']] }); },
   cNoShowOk(id) { S.dialog = null; const o = orderById(id); const ret = o.sub ? perVisit(o) * (o.sub.total - o.sub.used) : o.total; setSt(o, 'cancel', `${fmtOf(o) === 'point' ? 'Заказчика не приняли вовремя' : 'Исполнитель не пришёл'}. Заказ отменён, ${rub(ret)} вернутся заказчику.`); notify('exec', 'Заказ отменён: неявка', `Заказчик отметил неявку: заказ № ${o.id}`, gv('order', { id: o.id })); render(); toast(`Заказ отменён. ${rub(ret)} вернутся на карту`); },
   stMode(v) { S.stx.mode = v; S.stx.err = ''; startSheet(); if (v === 'scan') { const id = S.stx.id; later(1600, () => { if (S.stx && S.stx.id === id && S.stx.mode === 'scan' && S.sheet) startOk(orderById(id), 'qr'); }); } },
@@ -9620,12 +9693,14 @@ Object.assign(A, {
     render();
   },
   confirmStart(id) { const o = orderById(id); setSt(o, 'work', 'Заказчик подтвердил начало работы.'); simResult(o); render(); toast('Начало работы подтверждено'); },
-  resultAsk(id) { S.resDraft = { id, tags: ['Работа выполнена по списку'], photo: true }; resultSheet(); },
+  resultAsk(id) { S.resDraft = { id, tags: ['Работа выполнена по списку'], photos: [] }; resultSheet(); },
+  resPhDel(i) { S.resDraft.photos.splice(Number(i), 1); resultSheet(); },
   resTag(v) { togIn(S.resDraft.tags, v); resultSheet(); },
-  resPhoto() { S.resDraft.photo = !S.resDraft.photo; resultSheet(); },
+
   resSend() {
     const d = S.resDraft; const o = orderById(d.id); o.resultText = d.tags.join('. ') + '.'; closeSheet();
-    setSt(o, 'result', `Исполнитель передал результат${d.photo ? ' и фото' : ''}. Заказчик проверяет.`);
+    if (d.photos.length) resultPhotosOut(o, d.photos);
+    setSt(o, 'result', `Исполнитель передал результат${d.photos.length ? ` и ${pn(d.photos.length, 'фото', 'фото', 'фото')}` : ''}. Заказчик проверяет.`);
     { toast('Результат передан. Ждём приёмки'); sim(2600, () => { if (visitAccepted(o)) { setSt(o, 'paid', `${o.client}: визит ${o.sub.used} из ${o.sub.total} принят. Вам переведено ${rub(perVisit(o))}.`); toast(`${o.client}: визит принят. Деньги за визит переведены`); celebrate(o, perVisit(o), 'Визит принят'); return; } setSt(o, 'done', 'Заказчик принял работу. Деньги переведены исполнителю.'); notify('exec', `Заказ № ${o.id} принят`, `Вам: ${rub(payout(o).net)}`, gv('order', { id: o.id })); celebrate(o, payout(o).net); toast(`${o.client}: работа принята. Деньги переведены`); }); }
     render();
   },
@@ -9750,10 +9825,14 @@ SCREENS.resched = p => {
     bar: `<div class="abar">${r.slot ? btn(`Предложить: ${when(r.day, r.slot).toLowerCase()}`, 'chTimeOk', o.id, 'block') : `<button class="btn block" disabled>Предложить перенос</button><div class="why center">Причина: выберите день и время.</div>`}</div>`,
   };
 };
+/* фото результата (запись 48, 07:25: «приложить фото — и оно куда-то проваливается»): настоящий выбор с камеры или из галереи */
+CH.resFiles = el => { const fs = [...el.files].slice(0, 10 - S.resDraft.photos.length); el.value = ''; fs.forEach(f => S.resDraft.photos.push({ src: URL.createObjectURL(f), name: f.name, file: f })); resultSheet(); };
+/* куда уходят фото: в прототипе — в заказ и переписку на этом телефоне; в рабочей версии 10-real.js загружает их на сервер */
+function resultPhotosOut(o, photos) { o.resultPhotos = photos.map(p => p.src); const ch = chatById(o.echat || o.chat); photos.forEach(p => postMsg(ch, 'me', { kind: 'file', name: p.name, size: 'Фото результата', img: true, src: p.src })); }
 function resultSheet() {
   const d = S.resDraft;
   sheet('Передать результат', `${field('Что сделано', chips('resTag', ['Работа выполнена по списку', 'Балансировка сделана', 'Давление проверено', 'Старые шины упакованы'], v => d.tags.includes(v)))}
-    <button class="opt ${d.photo ? 'on' : ''}" data-a="resPhoto"><span class="mark sq"></span><span class="grow"><span class="ot">Приложить фото</span><span class="os">Из камеры или портфолио</span></span></button>
+    ${field('Фото результата', `<div class="resph">${d.photos.map((p, i) => `<span class="thumb"><img src="${esc(p.src)}" alt="Фото ${i + 1}"><button class="resph-x" data-a="resPhDel" data-v="${i}" aria-label="Убрать фото ${i + 1}">${ic('x', 16, 2.6)}</button></span>`).join('')}${d.photos.length < 10 ? `<label class="resph-add">${ic('plus', 24, 2.2)}<span>Добавить фото</span><input type="file" accept="image/*" multiple data-ch="resFiles" hidden></label>` : ''}</div>`, { hint: d.photos.length ? `Фото: ${d.photos.length}. Заказчик увидит их в заказе и в переписке.` : 'С камеры или из галереи, до 10 штук. Фото помогают быстрее принять работу.' })}
     <div class="m">Передача результата не означает приёмку: деньги придут, когда заказчик её подтвердит.</div>${btn('Передать результат', 'resSend', '', 'block')}`);
 }
 
@@ -9878,7 +9957,58 @@ fitPhone();
 document.documentElement.dataset.theme = S.theme;
 document.documentElement.dataset.style = 'bold';
 window.__z = { S, A, SCREENS, CATS, DIRS, SERVICES, OFFERS, offerById, offersFor, svcBy, render, go, root, stackTo, startRequest, openWizard, ZP, calc, cfgOf, dk, fromKey, blockers };
-if (!REAL) render('new');
+/* ---------- профиль по нажатию на имя (запись 48, 63:49; образец — снимок 6220) ---------- */
+function exStats(id) {
+  const e = EX[id] || {}; if (REAL) return e.reviews ? card(`<div class="list">${rl(`${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')} после заказов`, `★ ${String(e.rating).replace('.', ',')}`, 'go', gv('c_reviews', { id }), { icon: 'star' })}</div>`, 'c') : '';
+  const h = hash(id); const neg = Math.round((e.reviews || 0) * 0.04); const done = Math.round((e.reviews || 0) * 1.35);
+  const row = (icn, t) => `<div class="exst"><span class="ri">${ic(icn, 22)}</span><span>${t}</span></div>`;
+  return card(`${row('calok', `На ZELDO с ${e.since || 2020} года`)}${row('check', pn(done, 'заказ выполнен', 'заказа выполнено', 'заказов выполнено'))}${row('star', `${pn(e.reviews || 0, 'отзыв', 'отзыва', 'отзывов')}: ${(e.reviews || 0) - neg} положительных, ${neg} отрицательных`)}${row('orders', `${94 + h % 6}% заказов сдано без споров`)}${row('clock', `${90 + h % 10}% сдано вовремя`)}${row('retry', `${12 + h % 20}% повторных заказов`)}`, 'c');
+}
+SCREENS.c_client = p => {
+  const n = p.name || ''; const list = S.clientRev[n] || []; const mine = S.orders.filter(o => o.ex === 'alex' && o.client === n);
+  return { title: esc(n), sub: 'Заказчик',
+    body: `${card(`<div class="row"><span class="ava lg">${letter(n)}</span><span class="grow"><b class="t18" style="display:block">${esc(n)}</b><span class="m">${clientLine(n)}</span></span></div>
+      ${sumLines([['Заказов у вас', String(mine.length)], ['Выполнено', String(mine.filter(o => o.status === 'done').length)], ['Отменено', String(mine.filter(o => o.status === 'cancel').length)]])}
+      <div class="m">Телефон и адрес скрыты. Связь — через переписку и звонок через ZELDO.</div>`)}
+      ${list.length ? list.map(x => card(`<div class="row"><b class="grow">${esc(x.who)}</b><span class="m">${dayName(x.date)}</span></div><div>${'★'.repeat(x.stars)}</div><div>${esc(x.text)}</div>`, 'c')).join('') : '<div class="m">Отзывов исполнителей о нём пока нет.</div>'}` };
+};
+
+/* ---------- мои данные (запись 48, 47:56–48:43): видит только сам человек — имя, телефон, почта; карты для оплаты ---------- */
+S.me2 = { phone: '+7 916 123-45-42', email: 'alexey@mail.ru' }; S.cards = [{ id: 'k1', brand: 'Мир', last: '4242', exp: '08/28' }]; S.md = {};
+IN.mdName = v => { S.md.name = v; }; IN.mdPhone = v => { S.md.phone = v; }; IN.mdEmail = v => { S.md.email = v; };
+SCREENS.mydata = () => ({ title: 'Мои данные',
+  body: card(`${field('Имя и фамилия', `<input class="input" data-in="mdName" value="${esc(S.md.name ?? myName())}" maxlength="60" autocomplete="name">`)}
+    ${field('Телефон', `<input class="input" data-in="mdPhone" value="${esc(S.md.phone ?? S.me2.phone)}" inputmode="tel" autocomplete="tel" placeholder="+7">`, { hint: 'Исполнители его не видят: связь — через переписку и звонок через ZELDO.' })}
+    ${field('Почта', `<input class="input" type="email" data-in="mdEmail" value="${esc(S.md.email ?? S.me2.email)}" autocomplete="email">`, { hint: 'Для входа и чеков.' })}${btn('Сохранить', 'mdSave', '', 'block')}`)
+    + card(`<div class="h2">Карты для оплаты</div>${S.cards.length ? `<div class="list">${S.cards.map(c => rl(`${c.brand} •••• ${c.last}`, `до ${c.exp}`, 'cardDel', c.id, { icon: 'card', right: '<span class="m">Отвязать</span>', noArr: true })).join('')}</div>` : '<div class="m">Карт пока нет. Можно платить каждый раз новой картой или через СБП.</div>'}
+      ${btn('Привязать карту', 'cardAdd', '', 'soft block')}<div class="m">Номер карты хранит банк, у ZELDO его нет. Привязывать не обязательно.</div>`) });
+S.cardDraft = {}; IN.cardNum = v => { S.cardDraft.num = v; }; IN.cardExp = v => { S.cardDraft.exp = v; };
+Object.assign(A, {
+  mdSave() { if (S.md.name != null && S.md.name.trim().length > 1) ME_NAME = S.md.name.trim(); if (S.md.phone != null) S.me2.phone = S.md.phone.trim(); if (S.md.email != null) S.me2.email = S.md.email.trim(); S.md = {}; render(); toast('Данные сохранены'); },
+  cardAdd() { S.cardDraft = {}; sheet('Привязать карту', `${field('Номер карты', `<input class="input num" data-in="cardNum" inputmode="numeric" autocomplete="cc-number" placeholder="0000 0000 0000 0000" maxlength="23">`)}${field('Срок', `<input class="input num" data-in="cardExp" inputmode="numeric" autocomplete="cc-exp" placeholder="ММ/ГГ" maxlength="5">`)}<div class="m">В прототипе карта никуда не уходит. В рабочей версии привязку проводит банк на своей странице.</div>${btn('Привязать', 'cardSave', '', 'block')}${btn('Отмена', 'closeSheet', '', 'text block')}`); },
+  cardSave() { const n = String(S.cardDraft.num || '').replace(/\D/g, ''); if (n.length < 16) { toast('Впишите номер карты: 16 цифр', 'info'); return; } S.cards.push({ id: uid('k'), brand: n[0] === '2' ? 'Мир' : n[0] === '4' ? 'Visa' : 'Mastercard', last: n.slice(-4), exp: S.cardDraft.exp || '—' }); closeSheet(); render(); toast('Карта привязана'); },
+  cardDel(id) { S.cards = S.cards.filter(c => c.id !== id); render(); toast('Карта отвязана', 'info'); },
+});
+
+/* ---------- ярлык на экран «Домой» (запись 48, 70:36–82:52): ZELDO открывается как приложение, без строки браузера ---------- */
+const standalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+let a2hsEvt = null; window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); a2hsEvt = e; });
+function a2hsMaybe() { try { if (standalone() || VIEW() === 'desk' || /jsdom/i.test(navigator.userAgent) || navigator.webdriver || localStorage.getItem('zeldo-a2hs')) return; } catch (e) { return; } setTimeout(() => { if (!S.sheet && !S.dialog) A.a2hs(); }, 2500); }
+const a2hsDone = () => { try { localStorage.setItem('zeldo-a2hs', '1'); } catch (e) { /* без памяти — спросим ещё раз */ } };
+Object.assign(A, {
+  a2hs() { const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    sheet('ZELDO на экране «Домой»', `<div class="m">Добавьте ярлык: ZELDO будет открываться как приложение — на весь экран, без строки браузера.</div>
+      ${a2hsEvt ? btn('Добавить на экран «Домой»', 'a2hsGo', '', 'block') : `<ol class="a2hs">${ios ? `<li>Нажмите «Поделиться» ${ic('share', 18, 2)} внизу экрана</li><li>Пролистайте и выберите «На экран „Домой“»</li><li>Нажмите «Добавить»</li>` : '<li>Откройте меню браузера ⋮ справа вверху</li><li>Выберите «Добавить на главный экран» или «Установить приложение»</li><li>Подтвердите</li>'}</ol>`}
+      ${btn(a2hsEvt ? 'Не сейчас' : 'Понятно', 'a2hsOk', '', a2hsEvt ? 'text block' : 'block')}`); },
+  async a2hsGo() { closeSheet(); try { a2hsEvt.prompt(); await a2hsEvt.userChoice; } catch (e) { /* браузер отказал — инструкция в «Настройках» */ } a2hsEvt = null; a2hsDone(); },
+  a2hsOk() { closeSheet(); a2hsDone(); },
+});
+const settings1 = SCREENS.settings;
+SCREENS.settings = p => { const r = settings1(p); r.body += card(`<div class="list">${rl('Добавить на экран «Домой»', 'Открывать ZELDO как приложение', 'a2hs', '', { icon: 'home' })}</div>`, 'c'); return r; };
+/* пункт бокового меню нажат — меню закрывается */
+document.addEventListener('click', e => { if (S.drawer && e.target.closest('.drawer [data-a]')) setTimeout(() => { S.drawer = false; renderOverlay(); }, 0); });
+
+if (!REAL) { render('new'); a2hsMaybe(); }
 
 /* ---------- защита от копирования (01.11, решение владельца) ----------
    Компьютер: нет меню правой кнопки, текст не выделяется и не копируется, картинки не перетаскиваются,
