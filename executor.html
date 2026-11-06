@@ -9984,9 +9984,17 @@ let a2hsEvt = null; window.addEventListener('beforeinstallprompt', e => { e.prev
 function a2hsMaybe() { try { if (standalone() || VIEW() === 'desk' || /jsdom/i.test(navigator.userAgent) || navigator.webdriver || localStorage.getItem('zeldo-a2hs')) return; } catch (e) { return; } setTimeout(() => { if (!S.sheet && !S.dialog) A.a2hs(); }, 2500); }
 const a2hsDone = () => { try { localStorage.setItem('zeldo-a2hs', '1'); } catch (e) { /* без памяти — спросим ещё раз */ } };
 Object.assign(A, {
-  a2hs() { const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  /* 06.11: шаги по версии Safari. С iOS 26 «Поделиться» спрятана в меню •••, а в окне добавления есть переключатель
+     «Открыть как веб-приложение» (названия — как в справке Apple). Из Chrome, Яндекс Браузера и Telegram ярлык надёжнее делать через Safari */
+  a2hs() { const ua = navigator.userAgent, ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const other = ios && /CriOS|FxiOS|EdgiOS|YaBrowser|OPiOS|GSA\/|Telegram|Instagram|FBAN|FBAV|VKClient/.test(ua), v = other ? 0 : +((ua.match(/Version\/(\d+)/) || [])[1] || 0), sh = ic('share', 18, 2);
+    const iosSteps = (other ? '<li>Откройте эту страницу в Safari. Из других браузеров и из Telegram ярлык может открываться обычной вкладкой</li>' : '')
+      + (v >= 26 ? `<li>Нажмите ••• рядом с адресной строкой, затем «Поделиться» ${sh}</li>` : v ? `<li>Нажмите «Поделиться» ${sh} внизу экрана</li>` : `<li>Нажмите «Поделиться» ${sh}. Не видно этой кнопки — сначала •••</li>`)
+      + '<li>Пролистайте вниз и выберите «На экран „Домой“». Нет такого пункта — нажмите «Редактировать действия» в самом низу</li>'
+      + (v && v < 26 ? '<li>Нажмите «Добавить»</li>' : '<li>Проверьте, что включено «Открыть как веб-приложение», и нажмите «Добавить»</li>');
     sheet('ZELDO на экране «Домой»', `<div class="m">Добавьте ярлык: ZELDO будет открываться как приложение — на весь экран, без строки браузера.</div>
-      ${a2hsEvt ? btn('Добавить на экран «Домой»', 'a2hsGo', '', 'block') : `<ol class="a2hs">${ios ? `<li>Нажмите «Поделиться» ${ic('share', 18, 2)} внизу экрана</li><li>Пролистайте и выберите «На экран „Домой“»</li><li>Нажмите «Добавить»</li>` : '<li>Откройте меню браузера ⋮ справа вверху</li><li>Выберите «Добавить на главный экран» или «Установить приложение»</li><li>Подтвердите</li>'}</ol>`}
+      ${a2hsEvt ? btn('Добавить на экран «Домой»', 'a2hsGo', '', 'block') : `<ol class="a2hs">${ios ? iosSteps : '<li>Откройте меню браузера ⋮ справа вверху</li><li>Выберите «Добавить на главный экран» или «Установить приложение»</li><li>Подтвердите</li>'}</ol>`}
+      <div class="m">Ярлык уже есть, но открывается с адресной строкой? Удалите его и добавьте заново: телефон запоминает ярлык таким, каким его создали.</div>
       ${btn(a2hsEvt ? 'Не сейчас' : 'Понятно', 'a2hsOk', '', a2hsEvt ? 'text block' : 'block')}`); },
   async a2hsGo() { closeSheet(); try { a2hsEvt.prompt(); await a2hsEvt.userChoice; } catch (e) { /* браузер отказал — инструкция в «Настройках» */ } a2hsEvt = null; a2hsDone(); },
   a2hsOk() { closeSheet(); a2hsDone(); },
