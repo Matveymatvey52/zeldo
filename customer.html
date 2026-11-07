@@ -3421,6 +3421,61 @@ window.ZMAP_STYLE = {"version":8,"sources":{"openmaptiles":{"type":"vector","url
   --shadow: 0 8px 24px rgba(0, 0, 0, 0.25); --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5); color-scheme: dark;
 }
 
+/* ===== раскраски (07.11, владелец: «как в Рокетбанке… белую, как у iPhone, оранжевую… штук 6») =====
+   Раскраска задаёт шапку, первый экран, главную кнопку, акцент и фон. Выбор — в «Настройках», запоминается на телефоне.
+   --hdr — шапка и первый экран, --hdr-ink/--hdr-sub — текст на них, --glow — свечение и тени акцента (r, g, b),
+   --hbm-* — главная кнопка на первом экране, --pg/--pact — фон страницы и цвет действий, --sbar — полоса под часами на ярлыке «Домой» */
+:root {
+  --hdr: #0E1D36; --hdr-ink: #FFFFFF; --hdr-sub: #C7D2E4; --hdr-soft: rgba(255, 255, 255, 0.1); --hdr-line: rgba(255, 255, 255, 0.14); --hdr-line2: rgba(255, 255, 255, 0.28);
+  --glow: 11, 108, 242; --glow-a: 0.55; --grad-a: #2E8BFF; --grad-b: #0B6CF2; --grad-c: #0A55C4;
+  --hbm-bg: linear-gradient(135deg, var(--grad-a) 0%, var(--grad-b) 100%); --hbm-ink: #FFFFFF;
+  --pg: #EEF2F8; --pact: #0B6CF2; --sbar: var(--hdr);
+}
+/* белая — как у iPhone: светлая шапка, системный серый фон, синий акцент; полоса под часами тёмная, иначе белые часы не видно */
+:root[data-pal="white"] {
+  --hdr: #FFFFFF; --hdr-ink: #1C1C1E; --hdr-sub: #6C6C70; --hdr-soft: #F2F2F7; --hdr-line: rgba(60, 60, 67, 0.14); --hdr-line2: rgba(60, 60, 67, 0.22);
+  --glow: 0, 113, 227; --glow-a: 0; --grad-a: #1A84F0; --grad-b: #0071E3; --grad-c: #005BBF;
+  --pg: #F2F2F7; --pact: #0071E3; --brand: #007AFF; --act-press: #005BBF; --soft: #EAF2FF; --soft2: #F7F7FA; --line: #E5E5EA; --line2: #C7C7CC;
+  --ink: #1C1C1E; --muted: #6C6C70; --navy: #1C1C1E; --sbar: #1C1C1E;
+}
+:root[data-pal="white"] #top { box-shadow: 0 1px 0 var(--line); }
+:root[data-pal="white"] .page.home > .hband, :root[data-pal="white"] .card.hero { box-shadow: 0 1px 0 var(--line); }
+/* оранжевая: яркая шапка, белая главная кнопка с оранжевым текстом */
+:root[data-pal="orange"] {
+  --rdot-bg: #FFFFFF; --rdot-ink: #C2410C;
+  --hdr: #D4500B; --hdr-sub: #FFE6D5; --hdr-soft: rgba(255, 255, 255, 0.16); --hdr-line: rgba(255, 255, 255, 0.24); --hdr-line2: rgba(255, 255, 255, 0.42);
+  --glow: 255, 168, 96; --glow-a: 0.5; --grad-a: #FF8A3D; --grad-b: #E8590C; --grad-c: #C2410C; --hbm-bg: #FFFFFF; --hbm-ink: #C2410C;
+  --pg: #F8F4F0; --pact: #C2410C; --brand: #F26A1B; --act-press: #9A3412; --soft: #FFEFE3; --soft2: #FFF8F2; --line: #EEE2D8; --line2: #D9C5B5; --navy: #3A2314;
+}
+/* мятная: глубокий зелёно-бирюзовый */
+:root[data-pal="mint"] {
+  --hdr: #0D3B36; --hdr-sub: #B8D8D2;
+  --glow: 20, 184, 166; --glow-a: 0.45; --grad-a: #1BB59F; --grad-b: #0E8C7B; --grad-c: #0B7A6C;
+  --pg: #EEF5F3; --pact: #0B7A6C; --brand: #12A08C; --act-press: #085F54; --soft: #E2F4F0; --soft2: #F4FBF9; --line: #D5E8E3; --line2: #B3CFC8; --navy: #0D3B36;
+}
+/* фиолетовая */
+:root[data-pal="violet"] {
+  --hdr: #24123F; --hdr-sub: #CFC3E8;
+  --glow: 139, 92, 246; --glow-a: 0.5; --grad-a: #9B6BFF; --grad-b: #7C3AED; --grad-c: #6D28D9;
+  --pg: #F3F0F9; --pact: #6D28D9; --brand: #8B5CF6; --act-press: #5B21B6; --soft: #F0E9FF; --soft2: #FAF7FF; --line: #E4DDF2; --line2: #C8BDE0; --navy: #24123F;
+}
+/* тёмная: цвета тёмной темы, шапка почти чёрная */
+:root[data-pal="night"] {
+  --hdr: #070D18; --hdr-sub: #9AA9C0;
+  --glow: 47, 134, 246; --glow-a: 0.4; --grad-a: #3D8EF8; --grad-b: #1E6FE0; --grad-c: #1A5FC2;
+  --pg: #0B1424; --pact: #1E6FE0;
+}
+/* выбор раскраски в «Настройках» */
+.palg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.palb { display: grid; justify-items: center; gap: 8px; padding: 12px 6px 10px; border-radius: 18px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); font-size: 15px; line-height: 20px; color: var(--ink); transition: box-shadow 0.15s ease; }
+.palb.on { box-shadow: inset 0 0 0 2px var(--act); font-weight: 600; }
+.palb .sw { position: relative; width: 52px; height: 52px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08); }
+.palb .sw i { position: absolute; inset: 0 0 50% 0; }
+.palb .sw b { position: absolute; inset: 50% 0 0 0; }
+.palb .sw em { position: absolute; right: 9px; bottom: 9px; width: 14px; height: 14px; border-radius: 50%; }
+.palb .sw svg { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: #fff; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)); }
+@media (prefers-reduced-motion: reduce) { .palb { transition: none; } }
+
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body { margin: 0; background: var(--desk); color: var(--ink); font: 400 14px/20px var(--font); -webkit-font-smoothing: antialiased; }
@@ -3920,11 +3975,11 @@ a.btn { text-decoration: none; }
 @keyframes up { from { transform: translateY(40px); opacity: 0.4; } }
 .sheet.still, .scrim.still { animation: none; }
 /* ярлык на экране «Домой»: шапка заходит под часы и вырез, нижние вкладки — над полоской жестов */
-@media (display-mode: standalone) { #top { padding-top: env(safe-area-inset-top); background: var(--navy); } #tabs { padding-bottom: max(8px, calc(env(safe-area-inset-bottom) - 12px)); } html, body { background: var(--card); } }
+@media (display-mode: standalone) { #top { padding-top: env(safe-area-inset-top); background: linear-gradient(var(--sbar) 0 env(safe-area-inset-top), var(--hdr) 0); } #tabs { padding-bottom: var(--tabpad, max(8px, calc(env(safe-area-inset-bottom) - 12px))); } html, body { background: var(--card); } }
 .a2hs { display: grid; gap: 10px; margin: 0; padding-left: 22px; font-size: 17px; line-height: 24px; }
 .a2hs svg { vertical-align: -3px; color: var(--act); }
 /* боковое меню на телефоне */
-.hmenu { color: #fff; margin-right: -6px; }
+.hmenu { color: var(--hdr-ink); margin-right: -6px; }
 .scrim.drw { display: flex; justify-content: flex-start; align-items: stretch; padding: 0; }
 .drawer { width: min(86vw, 320px); height: 100%; overflow-y: auto; padding-top: calc(14px + env(safe-area-inset-top)); animation: drwIn 0.24s var(--ease-drawer); }
 .drawer .cabtop { display: none; }
@@ -4004,7 +4059,7 @@ mark { background: none; color: var(--act); font-weight: 700; }
 .rtabs button { min-height: 44px; border-radius: 12px; font-size: 14px; font-weight: 600; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 0 2px; min-width: 0; letter-spacing: -0.02em; }
 .rtabs button.on { background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
 .rtabs .rc { min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; line-height: 20px !important; background: var(--brand); color: #fff; font-size: 14px; line-height: 22px; font-variant-numeric: tabular-nums; }
-.role .rdot { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; margin-left: 6px; border-radius: 10px; background: var(--brand); color: #fff; font-size: 14px; line-height: 20px; }
+.role .rdot { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; margin-left: 6px; border-radius: 10px; background: var(--rdot-bg, var(--brand)); color: var(--rdot-ink, #fff); font-size: 14px; line-height: 20px; }
 
 /* сетка часов дня в расписании исполнителя */
 .hgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
@@ -4142,29 +4197,29 @@ mark { background: none; color: var(--act); font-weight: 700; }
 .hb-sec { background: var(--card); color: var(--act); box-shadow: inset 0 0 0 1.5px var(--line2); }
 
 /* ===== «Тёмная шапка» — основное оформление (выбор владельца 21.10) ===== */
-[data-style="bold"] { --page: #EEF2F8; --act: #0B6CF2; }
-[data-style="bold"] #top { background: #0E1D36; border-bottom-color: #0E1D36; }
-[data-style="bold"] #top .logo { color: #fff; letter-spacing: 0.04em; }
-[data-style="bold"] #top .role { background: rgba(255,255,255,.1); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
-[data-style="bold"] #top .hbtn { color: #fff; }
-@media (hover: hover) and (pointer: fine) { [data-style="bold"] #top .hbtn:hover { background: rgba(255,255,255,.08); } }
+[data-style="bold"] { --page: var(--pg); --act: var(--pact); }
+[data-style="bold"] #top { background: var(--hdr); border-bottom-color: var(--hdr); }
+[data-style="bold"] #top .logo { color: var(--hdr-ink); letter-spacing: 0.04em; }
+[data-style="bold"] #top .role { background: var(--hdr-soft); color: var(--hdr-ink); box-shadow: inset 0 0 0 1px var(--hdr-line); }
+[data-style="bold"] #top .hbtn { color: var(--hdr-ink); }
+@media (hover: hover) and (pointer: fine) { [data-style="bold"] #top .hbtn:hover { background: var(--hdr-soft); } }
 [data-style="bold"] .sec-t, [data-style="bold"] .h1 { font-weight: 800; letter-spacing: -0.03em; }
-[data-style="bold"] .page.home > .hband { background: radial-gradient(120% 140% at 100% 0%, rgba(11,108,242,.55) 0%, rgba(11,108,242,0) 55%), #0E1D36; margin: -12px -16px 4px; padding: 14px 16px 22px; border-radius: 0 0 30px 30px; }
-[data-style="bold"] .hb-main { background: linear-gradient(135deg, #2E8BFF 0%, #0B6CF2 100%); box-shadow: 0 10px 24px rgba(11,108,242,.45); }
-[data-style="bold"] .hb-sec { background: rgba(255,255,255,.08); color: #fff; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.28); }
+[data-style="bold"] .page.home > .hband { background: radial-gradient(120% 140% at 100% 0%, rgba(var(--glow), var(--glow-a)) 0%, rgba(var(--glow), 0) 55%), var(--hdr); margin: -12px -16px 4px; padding: 14px 16px 22px; border-radius: 0 0 30px 30px; }
+[data-style="bold"] .hb-main { background: var(--hbm-bg); color: var(--hbm-ink); box-shadow: 0 10px 24px rgba(var(--glow), .35); }
+[data-style="bold"] .hb-sec { background: var(--hdr-soft); color: var(--hdr-ink); box-shadow: inset 0 0 0 1.5px var(--hdr-line2); }
 [data-style="bold"] .card, [data-style="bold"] .pc, [data-style="bold"] .pct, [data-style="bold"] .ocl { border-radius: 24px; }
 [data-style="bold"] .ocl-pr, [data-style="bold"] .oct-pr { color: var(--act); }
 [data-style="bold"] .cat { border-radius: 22px; }
 [data-style="bold"] .tab.on { color: var(--act); }
-[data-style="bold"] .tab.on svg { background: rgba(11,108,242,.12); border-radius: 12px; padding: 3px 12px; box-sizing: content-box; }
+[data-style="bold"] .tab.on svg { background: rgba(var(--glow), .12); border-radius: 12px; padding: 3px 12px; box-sizing: content-box; }
 [data-style="bold"] .hsearch { box-shadow: none; }
-[data-style="bold"] .page > .col.g8:first-child { background: #0E1D36; margin: -12px -16px 4px; padding: 16px 16px 20px; border-radius: 0 0 28px 28px; }
-[data-style="bold"] .page > .col.g8:first-child .hloc { color: #C7D2E4; }
-[data-style="bold"] .page > .col.g8:first-child .reqmini { background: rgba(255,255,255,.14); color: #fff; }
-[data-style="bold"] .card.hero { background: radial-gradient(120% 140% at 100% 0%, rgba(11,108,242,.5) 0%, rgba(11,108,242,0) 55%), #0E1D36; color: #fff; }
-[data-style="bold"] .card.hero .m { color: #C7D2E4; }
-[data-style="bold"] .card.hero .fakefield { background: rgba(255,255,255,.1); color: #E3EAF5; box-shadow: none; }
-[data-style="bold"] .card.hero .sec-t { color: #fff; }
+[data-style="bold"] .page > .col.g8:first-child { background: var(--hdr); margin: -12px -16px 4px; padding: 16px 16px 20px; border-radius: 0 0 28px 28px; }
+[data-style="bold"] .page > .col.g8:first-child .hloc { color: var(--hdr-sub); }
+[data-style="bold"] .page > .col.g8:first-child .reqmini { background: var(--hdr-soft); color: var(--hdr-ink); }
+[data-style="bold"] .card.hero { background: radial-gradient(120% 140% at 100% 0%, rgba(var(--glow), var(--glow-a)) 0%, rgba(var(--glow), 0) 55%), var(--hdr); color: var(--hdr-ink); }
+[data-style="bold"] .card.hero .m { color: var(--hdr-sub); }
+[data-style="bold"] .card.hero .fakefield { background: var(--hdr-soft); color: var(--hdr-sub); box-shadow: none; }
+[data-style="bold"] .card.hero .sec-t { color: var(--hdr-ink); }
 [data-style="bold"] #top, [data-style="bold"] #top .hdr { border-bottom: 0; box-shadow: none; }
 
 /* список услуг группы: крупное фото почти до края карточки */
@@ -4272,7 +4327,7 @@ mark { background: none; color: var(--act); font-weight: 700; }
 .lme { position: absolute; top: 12px; right: 12px; z-index: 500; width: 44px; height: 44px; border-radius: 14px; background: var(--card); color: var(--act); display: grid; place-items: center; box-shadow: 0 4px 14px rgba(16,33,61,.2); }
 .cpin { position: absolute; left: 50%; top: 50%; z-index: 500; transform: translate(-50%, -100%); color: var(--act); pointer-events: none; filter: drop-shadow(0 4px 6px rgba(16,33,61,.3)); }
 .cpin svg { fill: #fff; }
-.rcircle { position: absolute; left: 50%; top: 50%; aspect-ratio: 1 / 1; transform: translate(-50%, -50%); border: 2px dashed var(--act); background: rgba(11,108,242,.07); border-radius: 50%; pointer-events: none; }
+.rcircle { position: absolute; left: 50%; top: 50%; aspect-ratio: 1 / 1; transform: translate(-50%, -50%); border: 2px dashed var(--act); background: rgba(var(--glow), .07); border-radius: 50%; pointer-events: none; }
 .leaflet-container { font-family: inherit; }
 .leaflet-div-icon.lfx, .lfx { background: none; border: 0; }
 .lfx .pin { position: absolute; white-space: nowrap; font-size: 14px; line-height: 18px; cursor: pointer; }
@@ -4445,8 +4500,8 @@ input, textarea, select { font-size: max(16px, 1em); }
 .cribbon .cgp { aspect-ratio: 4 / 3; }
 .cribbon .cgc { height: 44px; padding: 6px 10px 8px; }
 /* заявка с новыми предложениями — ярко и крупно */
-.reqhot { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; padding: 16px 16px 16px 14px; border-radius: 22px; background: linear-gradient(135deg, #0B6CF2, #0A55C4); color: #fff; box-shadow: 0 10px 24px rgba(11, 108, 242, 0.32); }
-.reqhot .rh-n { flex: none; width: 44px; height: 44px; border-radius: 14px; background: #fff; color: #0A55C4; font-size: 22px; font-weight: 800; display: grid; place-items: center; font-variant-numeric: tabular-nums; }
+.reqhot { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; padding: 16px 16px 16px 14px; border-radius: 22px; background: linear-gradient(135deg, var(--grad-b), var(--grad-c)); color: #fff; box-shadow: 0 10px 24px rgba(11, 108, 242, 0.32); }
+.reqhot .rh-n { flex: none; width: 44px; height: 44px; border-radius: 14px; background: #fff; color: var(--grad-c); font-size: 22px; font-weight: 800; display: grid; place-items: center; font-variant-numeric: tabular-nums; }
 .reqhot b { display: block; font-size: 18px; line-height: 22px; }
 .reqhot .grow span { display: block; color: rgba(255, 255, 255, 0.82); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .reqhot .grow { min-width: 0; }
@@ -4707,10 +4762,10 @@ input, textarea, select { font-size: max(16px, 1em); }
 .dcat-t small { font-size: 15px; line-height: 20px; font-weight: 500; letter-spacing: 0; color: rgba(255, 255, 255, 0.82); }
 /* наведение — как у всех карточек: плитка чуть приподнимается, тень глубже; сам снимок не масштабируется */
 @media (hover: hover) and (pointer: fine) { .phone[data-view="desk"] .dcat:hover { transform: translate3d(0, -3px, 0); } }
-.phone[data-view="desk"] .dfind { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 36px; padding: 32px 36px; border-radius: 28px; color: #fff;
-  background: radial-gradient(90% 140% at 100% 0%, rgba(11, 108, 242, 0.6) 0%, rgba(11, 108, 242, 0) 60%), #0E1D36; }
+.phone[data-view="desk"] .dfind { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 36px; padding: 32px 36px; border-radius: 28px; color: var(--hdr-ink);
+  background: radial-gradient(90% 140% at 100% 0%, rgba(var(--glow), var(--glow-a)) 0%, rgba(var(--glow), 0) 60%), var(--hdr); }
 .dfind .h2 { font-size: 28px; line-height: 34px; font-weight: 800; }
-.dfind .m { color: #C7D2E4; }
+.dfind .m { color: var(--hdr-sub); }
 .df-a, .df-r { display: grid; gap: 16px; align-content: start; }
 .df-q { display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 18px; border-radius: 14px; background: #fff; color: var(--muted); font-size: 18px; text-align: left; }
 .df-b { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 12px; background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24); color: #fff; font-weight: 600; }
@@ -4783,7 +4838,7 @@ input, textarea, select { font-size: max(16px, 1em); }
 /* у профиля постоянная ширина и высота: пока панель едет, имя не переносится и квадратики не прыгают */
 .cabme { display: flex; align-items: center; gap: 12px; height: 60px; padding: 0 2px; }
 .cabme .grow { flex: none; width: 194px; }
-.cabme .ava.lg { flex: none; width: 52px; height: 52px; font-size: 22px; background: linear-gradient(135deg, #0B6CF2, #0A55C4); color: #fff; }
+.cabme .ava.lg { flex: none; width: 52px; height: 52px; font-size: 22px; background: linear-gradient(135deg, var(--grad-b), var(--grad-c)); color: #fff; }
 .cabme b { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .cabme .m { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 14px; line-height: 18px; }
 /* слева 13 px: иконка смены роли стоит по центру полоски, когда меню свёрнуто (14 + 13 + 9 = 36) */
@@ -4843,9 +4898,9 @@ input, textarea, select { font-size: max(16px, 1em); }
 .msgr-ei { display: grid; place-items: center; width: 80px; height: 80px; border-radius: 24px; background: var(--card); color: var(--act); box-shadow: var(--sh); margin-bottom: 8px; }
 .msgr-empty .m { max-width: 320px; }
 /* сводка исполнителя */
-.dhero { display: flex; align-items: center; gap: 28px; padding: 28px 32px; border-radius: 24px; color: #fff; background: radial-gradient(90% 160% at 100% 0%, rgba(11, 108, 242, 0.6) 0%, rgba(11, 108, 242, 0) 60%), #0E1D36; }
+.dhero { display: flex; align-items: center; gap: 28px; padding: 28px 32px; border-radius: 24px; color: var(--hdr-ink); background: radial-gradient(90% 160% at 100% 0%, rgba(var(--glow), var(--glow-a)) 0%, rgba(var(--glow), 0) 60%), var(--hdr); }
 .dhero-t { margin: 0; font-size: 28px; line-height: 34px; font-weight: 800; letter-spacing: -0.02em; }
-.dhero-s { display: block; margin-top: 4px; color: #C7D2E4; }
+.dhero-s { display: block; margin-top: 4px; color: var(--hdr-sub); }
 .dhero-q { flex: 0 1 460px; display: flex; align-items: stretch; height: 52px; border-radius: 14px; background: #fff; color: var(--muted); overflow: hidden; text-align: left; }
 .dhero-q > svg { align-self: center; margin: 0 10px 0 16px; flex: none; }
 .dhero-q span { flex: 1; min-width: 0; align-self: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -10019,7 +10074,7 @@ A.settings = () => go('settings');  /* шестерёнка в шапке и с�
 SCREENS.settings = () => ({
   title: 'Настройки',
   body: `${card(`<div class="h2">Параметры аккаунта</div><div class="list">${rl('Профиль', '', S.role === 'exec' ? 'go' : 'tab', S.role === 'exec' ? 'e_profile' : 'c_cab')}${rl('Уведомления', '', 'go', 'notifset')}${rl('Конфиденциальность', '', 'go', 'privacy')}</div>`, 'c')}
-    ${field('Оформление', seg('setTheme', [['light', 'Светлое'], ['dark', 'Тёмное']], S.theme))}
+    ${field('Раскраска', `<div class="palg" role="group" aria-label="Раскраска приложения">${PALS.map(([k, name, hdr, page, acc]) => `<button class="palb ${S.pal === k ? 'on' : ''}" data-a="setPal" data-v="${k}" aria-pressed="${S.pal === k}"><span class="sw"><i style="background:${hdr}"></i><b style="background:${page}"></b><em style="background:${acc}"></em>${S.pal === k ? ic('check', 20, 3) : ''}</span>${name}</button>`).join('')}</div>`, { hint: 'Меняет шапку, кнопки и фон. Запоминается на этом телефоне.' })}
     ${card(`<div class="list">${rl('Помощь', 'Как работают оплата и заказы', S.role === 'exec' ? 'helpExec' : 'helpPay', '', { icon: 'info' })}</div>`, 'c')}`,
 });
 SCREENS.notifset = () => {
@@ -10036,7 +10091,8 @@ SCREENS.privacy = () => ({
   body: `${card(`<div class="h2">Кто что видит</div>${bullets(['До оплаты исполнитель видит только ваш район', 'Точный адрес открывается после защищённой оплаты', 'Телефон не показываем: общение идёт в переписке, звонки — через подменный номер', 'Номера, почта и ссылки в переписке скрываются: собеседник видит •••', 'Паспорт и банковские данные до заказа не передаются'])}`)}`,
 });
 Object.assign(A, {
-  setTheme(v) { S.theme = v; document.documentElement.dataset.theme = v; render(); },
+  setTheme(v) { A.setPal(v === 'dark' ? 'night' : 'blue'); },  /* старое «Светлое/Тёмное» — теперь две раскраски из шести */
+  setPal(k) { applyPal(k); render(); toast(`Раскраска «${(PALS.find(p => p[0] === k) || PALS[0])[1]}»`); },
   nsTog(k) { S.nset[k] = !S.nset[k]; render(); },
   nsSave() { back(); toast('Изменения сохранены'); },
 });
@@ -10097,12 +10153,17 @@ function fitPhone() {}
   const fit = () => {
     const st = document.querySelector('.stage'); if (!st) return;
     if (!vv || innerWidth >= 768) { st.style.removeProperty('--vvh'); st.style.transform = ''; return; }
-    /* ярлык «Домой» (07.11, Максим: «нижняя панель высоковато»): iPhone отдаёт видимую высоту без полоски жестов,
-       и под меню оставалась серая полоса. Без клавиатуры приложение занимает весь экран, отступ над полоской делает само меню */
-    const full = innerWidth < innerHeight ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
+    st.style.setProperty('--vvh', vv.height + 'px'); st.style.transform = vv.offsetTop ? `translateY(${vv.offsetTop}px)` : '';
+    /* ярлык «Домой» (07.11, Максим: «нижняя панель высоковато», потом «белым перекрывает текст»): на части iPhone приложению
+       отдают экран короче настоящего — ниже этой границы всё обрезается, растягивать нельзя. Поэтому меню стоит в отведённой высоте,
+       а отступ над полоской жестов уменьшаем ровно на то, что iPhone уже отрезал сам. Полосу ниже красит фон страницы — цвет меню */
     const app = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
-    const h = app && vv.height > full * 0.7 ? Math.max(vv.height, full) : vv.height;
-    st.style.setProperty('--vvh', h + 'px'); st.style.transform = vv.offsetTop ? `translateY(${vv.offsetTop}px)` : '';
+    if (app) {
+      const full = innerWidth < innerHeight ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
+      let pr = document.getElementById('sabprobe'); if (!pr) { pr = document.createElement('div'); pr.id = 'sabprobe'; pr.style.cssText = 'position:fixed;left:0;bottom:0;width:1px;height:0;visibility:hidden;pointer-events:none;padding-bottom:env(safe-area-inset-bottom)'; document.body.appendChild(pr); }
+      const inset = parseFloat(getComputedStyle(pr).paddingBottom) || 0; const cut = Math.max(0, full - innerHeight);
+      document.documentElement.style.setProperty('--tabpad', `${Math.max(6, Math.round(inset - cut - 10))}px`);
+    }
     if (window.scrollY || window.scrollX) window.scrollTo(0, 0);
   };
   if (vv) { vv.addEventListener('resize', fit); vv.addEventListener('scroll', fit); }
@@ -10111,7 +10172,17 @@ function fitPhone() {}
 })();
 /* ---------- запуск ---------- */
 fitPhone();
-document.documentElement.dataset.theme = S.theme;
+/* раскраски (07.11): шесть на выбор, как в «Рокетбанке»; [ключ, название, шапка, фон, акцент] — для кружков в настройках.
+   Выбор хранится на телефоне; тёмная включает и тёмную тему карточек. Цвет шапки — и в метке theme-color: Safari красит под него свою панель */
+const PALS = [['blue', 'Синяя', '#0E1D36', '#EEF2F8', '#0B6CF2'], ['white', 'Белая', '#FFFFFF', '#F2F2F7', '#0071E3'], ['orange', 'Оранжевая', '#D4500B', '#F8F4F0', '#FFFFFF'],
+  ['mint', 'Мятная', '#0D3B36', '#EEF5F3', '#1BB59F'], ['violet', 'Фиолетовая', '#24123F', '#F3F0F9', '#9B6BFF'], ['night', 'Тёмная', '#070D18', '#0B1424', '#3D8EF8']];
+function applyPal(k) {
+  const p = PALS.find(x => x[0] === k) || PALS[0]; S.pal = p[0]; S.theme = p[0] === 'night' ? 'dark' : 'light';
+  const de = document.documentElement; de.dataset.pal = p[0]; de.dataset.theme = S.theme;
+  let m = document.querySelector('meta[name="theme-color"]'); if (!m) { m = document.createElement('meta'); m.name = 'theme-color'; document.head.appendChild(m); } m.content = p[2];
+  try { localStorage.setItem('zeldo-pal', p[0]); } catch (e) { /* приватный режим: просто не запомним */ }
+}
+applyPal((() => { try { return localStorage.getItem('zeldo-pal'); } catch (e) { return null; } })() || 'blue');
 document.documentElement.dataset.style = 'bold';
 window.__z = { S, A, SCREENS, CATS, DIRS, SERVICES, OFFERS, offerById, offersFor, svcBy, render, go, root, stackTo, startRequest, openWizard, ZP, calc, cfgOf, dk, fromKey, blockers };
 /* ---------- профиль по нажатию на имя (запись 48, 63:49; образец — снимок 6220) ---------- */
