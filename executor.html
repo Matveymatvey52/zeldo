@@ -4876,7 +4876,16 @@ input, textarea, select { font-size: max(16px, 1em); }
 /* сообщения: одно окно мессенджера */
 .phone[data-view="desk"] .page.msgp .cabmain { display: grid; grid-template-rows: minmax(0, 1fr); padding: 0; overflow: hidden; }
 .phone[data-view="desk"] .page.msgp .cabin { display: grid; grid-template-rows: minmax(0, 1fr); gap: 0; max-width: none; min-height: 0; margin: 0; }
-.msgr { display: grid; grid-template-columns: 380px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); min-height: 0; background: var(--card); overflow: hidden; }
+/* столбик разделов слева (07.11, по образцу из видео Максима) */
+.mrail { display: flex; flex-direction: column; gap: 4px; padding: 12px 8px; border-right: 1px solid var(--line); background: var(--soft2); overflow-y: auto; min-height: 0; }
+.mrail-i { display: grid; justify-items: center; gap: 6px; padding: 10px 4px; border-radius: 14px; font-size: 12px; line-height: 15px; color: var(--muted); text-align: center; }
+@media (hover: hover) and (pointer: fine) { .mrail-i:hover { background: var(--card); } }
+.mrail-i.on { color: var(--act); font-weight: 600; }
+.mrail-ic { position: relative; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); }
+.mrail-i.on .mrail-ic { background: var(--act); color: #fff; box-shadow: none; }
+.mrail-n { position: absolute; top: -6px; right: -9px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--brand); color: #fff; font-size: 12px; line-height: 20px; font-weight: 700; box-shadow: 0 0 0 2px var(--soft2); }
+.msgr-list .mrow .ndot { flex: none; }
+.msgr { display: grid; grid-template-columns: 96px 360px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); min-height: 0; background: var(--card); overflow: hidden; }
 .msgr-l { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--line); }
 .msgr-lh { display: grid; gap: 12px; padding: 18px 16px 12px; border-bottom: 1px solid var(--line); }
 .msgr-lh .search { min-height: 44px; }
@@ -5246,7 +5255,7 @@ const hsq = () => `<button class="hsq" data-a="openSearch">${ic('search', 20, 2.
 /* шапка компьютера (01.11, по образцу больших досок объявлений): сверху роль, место, главное действие роли и настройки;
    ниже логотип, «Все категории», поиск с кнопкой «Найти» и разделы со счётчиками */
 function deskHeader() {
-  const g = S.role === 'guest'; const ex = S.role === 'exec'; const rootN = navRoot();
+  const g = S.role === 'guest'; const ex = S.role === 'exec'; const rootN = ['c_msgs', 'e_msgs'].includes(navRoot()) && S.msec === 'notif' && cur().n !== 'chat' ? 'notifs' : navRoot();  /* открыты уведомления — подсвечен колокольчик */
   const msgs = unreadMsgs('cust') + unreadMsgs('exec'); const bell = unreadNotifs('cust') + unreadNotifs('exec');
   const other = g ? 0 : ROLES.filter(([r]) => r !== S.role && r !== 'partner').reduce((a, [r]) => a + allNew(r), 0);
   const item = (n, i, l, cnt, act = 'tab') => `<button class="dh-i ${rootN === n ? 'on' : ''}" data-a="${act}" data-v="${n}" title="${l}" ${rootN === n ? 'aria-current="page"' : ''}>${rootN === n ? icf(i, 22) : ic(i, 22, 1.9)}<span>${l}</span>${cnt ? `<b class="dh-n">${cnt}</b>` : ''}</button>`;
@@ -9261,7 +9270,7 @@ A.roleTab = v => {
   switchRole(r, ROLE_ROOT[kind][r]); render('new'); toast(`Вы в роли «${ROLE_NAME[r]}»`, 'info');
 };
 const QUICK = { cust: ['Когда сможете?', 'Сколько это будет стоить?', 'Можно фото ваших работ?', 'Спасибо!'], exec: ['Добрый день! Да, сделаю', 'Пришлите фото, пожалуйста', `Могу ${dayName(dk(1)).toLowerCase()} в 10:00`, 'Спасибо!'] };
-const chatFilter = role => { const q = norm(S.chatQ || ''); return chatsFor(role).filter(c => !q || norm(c.with + ' ' + c.msgs.map(m => m.t || '').join(' ')).includes(q)); };
+const chatFilter = role => { const q = norm(S.chatQ || ''); return chatsFor(role).filter(c => !c.support && (!S.chatNew || c.unread)).filter(c => !q || norm(c.with + ' ' + c.msgs.map(m => m.t || '').join(' ')).includes(q)); };
 /* последнее сообщение диалога и подпись к нему в списке */
 const lastOf = c => { const last = [...c.msgs].reverse().find(m => m.from !== 'sys') || c.msgs[c.msgs.length - 1] || { t: '' }; return [last, last.kind === 'version' ? `Предложение: ${rub(last.v.price)}` : last.kind === 'ask' ? `Просьба изменить условия: ${rub(last.a.price)}` : last.kind === 'brief' ? 'Запрос с условиями' : last.kind === 'file' ? last.name : last.kind === 'voice' ? `Голосовое, ${durText(last.dur)}` : last.t]; };
 /* договорились в переписке (03.11, Максим): предложение уходит карточкой прямо в диалог — примут, и эта же переписка становится заказом с номером.
@@ -9276,7 +9285,7 @@ const contactsHidden = () => toast('Контакты скрыты: номера,
 const chatRow = (c, curId) => { const [last, lt] = lastOf(c); const on = c.id === curId;
   return `<button class="mrow ${on ? 'on' : ''}" data-a="openChat" data-v="${c.id}" ${on ? 'aria-current="true"' : ''}>${avaByName(c.with)}<span class="grow"><span class="mrow-h"><b>${esc(c.with)}</b><small>${esc(last.at || '')}</small></span><span class="mrow-s">${esc(lt || '')}</span>${c.order ? `<span class="mrow-o">Заказ № ${c.order}</span>` : ''}</span>${c.unread ? `<span class="cnt">${c.unread}</span>` : ''}</button>`; };
 const chatRows = (role, curId) => { const l = chatFilter(role); return l.length ? l.map(c => chatRow(c, curId)).join('') : '<div class="msgr-none m">Диалогов нет</div>'; };
-const composerHtml = ch => `<div class="composer"><div class="chips scroll" style="margin:0 -12px;padding:0 12px 2px">${dealChip(ch)}${QUICK[ch.role].map(t => `<button class="chip" data-a="quickSend" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</div>
+const composerHtml = ch => `<div class="composer"><div class="chips scroll" style="margin:0 -12px;padding:0 12px 2px">${dealChip(ch)}${(ch.support ? [] : QUICK[ch.role]).map(t => `<button class="chip" data-a="quickSend" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</div>
       ${composeRow(ch)}</div>`;
 /* ---------- голосовые в переписке (05.11): мастеру проще наговорить, чем печатать ----------
    Запись — микрофон браузера (MediaRecorder), до 2 минут; волна — громкость каждые 0,1 с. Плеер один на всё приложение.
@@ -9382,19 +9391,63 @@ function chatPane(ch) {
   const o = offerById(ch.offer); const ord = ch.order && orderById(ch.order);
   const sub = ord ? `${esc(ord.svc)} · заказ № ${ord.id}` : o ? `По услуге «${esc(o.title)}»` : '';
   const act = ord ? btn('Открыть заказ', 'go', gv('order', { id: ord.id }), 'soft sm') : o && ch.role === 'cust' ? btn('Карточка услуги', 'openOffer', o.id, 'soft sm') : '';
-  return `<div class="msgr-r"><div class="msgr-h">${avaByName(ch.with)}<span class="grow">${ch.with === 'Администратор ZELDO' ? `<b class="t18">${esc(ch.with)}</b>` : `<button class="plink" data-a="go" data-v="${ch.role === 'cust' ? gv('c_exec', { id: ch.ex }) : gv('c_client', { name: ch.with })}" aria-label="Профиль: ${esc(ch.with)}"><b class="t18">${esc(ch.with)}</b></button>`}<span class="m">${sub}</span></span>${ord ? orderPill(ord) : ''}${act}<button class="iconbtn" data-a="callAsk" data-v="${esc(ch.ex || '')}" aria-label="Позвонить через ZELDO" title="Позвонить через ZELDO">${ic('phone', 22, 2)}</button></div>
+  return `<div class="msgr-r"><div class="msgr-h">${avaByName(ch.with)}<span class="grow">${ch.with === 'Администратор ZELDO' ? `<b class="t18">${esc(ch.with)}</b>` : `<button class="plink" data-a="go" data-v="${ch.role === 'cust' ? gv('c_exec', { id: ch.ex }) : gv('c_client', { name: ch.with })}" aria-label="Профиль: ${esc(ch.with)}"><b class="t18">${esc(ch.with)}</b></button>`}<span class="m">${sub}</span></span>${ord ? orderPill(ord) : ''}${act}${ch.support ? '' : `<button class="iconbtn" data-a="callAsk" data-v="${esc(ch.ex || '')}" aria-label="Позвонить через ZELDO" title="Позвонить через ZELDO">${ic('phone', 22, 2)}</button>`}</div>
     <div class="msgr-b"><div class="chat">${incStrip(ch)}${ch.msgs.map((m, i) => msgHtml(ch, m, i)).join('')}</div></div><div class="msgr-f">${composerHtml(ch)}</div></div>`;
 }
-function messenger(role, ch) {
-  const right = ch ? chatPane(ch) : `<div class="msgr-r msgr-empty"><span class="msgr-ei">${ic('chat', 40, 1.6)}</span><b class="t18">Выберите диалог</b><span class="m">Слева — все ваши переписки. Нажмите на любую, и она откроется здесь.</span></div>`;
-  return `<div class="msgr"><div class="msgr-l"><div class="msgr-lh"><b class="h2">Сообщения</b>${roleTabs('msgs')}<span class="search"><input data-in="chatQ|${role}" value="${esc(S.chatQ || '')}" placeholder="Имя или текст" autocomplete="off" aria-label="Поиск по диалогам">${ic('search', 22)}</span></div>
-    <div id="chatlist" class="msgr-list">${chatRows(role, ch && ch.id)}</div></div>${right}</div>`;
+/* сообщения на компьютере (07.11, видео Максима «Уведомления zeldo»: «как у Озона — всё в одном месте»):
+   слева разделы со счётчиками — переписки в роли заказчика и исполнителя, поддержка, уведомления; посередине список; справа переписка.
+   Колокольчик на компьютере открывает это же окно на «Уведомлениях», отдельного окна больше нет */
+const msecOf = ch => (ch && ch.support ? 'sup' : !ch && S.msec === 'notif' ? 'notif' : 'chats');
+function msgRail(role, sec) {
+  const sup = chatById('sup');
+  const it = (v, icon, label, n, on) => `<button class="mrail-i ${on ? 'on' : ''}" data-a="msec" data-v="${v}" ${on ? 'aria-current="page"' : ''}><span class="mrail-ic">${ic(icon, 22, 2)}${n ? `<b class="mrail-n">${n}</b>` : ''}</span><span>${label}</span></button>`;
+  return `<nav class="mrail" aria-label="Разделы сообщений">${it('cust', 'user', 'Я заказчик', unreadMsgs('cust'), sec === 'chats' && role === 'cust')}${it('exec', 'tool', 'Я исполнитель', unreadMsgs('exec'), sec === 'chats' && role === 'exec')}${it('sup', 'shield', 'Поддержка', sup ? sup.unread : 0, sec === 'sup')}${it('notif', 'bell', 'Уведомления', unreadNotifs('cust') + unreadNotifs('exec'), sec === 'notif')}</nav>`;
 }
+const NROLE = { cust: 'как заказчик', exec: 'как исполнитель', partner: 'как партнёр' };
+function notifRows() {
+  const all = S.notifs.filter(n => n.role !== 'partner'); const l = S.notifTab === 'unread' ? all.filter(n => !n.read) : all;
+  return l.length ? l.map(n => `<button class="mrow" data-a="openNotif" data-v="${n.id}"><span class="ndot ${n.read ? 'read' : ''}" aria-label="${n.read ? 'Прочитано' : 'Не прочитано'}"></span><span class="grow"><span class="mrow-h"><b>${esc(n.title)}</b><small>${esc(n.at)}</small></span><span class="mrow-s">${esc(n.text)}</span><span class="mrow-o">${NROLE[n.role] || ''}</span></span></button>`).join('') : '<div class="msgr-none m">Новых уведомлений нет</div>';
+}
+function messenger(role, ch) {
+  const sec = msecOf(ch);
+  const empty = (i, t, s) => `<div class="msgr-r msgr-empty"><span class="msgr-ei">${ic(i, 40, 1.6)}</span><b class="t18">${t}</b><span class="m">${s}</span></div>`;
+  const right = ch ? chatPane(ch) : sec === 'notif' ? empty('bell', 'Уведомления о заказах', 'Здесь события в обеих ролях: оплаты, начало работы, сдача, отзывы. Нажмите на уведомление — откроется заказ или переписка.') : empty('chat', 'Выберите диалог', 'Слева — все ваши переписки. Нажмите на любую, и она откроется здесь.');
+  const chipsNew = (act, on, l2) => `<div class="row" style="gap:8px">${[['', 'Все'], ['1', l2]].map(([v, l]) => `<button class="chip ${on === !!v ? 'on' : ''}" data-a="${act}" data-v="${v}">${l}</button>`).join('')}</div>`;
+  const mid = sec === 'notif'
+    ? `<div class="msgr-lh"><div class="row"><b class="h2 grow">Уведомления</b>${S.notifs.some(n => !n.read) ? `<button class="lnk" data-a="readAllN">Прочитать все</button>` : ''}</div>${chipsNew('notifNew', S.notifTab === 'unread', 'Непрочитанные')}</div><div class="msgr-list">${notifRows()}</div>`
+    : sec === 'sup'
+      ? `<div class="msgr-lh"><b class="h2">Поддержка ZELDO</b><span class="m">Отвечаем с 9:00 до 21:00 по Москве. Спор по заказу — тоже сюда.</span></div><div class="msgr-list">${chatRow(supChatGet(), ch && ch.id)}</div>`
+      : `<div class="msgr-lh"><b class="h2">${role === 'exec' ? 'Я исполнитель' : 'Я заказчик'}</b>${chipsNew('chatNew', !!S.chatNew, 'Только новые')}<span class="search"><input data-in="chatQ|${role}" value="${esc(S.chatQ || '')}" placeholder="Имя или текст" autocomplete="off" aria-label="Поиск по диалогам">${ic('search', 22)}</span></div>
+    <div id="chatlist" class="msgr-list">${chatRows(role, ch && ch.id)}</div>`;
+  return `<div class="msgr">${msgRail(role, sec)}<div class="msgr-l">${mid}</div>${right}</div>`;
+}
+/* поддержка ZELDO (07.11): один диалог, виден в обеих ролях; в рабочей версии сообщения ходят через сервер (10-real.js) */
+function supChatGet() {
+  let ch = chatById('sup'); if (ch) return ch;
+  ch = { id: 'sup', support: true, with: 'Поддержка ZELDO', unread: 0, msgs: [{ mid: 'hello', from: 'sys', t: 'Напишите, что случилось. Поддержка ZELDO отвечает с 9:00 до 21:00 по Москве.', at: '' }] };
+  Object.defineProperty(ch, 'role', { get: () => (S.role === 'exec' ? 'exec' : 'cust'), set() {}, enumerable: true });
+  S.chats.push(ch); return ch;
+}
+const msgsRoot = () => (S.role === 'exec' ? 'e_msgs' : 'c_msgs');
+/* «Сообщения» в шапке и меню открывают переписки, даже если до этого смотрели уведомления */
+const tabMsec0 = A.tab; A.tab = n => { if (['c_msgs', 'e_msgs'].includes(n) && !S.keepMsec) S.msec = 'chats'; tabMsec0(n); };
+Object.assign(A, {
+  msec(k) {
+    if (k === 'cust' || k === 'exec') { S.msec = 'chats'; if (k !== S.role) { switchRole(k, ROLE_ROOT.msgs[k]); render('new'); } else if (cur().n === 'chat') replace(msgsRoot()); else render(); return; }
+    S.msec = k;
+    if (k === 'sup') { supChatGet(); if (cur().n === 'chat') replace('chat', { id: 'sup' }); else go('chat', { id: 'sup' }); return; }
+    if (cur().n === 'chat') replace(msgsRoot()); else if (['c_msgs', 'e_msgs'].includes(cur().n)) render(); else { S.keepMsec = true; A.tab(msgsRoot()); S.keepMsec = false; }
+  },
+  chatNew(v) { S.chatNew = !!v; render(); },
+  notifNew(v) { S.notifTab = v ? 'unread' : 'all'; render(); },
+  readAllN() { S.notifs.forEach(n => { n.read = true; }); render(); },
+  supportOpen() { A.msec('sup'); },
+});
 function chatListScreen(role) {
   const list = chatFilter(role);
   return {
     title: 'Сообщения', cls: 'msgp', deskBody: messenger(role, null), deskBare: true,
-    body: `${roleTabs('msgs')}${field('Поиск по диалогам', `<span class="search"><input data-in="chatQ|${role}" value="${esc(S.chatQ || '')}" placeholder="Имя или текст" autocomplete="off">${ic('search', 22)}</span>`)}
+    body: `${roleTabs('msgs')}${card(`<div class="list">${rl('Поддержка ZELDO', 'Отвечаем с 9:00 до 21:00', 'supportOpen', '', { icon: 'shield' })}${rl('Уведомления', (n => n ? `Новых: ${n}` : 'События по заказам')(unreadNotifs('cust') + unreadNotifs('exec')), 'go', 'notifs', { icon: 'bell' })}</div>`, 'c')}${field('Поиск по диалогам', `<span class="search"><input data-in="chatQ|${role}" value="${esc(S.chatQ || '')}" placeholder="Имя или текст" autocomplete="off">${ic('search', 22)}</span>`)}
       <div id="chatlist">${chatListHtml(list)}</div>
       <div class="m">Сообщения — это переписка. События по заказам приходят в колокольчик.</div>`,
   };
@@ -9467,6 +9520,7 @@ CH.chatFile = el => { const f = el.files[0]; if (!f) return; const ch = chatById
 /* имитация собеседника: исполнитель в ответ на вопрос присылает предложение, заказчик — просит назвать условия */
 function autoReply(ch) {
   if (ch.pair) return;
+  if (ch.support) { sim(1500, () => postMsg(ch, 'them', { t: 'Здравствуйте! Это поддержка ZELDO. Посмотрю ваш вопрос и отвечу здесь. В прототипе это пример ответа.' })); return; }
   const o = ch.role === 'cust' && canDeal(ch) && offerById(ch.offer); const vers = ch.msgs.filter(m => m.kind === 'version');
   if (o && !vers.length) {
     sim(1500, () => postMsg(ch, 'them', { t: 'Здравствуйте! Да, сделаю. Пришлю предложение с ценой и временем: примете его, и это станет заказом.' }));
@@ -10066,8 +10120,8 @@ function bellPanel() {
     ${btn(`Все уведомления ${ic('arr', 20, 2.2)}`, 'allNotifs', '', 'soft block')}${btn('Закрыть', 'closeAll', '', 'text block')}`;
 }
 Object.assign(A, {
-  bell() { S.panel = bellPanel(); S.sheet = null; renderOverlay(); },
-  openNotif(id) { const n = S.notifs.find(x => x.id === id); n.read = true; S.panel = null; S.sheet = null; A.go(n.to); },
+  bell() { if (VIEW() === 'desk') { S.panel = null; S.sheet = null; renderOverlay(); A.msec('notif'); return; } S.panel = bellPanel(); S.sheet = null; renderOverlay(); },
+  openNotif(id) { const n = S.notifs.find(x => x.id === id); n.read = true; S.panel = null; S.sheet = null; if (n.role && n.role !== S.role && n.role !== 'partner' && S.role !== 'guest') switchRole(n.role); A.go(n.to); },
   allNotifs() { S.panel = null; renderOverlay(); go('notifs'); },
   readAll() { notifsFor(S.role).forEach(n => { n.read = true; }); render(); },
   notifTab(v) { S.notifTab = v; render(); },
