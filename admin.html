@@ -114,11 +114,82 @@ label.f { display: grid; gap: 6px; font-size: 14px; color: var(--muted); }
   .kv { grid-template-columns: 1fr; }
   table { font-size: 14px; }
 }
+/* ===== правки 07.11: ровные таблицы, сводка, автопроверка ===== */
+table { table-layout: fixed; }
+th, td { overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
+td { padding: 12px 10px; height: 64px; }
+.c1, .c2 { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.c1 { line-height: 21px; } .c2 { color: var(--muted); font-size: 13px; line-height: 19px; margin-top: 1px; }
+.c2 .lnk, td .lnk { color: var(--act); font-size: 13px; font-weight: 600; }
+.r { text-align: right; justify-content: flex-end; } th .r { display: block; }
+.tw { padding: 4px 12px; overflow-x: auto; }
+.tw table { min-width: 860px; }
+tr.dim td { opacity: .62; }
+.tag { display: inline-block; padding: 0 8px; border-radius: 8px; font-size: 12px; line-height: 19px; font-weight: 600; background: var(--soft); color: var(--act-press); }
+.tag.ok { background: var(--ok-soft); color: var(--ok); } .tag.bad { background: var(--bad-soft); color: var(--bad); }
+.acts { display: flex; gap: 8px; flex-wrap: nowrap; }
+.w170 { width: 172px; } .w150 { width: 150px; } .wfix { width: 108px; }
+.stars { color: #E8A100; letter-spacing: 1px; } .st0 { color: var(--line2); }
+.clamp2, .clamp3 { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+.clamp2 { -webkit-line-clamp: 2; } .clamp3 { -webkit-line-clamp: 3; min-height: 66px; }
+.ell { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.nw { flex-wrap: nowrap; }
+.blk { margin-bottom: 26px; }
+.bh { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; } .bh h2 { margin: 0; }
+.att { padding: 6px; display: grid; }
+.att-i { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 14px; text-align: left; width: 100%; }
+.att-i + .att-i { border-top: 1px solid var(--line); border-radius: 0 0 14px 14px; }
+.att-i:hover { background: #F6F9FE; }
+.att-i b { display: block; font-size: 16px; }
+.att-n { flex: none; min-width: 44px; height: 44px; padding: 0 10px; border-radius: 14px; display: grid; place-items: center; font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.att-n.bad { background: var(--bad-soft); color: var(--bad); } .att-n.warn { background: var(--warn-soft); color: var(--warn); }
+.att-go { color: var(--act); flex: none; }
+.calm { display: flex; gap: 14px; align-items: center; } .calm b { display: block; }
+.calm-i { flex: none; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--ok-soft); color: var(--ok); }
+.kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.kpi { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: 2px; padding: 16px 18px; min-height: 148px; }
+.kl { font-size: 14px; font-weight: 600; color: var(--muted); }
+.kv { font-size: 28px; line-height: 36px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dl { font-size: 13px; line-height: 18px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.kh { font-size: 13px; line-height: 18px; color: var(--muted); margin-top: 6px; }
+.two-c { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+.chart .ch-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.ch-plot { position: relative; display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 2px; height: 150px; align-items: end; border-bottom: 1px solid var(--line2); }
+.ch-col { position: relative; height: 100%; display: flex; align-items: flex-end; justify-content: center; outline: none; }
+.ch-col i { display: block; width: 62%; max-width: 24px; background: var(--act); border-radius: 4px 4px 0 0; }
+.ch-col:hover i, .ch-col:focus-visible i { background: var(--act-press); }
+.ch-col:hover::before, .ch-col:focus-visible::before { content: ''; position: absolute; inset: 0; background: rgba(11,108,242,.06); border-radius: 6px; }
+.ch-tip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); white-space: nowrap; background: var(--ink); color: #fff; font-size: 13px; line-height: 18px; padding: 5px 9px; border-radius: 8px; z-index: 2; pointer-events: none; }
+.ch-col:first-child .ch-tip { left: 0; transform: none; } .ch-col:last-child .ch-tip { left: auto; right: 0; transform: none; }
+.ch-col:hover .ch-tip, .ch-col:focus-visible .ch-tip { display: block; }
+.ch-x { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; margin-top: 6px; }
+.pipe { display: grid; grid-template-columns: repeat(11, auto); align-items: center; gap: 6px; overflow-x: auto; }
+.pipe-i { display: grid; justify-items: start; gap: 2px; padding: 12px 14px; border-radius: 14px; background: #F6F9FE; box-shadow: inset 0 0 0 1px var(--line); text-align: left; min-width: 112px; }
+.pipe-i:hover { box-shadow: inset 0 0 0 2px var(--act); }
+.pipe-i b { font-size: 24px; line-height: 30px; font-variant-numeric: tabular-nums; } .pipe-i span { font-size: 13px; line-height: 17px; color: var(--muted); }
+.pipe-i.bad b { color: var(--bad); } .pipe-i.grey b { color: var(--muted); }
+.pipe-a { color: var(--line2); display: grid; place-items: center; }
+.pipe-side { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.funnel { display: grid; gap: 10px; margin-bottom: 14px; }
+.fn { display: grid; grid-template-columns: 150px minmax(0, 1fr) 40px 48px; gap: 10px; align-items: center; font-size: 14px; }
+.fn-b { height: 12px; border-radius: 6px; background: #EEF2F8; overflow: hidden; } .fn-b i { display: block; height: 100%; background: var(--act); border-radius: 6px; }
+.fn b { text-align: right; }
+.kv2 { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; font-size: 15px; } .kv2 span { color: var(--muted); } .kv2 b { text-align: right; font-variant-numeric: tabular-nums; }
+.note { font-size: 14px; line-height: 21px; color: var(--muted); margin-bottom: 14px; } .note b { color: var(--ink); }
+.pc { display: flex; flex-direction: column; gap: 10px; }
+.pc .ph { display: grid; place-items: center; }
+.pc-act { margin-top: auto; flex-wrap: nowrap; }
+.auto { display: grid; gap: 6px; padding: 10px 12px; border-radius: 12px; background: #F6F9FE; font-size: 14px; line-height: 19px; min-height: 42px; }
+.ar { display: flex; gap: 8px; align-items: flex-start; }
+.ai { flex: none; width: 20px; height: 20px; display: grid; place-items: center; }
+.ai.ok { color: var(--ok); } .ai.warn { color: #B26B00; } .ai.bad { color: var(--bad); } .ai.info { color: var(--muted); }
+@media (max-width: 1200px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 860px) { .two-c { grid-template-columns: 1fr; } .fn { grid-template-columns: 110px minmax(0, 1fr) 32px 40px; } }
 @media (prefers-reduced-motion: reduce) { .drawer { animation: none; } .sw input, .sw input::after { transition: none; } }
 </style>
 </head>
 <body>
-<div style="position:sticky;top:0;z-index:30;background:#FFF2DC;color:#8A5300;padding:10px 16px;font:500 15px/21px Onest,system-ui,sans-serif;text-align:center">Пример админки: данные выдуманы, кнопки работают, но ничего никуда не уходит. Настоящая админка — в рабочей версии.</div><div id="root"></div>
+<style>nav{top:41px!important;height:calc(100vh - 41px)!important}@media (max-width:860px){nav{top:0!important;height:auto!important}}</style><div style="position:sticky;top:0;z-index:30;height:41px;box-sizing:border-box;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#FFF2DC;color:#8A5300;padding:10px 16px;font:500 15px/21px Onest,system-ui,sans-serif;text-align:center">Пример админки: данные выдуманы, кнопки работают, но ничего никуда не уходит. Настоящая админка — в рабочей версии.</div><div id="root"></div>
 <script>/* админка-пример для сайта (07.11.2026): Максим смотрит админку, когда ноутбук владельца выключен.
    Сервера нет: ответы подставляет этот файл, данные выдуманы, все действия меняют только эту страницу. Собирает z2/build.py → сайт/admin.html */
 window.ZDEMO = (() => {
@@ -164,9 +235,17 @@ window.ZDEMO = (() => {
   const rate = (id, by) => { const l = R.filter(r => r.target === id && r.by === by && !r.hidden); return l.length ? [Math.round(l.reduce((s, r) => s + r.stars, 0) / l.length * 10) / 10, l.length] : [0, 0]; };
   const HOW = { refund: 'деньги возвращаются заказчику', payout: 'деньги уходят исполнителю', split: 'сумма делится', rework: 'исполнитель доделывает работу', cancel: 'заказ отменён администратором' };
   const err = (status, m) => { throw Object.assign(new Error(m), { status }); };
-  const summary = () => { const by = {}; let gmv = 0; O.forEach(o => { by[o.status] = (by[o.status] || 0) + 1; if (!['request', 'confirmed', 'cancel'].includes(o.status)) gmv += o.data.total; });
-    return { users: { all: 6, today: 1, week: 6, blocked: Object.values(U).filter(u => u.blocked).length }, cards: { all: C.length, review: C.filter(c => c.mod === 'review').length, back: C.filter(c => c.mod === 'back').length }, orders: by, gmv, gmvWeek: gmv,
-      reqs: { week: 4, noOffers: 1, firstMin: 38, chooseMin: 190 }, disputes: by.dispute || 0, support: Object.values(T).filter(t => t.status === 'new').length }; };
+  const summary = () => { const by = {}; O.forEach(o => { by[o.status] = (by[o.status] || 0) + 1; });
+    const days = []; const ord = [1, 0, 2, 1, 3, 2, 4, 2, 5, 3, 6, 4, 5, 7], usr = [3, 2, 4, 1, 5, 3, 6, 2, 4, 5, 3, 6, 4, 2];
+    for (let i = 13; i >= 0; i--) { const t0 = new Date(now - i * D); t0.setHours(0, 0, 0, 0); days.push({ d: t0.getTime(), orders: ord[13 - i], users: usr[13 - i] }); }
+    const dsp = O.filter(o => o.status === 'dispute'); const sup = Object.values(T).filter(x => x.status === 'new');
+    return { attention: { disputes: { n: dsp.length, oldest: dsp.length ? Math.min(...dsp.map(o => o.updated)) : null }, support: { n: sup.length, oldest: sup.length ? sup[0].msgs[sup[0].msgs.length - 1].at : null }, cards: { n: C.filter(c => c.mod === 'review').length, oldest: now - 30 * 60e3 }, late: { n: 0 }, wait: { n: 0 } },
+      week: { now: { users: 24, orders: 31, paid: 26, done: 19, gmv: 118400, fee: 7300, cancel: 3, disputes: 1 }, prev: { users: 17, orders: 22, paid: 18, done: 14, gmv: 86500, fee: 4100, cancel: 2, disputes: 2 } },
+      days, pipeline: by, totals: { users: 64, execs: 12, custs: 41, cards: 27, blocked: Object.values(U).filter(u => u.blocked).length },
+      reqs: { week: 11, withOffers: 9, chosen: 7, firstMin: 38, chooseMin: 190 }, quality: { rating: 4.7, ratings: 38, reviewsWeek: 12 }, money: true }; };
+  C[0].auto = { hard: [], soft: ['Фото похоже на фото другого исполнителя: «Сборка шкафов недорого», Сергей Л.'], info: [], at: now - 30 * 60e3 };
+  C[1].auto = { hard: [], soft: [], info: [], at: now - 4 * D };
+  C[2].auto = { hard: [], soft: [], info: ['Были контакты — скрыты автоматически'], at: now - D };
   return async function (url, b) {
     await new Promise(r => setTimeout(r, 120));
     const u = new URL(url, location.href); const p = u.pathname.replace(/^.*\/api\//, '/api/'); const q = u.searchParams;
@@ -242,47 +321,109 @@ async function load(sec) {
 async function counts() { if (!can('summary')) return; try { S.data.summary = await api('/api/admin/summary'); render(); } catch (e) { /* догоним позже */ } }
 
 /* ---------- экраны ---------- */
+/* ---------- сводка (07.11, владелец: «непонятно, что где… надо поподробнее и качественнее») ----------
+   сверху — что требует действий сейчас; дальше неделя в цифрах с пояснениями, заказы и люди по дням, где сейчас заказы, заявки, люди и качество */
+const ago = t => { if (!t) return ''; const m = Math.max(1, Math.round((Date.now() - t) / 60e3)); return m < 60 ? `${m} мин` : m < 1440 ? `${Math.round(m / 60)} ч` : `${Math.round(m / 1440)} дн`; };
+const num = n => n == null ? '—' : Math.round(n).toLocaleString('ru-RU');
+const mins = m => m == null ? '—' : m < 60 ? `${m} мин` : `${String(Math.round(m / 6) / 10).replace('.', ',')} ч`;
+const ICO = {
+  ok: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  warn: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.5v.01"/></svg>',
+  bad: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  info: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/></svg>',
+  arr: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+};
+/* разница с прошлой неделей: стрелка и число, без оценки «хорошо/плохо» — рост споров не радость */
+const delta = (a, b) => { if (a == null || b == null) return ''; const d = a - b; return d === 0 ? '<span class="dl">как на прошлой неделе</span>' : `<span class="dl">${d > 0 ? '↑' : '↓'} ${num(Math.abs(d))} к прошлой неделе</span>`; };
+function bars(list, key, label) {
+  const max = Math.max(1, ...list.map(x => x[key])); const sum = list.reduce((s, x) => s + x[key], 0);
+  const dd = t => new Date(t).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+  return `<div class="chart"><div class="ch-h"><b>${label}</b><span class="m">за 14 дней: ${num(sum)}</span></div>
+    <div class="ch-plot" role="img" aria-label="${label} по дням за 14 дней, всего ${sum}">${list.map(x => `<span class="ch-col" tabindex="0" aria-label="${dd(x.d)}: ${x[key]}"><i style="height:${x[key] ? Math.max(4, Math.round(x[key] / max * 100)) : 0}%"></i><span class="ch-tip"><b>${num(x[key])}</b> ${dd(x.d)}</span></span>`).join('')}</div>
+    <div class="ch-x"><span>${dd(list[0].d)}</span><span>сегодня</span></div></div>`;
+}
+const STAGES = [['request', 'Ждут подтверждения'], ['confirmed', 'Ждут оплаты'], ['paid', 'Оплачены'], ['work', 'В работе'], ['result', 'Работа сдана'], ['done', 'Завершены']];
 function vSummary() {
   const s = S.data.summary; if (!s) return '<div class="empty">Загружаем…</div>';
-  const st = Object.entries(s.orders || {}); const max = Math.max(1, ...st.map(x => x[1]));
-  const mins = m => m == null ? '—' : m < 60 ? `${m} мин` : `${String(Math.round(m / 6) / 10).replace('.', ',')} ч`;
-  return `<div class="grid tiles">
-    <div class="card tile"><div class="v">${s.users.all}</div><div class="l">людей, за неделю +${s.users.week}, сегодня +${s.users.today}</div></div>
-    <div class="card tile"><div class="v">${s.cards.all}</div><div class="l">карточек${s.cards.review ? `, на проверке ${s.cards.review}` : ''}</div></div>
-    <div class="card tile ${s.disputes ? 'warn' : ''}"><div class="v">${s.disputes}</div><div class="l">открытых споров</div></div>
-    <div class="card tile ${s.support ? 'warn' : ''}"><div class="v">${s.support}</div><div class="l">новых обращений в поддержку</div></div>
-    ${s.gmv != null ? `<div class="card tile"><div class="v">${rub(s.gmvWeek)}</div><div class="l">сделок за неделю, всего ${rub(s.gmv)}</div></div>` : ''}
-  </div>
-  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))">
-    <div class="card"><h2>Заказы по статусам</h2>${st.length ? `<div class="bars">${st.map(([k, n]) => `<div class="bar"><span>${esc((ST[k] || [k])[0])}</span><i style="width:${Math.round(n / max * 100)}%"></i><b class="num">${n}</b></div>`).join('')}</div>` : '<div class="m">Заказов пока нет</div>'}</div>
-    <div class="card"><h2>Заявки всем, за неделю</h2><div class="kv"><span>Размещено</span><b>${s.reqs.week}</b><span>Без откликов</span><b>${s.reqs.noOffers}${s.reqs.week ? ` (${Math.round(s.reqs.noOffers / s.reqs.week * 100)} %)` : ''}</b><span>До первого отклика</span><b>${mins(s.reqs.firstMin)}</b><span>До выбора исполнителя</span><b>${mins(s.reqs.chooseMin)}</b></div><p class="m">Метрики из раздела 6 файла Максима. Сумма сделок — по тестовой оплате.</p></div>
+  const a = s.attention; const w = s.week.now, p = s.week.prev;
+  const att = [
+    [a.disputes.n, 'Споры без решения', a.disputes.n ? `Самый давний ждёт ${ago(a.disputes.oldest)}. Деньги заморожены, пока вы не решите.` : '', 'sec', 'disputes', 'bad'],
+    [a.support.n, 'Обращения без ответа', a.support.n ? `Самое давнее ждёт ${ago(a.support.oldest)}.` : '', 'sec', 'support', 'warn'],
+    [a.cards.n, 'Карточки ждут модератора', a.cards.n ? `Автопроверка нашла замечания. Самая давняя ждёт ${ago(a.cards.oldest)}.` : '', 'goSec', 'cards|review', 'warn'],
+    [a.late.n, 'Исполнитель не начал вовремя', 'Время начала прошло больше часа назад, а работа не начата.', 'goSec', 'orders|paid', 'warn'],
+    [a.wait.n, 'Заказчик не принимает работу', 'Работа сдана больше суток назад.', 'goSec', 'orders|result', 'warn'],
+  ].filter(x => x[0]);
+  const tile = (v, label, hint, d, k) => `<div class="card kpi"><span class="kl">${label}</span><b class="kv">${v}</b>${d}<span class="kh">${hint}</span></div>`;
+  const st = s.pipeline || {};
+  return `<section class="blk"><div class="bh"><h2>Требует внимания</h2></div>${att.length ? `<div class="card att">${att.map(([n, t, sub, act, v, k]) => `<button class="att-i" data-a="${act}" data-v="${v}"><span class="att-n ${k}">${n}</span><span class="grow"><b>${t}</b><span class="m">${sub}</span></span><span class="att-go">${ICO.arr}</span></button>`).join('')}</div>`
+      : `<div class="card calm"><span class="calm-i">${ICO.ok}</span><span><b>Всё спокойно</b><span class="m">Споров, обращений без ответа и карточек на проверке нет. Заказы идут по расписанию.</span></span></div>`}</section>
+  <section class="blk"><div class="bh"><h2>Неделя в цифрах</h2><span class="m">Последние 7 дней. Ниже каждой цифры — разница с прошлой неделей.</span></div>
+    <div class="grid kpis">
+      ${tile(num(w.users), 'Новые люди', 'Зарегистрировались и указали имя', delta(w.users, p.users))}
+      ${tile(num(w.orders), 'Новые заказы', 'Оформлены за неделю, в любом статусе', delta(w.orders, p.orders))}
+      ${tile(num(w.paid), 'Оплачено', 'Из новых заказов дошли до оплаты', delta(w.paid, p.paid))}
+      ${tile(num(w.done), 'Завершено', 'Заказчик принял работу', delta(w.done, p.done))}
+      ${s.money ? tile(rub(w.gmv), 'Оборот', 'Сумма оплаченных заказов. Пока тестовая оплата', delta(w.gmv, p.gmv)) : ''}
+      ${s.money ? tile(rub(w.fee), 'Доход ZELDO', '10 % с завершённых заказов, первые три заказа исполнителя без комиссии', delta(w.fee, p.fee)) : ''}
+      ${tile(num(w.cancel), 'Отменено', 'Отменены до начала или по неявке', delta(w.cancel, p.cancel))}
+      ${tile(num(w.disputes), 'Споры', 'Открыто споров по заказам недели', delta(w.disputes, p.disputes))}
+    </div></section>
+  <section class="blk"><div class="bh"><h2>По дням</h2><span class="m">Наведите на столбик, чтобы увидеть число за день.</span></div>
+    <div class="grid two-c"><div class="card">${bars(s.days, 'orders', 'Новые заказы')}</div><div class="card">${bars(s.days, 'users', 'Новые люди')}</div></div></section>
+  <section class="blk"><div class="bh"><h2>Где сейчас заказы</h2><span class="m">Все заказы по шагам. Нажмите на шаг, чтобы открыть список.</span></div>
+    <div class="card"><div class="pipe">${STAGES.map(([k, t], i) => `${i ? `<span class="pipe-a" aria-hidden="true">${ICO.arr}</span>` : ''}<button class="pipe-i" data-a="goSec" data-v="orders|${k}"><b>${num(st[k] || 0)}</b><span>${t}</span></button>`).join('')}</div>
+      <div class="pipe-side"><button class="pipe-i bad" data-a="goSec" data-v="orders|dispute"><b>${num(st.dispute || 0)}</b><span>Спор</span></button><button class="pipe-i grey" data-a="goSec" data-v="orders|cancel"><b>${num(st.cancel || 0)}</b><span>Отменены</span></button><button class="pipe-i" data-a="goSec" data-v="orders|rework"><b>${num(st.rework || 0)}</b><span>На доработке</span></button></div></div></section>
+  <div class="grid two-c">
+    <section class="blk"><div class="bh"><h2>Заявки всем, за неделю</h2></div><div class="card">
+      <div class="funnel">${[['Размещено', s.reqs.week], ['Получили отклики', s.reqs.withOffers], ['Выбран исполнитель', s.reqs.chosen]].map(([t, n], i) => `<div class="fn"><span class="fn-l">${t}</span><span class="fn-b"><i style="width:${s.reqs.week ? Math.max(n ? 3 : 0, Math.round(n / s.reqs.week * 100)) : 0}%"></i></span><b class="num">${num(n)}</b>${i && s.reqs.week ? `<span class="m num">${Math.round(n / s.reqs.week * 100)} %</span>` : '<span></span>'}</div>`).join('')}</div>
+      <div class="kv2"><span>До первого отклика</span><b>${mins(s.reqs.firstMin)}</b><span>До выбора исполнителя</span><b>${mins(s.reqs.chooseMin)}</b></div>
+      <p class="m">Чем быстрее первый отклик, тем реже заявка остаётся без исполнителя.</p></div></section>
+    <section class="blk"><div class="bh"><h2>Люди и качество</h2></div><div class="card"><div class="kv2">
+      <span>Всего людей</span><b>${num(s.totals.users)}</b><span>Исполнителей с карточками</span><b>${num(s.totals.execs)}</b><span>Заказчиков с заказами</span><b>${num(s.totals.custs)}</b><span>Карточек в каталоге</span><b>${num(s.totals.cards)}</b>
+      <span>Средняя оценка исполнителей</span><b>${s.quality.rating ? `★ ${String(s.quality.rating).replace('.', ',')} · ${num(s.quality.ratings)} отз.` : 'отзывов пока нет'}</b><span>Отзывов за неделю</span><b>${num(s.quality.reviewsWeek)}</b><span>Заблокировано</span><b>${num(s.totals.blocked)}</b></div></div></section>
   </div>`;
 }
-const orderTable = (l, empty) => !l ? '<div class="empty">Загружаем…</div>' : l.length ? `<div class="card" style="padding:6px 10px"><table><thead><tr><th>№</th><th>Услуга</th><th>Заказчик</th><th>Исполнитель</th><th>Сумма</th><th>Статус</th><th>Изменён</th></tr></thead><tbody>${l.map(o => `<tr class="click" data-a="openOrder" data-v="${o.id}"><td class="num">${o.id}</td><td>${esc(o.svc)}</td><td>${esc(o.client)}</td><td>${esc(o.exec)}</td><td class="num">${rub(o.total)}</td><td>${stPill(o.status)}</td><td class="m num">${dt(o.updated)}</td></tr>`).join('')}</tbody></table></div>` : `<div class="card empty">${empty}</div>`;
+/* таблицы (07.11, «ничего не съезжало, всё ровно»): фиксированные колонки, одна строка на ячейку, длинное — многоточием, кнопки всегда в одну линию */
+const tbl = (cols, head, rows, cls = '') => `<div class="card tw"><table class="${cls}"><colgroup>${cols.map(c => `<col${c ? ` style="width:${c}"` : ''}>`).join('')}</colgroup><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
+const cell = (main, sub) => `<span class="c1">${main}</span>${sub != null ? `<span class="c2">${sub}</span>` : ''}`;
+const orderTable = (l, empty) => !l ? '<div class="empty">Загружаем…</div>' : l.length ? tbl(['72px', '', '17%', '17%', '112px', '190px', '128px'], ['№', 'Услуга', 'Заказчик', 'Исполнитель', '<span class="r">Сумма</span>', 'Статус', 'Изменён'],
+  l.map(o => `<tr class="click" data-a="openOrder" data-v="${o.id}"><td class="num">${o.id}</td><td>${cell(esc(o.svc), o.date ? esc([day(o.date), o.time].filter(Boolean).join(', ')) : '')}</td><td>${cell(esc(o.client))}</td><td>${cell(esc(o.exec))}</td><td class="num r">${rub(o.total)}</td><td>${stPill(o.status)}</td><td class="m num">${dt(o.updated)}</td></tr>`)) : `<div class="card empty">${empty}</div>`;
 const vDisputes = () => orderTable(S.data.disputes, 'Открытых споров нет');
 function vOrders() {
   const f = S.flt.orders || '';
-  return `<div class="chips">${[['', 'Все'], ['paid', 'Оплачены'], ['work', 'В работе'], ['result', 'Ждут приёмки'], ['dispute', 'Спор'], ['done', 'Завершены'], ['cancel', 'Отменены'], ['request', 'Ждут подтверждения'], ['confirmed', 'Ждут оплаты']].map(([k, t]) => `<button class="chip ${f === k ? 'on' : ''}" data-a="fltOrders" data-v="${k}">${t}</button>`).join('')}</div>${orderTable(S.data.orders, 'Таких заказов нет')}`;
+  return `<div class="chips">${[['', 'Все'], ['request', 'Ждут подтверждения'], ['confirmed', 'Ждут оплаты'], ['paid', 'Оплачены'], ['work', 'В работе'], ['result', 'Работа сдана'], ['rework', 'На доработке'], ['dispute', 'Спор'], ['done', 'Завершены'], ['cancel', 'Отменены']].map(([k, t]) => `<button class="chip ${f === k ? 'on' : ''}" data-a="fltOrders" data-v="${k}">${t}</button>`).join('')}</div>${orderTable(S.data.orders, 'Таких заказов нет')}`;
+}
+/* карточки: результат автопроверки виден на каждой; все карточки одной высоты */
+function autoHtml(au) {
+  au = au || {}; const rows = [...(au.hard || []).map(t => ['bad', t]), ...(au.soft || []).map(t => ['warn', t]), ...(au.info || []).map(t => ['info', t])];
+  if (!au.at) return '<div class="auto"><span class="ai info">' + ICO.info + '</span><span class="m">Автопроверки ещё не было</span></div>';
+  return rows.length ? `<div class="auto">${rows.map(([k, t]) => `<div class="ar"><span class="ai ${k}">${ICO[k]}</span><span>${esc(t)}</span></div>`).join('')}</div>` : `<div class="auto"><div class="ar"><span class="ai ok">${ICO.ok}</span><span>Автопроверка: замечаний нет</span></div></div>`;
 }
 function vCards() {
   const f = S.flt.cards || ''; const l = S.data.cards;
-  const head = `<div class="row" style="margin-bottom:14px"><div class="chips grow" style="margin:0">${[['', 'Все'], ['review', 'На проверке'], ['back', 'Возвращены']].map(([k, t]) => `<button class="chip ${f === k ? 'on' : ''}" data-a="fltCards" data-v="${k}">${t}</button>`).join('')}</div>
-    ${can('settings') ? `<label class="sw"><input type="checkbox" data-ch="premod" ${S.me.premod ? 'checked' : ''}> Проверять карточки до публикации</label>` : `<span class="m">${S.me.premod ? 'Карточки проверяются до публикации' : 'Карточки публикуются сразу'}</span>`}</div>`;
+  const head = `<div class="row" style="margin-bottom:14px"><div class="chips grow" style="margin:0">${[['', 'Все'], ['review', 'Ждут модератора'], ['back', 'Возвращены'], ['ok', 'В каталоге']].map(([k, t]) => `<button class="chip ${f === k ? 'on' : ''}" data-a="fltCards" data-v="${k}">${t}</button>`).join('')}</div>
+    ${can('settings') ? `<label class="sw"><input type="checkbox" data-ch="premod" ${S.me.premod ? 'checked' : ''}> Проверять вручную все новые карточки</label>` : ''}</div>
+    <div class="card note"><b>Как проверяются карточки.</b> Сервер сам смотрит каждую новую или изменённую карточку, без ИИ и без платы. Грубые слова и запрещённые услуги — сразу на исправление с причиной. Фото, похожее на фото другого исполнителя, текст капслоком, повторы знаков, очень короткое описание, странная цена — сюда, к модератору. Остальные публикуются сами.</div>`;
   if (!l) return head + '<div class="empty">Загружаем…</div>';
-  return head + (l.length ? `<div class="grid cards">${l.map(c => `<div class="card pc"><div class="ph" ${c.ph ? `style="background-image:url('${esc(c.ph)}')"` : ''}></div>
-    <div class="row"><b class="grow">${esc(c.title)}</b>${c.mod === 'review' ? '<span class="pill warn">На проверке</span>' : c.mod === 'back' ? '<span class="pill bad">Возвращена</span>' : c.hidden ? '<span class="pill grey">Скрыта автором</span>' : '<span class="pill ok">В каталоге</span>'}</div>
-    <div class="m">${esc(c.svc)} · ${esc(c.who)}${c.from ? ` · от ${rub(c.from)}${c.unit ? ' ' + esc(c.unit) : ''}` : ''}</div><div>${esc(c.desc)}</div>${c.inc.length ? `<div class="m">Входит: ${esc(c.inc.join(', '))}</div>` : ''}
-    ${c.reason ? `<div class="m"><b>Причина:</b> ${esc(c.reason)}</div>` : ''}
-    <div class="row">${c.mod !== 'ok' ? `<button class="btn sm" data-a="cardOk" data-v="${esc(c.id)}">Опубликовать</button>` : ''}${c.mod !== 'back' ? `<button class="btn sm danger" data-a="cardBack" data-v="${esc(c.id)}">Вернуть на исправление</button>` : ''}</div></div>`).join('')}</div>` : '<div class="card empty">Карточек нет</div>');
+  return head + (l.length ? `<div class="grid cards">${l.map(c => `<div class="card pc"><div class="ph" ${c.ph ? `style="background-image:url('${esc(c.ph)}')"` : ''}>${c.ph ? '' : '<span class="m">Без своих фото</span>'}</div>
+    <div class="row nw"><b class="grow ell">${esc(c.title)}</b>${c.mod === 'review' ? '<span class="pill warn">Ждёт модератора</span>' : c.mod === 'back' ? '<span class="pill bad">Возвращена</span>' : c.hidden ? '<span class="pill grey">Скрыта автором</span>' : '<span class="pill ok">В каталоге</span>'}</div>
+    <div class="m ell">${esc(c.svc)} · ${esc(c.who)}${c.from ? ` · от ${rub(c.from)}${c.unit ? ' ' + esc(c.unit) : ''}` : ''}</div><div class="clamp3">${esc(c.desc)}</div>
+    ${autoHtml(c.auto)}${c.reason ? `<div class="m clamp2"><b>Причина возврата:</b> ${esc(c.reason)}</div>` : ''}
+    <div class="row pc-act">${c.mod !== 'ok' ? `<button class="btn sm" data-a="cardOk" data-v="${esc(c.id)}">Опубликовать</button>` : ''}${c.mod !== 'back' ? `<button class="btn sm danger" data-a="cardBack" data-v="${esc(c.id)}">Вернуть на исправление</button>` : ''}</div></div>`).join('')}</div>` : '<div class="card empty">Карточек нет</div>');
 }
 function vReviews() {
   const l = S.data.reviews; if (!l) return '<div class="empty">Загружаем…</div>';
-  return l.length ? `<div class="card" style="padding:6px 10px"><table><thead><tr><th>Кто</th><th>О ком</th><th>Оценка</th><th>Текст</th><th>Заказ</th><th></th></tr></thead><tbody>${l.map(r => `<tr><td>${esc(r.authorName)}<div class="m">${r.by === 'c' ? 'заказчик' : 'исполнитель'}</div></td><td>${esc(r.targetName)}</td><td class="num">${'★'.repeat(r.stars)}</td><td>${esc(r.text || (r.tags || []).join(', '))}${r.hidden ? `<div class="m"><span class="pill grey">Скрыт</span> ${esc(r.hideReason || '')}</div>` : ''}</td><td class="num">${r.order}</td><td>${r.hidden ? `<button class="btn sm soft" data-a="revShow" data-v="${r.order}|${r.by}">Вернуть</button>` : `<button class="btn sm danger" data-a="revHide" data-v="${r.order}|${r.by}">Скрыть</button>`}</td></tr>`).join('')}</tbody></table></div>` : '<div class="card empty">Отзывов пока нет</div>';
+  return l.length ? tbl(['19%', '17%', '108px', '', '84px', '132px'], ['Кто', 'О ком', 'Оценка', 'Текст', 'Заказ', ''],
+    l.map(r => `<tr class="${r.hidden ? 'dim' : ''}"><td>${cell(esc(r.authorName), r.by === 'c' ? 'заказчик' : 'исполнитель')}</td><td>${cell(esc(r.targetName))}</td><td class="num stars">${'★'.repeat(r.stars)}<span class="st0">${'★'.repeat(5 - r.stars)}</span></td><td><span class="clamp2">${esc(r.text || (r.tags || []).join(', ') || '—')}</span>${r.hidden ? `<span class="c2">Скрыт: ${esc(r.hideReason || '')}</span>` : ''}</td><td class="num">${r.order}</td><td class="r">${r.hidden ? `<button class="btn sm soft wfix" data-a="revShow" data-v="${r.order}|${r.by}">Вернуть</button>` : `<button class="btn sm danger wfix" data-a="revHide" data-v="${r.order}|${r.by}">Скрыть</button>`}</td></tr>`)) : '<div class="card empty">Отзывов пока нет</div>';
 }
 function vUsers() {
   const l = S.data.users;
   return `<div class="row" style="margin-bottom:14px"><input class="in grow" style="max-width:420px" id="uq" placeholder="Имя или точная почта" value="${esc(S.flt.users || '')}" data-enter="userFind"><button class="btn" data-a="userFind">Найти</button></div>
-  ${!l ? '<div class="empty">Загружаем…</div>' : l.length ? `<div class="card" style="padding:6px 10px"><table><thead><tr><th>№</th><th>Имя</th><th>Почта</th><th>С нами с</th><th>Карточек</th><th>Заказов</th><th>Рейтинг</th><th>Отметки</th><th></th></tr></thead><tbody>${l.map(x => `<tr><td class="num">${x.id}</td><td>${esc(x.name)}${x.staff ? `<div class="m">${esc(S.me.roles[x.staff])}</div>` : ''}</td><td class="num">${esc(x.email)}${can('email') ? ` <button class="btn sm soft" data-a="showEmail" data-v="${x.id}" title="Просмотр попадёт в журнал">Показать</button>` : ''}</td><td class="m num">${dt(x.created)}</td><td class="num">${x.cards}</td><td class="num">${x.orders}</td><td class="num">${x.ex[1] ? `★ ${x.ex[0]} (${x.ex[1]})` : '—'}</td><td>${x.verified ? '<span class="pill ok">Проверен</span> ' : ''}${x.blocked ? '<span class="pill bad">Заблокирован</span>' : ''}</td><td><div class="row">${can('verify') ? `<button class="btn sm soft" data-a="userVer" data-v="${x.id}|${x.verified ? 0 : 1}">${x.verified ? 'Снять «Проверен»' : 'Отметить «Проверен»'}</button>` : ''}${can('block') ? `<button class="btn sm ${x.blocked ? 'soft' : 'danger'}" data-a="userBlock" data-v="${x.id}|${x.blocked ? 0 : 1}">${x.blocked ? 'Разблокировать' : 'Заблокировать'}</button>` : ''}</div></td></tr>`).join('')}</tbody></table></div>` : '<div class="card empty">Никого не нашли</div>'}`;
+  ${!l ? '<div class="empty">Загружаем…</div>' : l.length ? tbl(['48px', '', '200px', '118px', '84px', '76px', '104px', '340px'], ['№', 'Человек', 'Почта', 'С нами с', '<span class="r">Карточек</span>', '<span class="r">Заказов</span>', 'Рейтинг', 'Действия'],
+    l.map(x => `<tr class="${x.blocked ? 'dim' : ''}"><td class="num">${x.id}</td><td>${cell(esc(x.name), [x.staff ? esc(S.me.roles[x.staff]) : '', x.verified ? '<span class="tag ok">Проверен</span>' : '', x.blocked ? '<span class="tag bad">Заблокирован</span>' : ''].filter(Boolean).join(' ') || (x.cards ? 'исполнитель' : 'заказчик'))}</td>
+      <td>${cell(esc(x.email), can('email') ? `<button class="lnk" data-a="showEmail" data-v="${x.id}" title="Просмотр попадёт в журнал">показать целиком</button>` : '')}</td><td class="m num">${dt(x.created)}</td><td class="num r">${x.cards}</td><td class="num r">${x.orders}</td><td class="num">${x.ex[1] ? `★ ${String(x.ex[0]).replace('.', ',')} <span class="m">(${x.ex[1]})</span>` : '<span class="m">—</span>'}</td>
+      <td><div class="acts">${can('verify') ? `<button class="btn sm soft w170" data-a="userVer" data-v="${x.id}|${x.verified ? 0 : 1}">${x.verified ? 'Снять «Проверен»' : 'Отметить «Проверен»'}</button>` : ''}${can('block') && x.staff !== 'admin' ? `<button class="btn sm ${x.blocked ? 'soft' : 'danger'} w150" data-a="userBlock" data-v="${x.id}|${x.blocked ? 0 : 1}">${x.blocked ? 'Разблокировать' : 'Заблокировать'}</button>` : ''}</div></td></tr>`))
+    : '<div class="card empty">Никого не нашли</div>'}`;
 }
 function vSupport() {
   const l = S.data.tickets; if (!l) return '<div class="empty">Загружаем…</div>';
@@ -295,11 +436,11 @@ function vSupport() {
 function vStaff() {
   const l = S.data.staff; if (!l) return '<div class="empty">Загружаем…</div>';
   return `<div class="card" style="margin-bottom:14px"><h2>Добавить сотрудника</h2><div class="row"><input class="in" style="max-width:320px" id="sfe" placeholder="Почта, с которой он входит"><select class="in" id="sfr" style="max-width:200px">${Object.entries(S.me.roles).map(([k, t]) => `<option value="${k}">${t}</option>`).join('')}</select><button class="btn" data-a="staffAdd">Добавить</button></div><p class="m">Человек входит в админку той же почтой по адресу /admin. Роль можно сменить, добавив его ещё раз.</p></div>
-  <div class="card" style="padding:6px 10px"><table><thead><tr><th>Почта</th><th>Имя в ZELDO</th><th>Роль</th><th>С</th><th></th></tr></thead><tbody>${l.map(s => `<tr><td>${esc(s.email)}</td><td>${esc(s.name || 'ещё не входил')}</td><td>${esc(S.me.roles[s.role] || s.role)}</td><td class="m num">${dt(s.added)}</td><td><button class="btn sm danger" data-a="staffDel" data-v="${esc(s.email)}">Убрать доступ</button></td></tr>`).join('')}</tbody></table></div>
-  <div class="card" style="margin-top:14px"><h2>Что может каждая роль</h2><div class="kv"><span>Админ</span><b>Всё: заказы, пользователи, споры, модерация, деньги, сотрудники</b><span>Модератор</span><b>Карточки, отзывы, профили, споры. Без денег</b><span>Поддержка</span><b>Обращения, просмотр заказов, ответы. Без денег</b><span>Аналитик</span><b>Только сводка</b></div></div>`;
+  ${tbl(['30%', '', '16%', '128px', '170px'], ['Почта', 'Имя в ZELDO', 'Роль', 'С', ''], l.map(s => `<tr><td>${cell(esc(s.email))}</td><td>${cell(esc(s.name || 'ещё не входил'))}</td><td>${cell(esc(S.me.roles[s.role] || s.role))}</td><td class="m num">${dt(s.added)}</td><td class="r"><button class="btn sm danger w150" data-a="staffDel" data-v="${esc(s.email)}">Убрать доступ</button></td></tr>`))}
+  <div class="card" style="margin-top:14px"><h2>Что может каждая роль</h2><div class="kv2"><span>Админ</span><b>Всё: заказы, пользователи, споры, модерация, деньги, сотрудники</b><span>Модератор</span><b>Карточки, отзывы, профили, споры. Без денег</b><span>Поддержка</span><b>Обращения, просмотр заказов, ответы. Без денег</b><span>Аналитик</span><b>Сводка и цифры</b></div></div>`;
 }
-const vLog = () => { const l = S.data.log; return !l ? '<div class="empty">Загружаем…</div>' : `<div class="card" style="padding:6px 10px"><table><thead><tr><th>Когда</th><th>Кто</th><th>Что</th><th>Подробно</th></tr></thead><tbody>${l.map(a => `<tr><td class="m num">${dt(a.at)}</td><td>${esc(a.who)}</td><td>${esc(a.act)}</td><td class="m">${esc(a.target || '')}</td></tr>`).join('')}</tbody></table></div>`; };
-const SUBS = { summary: 'Главные цифры площадки за сегодня и за неделю.', disputes: 'Споры по заказам. Деньги ждут на защищённом счёте, пока вы не примете решение.', orders: 'Все заказы. Откройте заказ, чтобы увидеть ход и переписку: просмотр попадёт в журнал.', cards: 'Карточки исполнителей. Вернуть можно с причиной: исполнитель увидит её и исправит.', reviews: 'Скрытый отзыв не влияет на рейтинг. Причина остаётся в админке.', users: 'Поиск по имени или по точной почте. Почта показывается целиком только админу, просмотр пишется в журнал.', support: 'Обращения из диалога «Поддержка ZELDO» в приложении.', staff: 'Кто работает в админке и в какой роли.', log: 'Кто из сотрудников что открыл и что сделал.' };
+const vLog = () => { const l = S.data.log; return !l ? '<div class="empty">Загружаем…</div>' : tbl(['136px', '20%', '30%', ''], ['Когда', 'Кто', 'Что', 'Подробно'], l.map(a => `<tr><td class="m num">${dt(a.at)}</td><td>${cell(esc(a.who))}</td><td>${cell(esc(String(a.act).replace(/^админка: /, '')))}</td><td>${cell(`<span class="m">${esc(a.target || '')}</span>`)}</td></tr>`)); };
+const SUBS = { summary: 'Что требует действий сейчас и как прошла неделя.', disputes: 'Споры по заказам. Деньги ждут на защищённом счёте, пока вы не примете решение.', orders: 'Все заказы. Откройте заказ, чтобы увидеть ход и переписку: просмотр попадёт в журнал.', cards: 'Карточки исполнителей и результат автопроверки. Вернуть можно с причиной: исполнитель увидит её и исправит.', reviews: 'Скрытый отзыв не влияет на рейтинг. Причина остаётся в админке.', users: 'Поиск по имени или по точной почте. Почта показывается целиком только админу, просмотр пишется в журнал.', support: 'Обращения из диалога «Поддержка ZELDO» в приложении.', staff: 'Кто работает в админке и в какой роли.', log: 'Кто из сотрудников что открыл и что сделал.' };
 const VIEWS = { summary: vSummary, disputes: vDisputes, orders: vOrders, cards: vCards, reviews: vReviews, users: vUsers, support: vSupport, staff: vStaff, log: vLog };
 
 /* заказ и спор — в боковой панели */
@@ -345,6 +486,7 @@ function render() {
 /* ---------- действия ---------- */
 const A = {
   sec(k) { S.sec = k; S.data.ticket = null; S.drawer = null; render(); load(k); },
+  goSec(v) { const [k, f] = v.split('|'); S.flt[k] = f || ''; A.sec(k); },
   async lsend() { const l = S.login; l.email = $('#le').value.trim(); l.err = ''; try { const r = await api('/api/login', { email: l.email }); l.step = 'code'; l.to = r.to; } catch (e) { l.err = e.message; } render(); const c = $('#lc'); if (c) c.focus(); },
   async lverify() { const l = S.login; l.err = ''; try { await api('/api/verify', { email: l.email, code: $('#lc').value }); await boot(); return; } catch (e) { l.err = e.message; } render(); },
   lback() { S.login.step = 'email'; render(); },

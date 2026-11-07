@@ -8429,6 +8429,13 @@ Object.assign(A, {
     const w = S.wiz; wizSave();
     const ms = S.myServices.find(x => x.id === w.id);
     const oid = ms.offer || uid('my'); const wasPub = !!ms.offer && (ms.status === 'pub' || ms.status === 'pause');
+    /* рабочая версия (07.11): карточку проверяет сервер по правилам, без ИИ; ответ «опубликована / к модератору / исправить» приходит за секунды */
+    if (REAL) {
+      const o = wizToOffer(w, oid); o.hidden = false;
+      Object.assign(ms, { offer: oid, title: o.title, status: 'review', need: null, step: null, reason: null, nextVer: false });
+      S.wiz = null; stackTo(['e_home', 'e_services', { n: 'e_service', p: { id: ms.id } }]);
+      toast('Отправили на проверку. Обычно это несколько секунд'); return;
+    }
     /* опубликованная карточка остаётся в каталоге, пока новая версия на проверке */
     const nid = wasPub ? `${oid}_next` : oid;
     const o = wizToOffer(w, nid); o.hidden = true;
@@ -10264,7 +10271,7 @@ function applyPal(k) {
 }
 applyPal((() => { try { return localStorage.getItem('zeldo-pal'); } catch (e) { return null; } })() || 'blue');
 document.documentElement.dataset.style = 'bold';
-window.__z = { S, A, SCREENS, CATS, DIRS, SERVICES, OFFERS, offerById, offersFor, svcBy, render, go, root, stackTo, startRequest, openWizard, ZP, calc, cfgOf, dk, fromKey, blockers };
+window.__z = { PH, S, A, SCREENS, CATS, DIRS, SERVICES, OFFERS, offerById, offersFor, svcBy, render, go, root, stackTo, startRequest, openWizard, ZP, calc, cfgOf, dk, fromKey, blockers };
 /* ---------- профиль по нажатию на имя (запись 48, 63:49; образец — снимок 6220) ---------- */
 function exStats(id) {
   const e = EX[id] || {}; if (REAL) return e.reviews ? card(`<div class="list">${rl(`${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')} после заказов`, `★ ${String(e.rating).replace('.', ',')}`, 'go', gv('c_reviews', { id }), { icon: 'star' })}</div>`, 'c') : '';
