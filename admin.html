@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Админка ZELDO — пример</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap">
+<style>
+/* админка ZELDO (07.11.2026): задание — «Главное по проекту/5. Админка — задание.md». Те же цвета и шрифт, что в приложении */
+:root {
+  --hdr: #0E1D36; --act: #0B6CF2; --act-press: #0A55C4; --ink: #10213D; --muted: #60708A; --page: #EEF2F8; --card: #FFFFFF;
+  --soft: #EAF3FF; --line: #DBE5F1; --line2: #B9C6D8; --ok: #17733F; --ok-soft: #E5F4EB; --bad: #B42318; --bad-soft: #FDECEC; --warn: #8A5300; --warn-soft: #FFF2DC;
+  --font: "Onest", "Segoe UI", system-ui, sans-serif; color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--page); color: var(--ink); font: 400 15px/22px var(--font); -webkit-font-smoothing: antialiased; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; padding: 0; }
+:focus-visible { outline: 3px solid var(--act); outline-offset: 2px; border-radius: 10px; }
+.app { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100%; }
+nav { background: var(--hdr); color: #fff; padding: 22px 14px; display: flex; flex-direction: column; gap: 4px; position: sticky; top: 0; height: 100vh; overflow: auto; }
+.logo { font-weight: 800; font-size: 22px; letter-spacing: 0.04em; padding: 0 10px 2px; }
+.logo small { display: block; font-weight: 500; font-size: 13px; letter-spacing: 0; color: #C7D2E4; }
+nav .who { margin: 14px 10px 14px; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,.08); font-size: 14px; line-height: 19px; color: #C7D2E4; }
+nav .who b { display: block; color: #fff; font-weight: 600; }
+nav button.it { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; text-align: left; padding: 10px 12px; border-radius: 12px; color: #DCE6F5; font-weight: 500; }
+nav button.it:hover { background: rgba(255,255,255,.07); }
+nav button.it.on { background: var(--act); color: #fff; }
+nav .n { min-width: 24px; height: 22px; padding: 0 7px; border-radius: 11px; background: rgba(255,255,255,.16); font-size: 13px; line-height: 22px; text-align: center; font-variant-numeric: tabular-nums; }
+nav .n.hot { background: #FFB020; color: #3A2400; font-weight: 700; }
+nav .sp { flex: 1; }
+nav .out { color: #C7D2E4; padding: 10px 12px; text-align: left; border-radius: 12px; }
+nav .out:hover { background: rgba(255,255,255,.07); }
+main { padding: 28px 36px 60px; min-width: 0; }
+h1 { font-size: 30px; line-height: 36px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 4px; }
+.sub { color: var(--muted); margin: 0 0 22px; max-width: 70ch; }
+h2 { font-size: 19px; line-height: 26px; margin: 0 0 10px; }
+.card { background: var(--card); border-radius: 18px; box-shadow: 0 1px 0 var(--line), 0 8px 24px rgba(16,33,61,.05); padding: 18px 20px; }
+.grid { display: grid; gap: 14px; }
+.tiles { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); margin-bottom: 18px; }
+.tile { padding: 16px 18px; }
+.tile .v { font-size: 30px; line-height: 36px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tile .l { color: var(--muted); font-size: 14px; line-height: 19px; }
+.tile.warn { box-shadow: inset 0 0 0 2px #FFB020; }
+.row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.grow { flex: 1; min-width: 0; }
+.m { color: var(--muted); font-size: 14px; line-height: 20px; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-size: 13px; font-weight: 600; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 11px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr.click { cursor: pointer; }
+tr.click:hover td { background: #F6F9FE; }
+.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; line-height: 20px; font-weight: 600; background: var(--soft); color: var(--act-press); white-space: nowrap; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); } .pill.bad { background: var(--bad-soft); color: var(--bad); } .pill.warn { background: var(--warn-soft); color: var(--warn); } .pill.grey { background: #EEF1F5; color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 16px; border-radius: 12px; background: var(--act); color: #fff; font-weight: 600; white-space: nowrap; }
+.btn:hover { background: var(--act-press); }
+.btn.soft { background: var(--soft); color: var(--act-press); }
+.btn.soft:hover { background: #DCEBFF; }
+.btn.danger { background: var(--bad-soft); color: var(--bad); }
+.btn.sm { height: 32px; padding: 0 12px; border-radius: 10px; font-size: 14px; }
+.btn:disabled { opacity: .5; cursor: default; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip { height: 34px; padding: 0 14px; border-radius: 999px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line2); font-size: 14px; font-weight: 500; }
+.chip.on { background: var(--ink); color: #fff; box-shadow: none; }
+input.in, textarea.in, select.in { width: 100%; padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--line2); background: #fff; }
+textarea.in { resize: vertical; min-height: 84px; }
+input.in:focus, textarea.in:focus, select.in:focus { border-color: var(--act); outline: none; }
+label.f { display: grid; gap: 6px; font-size: 14px; color: var(--muted); }
+.drawer { position: fixed; inset: 0 0 0 auto; width: min(620px, 100%); background: var(--page); box-shadow: -20px 0 60px rgba(16,33,61,.22); padding: 24px 26px 40px; overflow: auto; z-index: 10; animation: din .22s cubic-bezier(.23,1,.32,1); }
+@keyframes din { from { transform: translateX(40px); opacity: .5; } }
+.scrim { position: fixed; inset: 0; background: rgba(16,33,61,.32); z-index: 9; }
+.x { float: right; width: 36px; height: 36px; border-radius: 10px; background: var(--card); font-size: 20px; }
+.kv { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 6px 12px; }
+.kv span { color: var(--muted); }
+.msgs { display: grid; gap: 8px; max-height: 360px; overflow: auto; padding: 4px; }
+.msg { background: var(--card); border-radius: 12px; padding: 8px 12px; box-shadow: 0 1px 0 var(--line); }
+.msg b { font-weight: 600; } .msg .m { font-size: 13px; }
+.msg.sys { background: var(--soft); }
+.msg.me { background: #E7F7EE; }
+.opts { display: grid; gap: 8px; }
+.opt { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); cursor: pointer; }
+.opt:has(input:checked) { box-shadow: inset 0 0 0 2px var(--act); }
+.opt input { margin-top: 4px; accent-color: var(--act); }
+.cards { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.pc { display: grid; gap: 10px; }
+.pc .ph { height: 160px; border-radius: 14px; background: #E3EAF5 center/cover no-repeat; }
+.two { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 14px; align-items: start; }
+.tk { display: block; width: 100%; text-align: left; padding: 12px 14px; border-radius: 14px; background: var(--card); box-shadow: 0 1px 0 var(--line); margin-bottom: 8px; }
+.tk.on { box-shadow: inset 0 0 0 2px var(--act); }
+.empty { padding: 28px; text-align: center; color: var(--muted); }
+.toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 14px; z-index: 20; box-shadow: 0 12px 30px rgba(16,33,61,.3); max-width: 90vw; }
+.toast.bad { background: var(--bad); }
+.login { max-width: 420px; margin: 12vh auto; }
+.login .logo { color: var(--ink); padding: 0; margin-bottom: 16px; } .login .logo small { color: var(--muted); }
+.sw { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; }
+.sw input { width: 44px; height: 26px; appearance: none; border-radius: 13px; background: var(--line2); position: relative; cursor: pointer; transition: background .15s; }
+.sw input::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: transform .15s; }
+.sw input:checked { background: var(--act); } .sw input:checked::after { transform: translateX(18px); }
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: 170px minmax(0, 1fr) 48px; gap: 10px; align-items: center; font-size: 14px; }
+.bar i { display: block; height: 10px; border-radius: 5px; background: var(--act); min-width: 2px; }
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; }
+  nav { position: static; height: auto; flex-direction: row; flex-wrap: wrap; padding: 12px; }
+  nav .who, nav .sp { display: none; }
+  nav button.it { width: auto; }
+  main { padding: 20px 16px 50px; }
+  .two { grid-template-columns: 1fr; }
+  .kv { grid-template-columns: 1fr; }
+  table { font-size: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .drawer { animation: none; } .sw input, .sw input::after { transition: none; } }
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:30;background:#FFF2DC;color:#8A5300;padding:10px 16px;font:500 15px/21px Onest,system-ui,sans-serif;text-align:center">Пример админки: данные выдуманы, кнопки работают, но ничего никуда не уходит. Настоящая админка — в рабочей версии.</div><div id="root"></div>
+<script>/* админка-пример для сайта (07.11.2026): Максим смотрит админку, когда ноутбук владельца выключен.
+   Сервера нет: ответы подставляет этот файл, данные выдуманы, все действия меняют только эту страницу. Собирает z2/build.py → сайт/admin.html */
+window.ZDEMO = (() => {
+  const now = Date.now(), H = 3600e3, D = 864e5;
+  const dk = n => { const t = new Date(now + n * D); return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`; };
+  const U = {
+    1: { id: 1, name: 'Матвей Корепин', email: 'ma•••@yandex.ru', full: 'matvey@пример.рф', created: now - 9 * D, blocked: false, verified: false, staff: 'admin' },
+    2: { id: 2, name: 'Максим Петров', email: 'ma•••@mail.ru', full: 'maxim@пример.рф', created: now - 9 * D, blocked: false, verified: false, staff: 'admin' },
+    3: { id: 3, name: 'Ирина Соколова', email: 'ir•••@yandex.ru', full: 'irina@пример.рф', created: now - 6 * D, blocked: false, verified: true, staff: null },
+    4: { id: 4, name: 'Дмитрий Орлов', email: 'dm•••@gmail.com', full: 'dmitry@пример.рф', created: now - 5 * D, blocked: false, verified: false, staff: null },
+    5: { id: 5, name: 'Анна Белова', email: 'an•••@mail.ru', full: 'anna@пример.рф', created: now - 3 * D, blocked: false, verified: false, staff: null },
+    6: { id: 6, name: 'Олег Ким', email: 'ol•••@yandex.ru', full: 'oleg@пример.рф', created: now - 20 * H, blocked: false, verified: false, staff: null },
+  };
+  const nm = id => (U[id] || {}).name || `№ ${id}`;
+  const O = [
+    { id: 1012, status: 'dispute', cu: 5, eu: 3, updated: now - 2 * H, data: { svc: 'Химчистка мягкой мебели', what: 'Угловой диван, велюр', total: 4500, date: dk(-1), time: '10:00', addr: 'Москва, ул. Тестовая, 12, кв. 40', resultText: 'Почистила диван и подушки, пятно на спинке вывести не удалось.' },
+      msgs: [['Анна Белова', 'Здравствуйте! Нужно почистить угловой диван, есть пятно от кофе.', '09:12'], ['Ирина Соколова', 'Здравствуйте! Приеду завтра в 10:00, возьму средство для велюра.', '09:20'], ['ZELDO', 'Заказ № 1012 оплачен, 4 500 ₽ на защищённом счёте', '09:31', 1], ['Ирина Соколова', 'Работа сделана, пятно на спинке старое, полностью не вывелось.', '12:40'], ['Анна Белова', 'Пятно осталось, а это было главное. Платить полную сумму не готова.', '13:05'], ['ZELDO', 'Открыт спор: результат не соответствует условиям заказа. Деньги ждут решения на защищённом счёте', '13:06', 1]] },
+    { id: 1011, status: 'done', cu: 6, eu: 4, updated: now - 5 * H, data: { svc: 'Мелкий косметический ремонт', what: '2 часа · полки и карниз', total: 3000, date: dk(-1), time: '16:00' }, msgs: [['Олег Ким', 'Повесить две полки и карниз', '11:00'], ['Дмитрий Орлов', 'Готово, фото приложил', '18:10']] },
+    { id: 1010, status: 'work', cu: 5, eu: 4, updated: now - 40 * 60e3, data: { svc: 'Сборка корпусной мебели', what: 'Шкаф-купе 2 м', total: 5200, date: dk(0), time: '12:00' }, msgs: [] },
+    { id: 1009, status: 'paid', cu: 6, eu: 3, updated: now - 3 * H, data: { svc: 'Генеральная уборка квартиры или дома', what: '2 комнаты · стандартная', total: 7800, date: dk(1), time: '10:00' }, msgs: [] },
+    { id: 1008, status: 'cancel', cu: 5, eu: 4, updated: now - 2 * D, data: { svc: 'Мелкий косметический ремонт', what: '1 час', total: 1500, date: dk(-2), time: '15:00' }, msgs: [] },
+  ];
+  const C = [
+    { id: 'c1', owner: 4, title: 'Соберу шкаф или кровать за вечер', svc: 'Сборка корпусной мебели', desc: 'Соберу корпусную мебель любой сложности, свой инструмент, мусор заберу.', inc: ['Сборка по схеме', 'Крепление к стене', 'Вынос упаковки'], from: 1800, unit: 'за час', mod: 'review', reason: null, hidden: false, ph: 'img/M/photo-1668600418844-5b3d2e381e10.jpg', updated: now - 30 * 60e3 },
+    { id: 'c2', owner: 3, title: 'Химчистка дивана на дому', svc: 'Химчистка мягкой мебели', desc: 'Чищу диваны и кресла профессиональным пылесосом, сохнет 4–6 часов.', inc: ['Выезд', 'Чистка всех поверхностей', 'Защитная пропитка'], from: 2500, unit: '', mod: 'ok', reason: null, hidden: false, ph: 'img/M/photo-1557618159-7d6fe547ae20.jpg', updated: now - 4 * D },
+    { id: 'c3', owner: 4, title: 'Мастер на час', svc: 'Мелкий косметический ремонт', desc: 'Повешу полки, карнизы, телевизор. Звоните ••• — номер скрыт площадкой.', inc: ['Свой инструмент'], from: 1500, unit: 'за час', mod: 'back', reason: 'Уберите телефон из описания: связь только через ZELDO', hidden: false, ph: null, updated: now - D },
+  ];
+  const R = [
+    { order: 1011, by: 'c', author: 6, target: 4, stars: 5, tags: ['Пришёл вовремя'], text: 'Всё быстро и аккуратно, убрал за собой.', hidden: false },
+    { order: 1011, by: 'e', author: 4, target: 6, stars: 5, tags: ['Чётко описал задачу'], text: '', hidden: false },
+    { order: 1006, by: 'c', author: 5, target: 3, stars: 1, tags: [], text: 'Ужасно, больше не обращусь, мошенница!!!', hidden: false },
+  ];
+  const T = {
+    5: { user: 5, status: 'new', msgs: [{ from: 'u', t: 'Здравствуйте! Открыла спор по заказу 1012. Когда будет решение?', at: now - 100 * 60e3 }] },
+    6: { user: 6, status: 'closed', msgs: [{ from: 'u', t: 'Как поменять имя в профиле?', at: now - D }, { from: 's', by: 'Матвей К.', t: 'Настройки → Профиль → Имя. Сохранится сразу.', at: now - D + 20 * 60e3 }] },
+  };
+  const ST = [{ email: 'matvey@пример.рф', role: 'admin', name: 'Матвей Корепин', added: now - 9 * D }, { email: 'maxim@пример.рф', role: 'admin', name: 'Максим Петров', added: now - 9 * D }];
+  const LOG = [{ at: now - 2 * H, who: 'Матвей Корепин', act: 'админка: просмотр заказа и переписки', target: '1012' }, { at: now - D, who: 'Максим Петров', act: 'админка: карточка возвращена', target: 'c3: Уберите телефон из описания' }, { at: now - D - H, who: 'Матвей Корепин', act: 'админка: отметка «Проверен»', target: '№ 3 Ирина Соколова' }];
+  let premod = true;
+  const ROLES = { admin: 'Админ', mod: 'Модератор', support: 'Поддержка', analyst: 'Аналитик' };
+  const log = (act, target) => LOG.unshift({ at: Date.now(), who: 'Вы (пример)', act: 'админка: ' + act, target: String(target) });
+  const row = o => ({ id: o.id, status: o.status, svc: o.data.svc, total: o.data.total, date: o.data.date, time: o.data.time, cu: o.cu, eu: o.eu, client: nm(o.cu), exec: nm(o.eu), updated: o.updated, resolution: o.data.resolution || null });
+  const rate = (id, by) => { const l = R.filter(r => r.target === id && r.by === by && !r.hidden); return l.length ? [Math.round(l.reduce((s, r) => s + r.stars, 0) / l.length * 10) / 10, l.length] : [0, 0]; };
+  const HOW = { refund: 'деньги возвращаются заказчику', payout: 'деньги уходят исполнителю', split: 'сумма делится', rework: 'исполнитель доделывает работу', cancel: 'заказ отменён администратором' };
+  const err = (status, m) => { throw Object.assign(new Error(m), { status }); };
+  const summary = () => { const by = {}; let gmv = 0; O.forEach(o => { by[o.status] = (by[o.status] || 0) + 1; if (!['request', 'confirmed', 'cancel'].includes(o.status)) gmv += o.data.total; });
+    return { users: { all: 6, today: 1, week: 6, blocked: Object.values(U).filter(u => u.blocked).length }, cards: { all: C.length, review: C.filter(c => c.mod === 'review').length, back: C.filter(c => c.mod === 'back').length }, orders: by, gmv, gmvWeek: gmv,
+      reqs: { week: 4, noOffers: 1, firstMin: 38, chooseMin: 190 }, disputes: by.dispute || 0, support: Object.values(T).filter(t => t.status === 'new').length }; };
+  return async function (url, b) {
+    await new Promise(r => setTimeout(r, 120));
+    const u = new URL(url, location.href); const p = u.pathname.replace(/^.*\/api\//, '/api/'); const q = u.searchParams;
+    if (p === '/api/admin/me') return { id: 1, name: 'Матвей Корепин', role: 'admin', roles: ROLES, can: ['summary', 'disputes', 'resolve', 'orders', 'cancel', 'cards', 'reviews', 'users', 'block', 'verify', 'email', 'staff', 'support', 'log', 'settings'], premod };
+    if (p === '/api/admin/summary') return summary();
+    if (p === '/api/admin/orders') return { orders: O.filter(o => !q.get('status') || o.status === q.get('status')).map(row) };
+    if (p === '/api/admin/order') { const o = O.find(x => x.id === Number(q.get('id'))); log('просмотр заказа и переписки', o.id); return { order: Object.assign(row(o), { data: o.data }), msgs: o.msgs.map(([who, t, at, sys]) => ({ who, t, at, sys: !!sys })) }; }
+    if (p === '/api/admin/resolve') { const o = O.find(x => x.id === Number(b.id)); const c = String(b.comment || '').trim(); if (!c) err(400, 'Напишите обеим сторонам, почему такое решение');
+      let exec = 0; if (b.how === 'split') { exec = Math.round(Number(b.exec)); if (!(exec > 0 && exec < o.data.total)) err(400, `Исполнителю — от 1 до ${o.data.total - 1} ₽`); }
+      o.status = b.how === 'refund' || b.how === 'cancel' ? 'cancel' : b.how === 'rework' ? 'rework' : 'done'; o.updated = Date.now();
+      o.data.resolution = { how: b.how, comment: c, at: Date.now(), exec: b.how === 'split' ? exec : b.how === 'payout' ? o.data.total : 0, cust: b.how === 'split' ? o.data.total - exec : o.status === 'cancel' ? o.data.total : 0 };
+      o.msgs.push(['ZELDO', `Решение ZELDO по заказу № ${o.id}: ${HOW[b.how]}. ${c}`, new Date().toTimeString().slice(0, 5), 1]); log(`решение по заказу: ${HOW[b.how]}`, `${o.id}: ${c}`); return { ok: true }; }
+    if (p === '/api/admin/cards') return { premod, cards: C.filter(c => !q.get('mod') || c.mod === q.get('mod')).map(c => Object.assign({}, c, { who: nm(c.owner) })) };
+    if (p === '/api/admin/card') { const c = C.find(x => x.id === b.id); if (b.act === 'ok') { c.mod = 'ok'; c.reason = null; log('карточка опубликована', c.title); } else { c.mod = 'back'; c.reason = b.reason; log('карточка возвращена', `${c.title}: ${b.reason}`); } return { ok: true }; }
+    if (p === '/api/admin/reviews') return { reviews: R.map(r => Object.assign({}, r, { authorName: nm(r.author), targetName: nm(r.target), hideReason: r.hideReason || null })) };
+    if (p === '/api/admin/review') { const r = R.find(x => x.order === Number(b.order) && x.by === b.by); r.hidden = !!b.hide; r.hideReason = b.hide ? b.reason : null; log(b.hide ? 'отзыв скрыт' : 'отзыв возвращён', `заказ ${r.order}`); return { ok: true }; }
+    if (p === '/api/admin/users') { const s = String(q.get('q') || '').toLowerCase(); return { users: Object.values(U).filter(x => !s || x.name.toLowerCase().includes(s) || x.full === s).map(x => Object.assign({}, x, { cards: C.filter(c => c.owner === x.id).length, orders: O.filter(o => o.cu === x.id || o.eu === x.id).length, ex: rate(x.id, 'c'), cl: rate(x.id, 'e') })) }; }
+    if (p === '/api/admin/email') { log('просмотр почты', nm(b.id)); return { email: U[b.id].full }; }
+    if (p === '/api/admin/user') { const x = U[b.id]; if (b.blocked != null) { x.blocked = !!b.blocked; log(b.blocked ? 'блокировка' : 'разблокировка', x.name); } if (b.verified != null) { x.verified = !!b.verified; log(b.verified ? 'отметка «Проверен»' : 'снята отметка «Проверен»', x.name); } return { ok: true }; }
+    if (p === '/api/admin/staff') { if (b) { const e = String(b.email || '').trim().toLowerCase(); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) err(400, 'Проверьте почту'); const i = ST.findIndex(s => s.email === e); if (!b.role) { if (i >= 0) ST.splice(i, 1); } else if (i >= 0) ST[i].role = b.role; else ST.push({ email: e, role: b.role, name: '', added: Date.now() }); log(b.role ? `сотрудник: ${ROLES[b.role]}` : 'сотрудник удалён', e); } return { staff: ST }; }
+    if (p === '/api/admin/support') {
+      if (b) { const t = T[b.user]; if (b.text) { t.msgs.push({ from: 's', by: 'Вы', t: b.text, at: Date.now() }); t.status = 'work'; } if (b.status) t.status = b.status; return Object.assign({ name: nm(t.user) }, t); }
+      if (q.get('id')) { const t = T[Number(q.get('id'))]; return Object.assign({ name: nm(t.user) }, t); }
+      return { tickets: Object.values(T).map(t => { const l = t.msgs[t.msgs.length - 1]; return { user: t.user, name: nm(t.user), status: t.status, last: l.t, lastFrom: l.from, updated: l.at, n: t.msgs.length }; }) };
+    }
+    if (p === '/api/admin/log') return { log: LOG };
+    if (p === '/api/admin/settings') { premod = !!b.premod; return { ok: true, premod }; }
+    return { ok: true };
+  };
+})();
+</script>
+<script>
+'use strict';
+/* состояние и связь с сервером */
+const S = { me: null, sec: 'summary', data: {}, drawer: null, login: { step: 'email', email: '', err: '' }, flt: {} };
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const rub = n => n == null ? '—' : `${Math.round(n).toLocaleString('ru-RU')} ₽`;
+const dt = t => t ? new Date(t).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+const $ = s => document.querySelector(s);
+const day = k => /^\d{4}-\d\d-\d\d$/.test(k || '') ? new Date(k + 'T12:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }) : (k || '');
+async function api(url, data) {
+  if (window.ZDEMO) return window.ZDEMO(url, data);  /* админка-пример на сайте: сервера нет, данные выдуманы */
+  const r = await fetch(url, data === undefined ? { credentials: 'same-origin' } : { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+  const j = await r.json().catch(() => ({})); if (!r.ok) throw Object.assign(new Error(j.err || 'Нет связи с сервером'), { status: r.status }); return j;
+}
+let tt = null;
+function toast(t, bad) { let el = $('.toast'); if (!el) { el = document.createElement('div'); el.className = 'toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); } el.textContent = t; el.classList.toggle('bad', !!bad); clearTimeout(tt); tt = setTimeout(() => el.remove(), 3200); }
+
+/* разделы: ключ, название, право с сервера */
+const SECS = [
+  ['summary', 'Сводка', 'summary'], ['disputes', 'Споры', 'disputes'], ['orders', 'Заказы', 'orders'], ['cards', 'Карточки', 'cards'],
+  ['reviews', 'Отзывы', 'reviews'], ['users', 'Пользователи', 'users'], ['support', 'Поддержка', 'support'], ['staff', 'Сотрудники', 'staff'], ['log', 'Журнал', 'log'],
+];
+const ST = { request: ['Ждёт подтверждения', 'grey'], confirmed: ['Ждёт оплаты', 'warn'], paid: ['Оплачен, ждёт начала', ''], startReq: ['Подтверждение начала', 'warn'], work: ['В работе', ''], result: ['Результат передан', 'warn'], rework: ['На доработке', 'warn'], done: ['Завершён', 'ok'], dispute: ['Спор', 'bad'], cancel: ['Отменён', 'grey'] };
+const stPill = s => { const [t, k] = ST[s] || [s, 'grey']; return `<span class="pill ${k}">${esc(t)}</span>`; };
+const can = k => !!S.me && S.me.can.includes(k);
+
+async function load(sec) {
+  const d = S.data;
+  try {
+    if (sec === 'summary') d.summary = await api('/api/admin/summary');
+    if (sec === 'disputes') d.disputes = (await api('/api/admin/orders?status=dispute')).orders;
+    if (sec === 'orders') d.orders = (await api('/api/admin/orders' + (S.flt.orders ? '?status=' + S.flt.orders : ''))).orders;
+    if (sec === 'cards') { const r = await api('/api/admin/cards' + (S.flt.cards ? '?mod=' + S.flt.cards : '')); d.cards = r.cards; S.me.premod = r.premod; }
+    if (sec === 'reviews') d.reviews = (await api('/api/admin/reviews')).reviews;
+    if (sec === 'users') d.users = (await api('/api/admin/users?q=' + encodeURIComponent(S.flt.users || ''))).users;
+    if (sec === 'support') d.tickets = (await api('/api/admin/support')).tickets;
+    if (sec === 'staff') d.staff = (await api('/api/admin/staff')).staff;
+    if (sec === 'log') d.log = (await api('/api/admin/log')).log;
+  } catch (e) { if (e.status === 401) return boot(); toast(e.message, true); }
+  render();
+}
+async function counts() { if (!can('summary')) return; try { S.data.summary = await api('/api/admin/summary'); render(); } catch (e) { /* догоним позже */ } }
+
+/* ---------- экраны ---------- */
+function vSummary() {
+  const s = S.data.summary; if (!s) return '<div class="empty">Загружаем…</div>';
+  const st = Object.entries(s.orders || {}); const max = Math.max(1, ...st.map(x => x[1]));
+  const mins = m => m == null ? '—' : m < 60 ? `${m} мин` : `${Math.round(m / 6) / 10} ч`;
+  return `<div class="grid tiles">
+    <div class="card tile"><div class="v">${s.users.all}</div><div class="l">людей, за неделю +${s.users.week}, сегодня +${s.users.today}</div></div>
+    <div class="card tile"><div class="v">${s.cards.all}</div><div class="l">карточек${s.cards.review ? `, на проверке ${s.cards.review}` : ''}</div></div>
+    <div class="card tile ${s.disputes ? 'warn' : ''}"><div class="v">${s.disputes}</div><div class="l">открытых споров</div></div>
+    <div class="card tile ${s.support ? 'warn' : ''}"><div class="v">${s.support}</div><div class="l">новых обращений в поддержку</div></div>
+    ${s.gmv != null ? `<div class="card tile"><div class="v">${rub(s.gmvWeek)}</div><div class="l">сделок за неделю, всего ${rub(s.gmv)}</div></div>` : ''}
+  </div>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))">
+    <div class="card"><h2>Заказы по статусам</h2>${st.length ? `<div class="bars">${st.map(([k, n]) => `<div class="bar"><span>${esc((ST[k] || [k])[0])}</span><i style="width:${Math.round(n / max * 100)}%"></i><b class="num">${n}</b></div>`).join('')}</div>` : '<div class="m">Заказов пока нет</div>'}</div>
+    <div class="card"><h2>Заявки всем, за неделю</h2><div class="kv"><span>Размещено</span><b>${s.reqs.week}</b><span>Без откликов</span><b>${s.reqs.noOffers}${s.reqs.week ? ` (${Math.round(s.reqs.noOffers / s.reqs.week * 100)} %)` : ''}</b><span>До первого отклика</span><b>${mins(s.reqs.firstMin)}</b><span>До выбора исполнителя</span><b>${mins(s.reqs.chooseMin)}</b></div><p class="m">Метрики из раздела 6 файла Максима. Сумма сделок — по тестовой оплате.</p></div>
+  </div>`;
+}
+const orderTable = (l, empty) => !l ? '<div class="empty">Загружаем…</div>' : l.length ? `<div class="card" style="padding:6px 10px"><table><thead><tr><th>№</th><th>Услуга</th><th>Заказчик</th><th>Исполнитель</th><th>Сумма</th><th>Статус</th><th>Изменён</th></tr></thead><tbody>${l.map(o => `<tr class="click" data-a="openOrder" data-v="${o.id}"><td class="num">${o.id}</td><td>${esc(o.svc)}</td><td>${esc(o.client)}</td><td>${esc(o.exec)}</td><td class="num">${rub(o.total)}</td><td>${stPill(o.status)}</td><td class="m num">${dt(o.updated)}</td></tr>`).join('')}</tbody></table></div>` : `<div class="card empty">${empty}</div>`;
+const vDisputes = () => orderTable(S.data.disputes, 'Открытых споров нет');
+function vOrders() {
+  const f = S.flt.orders || '';
+  return `<div class="chips">${[['', 'Все'], ['paid', 'Оплачены'], ['work', 'В работе'], ['result', 'Ждут приёмки'], ['dispute', 'Спор'], ['done', 'Завершены'], ['cancel', 'Отменены'], ['request', 'Ждут подтверждения'], ['confirmed', 'Ждут оплаты']].map(([k, t]) => `<button class="chip ${f === k ? 'on' : ''}" data-a="fltOrders" data-v="${k}">${t}</button>`).join('')}</div>${orderTable(S.data.orders, 'Таких заказов нет')}`;
+}
+function vCards() {
+  const f = S.flt.cards || ''; const l = S.data.cards;
+  const head = `<div class="row" style="margin-bottom:14px"><div class="chips grow" style="margin:0">${[['', 'Все'], ['review', 'На проверке'], ['back', 'Возвращены']].map(([k, t]) => `<button class="chip ${f === k ? 'on' : ''}" data-a="fltCards" data-v="${k}">${t}</button>`).join('')}</div>
+    ${can('settings') ? `<label class="sw"><input type="checkbox" data-ch="premod" ${S.me.premod ? 'checked' : ''}> Проверять карточки до публикации</label>` : `<span class="m">${S.me.premod ? 'Карточки проверяются до публикации' : 'Карточки публикуются сразу'}</span>`}</div>`;
+  if (!l) return head + '<div class="empty">Загружаем…</div>';
+  return head + (l.length ? `<div class="grid cards">${l.map(c => `<div class="card pc"><div class="ph" ${c.ph ? `style="background-image:url('${esc(c.ph)}')"` : ''}></div>
+    <div class="row"><b class="grow">${esc(c.title)}</b>${c.mod === 'review' ? '<span class="pill warn">На проверке</span>' : c.mod === 'back' ? '<span class="pill bad">Возвращена</span>' : c.hidden ? '<span class="pill grey">Скрыта автором</span>' : '<span class="pill ok">В каталоге</span>'}</div>
+    <div class="m">${esc(c.svc)} · ${esc(c.who)}${c.from ? ` · от ${rub(c.from)}${c.unit ? ' ' + esc(c.unit) : ''}` : ''}</div><div>${esc(c.desc)}</div>${c.inc.length ? `<div class="m">Входит: ${esc(c.inc.join(', '))}</div>` : ''}
+    ${c.reason ? `<div class="m"><b>Причина:</b> ${esc(c.reason)}</div>` : ''}
+    <div class="row">${c.mod !== 'ok' ? `<button class="btn sm" data-a="cardOk" data-v="${esc(c.id)}">Опубликовать</button>` : ''}${c.mod !== 'back' ? `<button class="btn sm danger" data-a="cardBack" data-v="${esc(c.id)}">Вернуть на исправление</button>` : ''}</div></div>`).join('')}</div>` : '<div class="card empty">Карточек нет</div>');
+}
+function vReviews() {
+  const l = S.data.reviews; if (!l) return '<div class="empty">Загружаем…</div>';
+  return l.length ? `<div class="card" style="padding:6px 10px"><table><thead><tr><th>Кто</th><th>О ком</th><th>Оценка</th><th>Текст</th><th>Заказ</th><th></th></tr></thead><tbody>${l.map(r => `<tr><td>${esc(r.authorName)}<div class="m">${r.by === 'c' ? 'заказчик' : 'исполнитель'}</div></td><td>${esc(r.targetName)}</td><td class="num">${'★'.repeat(r.stars)}</td><td>${esc(r.text || (r.tags || []).join(', '))}${r.hidden ? `<div class="m"><span class="pill grey">Скрыт</span> ${esc(r.hideReason || '')}</div>` : ''}</td><td class="num">${r.order}</td><td>${r.hidden ? `<button class="btn sm soft" data-a="revShow" data-v="${r.order}|${r.by}">Вернуть</button>` : `<button class="btn sm danger" data-a="revHide" data-v="${r.order}|${r.by}">Скрыть</button>`}</td></tr>`).join('')}</tbody></table></div>` : '<div class="card empty">Отзывов пока нет</div>';
+}
+function vUsers() {
+  const l = S.data.users;
+  return `<div class="row" style="margin-bottom:14px"><input class="in grow" style="max-width:420px" id="uq" placeholder="Имя или точная почта" value="${esc(S.flt.users || '')}" data-enter="userFind"><button class="btn" data-a="userFind">Найти</button></div>
+  ${!l ? '<div class="empty">Загружаем…</div>' : l.length ? `<div class="card" style="padding:6px 10px"><table><thead><tr><th>№</th><th>Имя</th><th>Почта</th><th>С нами с</th><th>Карточек</th><th>Заказов</th><th>Рейтинг</th><th>Отметки</th><th></th></tr></thead><tbody>${l.map(x => `<tr><td class="num">${x.id}</td><td>${esc(x.name)}${x.staff ? `<div class="m">${esc(S.me.roles[x.staff])}</div>` : ''}</td><td class="num">${esc(x.email)}${can('email') ? ` <button class="btn sm soft" data-a="showEmail" data-v="${x.id}" title="Просмотр попадёт в журнал">Показать</button>` : ''}</td><td class="m num">${dt(x.created)}</td><td class="num">${x.cards}</td><td class="num">${x.orders}</td><td class="num">${x.ex[1] ? `★ ${x.ex[0]} (${x.ex[1]})` : '—'}</td><td>${x.verified ? '<span class="pill ok">Проверен</span> ' : ''}${x.blocked ? '<span class="pill bad">Заблокирован</span>' : ''}</td><td><div class="row">${can('verify') ? `<button class="btn sm soft" data-a="userVer" data-v="${x.id}|${x.verified ? 0 : 1}">${x.verified ? 'Снять «Проверен»' : 'Отметить «Проверен»'}</button>` : ''}${can('block') ? `<button class="btn sm ${x.blocked ? 'soft' : 'danger'}" data-a="userBlock" data-v="${x.id}|${x.blocked ? 0 : 1}">${x.blocked ? 'Разблокировать' : 'Заблокировать'}</button>` : ''}</div></td></tr>`).join('')}</tbody></table></div>` : '<div class="card empty">Никого не нашли</div>'}`;
+}
+function vSupport() {
+  const l = S.data.tickets; if (!l) return '<div class="empty">Загружаем…</div>';
+  const t = S.data.ticket; const STT = { new: ['Новое', 'warn'], work: ['В работе', ''], closed: ['Закрыто', 'grey'] };
+  return `<div class="two"><div>${l.length ? l.map(x => `<button class="tk ${t && t.user === x.user ? 'on' : ''}" data-a="openTicket" data-v="${x.user}"><div class="row"><b class="grow">${esc(x.name)}</b><span class="pill ${STT[x.status][1]}">${STT[x.status][0]}</span></div><div class="m">${x.lastFrom === 's' ? 'Вы: ' : ''}${esc(x.last.slice(0, 90))}</div><div class="m">${dt(x.updated)}</div></button>`).join('') : '<div class="card empty">Обращений пока нет</div>'}</div>
+  <div>${t ? `<div class="card"><div class="row" style="margin-bottom:10px"><h2 class="grow" style="margin:0">${esc(t.name)}</h2>${['new', 'work', 'closed'].map(k => `<button class="chip ${t.status === k ? 'on' : ''}" data-a="ticketSt" data-v="${k}">${STT[k][0]}</button>`).join('')}</div>
+    <div class="msgs" id="tmsgs">${t.msgs.map(m => `<div class="msg ${m.from === 's' ? 'me' : m.from === 'sys' ? 'sys' : ''}"><div class="m"><b>${m.from === 's' ? esc('Поддержка' + (m.by ? ', ' + m.by : '')) : m.from === 'sys' ? 'Автоответ' : esc(t.name)}</b> · ${dt(m.at)}</div>${esc(m.t)}</div>`).join('')}</div>
+    <div class="grid" style="margin-top:12px"><textarea class="in" id="treply" placeholder="Ответ человеку. Он увидит его в «Сообщениях», в диалоге «Поддержка ZELDO»"></textarea><div class="row"><button class="btn" data-a="ticketSend">Ответить</button><span class="m">Часы поддержки 9:00–21:00 по Москве, вне их человек получает автоответ</span></div></div></div>` : '<div class="card empty">Выберите обращение слева</div>'}</div></div>`;
+}
+function vStaff() {
+  const l = S.data.staff; if (!l) return '<div class="empty">Загружаем…</div>';
+  return `<div class="card" style="margin-bottom:14px"><h2>Добавить сотрудника</h2><div class="row"><input class="in" style="max-width:320px" id="sfe" placeholder="Почта, с которой он входит"><select class="in" id="sfr" style="max-width:200px">${Object.entries(S.me.roles).map(([k, t]) => `<option value="${k}">${t}</option>`).join('')}</select><button class="btn" data-a="staffAdd">Добавить</button></div><p class="m">Человек входит в админку той же почтой по адресу /admin. Роль можно сменить, добавив его ещё раз.</p></div>
+  <div class="card" style="padding:6px 10px"><table><thead><tr><th>Почта</th><th>Имя в ZELDO</th><th>Роль</th><th>С</th><th></th></tr></thead><tbody>${l.map(s => `<tr><td>${esc(s.email)}</td><td>${esc(s.name || 'ещё не входил')}</td><td>${esc(S.me.roles[s.role] || s.role)}</td><td class="m num">${dt(s.added)}</td><td><button class="btn sm danger" data-a="staffDel" data-v="${esc(s.email)}">Убрать доступ</button></td></tr>`).join('')}</tbody></table></div>
+  <div class="card" style="margin-top:14px"><h2>Что может каждая роль</h2><div class="kv"><span>Админ</span><b>Всё: заказы, пользователи, споры, модерация, деньги, сотрудники</b><span>Модератор</span><b>Карточки, отзывы, профили, споры. Без денег</b><span>Поддержка</span><b>Обращения, просмотр заказов, ответы. Без денег</b><span>Аналитик</span><b>Только сводка</b></div></div>`;
+}
+const vLog = () => { const l = S.data.log; return !l ? '<div class="empty">Загружаем…</div>' : `<div class="card" style="padding:6px 10px"><table><thead><tr><th>Когда</th><th>Кто</th><th>Что</th><th>Подробно</th></tr></thead><tbody>${l.map(a => `<tr><td class="m num">${dt(a.at)}</td><td>${esc(a.who)}</td><td>${esc(a.act)}</td><td class="m">${esc(a.target || '')}</td></tr>`).join('')}</tbody></table></div>`; };
+const SUBS = { summary: 'Главные цифры площадки за сегодня и за неделю.', disputes: 'Споры по заказам. Деньги ждут на защищённом счёте, пока вы не примете решение.', orders: 'Все заказы. Откройте заказ, чтобы увидеть ход и переписку: просмотр попадёт в журнал.', cards: 'Карточки исполнителей. Вернуть можно с причиной: исполнитель увидит её и исправит.', reviews: 'Скрытый отзыв не влияет на рейтинг. Причина остаётся в админке.', users: 'Поиск по имени или по точной почте. Почта показывается целиком только админу, просмотр пишется в журнал.', support: 'Обращения из диалога «Поддержка ZELDO» в приложении.', staff: 'Кто работает в админке и в какой роли.', log: 'Кто из сотрудников что открыл и что сделал.' };
+const VIEWS = { summary: vSummary, disputes: vDisputes, orders: vOrders, cards: vCards, reviews: vReviews, users: vUsers, support: vSupport, staff: vStaff, log: vLog };
+
+/* заказ и спор — в боковой панели */
+function vDrawer() {
+  const x = S.drawer; if (!x) return ''; if (!x.order) return `<div class="scrim" data-a="closeDrawer"></div><aside class="drawer" aria-label="Заказ"><div class="empty">Загружаем…</div></aside>`;
+  const o = x.order; const d = o.data || {}; const r = o.resolution;
+  const H = { refund: 'Деньги вернули заказчику', payout: 'Деньги ушли исполнителю', split: 'Сумму поделили', rework: 'Вернули на доработку', cancel: 'Заказ отменён администратором' };
+  return `<div class="scrim" data-a="closeDrawer"></div><aside class="drawer" role="dialog" aria-label="Заказ № ${o.id}"><button class="x" data-a="closeDrawer" aria-label="Закрыть">×</button>
+  <h1 style="font-size:26px">Заказ № ${o.id}</h1><p class="sub">${stPill(o.status)}</p>
+  <div class="card" style="margin-bottom:12px"><div class="kv"><span>Услуга</span><b>${esc(o.svc)}</b><span>Что</span><b>${esc(d.what || '—')}</b><span>Заказчик</span><b>${esc(o.client)}</b><span>Исполнитель</span><b>${esc(o.exec)}</b><span>Когда</span><b>${esc([day(d.date), d.time].filter(Boolean).join(', ') || '—')}</b><span>Сумма</span><b>${rub(o.total)}</b>${d.addr ? `<span>Адрес</span><b>${esc(d.addr)}</b>` : ''}${d.resultText ? `<span>Результат</span><b>${esc(d.resultText)}</b>` : ''}</div>
+  ${(d.resultPhotos || []).length ? `<div class="row" style="margin-top:10px">${d.resultPhotos.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="Фото результата" style="width:96px;height:96px;object-fit:cover;border-radius:10px"></a>`).join('')}</div>` : ''}</div>
+  ${r ? `<div class="card" style="margin-bottom:12px;background:var(--soft)"><b>Решение ZELDO: ${esc(H[r.how] || r.how)}</b>${r.how === 'split' ? `<div class="m">Исполнителю ${rub(r.exec)}, заказчику ${rub(r.cust)}</div>` : ''}<div>${esc(r.comment)}</div><div class="m">${dt(r.at)}</div></div>` : ''}
+  ${o.status === 'dispute' && can('resolve') ? `<div class="card" style="margin-bottom:12px"><h2>Решение по спору</h2><div class="opts">
+    <label class="opt"><input type="radio" name="how" value="refund"><span><b>Вернуть деньги заказчику</b><div class="m">Заказ отменится, ${rub(o.total)} вернутся заказчику</div></span></label>
+    <label class="opt"><input type="radio" name="how" value="payout"><span><b>Выплатить исполнителю</b><div class="m">Заказ закроется, деньги уйдут исполнителю</div></span></label>
+    <label class="opt"><input type="radio" name="how" value="split"><span class="grow"><b>Поделить сумму</b><div class="m">Сколько получит исполнитель, остальное вернётся заказчику</div><input class="in" id="splitx" inputmode="numeric" placeholder="Например, ${Math.round((o.total || 0) / 2)}" style="margin-top:6px;max-width:200px"></span></label>
+    <label class="opt"><input type="radio" name="how" value="rework"><span><b>Вернуть на доработку</b><div class="m">Исполнитель доделает и снова сдаст работу</div></span></label></div>
+    <label class="f" style="margin-top:12px">Комментарий обеим сторонам<textarea class="in" id="rcom" placeholder="Почему такое решение. Обе стороны увидят его в переписке заказа"></textarea></label>
+    <div class="row" style="margin-top:10px"><button class="btn" data-a="resolve">Принять решение</button></div></div>` : ''}
+  ${can('cancel') && !['done', 'cancel', 'dispute'].includes(o.status) ? `<div class="card" style="margin-bottom:12px"><h2>Отменить заказ</h2><label class="f">Комментарий обеим сторонам<textarea class="in" id="ccom" placeholder="Почему заказ отменён"></textarea></label><div class="row" style="margin-top:10px"><button class="btn danger" data-a="cancelOrder">Отменить заказ</button></div></div>` : ''}
+  <div class="card"><h2>Переписка</h2>${x.msgs.length ? `<div class="msgs">${x.msgs.map(m => `<div class="msg ${m.sys ? 'sys' : ''}"><div class="m"><b>${esc(m.who)}</b> · ${esc(m.at || '')}</div>${esc(m.t)}${m.fid ? ` <a href="/api/file/${esc(m.fid)}" target="_blank" rel="noopener">открыть файл</a>` : ''}</div>`).join('')}</div>` : '<div class="m">Переписки нет</div>'}</div></aside>`;
+}
+
+function render() {
+  const root = $('#root');
+  if (!S.me) { const l = S.login; root.innerHTML = `<div class="login card"><div class="logo">ZELDO<small>Админка</small></div>${S.denied ? `<p>Эта почта не сотрудник ZELDO. Доступ выдаёт админ в разделе «Сотрудники».</p><button class="btn soft" data-a="logout">Войти другой почтой</button>` : l.step === 'email' ? `<label class="f">Почта сотрудника<input class="in" id="le" type="email" autocomplete="email" value="${esc(l.email)}" data-enter="lsend"></label><div class="row" style="margin-top:12px"><button class="btn" data-a="lsend">Получить код</button></div>` : `<p class="m">Код отправили на ${esc(l.to)}. Он действует 10 минут.</p><label class="f">Код из письма<input class="in" id="lc" inputmode="numeric" autocomplete="one-time-code" maxlength="6" data-enter="lverify"></label><div class="row" style="margin-top:12px"><button class="btn" data-a="lverify">Войти</button><button class="btn soft" data-a="lback">Другая почта</button></div>`}${l.err ? `<p style="color:var(--bad)">${esc(l.err)}</p>` : ''}</div>`; return; }
+  if (!S.me.name) { root.innerHTML = `<div class="login card"><div class="logo">ZELDO<small>Админка</small></div><label class="f">Как вас подписывать в ответах пользователям<input class="in" id="nm" autocomplete="name" maxlength="60" placeholder="Например: Матвей Корепин" data-enter="saveName"></label><p class="m">Пользователи увидят только имя и первую букву фамилии.</p><div class="row"><button class="btn" data-a="saveName">Продолжить</button></div></div>`; const i = $('#nm'); if (i) i.focus(); return; }
+  const s = S.data.summary || {}; const badge = { disputes: s.disputes, support: s.support, cards: (s.cards || {}).review };
+  const secs = SECS.filter(([, , k]) => can(k));
+  const sec = secs.some(x => x[0] === S.sec) ? S.sec : secs[0][0];
+  const scroll = document.scrollingElement.scrollTop;
+  /* набранное не теряется, когда страница обновляется сама: новые обращения и споры приходят без перезагрузки */
+  const keep = {}; ['rcom', 'ccom', 'treply', 'splitx', 'uq', 'sfe'].forEach(id => { const el = document.getElementById(id); if (el) keep[id] = el.value; }); const how = (document.querySelector('input[name="how"]:checked') || {}).value; const focus = document.activeElement && document.activeElement.id;
+  root.innerHTML = `<div class="app"><nav aria-label="Разделы"><div class="logo">ZELDO<small>Админка</small></div><div class="who"><b>${esc(S.me.name)}</b>${esc(S.me.roles[S.me.role])}</div>
+    ${secs.map(([k, t]) => `<button class="it ${k === sec ? 'on' : ''}" data-a="sec" data-v="${k}" ${k === sec ? 'aria-current="page"' : ''}><span>${t}</span>${badge[k] ? `<span class="n hot">${badge[k]}</span>` : ''}</button>`).join('')}
+    <div class="sp"></div><button class="out" data-a="logout">Выйти</button></nav>
+    <main><h1>${(SECS.find(x => x[0] === sec) || [])[1]}</h1><p class="sub">${SUBS[sec]}</p>${VIEWS[sec]()}</main></div>${vDrawer()}`;
+  document.scrollingElement.scrollTop = scroll;
+  Object.entries(keep).forEach(([id, v]) => { const el = document.getElementById(id); if (el) el.value = v; }); if (how) { const r = document.querySelector(`input[name="how"][value="${how}"]`); if (r) r.checked = true; } if (focus && document.getElementById(focus)) document.getElementById(focus).focus();
+  const tm = $('#tmsgs'); if (tm) tm.scrollTop = tm.scrollHeight;
+}
+
+/* ---------- действия ---------- */
+const A = {
+  sec(k) { S.sec = k; S.data.ticket = null; S.drawer = null; render(); load(k); },
+  async lsend() { const l = S.login; l.email = $('#le').value.trim(); l.err = ''; try { const r = await api('/api/login', { email: l.email }); l.step = 'code'; l.to = r.to; } catch (e) { l.err = e.message; } render(); const c = $('#lc'); if (c) c.focus(); },
+  async lverify() { const l = S.login; l.err = ''; try { await api('/api/verify', { email: l.email, code: $('#lc').value }); await boot(); return; } catch (e) { l.err = e.message; } render(); },
+  lback() { S.login.step = 'email'; render(); },
+  async saveName() { const n = $('#nm').value.trim(); if (n.length < 2) return toast('Имя — от двух букв', true); try { await api('/api/me', { name: n }); S.me.name = n; render(); load(S.sec); } catch (e) { toast(e.message, true); } },
+  async logout() { try { await api('/api/logout', {}); } catch (e) { /* и так выходим */ } location.reload(); },
+  fltOrders(v) { S.flt.orders = v; load('orders'); },
+  fltCards(v) { S.flt.cards = v; load('cards'); },
+  userFind() { S.flt.users = $('#uq').value.trim(); load('users'); },
+  async openOrder(id) { S.drawer = { id: Number(id) }; render(); try { const r = await api('/api/admin/order?id=' + id); S.drawer = { id: Number(id), order: r.order, msgs: r.msgs }; } catch (e) { S.drawer = null; toast(e.message, true); } render(); },
+  closeDrawer() { S.drawer = null; render(); },
+  async resolve() {
+    const how = (document.querySelector('input[name="how"]:checked') || {}).value; if (!how) return toast('Выберите решение', true);
+    const comment = $('#rcom').value.trim(); if (!comment) return toast('Напишите комментарий обеим сторонам', true);
+    if (!confirm('Принять решение? Его увидят обе стороны, деньги двинутся сразу.')) return;
+    try { await api('/api/admin/resolve', { id: S.drawer.id, how, comment, exec: Number(($('#splitx') || {}).value || 0) }); toast('Решение принято, обе стороны его видят'); await A.openOrder(S.drawer.id); load(S.sec); counts(); } catch (e) { toast(e.message, true); }
+  },
+  async cancelOrder() { const comment = $('#ccom').value.trim(); if (!comment) return toast('Напишите, почему заказ отменён', true); if (!confirm('Отменить заказ? Деньги вернутся заказчику.')) return;
+    try { await api('/api/admin/resolve', { id: S.drawer.id, how: 'cancel', comment }); toast('Заказ отменён'); await A.openOrder(S.drawer.id); load(S.sec); } catch (e) { toast(e.message, true); } },
+  async cardOk(id) { try { await api('/api/admin/card', { id, act: 'ok' }); toast('Карточка в каталоге'); load('cards'); counts(); } catch (e) { toast(e.message, true); } },
+  async cardBack(id) { const reason = prompt('Что исправить? Исполнитель увидит это в карточке'); if (!reason) return; try { await api('/api/admin/card', { id, act: 'back', reason }); toast('Карточка возвращена исполнителю'); load('cards'); counts(); } catch (e) { toast(e.message, true); } },
+  async revHide(v) { const [order, by] = v.split('|'); const reason = prompt('Почему скрываете отзыв? Причина останется в админке'); if (!reason) return; try { await api('/api/admin/review', { order: Number(order), by, hide: true, reason }); toast('Отзыв скрыт, рейтинг пересчитан'); load('reviews'); } catch (e) { toast(e.message, true); } },
+  async revShow(v) { const [order, by] = v.split('|'); try { await api('/api/admin/review', { order: Number(order), by, hide: false }); toast('Отзыв снова виден'); load('reviews'); } catch (e) { toast(e.message, true); } },
+  async showEmail(id) { try { const r = await api('/api/admin/email', { id: Number(id) }); prompt('Почта (просмотр записан в журнал):', r.email); } catch (e) { toast(e.message, true); } },
+  async userVer(v) { const [id, on] = v.split('|'); try { await api('/api/admin/user', { id: Number(id), verified: on === '1' }); toast(on === '1' ? 'Отмечен «Проверен»: значок виден заказчикам' : 'Отметка снята'); load('users'); } catch (e) { toast(e.message, true); } },
+  async userBlock(v) { const [id, on] = v.split('|'); if (on === '1' && !confirm('Заблокировать? Человек выйдет из ZELDO, его карточки пропадут из каталога.')) return; try { await api('/api/admin/user', { id: Number(id), blocked: on === '1' }); toast(on === '1' ? 'Заблокирован' : 'Разблокирован'); load('users'); } catch (e) { toast(e.message, true); } },
+  async openTicket(id) { try { S.data.ticket = await api('/api/admin/support?id=' + id); render(); } catch (e) { toast(e.message, true); } },
+  async ticketSend() { const t = S.data.ticket; const text = $('#treply').value.trim(); if (!text) return; try { S.data.ticket = await api('/api/admin/support', { user: t.user, text }); $('#treply').value = ''; render(); load('support'); counts(); } catch (e) { toast(e.message, true); } },
+  async ticketSt(st) { const t = S.data.ticket; try { S.data.ticket = await api('/api/admin/support', { user: t.user, status: st }); render(); load('support'); counts(); } catch (e) { toast(e.message, true); } },
+  async staffAdd() { const email = $('#sfe').value.trim(); const role = $('#sfr').value; try { S.data.staff = (await api('/api/admin/staff', { email, role })).staff; toast('Сотрудник добавлен'); render(); } catch (e) { toast(e.message, true); } },
+  async staffDel(email) { if (!confirm(`Убрать доступ к админке у ${email}?`)) return; try { S.data.staff = (await api('/api/admin/staff', { email, role: null })).staff; toast('Доступ убран'); render(); } catch (e) { toast(e.message, true); } },
+};
+document.addEventListener('click', e => { const el = e.target.closest('[data-a]'); if (!el || !A[el.dataset.a]) return; e.preventDefault(); A[el.dataset.a](el.dataset.v); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.drawer) A.closeDrawer(); if (e.key === 'Enter' && e.target.dataset && e.target.dataset.enter) A[e.target.dataset.enter](); });
+document.addEventListener('change', async e => { if (e.target.dataset.ch === 'premod') { try { const r = await api('/api/admin/settings', { premod: e.target.checked }); S.me.premod = r.premod; toast(r.premod ? 'Новые карточки ждут проверки' : 'Карточки публикуются сразу'); } catch (x) { toast(x.message, true); } } });
+
+/* новые обращения, споры и карточки — без перезагрузки */
+let es = null;
+function listen() { if (window.ZDEMO) return; if (es) es.close(); es = new EventSource('/api/events'); es.onmessage = e => { let ev; try { ev = JSON.parse(e.data); } catch (x) { return; } if (ev.t === 'adm' || ev.t === 'order' || ev.t === 'card') { counts(); if (['support', 'disputes', 'cards'].includes(S.sec)) load(S.sec); if (ev.t === 'adm' && S.data.ticket && S.data.ticket.user === ev.user) A.openTicket(ev.user); } }; }
+async function boot() {
+  try { S.me = await api('/api/admin/me'); S.denied = false; } catch (e) { S.me = null; S.denied = e.status === 403; render(); if (!S.denied) { const i = $('#le'); if (i) i.focus(); } return; }
+  render(); load(S.me.can.includes('summary') ? 'summary' : SECS.find(x => S.me.can.includes(x[2]))[0]); listen();
+}
+boot();
+</script>
+</body>
+</html>
