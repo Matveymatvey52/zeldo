@@ -245,7 +245,7 @@ async function counts() { if (!can('summary')) return; try { S.data.summary = aw
 function vSummary() {
   const s = S.data.summary; if (!s) return '<div class="empty">Загружаем…</div>';
   const st = Object.entries(s.orders || {}); const max = Math.max(1, ...st.map(x => x[1]));
-  const mins = m => m == null ? '—' : m < 60 ? `${m} мин` : `${Math.round(m / 6) / 10} ч`;
+  const mins = m => m == null ? '—' : m < 60 ? `${m} мин` : `${String(Math.round(m / 6) / 10).replace('.', ',')} ч`;
   return `<div class="grid tiles">
     <div class="card tile"><div class="v">${s.users.all}</div><div class="l">людей, за неделю +${s.users.week}, сегодня +${s.users.today}</div></div>
     <div class="card tile"><div class="v">${s.cards.all}</div><div class="l">карточек${s.cards.review ? `, на проверке ${s.cards.review}` : ''}</div></div>
