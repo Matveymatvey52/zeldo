@@ -6167,7 +6167,7 @@ const listCard = ({ to, t, pr = '', ps = '', s = '', m = '', mb = false, pl = ''
 /* ---------- карточка услуги (листы 19–20) ---------- */
 /* гость не видит имени исполнителя: только «проверенный исполнитель», рейтинг и район */
 const exName2 = o => S.role === 'guest' ? 'Проверенный исполнитель' : (EX[o.ex] || {}).name || '';
-const exLine = o => { const e = EX[o.ex] || {}; return `<span class="on2"><b>${esc(exName2(o))}</b>${S.role === 'guest' || REAL ? '' : `<span class="vbadge">${ic('diamond', 14, 2)} Проверен</span>`}${e.reviews ? `<span class="rating">${ic('star', 15, 2)}${String(e.rating).replace('.', ',')}</span>` : '<span class="m">Нет отзывов</span>'}</span>`; };
+const exLine = o => { const e = EX[o.ex] || {}; return `<span class="on2"><b>${esc(exName2(o))}</b>${S.role === 'guest' || (REAL && !e.ver) ? '' : `<span class="vbadge">${ic('diamond', 14, 2)} Проверен</span>`}${e.reviews ? `<span class="rating">${ic('star', 15, 2)}${String(e.rating).replace('.', ',')}</span>` : '<span class="m">Нет отзывов</span>'}</span>`; };
 const partnerLine = o => { const p = (EX[o.ex] || {}).partner || [5, 2]; return `<span class="partner">Партнёрам до ${p[0]}% · ${pn(p[1], 'уровень', 'уровня', 'уровней')}</span>`; };
 const heartBtn = o => { const on = S.favs.includes(o.id); return `<button class="heart ${on ? 'on' : ''}" data-a="fav" data-v="${o.id}" aria-label="${on ? 'Убрать из избранного' : 'В избранное'}" aria-pressed="${on}">${ic('heart', 20, 2)}</button>`; };
 /* список: фото слева, рядом название, цена и исполнитель; под фото — описание в две строки (пустого места нет).
@@ -6572,7 +6572,7 @@ SCREENS.c_exec = p => {
   return {
     title: 'Профиль',
     body: `<div class="card" style="justify-items:center;text-align:center">${exAva(p.id, 'lg')}<div class="h1">${esc(e.name)}</div>${e.biz ? `<div class="m">${esc(e.biz)} · с ${e.since} года</div>` : ''}
-        <div class="row" style="justify-content:center">${REAL ? '' : pill('Проверен', '', 'diamond')}${e.reviews ? `<span class="rating t18">${ic('star', 18, 2)} ${String(e.rating).replace('.', ',')}</span><span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')}</span>` : '<span class="m">Пока нет отзывов</span>'}</div>
+        <div class="row" style="justify-content:center">${REAL && !e.ver ? '' : pill('Проверен', '', 'diamond')}${e.reviews ? `<span class="rating t18">${ic('star', 18, 2)} ${String(e.rating).replace('.', ',')}</span><span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')}</span>` : '<span class="m">Пока нет отзывов</span>'}</div>
         <div class="m">${esc(areaText(e.area, p.id))}</div></div>
       ${card(`<div class="h2">Об исполнителе</div><div>${esc(e.about)}</div>`)}${exStats(p.id)}
       ${exHoursCard(p.id)}
@@ -7976,7 +7976,7 @@ SCREENS.e_fav = () => { const favs = allReqs().filter(x => S.favReqs.includes(x.
 /* ---------- кабинет исполнителя и финансы (лист 37: деньги и баллы раздельно) ---------- */
 SCREENS.e_cab = () => ({
   title: 'Кабинет', cls: 'cabh',
-  body: `<div class="card"><div class="row"><span class="ava lg">${letter(myName())}</span><span class="grow"><span class="h2" style="display:block;font-size:28px;line-height:32px">${esc(myName())}</span><span class="row wrap">${REAL ? '' : pill('Проверен', '', 'diamond')}<span class="rating">${ic('star', 16, 2)} 4,9</span><span class="m">214 отзывов</span></span></span></div></div>
+  body: `<div class="card"><div class="row"><span class="ava lg">${letter(myName())}</span><span class="grow"><span class="h2" style="display:block;font-size:28px;line-height:32px">${esc(myName())}</span><span class="row wrap">${REAL && !EX.alex.ver ? '' : pill('Проверен', '', 'diamond')}<span class="rating">${ic('star', 16, 2)} 4,9</span><span class="m">214 отзывов</span></span></span></div></div>
     ${card(`<div class="list">
       ${rl('Профиль и направления', 'Заполняется один раз для всех карточек', 'go', 'e_profile', { icon: 'user' })}
       ${rl('Статус и счёт', `${esc(S.profile.status)} · счёт подключён`, 'statusInfo', '', { icon: 'case' })}
@@ -8404,6 +8404,8 @@ Object.assign(A, {
     ms.offer = oid; ms.title = o.title; ms.status = 'review'; ms.need = null; ms.step = null; ms.reason = null; ms.nextVer = wasPub;
     S.wiz = null; stackTo(['e_home', 'e_services', { n: 'e_service', p: { id: ms.id } }]);
     toast(wasPub ? 'Новая версия на проверке. В каталоге пока прежняя, оформленные заказы не изменятся' : 'Отправили на проверку. Сообщим, когда карточка появится в каталоге');
+    /* рабочая версия с проверкой до публикации (админка, 07.11): новую карточку публикует модератор, сервер держит её до решения */
+    if (REAL && S.premod && !wasPub) { o.hidden = false; return; }
     later(3500, () => {
       /* карточку берём заново по номеру: в рабочей версии сервер присылает её обратно, и в каталоге уже другая копия (07.11: карточка оставалась скрытой) */
       const fresh = OFFERS.find(x => x.id === nid) || o;
@@ -9254,7 +9256,7 @@ const chatFilter = role => { const q = norm(S.chatQ || ''); return chatsFor(role
 const lastOf = c => { const last = [...c.msgs].reverse().find(m => m.from !== 'sys') || c.msgs[c.msgs.length - 1] || { t: '' }; return [last, last.kind === 'version' ? `Предложение: ${rub(last.v.price)}` : last.kind === 'ask' ? `Просьба изменить условия: ${rub(last.a.price)}` : last.kind === 'brief' ? 'Запрос с условиями' : last.kind === 'file' ? last.name : last.kind === 'voice' ? `Голосовое, ${durText(last.dur)}` : last.t]; };
 /* договорились в переписке (03.11, Максим): предложение уходит карточкой прямо в диалог — примут, и эта же переписка становится заказом с номером.
    Исполнитель — «Предложить заказ», заказчик — «Предложить свои условия». Правило R-18 в таблице */
-const canDeal = ch => !ch.order && ch.with !== 'Администратор ZELDO' && (ch.role === 'exec' || !!(offerById(ch.offer) && offerById(ch.offer).ex !== 'alex'));
+const canDeal = ch => !ch.order && !ch.support && ch.with !== 'Администратор ZELDO' && (ch.role === 'exec' || !!(offerById(ch.offer) && offerById(ch.offer).ex !== 'alex'));
 const dealChip = ch => !canDeal(ch) ? '' : ch.role === 'exec' ? `<button class="chip deal" data-a="dealOffer" data-v="${ch.id}">${ic('tag', 18, 2.2)} Предложить заказ</button>` : `<button class="chip deal" data-a="dealBrief" data-v="${ch.id}">${ic('tag', 18, 2.2)} Предложить свои условия</button>`;
 /* контакты в переписке скрыты: телефоны, почта, ссылки и мессенджеры собеседнику не уходят (решение встречи 20.10, правило R-19) */
 const CONTACT_RE = [/(https?:\/\/|www\.|t\.me\/)\S*/gi, /[\w.\-]+@[\w\-]+\.[a-zа-я]{2,}/gi, /@[a-z0-9_.]{3,}/gi, /\b[\w\-]+\.(ru|com|рф|net|org|me|io)\b\S*/gi, /(\+7|\b8)[\s\-()]*\d{3}[\s\-()]*\d{3}[\s\-]*\d{2}[\s\-]*\d{2}|\d{10,}/g, /(телеграм[а-яё]*|telegram|ватсап[а-яё]*|whatsapp|вайбер[а-яё]*|viber|инстаграм[а-яё]*|instagram)/gi];
@@ -9633,6 +9635,8 @@ const resPhotosHtml = o => (o.resultPhotos || []).length ? `<div class="resthumb
 function orderActions(o) {
   const ex = S.role === 'exec'; const cust = !ex;
   const st = o.status; let h = '';
+  /* решение администратора по спору или отмене (рабочая версия, 07.11): видят обе стороны */
+  const rz = o.resolution; if (rz) { const RZ = { refund: 'деньги возвращаются заказчику', payout: 'деньги уходят исполнителю', split: 'сумма поделена', rework: 'исполнитель доделывает работу', cancel: 'заказ отменён администратором' }; h += `<div class="info"><b>Решение ZELDO: ${RZ[rz.how] || ''}</b>${rz.how === 'split' ? `<span class="m">Исполнителю ${rub(rz.exec)}, заказчику вернётся ${rub(rz.cust)}</span>` : ''}<span class="m">${esc(rz.comment || '')}</span></div>`; }
   if (o.stages && cust) {
     const cur = o.stages.find(s => s.st !== 'done');
     if (st === 'request') h += `<div class="info"><b>Ждём подтверждения исполнителя</b><span class="m">Исполнитель проверит объём и сроки. Потом вы оплатите первый этап.</span></div>`;
