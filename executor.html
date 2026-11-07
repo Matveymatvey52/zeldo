@@ -5869,7 +5869,9 @@ S.reviews = [
 ];
 
 /* заказы: у каждого номер, переписка привязывается к заказу */
-function mkOrder(o) { const ord = Object.assign({ id: S.nextOrder++, created: dk(0), log: [] }, o); S.orders.unshift(ord); return ord; }
+/* заказ на выезд, который оформляет заказчик, сразу получает его адрес (07.11) */
+const withAddr = o => { if (o.cust && o.fmt === 'visit' && !o.addr) { const a = myAddrText(); if (a) o.addr = a; } return o; };
+function mkOrder(o) { const ord = Object.assign({ id: S.nextOrder++, created: dk(0), log: [] }, withAddr(o)); S.orders.unshift(ord); return ord; }
 /* демо: ближайший визит заказчика — через час с небольшим, чтобы код начала был виден сразу; поздно вечером — завтра */
 const SOON = (() => { const n = new Date(); const m = Math.ceil((n.getHours() * 60 + n.getMinutes() + 75) / 30) * 30; return m <= 20 * 60 ? [dk(0), tstr(Math.max(m, 9 * 60))] : [dk(1), '10:00']; })();
 S.orders = [
@@ -6011,6 +6013,8 @@ const photo = (key, alt = '', size = '') => { const s = phSize(size); return !PH
    Телефон — листается пальцем, счётчик «1 / 5»; компьютер — стрелки по краям и миниатюры под фото. Нажатие открывает фото на весь экран */
 const phId = k => PHB[k] || (PH[k] || {}).src;
 const galOf = o => { const s = svcBy(o.svc); const sub = s && subBy(s.c, s.s); const seen = new Set();
+  /* в рабочей версии в галерее только фото исполнителя: мастер карточки обещает «только ваши снимки» (07.11) */
+  if (REAL && !o.generated) return [o.cover, o.ph, ...(o.gal || [])].filter(k => k && PH[k] && !seen.has(phId(k)) && seen.add(phId(k))).slice(0, 8);
   const pool = [o.cover, o.ph, ...(o.gal || []), s && `svc|${s.n}`, ...OFFERS.filter(x => x.ex === o.ex && x.svc === o.svc && x.id !== o.id).map(x => x.ph),
     ...(sub ? sub.list.filter(v => v !== s).map(v => `svc|${v.n}`) : []), s && `sub|${s.c}|${s.s}`];
   return pool.filter(k => k && PH[k] && !GAL_SKIP.has(k) && !seen.has(phId(k)) && seen.add(phId(k))).slice(0, 5); };
@@ -6096,7 +6100,7 @@ const listCard = ({ to, t, pr = '', ps = '', s = '', m = '', mb = false, pl = ''
 /* ---------- карточка услуги (листы 19–20) ---------- */
 /* гость не видит имени исполнителя: только «проверенный исполнитель», рейтинг и район */
 const exName2 = o => S.role === 'guest' ? 'Проверенный исполнитель' : (EX[o.ex] || {}).name || '';
-const exLine = o => { const e = EX[o.ex] || {}; return `<span class="on2"><b>${esc(exName2(o))}</b>${S.role === 'guest' ? '' : `<span class="vbadge">${ic('diamond', 14, 2)} Проверен</span>`}${e.reviews ? `<span class="rating">${ic('star', 15, 2)}${String(e.rating).replace('.', ',')}</span>` : '<span class="m">Нет отзывов</span>'}</span>`; };
+const exLine = o => { const e = EX[o.ex] || {}; return `<span class="on2"><b>${esc(exName2(o))}</b>${S.role === 'guest' || REAL ? '' : `<span class="vbadge">${ic('diamond', 14, 2)} Проверен</span>`}${e.reviews ? `<span class="rating">${ic('star', 15, 2)}${String(e.rating).replace('.', ',')}</span>` : '<span class="m">Нет отзывов</span>'}</span>`; };
 const partnerLine = o => { const p = (EX[o.ex] || {}).partner || [5, 2]; return `<span class="partner">Партнёрам до ${p[0]}% · ${pn(p[1], 'уровень', 'уровня', 'уровней')}</span>`; };
 const heartBtn = o => { const on = S.favs.includes(o.id); return `<button class="heart ${on ? 'on' : ''}" data-a="fav" data-v="${o.id}" aria-label="${on ? 'Убрать из избранного' : 'В избранное'}" aria-pressed="${on}">${ic('heart', 20, 2)}</button>`; };
 /* список: фото слева, рядом название, цена и исполнитель; под фото — описание в две строки (пустого места нет).
@@ -6501,7 +6505,7 @@ SCREENS.c_exec = p => {
   return {
     title: 'Профиль',
     body: `<div class="card" style="justify-items:center;text-align:center">${exAva(p.id, 'lg')}<div class="h1">${esc(e.name)}</div>${e.biz ? `<div class="m">${esc(e.biz)} · с ${e.since} года</div>` : ''}
-        <div class="row" style="justify-content:center">${pill('Проверен', '', 'diamond')}${e.reviews ? `<span class="rating t18">${ic('star', 18, 2)} ${String(e.rating).replace('.', ',')}</span><span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')}</span>` : '<span class="m">Пока нет отзывов</span>'}</div>
+        <div class="row" style="justify-content:center">${REAL ? '' : pill('Проверен', '', 'diamond')}${e.reviews ? `<span class="rating t18">${ic('star', 18, 2)} ${String(e.rating).replace('.', ',')}</span><span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')}</span>` : '<span class="m">Пока нет отзывов</span>'}</div>
         <div class="m">${esc(areaText(e.area, p.id))}</div></div>
       ${card(`<div class="h2">Об исполнителе</div><div>${esc(e.about)}</div>`)}${exStats(p.id)}
       ${exHoursCard(p.id)}
@@ -6778,9 +6782,11 @@ function calc(o, c) {
   return { L, total, dur: o.booking === 'term' || o.booking === 'range' ? dur : Math.max(dur, 15), days, what: what.filter(Boolean).join(' · ') };
 }
 const FMT_LABEL = { point: 'У исполнителя', visit: 'Выезд к вам', online: 'Онлайн' };
-function placeText(o, fmt, paid) {
+/* адрес заказчика для выезда — его собственный, первый из «Моих адресов» (07.11: раньше стоял адрес из примера) */
+function myAddrText() { const a = S.myAddrs[0]; return a ? [a.city, a.street].filter(Boolean).join(', ') : ''; }
+function placeText(o, fmt, paid, ord) {
   if (fmt === 'online') return 'Онлайн, ссылку пришлёт исполнитель';
-  if (fmt === 'visit') return paid ? `К вам: Москва, ул. Профсоюзная, 104, кв. 18` : `Выезд к вам: ${S.district}`;
+  if (fmt === 'visit') { if (!paid) return `Выезд к вам: ${S.district}`; const a = (ord && ord.addr) || (ord && !ord.cust ? '' : myAddrText()); return a ? `К вам: ${a}` : ord && !ord.cust ? 'Заказчик ещё не указал адрес' : 'Адрес не указан'; }
   return paid && o.addr ? o.addr : (areaText(o.zone, o.ex) || 'Район покажем до оплаты');
 }
 /* два маршрута у каждой услуги: А — готовая цена, Б — свой запрос исполнителю (параметры, фото, своя цена); по умолчанию — основной из таблицы */
@@ -7056,8 +7062,8 @@ SCREENS.c_offer = p => {
     tabs: false,
     body: `${heroPh(galOf(o), o.title, preview ? '' : `<button class="heart ${favOn ? 'on' : ''}" style="top:12px;left:12px" data-a="fav" data-v="${o.id}" aria-label="${favOn ? 'Убрать из избранного' : 'В избранное'}" aria-pressed="${favOn}">${ic('heart', 20, 2)}</button>`)}
       <div class="col g4 ohead"><h1 class="h1">${esc(o.title)}</h1>${s ? `<span class="m">${esc(`${s.c} · ${s.s} · ${s.n}`)}</span>` : ''}</div>
-      ${S.role === 'guest' ? `<button class="card c" data-a="guestNeed" data-v="увидеть имя и профиль исполнителя" style="text-align:left"><span class="row"><span class="ava">${ic('user', 22, 2)}</span><span class="grow">${exLine(o)}<span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')} · ${esc(areaText(e.area, o.ex))}</span><span class="m" style="display:block">Имя и связь с исполнителем — после входа</span></span><span class="blue">${ic('lock', 20, 2)}</span></span></button>`
-        : `<div class="card c oexec" style="gap:10px"><button data-a="go" data-v="${gv('c_exec', { id: o.ex })}" style="text-align:left"><span class="row">${exAva(o.ex)}<span class="grow">${exLine(o)}<span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')} · ${esc(areaText(e.area, o.ex))}</span></span><span class="blue">${ic('arr', 22, 2)}</span></span></button>${o.ex === 'alex' ? '' : `<div class="btns two">${btn(`${ic('chat', 20)} Написать`, 'chatWith', o.id, 'soft')}${btn(`${ic('phone', 20)} Позвонить`, 'callAsk', o.ex, 'soft')}</div>`}</div>`}
+      ${S.role === 'guest' ? `<button class="card c" data-a="guestNeed" data-v="увидеть имя и профиль исполнителя" style="text-align:left"><span class="row"><span class="ava">${ic('user', 22, 2)}</span><span class="grow">${exLine(o)}<span class="m">${e.reviews ? pn(e.reviews, 'отзыв', 'отзыва', 'отзывов') + ' · ' : ''}${esc(areaText(e.area, o.ex))}</span><span class="m" style="display:block">Имя и связь с исполнителем — после входа</span></span><span class="blue">${ic('lock', 20, 2)}</span></span></button>`
+        : `<div class="card c oexec" style="gap:10px"><button data-a="go" data-v="${gv('c_exec', { id: o.ex })}" style="text-align:left"><span class="row">${exAva(o.ex)}<span class="grow">${exLine(o)}<span class="m">${e.reviews ? pn(e.reviews, 'отзыв', 'отзыва', 'отзывов') + ' · ' : ''}${esc(areaText(e.area, o.ex))}</span></span><span class="blue">${ic('arr', 22, 2)}</span></span></button>${o.ex === 'alex' ? '' : `<div class="btns two">${btn(`${ic('chat', 20)} Написать`, 'chatWith', o.id, 'soft')}${btn(`${ic('phone', 20)} Позвонить`, 'callAsk', o.ex, 'soft')}</div>`}</div>`}
       ${card(`<div>${esc(o.desc)}</div><div class="h2">Что входит</div>${bullets(o.inc)}<div class="h2">Что вы получите</div><div>${esc(o.res)}</div>${bounds.length ? `<div class="h2">Заказывается отдельно</div><div class="m">${bounds.map((x, i) => esc(i ? lcFirst(x) : x)).join(', ')}. Это другие услуги: в эту карточку они не входят.</div>` : ''}`)}
       ${preview || o.model === 'brief' || o.model === 'inspect' ? '' : wayField(o, c)}
       <div class="row wrap">${pillRow}${o.formats.includes('online') ? pill('Можно онлайн', '', 'globe') : ''}${o.docs ? pill('Документы проверены', 'ok', 'shield') : ''}</div>
@@ -7135,11 +7141,13 @@ SCREENS.c_checkout = p => {
   const date = ord ? ord.date : (c.visit === 'free' ? null : c.day), time = ord ? ord.time : c.time;
   const fmt = ord ? (ord.fmt || o.formats[0]) : c.fmt;
   const method = S.payMethod || 'sbp';
+  const needAddr = fmt === 'visit' && !(ord && ord.addr) && !myAddrText(); S.coNeed = needAddr;
   return {
     title: 'Оформление', tabs: false,
     body: `${card(`<div class="row top"><span class="bigth" style="width:64px;height:64px;border-radius:14px;overflow:hidden;flex:none">${photo(o.ph, '', 'M')}</span><span class="grow"><span class="h2" style="display:block">${esc(o.title)}</span><span class="m">${esc(exName(o.ex))}</span></span></div>
         <div class="sep"></div>${r.what ? `<div class="sumline"><span>Условия</span><b>${esc(r.what)}</b></div>` : ''}
         <div class="sumline"><span>Где</span><b>${esc(placeText(o, fmt, false))}</b></div>
+        ${needAddr ? field('Куда приехать', `<input class="input" data-in="coAddr" value="${esc(S.coAddr || '')}" maxlength="140" placeholder="Город, улица, дом, квартира" autocomplete="street-address">`, { hint: 'Исполнитель увидит адрес только после оплаты. Запомним его в «Моих адресах».' }) : ''}
         ${o.booking === 'range' && !ord ? `<div class="sumline"><span>Даты</span><b>${when(c.from)} — ${when(c.to)}</b></div>` : date ? `<div class="sumline"><span>Когда</span><b>${when(date, time)}${ord && ord.dateTo ? ' — ' + when(ord.dateTo) : ''}</b></div>` : o.booking === 'term' ? `<div class="sumline"><span>Срок</span><b>${pn(r.days || 5, 'день', 'дня', 'дней')}</b></div>` : '<div class="sumline"><span>Когда</span><b>Без записи, в часы работы</b></div>'}
         <div class="sep"></div>${sumLines(r.L.map(([a, b]) => [esc(a), rub(b)]))}
         ${extra ? `<div class="sumline total"><span>Доплата: ${esc(extra.name)}</span><b>${rub(payNow)}</b></div>` : stage ? `<div class="sumline"><span>Весь проект</span><b>${rub(r.total)}</b></div><div class="sumline total"><span>Сейчас: этап «${esc(stage.name)}»</span><b>${rub(payNow)}</b></div>` : `<div class="sumline total"><span>К оплате</span><b>${rub(payNow)}</b></div>`}`)}
@@ -7150,14 +7158,20 @@ SCREENS.c_checkout = p => {
   };
 };
 A.payM = v => { S.payMethod = v; render(); };
+IN.coAddr = v => { S.coAddr = v; };
+/* новый адрес из оформления — в «Мои адреса», чтобы не вписывать его снова */
+const keepAddr = () => { const v = (S.coAddr || '').trim(); if (v.length < 5) return; S.myAddrs.unshift({ id: uid('a'), name: 'Дом', street: v, city: '', district: S.district || '' }); S.coAddr = ''; };
 A.pay = v => {
-  if (S.payBusy) return; S.payBusy = true; render();
+  if (S.payBusy) return;
+  if (S.coNeed && (S.coAddr || '').trim().length < 5) { toast('Впишите адрес, куда приехать исполнителю', 'info'); const i = document.querySelector('[data-in="coAddr"]'); if (i) i.focus(); return; }
+  keepAddr(); S.coNeed = false; S.payBusy = true; render();
   setTimeout(() => {
     S.payBusy = false;
     const [kind, id] = v.split('|'); let ord;
     if (kind === 'x') { ord = orderById(id); changeApply(ord); S.stack = S.stack.filter(x => x.n !== 'c_checkout'); render('new'); toast('Доплата на защищённом счёте, заказ обновлён'); return; }
     if (kind === 'o') {
       ord = orderById(id); const o = offerById(ord.offer); const ch = chatById(ord.chat);
+      if ((ord.fmt || (o.formats || [])[0]) === 'visit' && !ord.addr) ord.addr = myAddrText() || undefined;  /* адрес для выезда — в заказ */
       if (ord.stages) {
         const st = ord.stages.find(s => s.st === 'wait'); st.st = 'work'; ord.status = 'work';
         if (ch) postMsg(ch, 'sys', { t: `Этап «${st.name}» оплачен: ${rub(st.price)} на защищённом счёте.`, ok: true });
@@ -7895,7 +7909,7 @@ SCREENS.e_fav = () => { const favs = allReqs().filter(x => S.favReqs.includes(x.
 /* ---------- кабинет исполнителя и финансы (лист 37: деньги и баллы раздельно) ---------- */
 SCREENS.e_cab = () => ({
   title: 'Кабинет', cls: 'cabh',
-  body: `<div class="card"><div class="row"><span class="ava lg">${letter(myName())}</span><span class="grow"><span class="h2" style="display:block;font-size:28px;line-height:32px">${esc(myName())}</span><span class="row wrap">${pill('Проверен', '', 'diamond')}<span class="rating">${ic('star', 16, 2)} 4,9</span><span class="m">214 отзывов</span></span></span></div></div>
+  body: `<div class="card"><div class="row"><span class="ava lg">${letter(myName())}</span><span class="grow"><span class="h2" style="display:block;font-size:28px;line-height:32px">${esc(myName())}</span><span class="row wrap">${REAL ? '' : pill('Проверен', '', 'diamond')}<span class="rating">${ic('star', 16, 2)} 4,9</span><span class="m">214 отзывов</span></span></span></div></div>
     ${card(`<div class="list">
       ${rl('Профиль и направления', 'Заполняется один раз для всех карточек', 'go', 'e_profile', { icon: 'user' })}
       ${rl('Статус и счёт', `${esc(S.profile.status)} · счёт подключён`, 'statusInfo', '', { icon: 'case' })}
@@ -7959,7 +7973,9 @@ const mkVar = (name, inc, res, price, term, dur) => ({ name, inc: inc.slice(), r
 function wizApplySvc(w, name) {
   const s = svcBy(name); const sug = sugFor(name); const base = BASE[s.c] || 2000;
   w.svc = name; w.title = sug.titles[0]; w.titleOwn = ''; w.inc = sug.inc.slice(); w.res = sug.res[0]; w.desc = w.desc || '';
-  w.fmts = s.f === 'on' ? ['online'] : s.f === 'off' ? ['point'] : ['point', 'online'];
+  /* нет своей точки (новый исполнитель в рабочей версии) — по умолчанию выезд к заказчику, а не «У себя» без адреса */
+  const off = S.profile.points.length ? 'point' : 'visit';
+  w.fmts = s.f === 'on' ? ['online'] : s.f === 'off' ? [off] : [off, 'online'];
   w.vars = !isTire(w) && wantsVars(w);
   w.vr = w.vars ? sug.vars.map((n, i) => mkVar(n, sug.inc.slice(0, Math.min(sug.inc.length, 2 + i)), sug.res[0], Math.round(base * (priceParam(name) ? 1 + 0.2 * i : [0.7, 1, 1.8][i % 3]) / 100) * 100, [3, 5, 7][i % 3], priceParam(name) ? (svcTable(name).d || 60) + 15 * i : [45, 60, 80][i % 3])) : [];
   w.priceType = s.r === 'B' && !isTire(w) && !w.vars ? 'deal' : 'fixed';  /* маршрут Б по таблице — цена после брифа */
@@ -8034,10 +8050,12 @@ function wzStep1(w) {
       ${field('Название карточки', `<div class="optlist">${titles.map(t => opt('wzTitle', t, esc(t), t === w.svc ? 'Как в каталоге' : '', w.title === t && !w.titleOwn)).join('')}
         <div class="opt ${w.titleOwn ? 'on' : ''}" style="display:grid;gap:8px"><span class="row"><span class="mark ${w.titleOwn ? 'on' : ''}"></span><span class="ot">Своё название</span></span><input class="input" data-in="wzTitleOwn" value="${esc(w.titleOwn)}" placeholder="Например: Шиномонтаж за 40 минут" maxlength="70"></div></div>`, { hint: `Название должно соответствовать составу работы. Карточку всё равно найдут по запросу «${esc(s.n)}»: связь с каталогом сохраняется.` })}`;
   }
-  return `<div class="info"><span class="m">Показываем услуги ваших направлений из профиля: <b>${S.profile.dirs.map(esc).join(', ')}</b>. <button class="lnk" data-a="go" data-v="e_profile">Изменить</button></span></div>
+  /* новый исполнитель (рабочая версия, 07.11): направлений в профиле ещё нет — сразу весь каталог, без пустого «из профиля: .» */
+  const noDirs = !S.profile.dirs.length; if (noDirs) w.showAll = true;
+  return `<div class="info"><span class="m">${noDirs ? 'Найдите свою услугу поиском или выберите раздел каталога ниже.' : `Показываем услуги ваших направлений из профиля: <b>${S.profile.dirs.map(esc).join(', ')}</b>.`} <button class="lnk" data-a="go" data-v="e_profile">${noDirs ? 'Указать направления в профиле' : 'Изменить'}</button></span></div>
     ${field('Найдите услугу', `<span class="search">${ic('search', 22)}<input data-in="wzQ" value="${esc(w.q)}" placeholder="Начните писать: шин, балан, мойк" autocomplete="off"></span>`)}
     <div id="wzsugg" class="col g16">${wzSugg(w)}</div>
-    ${w.showAll ? btn('Только мои направления', 'wzAll', '', 'text block') : btn('Показать весь каталог', 'wzAll', '', 'text block')}
+    ${noDirs ? '' : w.showAll ? btn('Только мои направления', 'wzAll', '', 'text block') : btn('Показать весь каталог', 'wzAll', '', 'text block')}
     ${btn('Нужной услуги нет в каталоге', 'wzPropose', '', 'text block')}`;
 }
 
@@ -8167,6 +8185,7 @@ function wzIssues(w) {
   if (isTire(w) && !w.tire.diams.length) out.push([3, 'Не выбраны диаметры']);
   if (isTire(w) && !w.tire.transfers.length) out.push([3, 'Не выбрано, как передают колёса']);
   if (w.fmts.includes('point') && !w.visit.length) out.push([3, 'Не выбрано, как записываться']);
+  if (w.fmts.includes('point') && !S.profile.points.length) out.push([3, 'Не указан адрес, где вы принимаете: добавьте точку в профиле или выберите выезд']);
   if (isTire(w) && w.tire.transfers.some(tr => w.tire.diams.some(d => !(w.tp.p[tr] || {})[d] || !(w.tp.p[tr] || {})[d][0]))) out.push([4, 'Не у всех диаметров есть цена']);
   if (w.svc && svcCard(w.svc).docs && !w.doc) out.push([3, 'Не приложен документ: лицензия, допуск или диплом']);
   if (w.pick && !Object.values((w.prp[w.pick] || {}).v || {}).some(x => x > 0)) out.push([4, 'В прайсе нет ни одного пункта с ценой']);
@@ -8319,7 +8338,9 @@ Object.assign(A, {
     S.wiz = null; stackTo(['e_home', 'e_services', { n: 'e_service', p: { id: ms.id } }]);
     toast(wasPub ? 'Новая версия на проверке. В каталоге пока прежняя, оформленные заказы не изменятся' : 'Отправили на проверку. Сообщим, когда карточка появится в каталоге');
     later(3500, () => {
-      if (wasPub) { const i = OFFERS.findIndex(x => x.id === oid); const nv = Object.assign({}, o, { id: oid, hidden: false }); if (i >= 0) OFFERS[i] = nv; else OFFERS.push(nv); OFFERS.splice(OFFERS.findIndex(x => x.id === nid), 1); S.cfg[oid] = null; } else o.hidden = false;
+      /* карточку берём заново по номеру: в рабочей версии сервер присылает её обратно, и в каталоге уже другая копия (07.11: карточка оставалась скрытой) */
+      const fresh = OFFERS.find(x => x.id === nid) || o;
+      if (wasPub) { const i = OFFERS.findIndex(x => x.id === oid); const nv = Object.assign({}, fresh, { id: oid, hidden: false }); if (i >= 0) OFFERS[i] = nv; else OFFERS.push(nv); const j = OFFERS.findIndex(x => x.id === nid); if (j >= 0) OFFERS.splice(j, 1); S.cfg[oid] = null; } else fresh.hidden = false;
       ms.status = 'pub'; ms.nextVer = false; notify('exec', 'Карточка опубликована', o.title, gv('e_service', { id: ms.id })); toast(`«${o.title}» опубликована и видна заказчикам`);
     });
   },
@@ -8441,7 +8462,7 @@ SCREENS.c_home = () => {
 /* здесь только записи на время: у заказов со сроком в поле времени стоит дата, их здесь нет */
 const custBooked = () => S.orders.filter(o => o.cust && o.date && /^\d{1,2}:\d{2}$/.test(o.time || '') && o.status !== 'cancel');
 const bookEnd = o => tmin(o.time) + (o.dur || 60);
-const bookPlace = o => { const of = offerById(o.offer); return of ? placeText(of, (of.formats || [])[0], true) : ''; };
+const bookPlace = o => { const of = offerById(o.offer); return of ? placeText(of, o.fmt || (of.formats || [])[0], true, o) : ''; };
 function nextBooking() {
   const now = new Date(); const nowK = `${dk(0)} ${tstr(now.getHours() * 60 + now.getMinutes())}`;
   return custBooked().filter(o => o.status !== 'done' && `${o.date} ${o.time}` >= nowK).sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`))[0] || null;
@@ -9622,7 +9643,8 @@ SCREENS.order = p => {
       ${card(`<div class="h2">${o.stages ? 'Этапы' : 'Ход заказа'}</div>${steps}`)}
       ${card(`<div class="h2">Условия заказа</div>
         ${o.date ? `<div class="sumline"><span>${o.dateTo ? 'Даты' : o.sub ? `Визит ${o.sub.used + 1}` : 'Когда'}</span><b>${when(o.date, o.time)}${o.dateTo ? ' — ' + when(o.dateTo) : ''}</b></div>` : o.free ? '<div class="sumline"><span>Когда</span><b>Без записи, живая очередь</b></div>' : o.sub ? '<div class="sumline"><span>Следующий визит</span><b>не выбран</b></div>' : ''}
-        <div class="sumline"><span>Где</span><b>${esc(placeText(of, o.fmt || of.formats[0], paid))}</b></div>
+        <div class="sumline"><span>Где</span><b>${esc(placeText(of, o.fmt || of.formats[0], paid, o))}</b></div>
+        ${!ex && (o.fmt || of.formats[0]) === 'visit' && !o.addr && !['done', 'cancel'].includes(o.status) ? `${field('Куда приехать', `<input class="input" data-in="ordAddr" value="${esc(S.ordAddr || myAddrText())}" maxlength="140" placeholder="Город, улица, дом, квартира" autocomplete="street-address">`, { hint: 'Исполнитель увидит адрес только после оплаты.' })}${btn('Сохранить адрес', 'ordAddrSave', o.id, 'soft block')}` : ''}
         ${!paid && (o.fmt || of.formats[0]) !== 'online' ? '<div class="m">Точный адрес откроется после оплаты.</div>' : ''}
         ${sumLines((o.lines || [[o.svc, o.total]]).map(([a, b]) => [esc(a), rub(b)]))}
         <div class="sumline total"><span>Итого</span><b>${rub(o.total)}</b></div>
@@ -9795,6 +9817,9 @@ Object.assign(A, {
 });
 IN.stCode = v => { if (S.stx) S.stx.code = v.replace(/\D/g, '').slice(0, 4); };
 
+/* заказ на выезд без адреса (например, из переписки): заказчик вписывает его прямо в заказе (07.11) */
+IN.ordAddr = v => { S.ordAddr = v; };
+A.ordAddrSave = id => { const o = orderById(id); const v = (S.ordAddr || myAddrText()).trim(); if (v.length < 5) { toast('Впишите адрес: город, улица и дом', 'info'); return; } o.addr = v; if (!S.myAddrs.length) S.myAddrs.unshift({ id: uid('a'), name: 'Дом', street: v, city: '', district: S.district || '' }); S.ordAddr = ''; render(); toast('Адрес сохранён. Исполнитель увидит его после оплаты'); };
 const setSt = (o, st, msg) => { o.status = st; const c1 = o.chat && chatById(o.chat); const c2 = !c1 && o.echat && chatById(o.echat); if (msg) postMsg(c1 || c2, 'sys', { t: msg }); };
 Object.assign(A, {
   orderChat(id) { const o = orderById(id); if (S.role === 'exec') { const ch = { id: uid('ch'), role: 'exec', with: o.client, offer: o.offer, order: o.id, unread: 0, msgs: [{ from: 'sys', t: `Переписка по заказу № ${o.id}` }] }; S.chats.unshift(ch); o.echat = ch.id; go('chat', { id: ch.id }); } else { const ch = ensureChat('cust', offerById(o.offer)); ch.order = o.id; o.chat = ch.id; go('chat', { id: ch.id }); } },
