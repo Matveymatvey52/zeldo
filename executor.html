@@ -3468,6 +3468,10 @@ window.ZMAP_STYLE = {"version":8,"sources":{"openmaptiles":{"type":"vector","url
 .cv-b.mute.on { background: var(--hdr-ink); color: var(--hdr); }
 .cv-b:active { transform: scale(0.95); }
 @media (prefers-reduced-motion: reduce) { .callov { animation: none; } .cv-b { transition: none; } }
+/* фото заявки — миниатюры со ссылкой на полный размер */
+.thumb.rqf { overflow: hidden; } .thumb.rqf img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* ссылка внутри текста — цветом раскраски */
+a.ilnk { color: var(--act); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 /* выбор раскраски в «Настройках» */
 .palg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .palb { display: grid; justify-items: center; gap: 8px; padding: 12px 6px 10px; border-radius: 18px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); font-size: 15px; line-height: 20px; color: var(--ink); transition: box-shadow 0.15s ease; }
@@ -7374,12 +7378,15 @@ Object.assign(A, {
     S.stack = [S.stack[0], { n: 'c_reqview', p: { id: req.id } }]; render('new'); toast('Заявка размещена');
   },
 });
+/* фото и файлы заявки (07.11): в рабочей версии лежат на сервере, их видят исполнители, которым видна заявка */
+const reqFilesHtml = l => { const up = (l || []).filter(x => x && typeof x === 'object' && x.fid); const names = (l || []).filter(x => typeof x === 'string'); if (!up.length && !names.length) return '';
+  return `<div class="col g8"><span class="lbl">Фото и файлы</span>${up.length ? `<div class="thumbs">${up.map(x => x.img ? `<a class="thumb rqf" href="/api/file/${esc(x.fid)}" target="_blank" rel="noopener" aria-label="Открыть фото ${esc(x.name)}"><img src="/api/file/${esc(x.fid)}" alt="" loading="lazy"></a>` : `<a class="chip" href="/api/file/${esc(x.fid)}" target="_blank" rel="noopener">${ic('clip', 16, 2.2)} ${esc(x.name)}</a>`).join('')}</div>` : ''}${names.length ? `<span class="m">${names.map(esc).join(', ')}</span>` : ''}</div>`; };
 SCREENS.c_reqview = p => {
   const r = S.requests.find(x => x.id === p.id);
   const fresh = new Set(r.offers.filter(x => !x.seen)); r.offers.forEach(x => { x.seen = true; });
   return {
     title: 'Заявка', sub: esc(r.title),
-    body: `${card(`<div class="h2">Сведения о задаче</div><div>${esc(r.what)}</div>${r.text ? `<div class="m">«${esc(r.text)}»</div>` : ''}<div class="sumline"><span>Где</span><b>${esc(r.whereText)}</b></div><div class="sumline"><span>Когда</span><b>${esc(r.whenText)}</b></div><div class="sumline"><span>Цена</span><b>${r.budgetFrom ? `${rub(r.budgetFrom)} – ${rub(r.budget)}` : r.budget ? rub(r.budget) : 'договорная'}</b></div><div class="sumline"><span>Кому</span><b>${r.to === 'all' ? 'всем подходящим' : pn(r.pick.length, 'исполнитель', 'исполнителя', 'исполнителей')}</b></div>`)}
+    body: `${card(`<div class="h2">Сведения о задаче</div><div>${esc(r.what)}</div>${r.text ? `<div class="m">«${esc(r.text)}»</div>` : ''}${reqFilesHtml(r.files)}<div class="sumline"><span>Где</span><b>${esc(r.whereText)}</b></div><div class="sumline"><span>Когда</span><b>${esc(r.whenText)}</b></div><div class="sumline"><span>Цена</span><b>${r.budgetFrom ? `${rub(r.budgetFrom)} – ${rub(r.budget)}` : r.budget ? rub(r.budget) : 'договорная'}</b></div><div class="sumline"><span>Кому</span><b>${r.to === 'all' ? 'всем подходящим' : pn(r.pick.length, 'исполнитель', 'исполнителя', 'исполнителей')}</b></div>`)}
       <div class="sec"><span class="h2">Предложения</span><span class="m">${r.offers.length}</span></div>
       ${r.offers.length ? r.offers.map(x => card(`${fresh.has(x) ? `<span class="newtag">${ic('spark', 14, 2.4)} Новое предложение</span>` : ''}<div class="row">${exAva(x.ex)}<span class="grow"><b class="t18" style="display:block">${esc(exName(x.ex))}</b><span class="m">${EX[x.ex].reviews ? `★ ${String(EX[x.ex].rating).replace('.', ',')}` : 'Нет отзывов'} · ${esc(areaText(EX[x.ex].area, x.ex))}</span></span><b class="t18 num">${rub(x.price)}</b></div><div>${esc(x.text)}</div><div class="m">${ic('clock', 16, 2)} ${esc(x.when)}</div>${r.status === 'open' ? `<div class="btns two">${btn('Написать', 'chatWith', x.offer, 'soft')}${btn('Выбрать', 'reqChoose', `${r.id}|${x.id}`)}</div>` : r.chosen === x.id ? pill('Вы выбрали', 'ok', 'check') : ''}`)).join('')
         : `${skel(2)}<div class="m">Предложения появятся здесь, мы пришлём уведомление.</div>`}`,
@@ -7544,7 +7551,7 @@ SCREENS.e_task = p => {
   SLOT_ST.task = () => S.offerDraft;
   return {
     title: 'Заявка', sub: esc(x.title),
-    body: `${card(`<div class="h2">Сведения о задаче</div><div>${esc(x.what)}</div><div class="sumline"><span>Где</span><b>${esc(x.where)}</b></div><div class="sumline"><span>Когда</span><b>${dayName(x.date)}, ${esc(x.part)}</b></div><div class="sumline"><span>Бюджет</span><b>${budgetText(x)}</b></div><div class="sumline"><span>Заказчик</span><b>${esc(x.client)}</b></div><div class="m">Точный адрес вы увидите после оплаты.</div>`)}
+    body: `${card(`<div class="h2">Сведения о задаче</div><div>${esc(x.what)}</div>${reqFilesHtml(x.files)}<div class="sumline"><span>Где</span><b>${esc(x.where)}</b></div><div class="sumline"><span>Когда</span><b>${dayName(x.date)}, ${esc(x.part)}</b></div><div class="sumline"><span>Бюджет</span><b>${budgetText(x)}</b></div><div class="sumline"><span>Заказчик</span><b>${esc(x.client)}</b></div><div class="m">Точный адрес вы увидите после оплаты.</div>`)}
       ${favBtn(x.id)}<div class="info"><b>${x.personal ? 'Вас выбрали в подборку' : 'Общая заявка'}</b><span class="m">Почему вы её видите: ${whyFeed(x)}. ${feedAudience(x)} Заказчик сравнит предложения и выберет одно.</span></div>
       ${x.my ? card(`${pill('Предложение отправлено', 'ok', 'check')}<div class="t18 b">${rub(x.my.price)} · ${dayName(x.my.day)}, ${x.my.slot}</div><div class="m">Ждём решения заказчика. Если он выберет вас, придёт уведомление и заказ появится в «Заказах».</div>`, 'soft')
         : card(`<div class="h2">Ваше предложение</div>
@@ -8756,7 +8763,7 @@ SCREENS.c_req = () => {
       <label class="field"><span class="lbl">Заголовок заявки</span><input class="input" data-in="reqTitle" value="${esc(R.title)}" maxlength="80" placeholder="Коротко: что нужно и к какому сроку"></label>
       <label class="field"><span class="lbl">Что нужно сделать?</span><textarea class="textarea" data-in="reqText" rows="4" maxlength="600" placeholder="Коротко опишите задачу">${esc(R.text)}</textarea><span id="reqmod">${modCheck(R.title + ' ' + R.text).length ? modWarn(modCheck(R.title + ' ' + R.text)) : ''}</span></label>
       ${askOn(s && s.n) ? `<div class="field"><span class="lbl">Параметры</span><span class="m">Те же вопросы, что в карточках исполнителей. С ответами предложения будут точнее.</span></div>${askForm(s.n, 'req')}` : opts.length && opts[0][0] !== 'Что важно' ? `<div class="field"><span class="lbl">Уточнения, если хотите</span>${opts.map(([g, list], gi) => `<span class="m">${esc(g)}</span>${chips('reqTog', list.map(x => [`${gi}|${x}`, x]), v => (R.sel[gi] || []).includes(v.split('|')[1]))}`).join('')}</div>` : ''}
-      <div class="field"><span class="lbl">Фото и файлы</span>${R.files.length ? `<div class="chips">${R.files.map((f, i) => `<button class="chip on" data-a="reqFileDel" data-v="${i}" aria-label="Убрать файл ${esc(f)}">${ic('clip', 16, 2.2)} ${esc(f)} <span class="x">×</span></button>`).join('')}</div>` : ''}<label class="fakefield svcf" style="cursor:pointer"><span class="grow t18">Выбрать файл</span>${ic('right', 22, 2.2)}<input type="file" data-ch="reqFile" hidden></label><span class="m">Фото, записи и документы по задаче — если они нужны.</span></div>`;
+      <div class="field"><span class="lbl">Фото и файлы</span>${R.files.length ? `<div class="chips">${R.files.map((f, i) => `<button class="chip on" data-a="reqFileDel" data-v="${i}" aria-label="Убрать файл ${esc(f.name || f)}">${ic(f.img ? 'camera' : 'clip', 16, 2.2)} ${esc(f.name || f)} <span class="x">×</span></button>`).join('')}</div>` : ''}<label class="fakefield svcf" style="cursor:pointer"><span class="grow t18">Выбрать файл</span>${ic('right', 22, 2.2)}<input type="file" data-ch="reqFile" hidden></label><span class="m">Фото, записи и документы по задаче — если они нужны.</span></div>`;
     bar = `<div class="abar">${bl ? `<button class="btn block" disabled>Далее</button><div class="why center">Причина: ${bl}.</div>` : btn('Далее', 'reqStep', '2', 'block')}${btn('Сохранить черновик', 'reqSave', '', 'outline block')}</div>`;
   } else if (R.step === 2) {
     const fmts = [...(canOnline(s.f) ? [['online', 'Онлайн']] : []), ...(canOffline(s.f) ? [['place', 'На месте']] : [])];
@@ -8816,7 +8823,7 @@ Object.assign(A, {
     setTimeout(() => {
       R.posting = false; const s = svcById(R.svc);
       const what = [R.text, (askOn(s.n) ? askWhat(s.n, R) : Object.values(R.sel).flat()).join(' · ')].filter(Boolean).join(' · ') || 'Подробности обсудим в переписке';
-      const req = { id: uid('r'), svc: s.n, title: R.title.trim() || s.n, what, text: '', files: R.files.slice(), photos: 0, whenText: reqWhenText(R), whereText: reqFmtText(R), budget: R.btype === 'deal' ? 0 : R.budget, budgetFrom: R.btype === 'range' ? R.budgetFrom : 0, to: 'all', pick: [], offers: [], status: 'open', created: dk(0), until: dk(7), day: R.from, dayTo: R.to || null, time: R.time || null };
+      const req = { id: uid('r'), svc: s.n, title: R.title.trim() || s.n, what, text: '', files: R.files.slice(), photos: R.files.filter(f => f && f.img).length, fk: R.fk || null, whenText: reqWhenText(R), whereText: reqFmtText(R), budget: R.btype === 'deal' ? 0 : R.budget, budgetFrom: R.btype === 'range' ? R.budgetFrom : 0, to: 'all', pick: [], offers: [], status: 'open', created: dk(0), until: dk(7), day: R.from, dayTo: R.to || null, time: R.time || null };
       S.requests.unshift(req); S.reqDraft = null; S.reqSaved = false;
       offersFor(s.n).filter(o => o.ex !== 'alex').slice(0, 3).forEach((o, i) => sim(2200 + i * 2300, () => {
         const base = isDeal(o) ? (o.reply || {}).price || priceFrom(o) : calc(o, cfgOf(o)).total || priceFrom(o); const dd = req.day || [dk(1), dk(2), dk(1)][i];
