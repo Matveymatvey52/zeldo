@@ -4399,6 +4399,11 @@ mark { background: none; color: var(--act); font-weight: 700; }
 .lc-m.lc-b { color: var(--ink); font-weight: 600; }
 .lc-f { display: flex !important; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; height: 26px; }
 .lc-f .pill { max-width: 85%; overflow: hidden; text-overflow: ellipsis; }
+/* «Повторить» в карточке заказа: поверх нижней строки, между статусом и стрелкой */
+.lcw { position: relative; min-width: 0; }
+.lc-act { position: absolute; right: 42px; bottom: 11px; height: 32px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; border-radius: 999px; background: var(--soft); color: var(--act); font-size: 14px; font-weight: 600; line-height: 1; white-space: nowrap; }
+.lc-act svg { flex: none; }
+@media (hover: hover) and (pointer: fine) { .lc-act:hover { background: var(--soft2); box-shadow: inset 0 0 0 1px var(--act); } }
 .lc-f > svg { flex: none; color: var(--act); }
 .lc-h > span { display: block; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* телефон (03.11, «фотографии побольше»): одна крупная миниатюра во всех списках — около 120 px на iPhone, не меньше 104 px на узких */
@@ -5526,12 +5531,12 @@ function screenName(x) {
 }
 
 /* широкий экран: подряд идущие карточки собираются в сетку (2–3 колонки — по ширине, задаёт CSS); одна карточка тоже, чтобы не растягивалась */
-const CARD_SEL = '.pc, .pct, .lc, .oc, .entry';
+const CARD_SEL = '.pc, .pct, .lc, .lcw, .oc, .entry';
 function gridCards(root) {
   if (!root || !root.querySelectorAll) return;
   const parents = new Set([...root.querySelectorAll(CARD_SEL)].map(x => x.parentElement));
   parents.forEach(par => {
-    if (!par || par.matches('.cgrid, .grid2, .hscroll, .hrow') || par.closest('.hscroll, .rib-s')) return;
+    if (!par || par.matches('.cgrid, .grid2, .hscroll, .hrow, .lcw') || par.closest('.hscroll, .rib-s')) return;
     let run = [];
     const flush = () => { if (run.length) { const g = document.createElement('div'); g.className = 'cgrid' + (run.every(x => x.matches('.pct')) ? ' tiles' : run.every(x => x.matches('.pc')) ? ' pcs' : ''); run[0].before(g); run.forEach(x => g.appendChild(x)); } run = []; };
     [...par.children].forEach(ch => { if (ch.matches(CARD_SEL)) run.push(ch); else flush(); }); flush();
@@ -6359,9 +6364,15 @@ const cardBudget = x => x.budgetFrom ? `${rub(x.budgetFrom).replace(/\s?₽$/, '
 /* компактная карточка списка (заказ, заявка): у каждой строки своя высота, поэтому карточки в списке одинаковые, а вся карточка — одна кнопка */
 /* img — фото услуги: на компьютере слева в карточке, на телефоне карточка без фото, как в эталоне */
 /* с фото (03.11): строки «название — цена — кто» собраны в .lc-h, на телефоне они стоят по центру рядом с крупным фото */
-const listCard = ({ to, t, pr = '', ps = '', s = '', m = '', mb = false, pl = '', img = '' }) => { const hasImg = !!(img && PH[img]);
+/* act — своя кнопка в нижней строке (08.11, «Повторить» в списке заказов): кнопку в кнопку не вложить, поэтому она рядом, поверх пустого места строки */
+const listCard = ({ to, t, pr = '', ps = '', s = '', m = '', mb = false, pl = '', img = '', act = '' }) => { const hasImg = !!(img && PH[img]);
   const head = `<span class="lc-t">${t}</span><span class="lc-p">${pr ? `<b>${pr}</b>` : ''}${pr && ps ? ' · ' : ''}${ps ? `<small>${ps}</small>` : ''}</span><span class="lc-s">${s}</span>`;
-  return `<button class="lc${hasImg ? ' has-img' : ''}" data-a="go" data-v="${esc(to)}">${hasImg ? `<span class="lc-img">${photo(img, '', 'M')}</span><span class="lc-h">${head}</span>` : head}<span class="lc-m${mb ? ' lc-b' : ''}">${m}</span><span class="lc-f">${pl}${ic('right', 18, 2.2)}</span></button>`; };
+  const card = `<button class="lc${hasImg ? ' has-img' : ''}" data-a="go" data-v="${esc(to)}">${hasImg ? `<span class="lc-img">${photo(img, '', 'M')}</span><span class="lc-h">${head}</span>` : head}<span class="lc-m${mb ? ' lc-b' : ''}">${m}</span><span class="lc-f">${pl}${ic('right', 18, 2.2)}</span></button>`;
+  return act ? `<div class="lcw">${card}${act}</div>` : card; };
+/* кнопка карточки — точно по высоте нижней строки (на компьютере строка не у нижнего края: фото во всю высоту) */
+function lcActAlign() { document.querySelectorAll('.lcw').forEach(w => { const f = w.querySelector('.lc-f'), b = w.querySelector('.lc-act'); if (!f || !b) return;
+  const wr = w.getBoundingClientRect(), fr = f.getBoundingClientRect(); b.style.top = `${Math.round(fr.top - wr.top + (fr.height - b.offsetHeight) / 2)}px`; b.style.bottom = 'auto'; }); }
+AFTER_RENDER.push(lcActAlign); addEventListener('resize', lcActAlign);
 
 /* ---------- карточка услуги (листы 19–20) ---------- */
 /* гость не видит имени исполнителя: только «проверенный исполнитель», рейтинг и район */
@@ -6843,7 +6854,9 @@ function orderCard(o) {
   const who = S.role === 'exec' ? o.client : exName(o.ex);
   const next = nextStepText(o) || (o.status === 'done' ? 'Работа принята' : o.status === 'cancel' ? 'Заказ отменён' : '');
   const of = offerById(o.offer); const sv = svcBy(o.svc);
-  return listCard({ to: gv('order', { id: o.id }), t: esc(o.svc), pr: rub(o.total), ps: `№${NB}${o.id}`, s: `${esc(who)}${o.date ? ' · ' + when(o.date, o.time) : ''}`, m: next, mb: true, pl: orderPill(o), img: of && PH[of.ph] ? of.ph : sv ? svcPh(sv) : '' });
+  return listCard({ to: gv('order', { id: o.id }), t: esc(o.svc), pr: rub(o.total), ps: `№${NB}${o.id}`, s: `${esc(who)}${o.date ? ' · ' + when(o.date, o.time) : ''}`, m: next, mb: true, pl: orderPill(o), img: of && PH[of.ph] ? of.ph : sv ? svcPh(sv) : '',
+    /* «Повторить» прямо в списке (08.11, Максим) — у заказчика, у завершённых и отменённых */
+    act: o.cust !== false && !o.stages && S.role !== 'exec' && ['done', 'cancel'].includes(o.status) && repeatOffer(o) ? `<button class="lc-act" data-a="repeatOrder" data-v="${o.id}">${ic('retry', 16, 2.4)}Повторить</button>` : '' });
 }
 
 /* ---------- кабинет заказчика ---------- */
