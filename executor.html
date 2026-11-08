@@ -4994,6 +4994,53 @@ img, svg, a { -webkit-user-drag: none; }
 .pline.bare { padding: 0; background: none; border-radius: 0; }
 @media (hover: hover) and (pointer: fine) { .pline:not(.bare):hover { background: var(--soft); } .pline.bare:hover > span { text-decoration: underline; } }
 .phone[data-view="desk"][data-lay="aside"] #bar { max-height: calc(100% - var(--hh) - 52px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+/* ---------- 08.11, видео Максима «список мне вообще не нравится»: широкая карточка списка на компьютере ----------
+   три части: фото во всю высоту | название, описание, свободное время, крупная цена | панель исполнителя за чертой */
+.pc-k, .pc-pay, .pc-st, .pc-aw { display: none; }
+.phone[data-view="desk"] .pc { grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: minmax(0, 1fr) auto; column-gap: 0; padding: 0; overflow: hidden; }
+.phone[data-view="desk"] .pc-top { padding: 16px 28px 16px 16px; }
+.phone[data-view="desk"] .pc-b { height: 100%; }
+.phone[data-view="desk"] .pc-g { grid-template-columns: 280px minmax(0, 1fr); gap: 28px; align-items: stretch; height: 100%; }
+.phone[data-view="desk"] .pc-p { width: 280px; height: 100%; min-height: 230px; }
+.phone[data-view="desk"] .pc .heart { top: 26px; left: 26px; }
+.phone[data-view="desk"] .pc-c { display: flex; flex-direction: column; gap: 10px; padding: 6px 0 4px; height: 100%; }
+.phone[data-view="desk"] .pc-t { order: 1; font-size: 18px; line-height: 24px; -webkit-line-clamp: 2; }
+.phone[data-view="desk"] .pc-d { order: 2; margin-top: 0; -webkit-line-clamp: 3; font-size: 14px; line-height: 20px; }
+.phone[data-view="desk"] .pc-k { order: 3; display: grid; gap: 6px; padding-top: 2px; }
+.pc-k > span { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 14px; line-height: 20px; color: var(--muted); }
+.pc-k > span > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pc-k b { color: var(--ink); font-weight: 600; }
+.pc-k svg { flex: none; color: var(--act); }
+.phone[data-view="desk"] .pc-pr { order: 4; margin-top: auto; padding-top: 8px; font-size: 28px; line-height: 34px; font-weight: 800; color: var(--ink); white-space: normal; overflow: visible; max-width: none; }
+.phone[data-view="desk"] .pc-pr small { display: inline; margin-left: 4px; font-size: 18px; line-height: 24px; font-weight: 500; color: var(--muted); }
+.phone[data-view="desk"] .pc-pay { order: 5; display: flex; align-items: center; gap: 6px; font-size: 14px; line-height: 20px; color: var(--muted); }
+.pc-pay svg { flex: none; color: var(--ok); }
+/* панель исполнителя: отделена чертой, светлый фон во всю высоту карточки, строка «Партнёрам» — её низ */
+.phone[data-view="desk"] .pc-foot { grid-column: 2; grid-row: 1; display: grid; grid-template-columns: 56px minmax(0, 1fr); align-content: start; column-gap: 12px; row-gap: 12px; padding: 20px 20px 12px; border: 0; border-left: 1px solid var(--line); border-radius: 0; background: var(--soft2); min-height: 0; }
+.phone[data-view="desk"] .pc-foot:not(:has(.pc-ava)) { grid-template-columns: minmax(0, 1fr); }
+.phone[data-view="desk"] .pc-who { gap: 4px; }
+.phone[data-view="desk"] .pc-who b { font-size: 18px; line-height: 24px; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; }
+.phone[data-view="desk"] .pc-r { display: none; }
+.phone[data-view="desk"] .pc-st { display: flex; align-items: center; gap: 8px; grid-column: 1 / -1; font-size: 14px; line-height: 20px; }
+.pc-st .stars { display: inline-flex; gap: 1px; font-size: 18px; line-height: 20px; letter-spacing: 0; }
+.pc-st .stars i { font-style: normal; color: var(--line2); }
+.pc-st .stars i.on { color: #F5A524; }
+.pc-st b { font-size: 14px; font-weight: 700; color: var(--ink); }
+.pc-st .m { font-size: 14px; line-height: 20px; }
+.phone[data-view="desk"] .pc-x { grid-column: 1 / -1; gap: 6px; padding-top: 12px; border-top: 1px solid var(--line); }
+.phone[data-view="desk"] .pc-x > span { color: var(--ink); }
+.phone[data-view="desk"] .pc-aw { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pc-aw .aw { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+.phone[data-view="desk"] .pc-partner { grid-column: 2; grid-row: 2; align-self: stretch; padding: 12px 20px 16px; border: 0; border-left: 1px solid var(--line); background: var(--soft2); font-size: 14px; line-height: 18px; }
+@media (hover: hover) and (pointer: fine) { .phone[data-view="desk"] .pc-foot:hover .pc-who b { color: var(--act); } .phone[data-view="desk"] .pc-partner:hover > span { text-decoration: underline; } }
+/* ---------- 08.11, видео Максима: «Назад» не уезжает при прокрутке и подписывает, куда ведёт ---------- */
+.back-to { display: none; }
+.phone:not([data-view="phone"]) .back { position: sticky; top: 12px; z-index: 6; align-self: start; justify-self: start; width: max-content; max-width: min(100%, 520px); margin-left: -14px; padding: 8px 18px 8px 12px; border-radius: 999px; background: transparent; box-shadow: none; transition: background-color .2s ease, box-shadow .2s ease; }
+.phone:not([data-view="phone"]) .back.stuck { background: var(--card); box-shadow: 0 6px 20px rgba(16, 33, 61, 0.12), 0 0 0 1px var(--line); }
+.phone:not([data-view="phone"]) .back-to { display: inline; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); font-weight: 400; }
+.phone:not([data-view="phone"]) .back-to::before { content: "·"; margin: 0 8px 0 2px; }
+@media (hover: hover) and (pointer: fine) { .phone:not([data-view="phone"]) .back:hover > span:first-of-type { text-decoration: underline; text-underline-offset: 3px; } }
+@media (prefers-reduced-motion: reduce) { .phone:not([data-view="phone"]) .back { transition: none; } }
 @media print {
   body > * { display: none !important; }
   body::before { content: "Печать страниц ZELDO недоступна"; display: block; padding: 48px; font: 600 18px/24px "Onest", sans-serif; color: #10213D; }
@@ -5323,7 +5370,10 @@ function render(mode) {
   const body = desk && scr.deskBody != null ? scr.deskBody : scr.body;
   const bar = desk && scr.deskBar != null ? scr.deskBar : (scr.bar || '');
   $('#top').innerHTML = header();
-  const backLink = S.stack.length > 1 && !scr.noBack ? `<button class="back" data-a="back">${ic('back', 22, 2.1)}Назад</button>` : '';
+  /* «Назад» с подписью, куда ведёт (08.11, видео Максима: «непонятно куда, надо отслеживание пути»). На компьютере и планшете
+     кнопка не уезжает при прокрутке: держится сверху, при прокрутке получает подложку */
+  const prevName = S.stack.length > 1 ? screenName(S.stack[S.stack.length - 2]) : '';
+  const backLink = S.stack.length > 1 && !scr.noBack ? `<button class="back" data-a="back" ${prevName ? `aria-label="Назад: ${esc(prevName)}"` : ''}>${ic('back', 22, 2.1)}<span>Назад</span>${prevName && view !== 'phone' ? `<span class="back-to">${esc(prevName)}</span>` : ''}</button>` : '';
   const head = scr.title ? `<div class="h1-wrap"><h1 class="h1">${scr.title}</h1>${scr.sub ? `<div class="h1-sub">${scr.sub}</div>` : ''}</div>` : '';
   /* компьютер: у выдачи слева колонка с разделом, местом, сортировкой и фильтрами */
   const main = view === 'desk' && scr.side ? `<div class="dcols"><aside class="dside">${scr.side}</aside><div class="dmain">${body}</div></div>` : body;
@@ -5332,7 +5382,7 @@ function render(mode) {
   if (view !== 'phone') gridCards(el);
   const box = scrollEl(); if (box !== el) el.scrollTop = 0;
   if (mode === 'new') box.scrollTop = 0;
-  else if (mode === 'restore') box.scrollTop = c.y || 0;
+  else if (mode === 'restore' || mode === 'pop') box.scrollTop = c.y || 0;
   else box.scrollTop = keep;
   if ($('.cabnav')) $('.cabnav').scrollTop = navY;
   if ($('.msgr-list')) $('.msgr-list').scrollTop = listY;
@@ -5347,6 +5397,63 @@ function render(mode) {
   if (scr.after) scr.after(el);
   mountAll();
   AFTER_RENDER.forEach(f => f());
+  trackPath(mode);
+}
+
+/* ---------- стрелка браузера «Назад» (08.11, видео Максима: стрелка выкидывала из приложения на страницу прототипа, путь терялся) ----------
+   PATH — прежние пути экранов. Каждый переход кладёт туда прежний путь и добавляет шаг в историю браузера,
+   поэтому стрелка браузера (и жест «назад» в Safari) идёт по тем же экранам, что и кнопка «Назад», в том числе через разделы.
+   Кнопка «Назад» в приложении убирает из PATH свой шаг. Из приложения стрелка выводит, только когда возвращаться некуда */
+const PATH = []; let PATH_LAST = null; let HI = 0;
+const sameStack = (a, b) => a && b && a.length === b.length && a.every((x, i) => x === b[i]);
+function trackPath(mode) {
+  const now = S.stack.slice();
+  if (mode === 'new' && PATH_LAST && !sameStack(PATH_LAST, now)) {
+    PATH.push(PATH_LAST); if (PATH.length > 60) PATH.shift();
+    try { HI++; history.pushState({ zi: HI }, ''); } catch (e) { /* в окне предпросмотра история недоступна */ }
+  } else if (mode === 'restore' && sameStack(PATH[PATH.length - 1], now)) PATH.pop();
+  PATH_LAST = now;
+}
+function histBack() {
+  if (S.lbox || S.dialog || S.sheet || S.panel || S.drawer) { S.lbox = null; S.dialog = null; S.sheet = null; S.panel = null; S.drawer = false; renderOverlay(); return 'overlay'; }
+  if (S.srch && S.srch.on && cur().n === 'c_home' && S.stack.length === 1) { S.srch.on = false; render('pop'); return 'screen'; }
+  if (PATH.length) { S.stack = PATH.pop(); render('pop'); return 'screen'; }
+  if (S.stack.length > 1) { S.stack.pop(); render('pop'); return 'screen'; }
+  const home = S.role === 'exec' ? 'e_home' : S.role === 'cust' ? 'c_home' : '';
+  if (home && S.stack[0].n !== home) { S.stack = [{ n: home, p: {} }]; render('pop'); return 'screen'; }
+  return '';
+}
+try { history.replaceState({ zi: 0 }, ''); } catch (e) { /* без истории */ }
+/* закреплённая «Назад» получает подложку, когда под ней уже прокрученное содержимое */
+function backStuck() { const b = $('.back'); if (b) b.classList.toggle('stuck', scrollEl().scrollTop > 24); }
+document.addEventListener('scroll', backStuck, { capture: true, passive: true });
+AFTER_RENDER.push(backStuck);
+addEventListener('popstate', e => {
+  const zi = e.state && typeof e.state.zi === 'number' ? e.state.zi : 0;
+  if (zi >= HI) { HI = zi; return; }  /* стрелка «Вперёд» — экран не меняем */
+  HI = zi;
+  const r = histBack();
+  if (r === 'overlay') { try { HI++; history.pushState({ zi: HI }, ''); } catch (er) { /* без истории */ } }  /* закрыли окно — шаг экрана остаётся */
+  else if (!r) history.back();  /* возвращаться в приложении некуда — уходим со страницы */
+});
+/* как назвать экран в подписи «Назад: …» */
+const SCREEN_NAMES = { c_home: 'Главная', e_home: 'Главная', g_home: 'Главная', c_orders: 'Заказы', e_orders: 'Заказы', c_fav: 'Избранное', e_fav: 'Избранное', c_msgs: 'Сообщения', e_msgs: 'Сообщения',
+  c_cab: 'Кабинет', e_cab: 'Кабинет', c_catalog: 'Каталог', notifs: 'Уведомления', settings: 'Настройки', c_map: 'Рядом', c_online: 'Онлайн', c_sched: 'Мои записи', e_schedule: 'Расписание',
+  e_services: 'Мои услуги', e_feed: 'Найти заказ', e_incoming: 'Заявки', e_offers: 'Предложения', e_money: 'Деньги', e_promos: 'Акции', chat: 'Переписка', c_results: 'Поиск' };
+function screenName(x) {
+  if (!x) return '';
+  try {
+    const p = x.p || {};
+    if (x.n === 'c_home' && S.srch && S.srch.on) return S.srch.q ? `Поиск «${S.srch.q}»` : 'Поиск';
+    if (x.n === 'c_service' && p.id) return svcById(Number(p.id) || p.id).n;
+    if (x.n === 'c_offer' && p.id) return offerById(p.id).title;
+    if (x.n === 'c_cat' && p.c) return p.c;
+    if (x.n === 'c_sub' && p.s) return p.s;
+    if (x.n === 'c_dir' && p.id) return DIRS.find(d => d.id === p.id).name;
+    if (x.n === 'c_exec' && p.id) return EX[p.id].name;
+    if (x.n === 'order' && p.id) return `Заказ № ${p.id}`;
+  } catch (e) { /* нет данных — подпись по таблице */ }
+  return SCREEN_NAMES[x.n] || '';
 }
 
 /* широкий экран: подряд идущие карточки собираются в сетку (2–3 колонки — по ширине, задаёт CSS); одна карточка тоже, чтобы не растягивалась */
@@ -8494,7 +8601,23 @@ const exAva = (id, cls = '') => { const e = EX[id] || {}; const s = avaSrc(e); r
 const avaByName = (n, cls = '') => { const id = Object.keys(EX).find(k => EX[k].name === n); return id ? exAva(id, cls) : `<span class="ava ${cls}">${letter(n)}</span>`; };
 /* факты об исполнителе для карточки в списке и правой колонки услуги — те же числа, что в профиле (exStats). В рабочей версии их пока нет */
 const exFacts = id => { const e = EX[id] || {}; if (REAL || !e.name) return [];
-  return [['calok', `На ZELDO с ${e.since || 2020} года`], ['check', pn(Math.round((e.reviews || 0) * 1.35), 'заказ выполнен', 'заказа выполнено', 'заказов выполнено')]]; };
+  return [['bolt', `Отвечает ${exReply(id)}`], ['calok', `На ZELDO с ${e.since || 2020} года`], ['check', pn(Math.round((e.reviews || 0) * 1.35), 'заказ выполнен', 'заказа выполнено', 'заказов выполнено')]]; };
+/* как быстро отвечает (08.11, переписка с Максимом: «отвечает, допустим, в течение трёх часов»). В прототипе — постоянное число на исполнителя */
+const exReply = id => ['в течение 15 минут', 'в течение 30 минут', 'в течение часа', 'в течение 3 часов'][[...String(id)].reduce((a, ch) => a + ch.charCodeAt(0), 0) % 4];
+/* награды исполнителя (08.11, Максим: «будут награды… маленькими значками, как на Кворке»). Список наград пришлёт Максим;
+   пока прототип выдаёт их по рейтингу, отзывам, стажу и скорости ответа. В рабочей версии не показываем */
+const exAwards = id => { const e = EX[id] || {}; if (REAL || !e.name) return [];
+  const yrs = 2026 - (e.since || 2026);
+  return [
+    e.rating >= 4.9 && e.reviews >= 30 ? ['star', 'orange', 'Отличный рейтинг', `Оценка ${String(e.rating).replace('.', ',')} из 5`] : null,
+    e.reviews >= 200 ? ['diamond', 'violet', 'Любимый исполнитель', `${e.reviews} отзывов от заказчиков`] : null,
+    /15 минут|30 минут/.test(exReply(id)) ? ['bolt', 'green', 'Быстрый ответ', `Отвечает ${exReply(id)}`] : null,
+    yrs >= 8 ? ['calok', 'blue', 'Опытный', `${pn(yrs, 'год', 'года', 'лет')} на ZELDO`] : null,
+  ].filter(Boolean); };
+const awardRow = id => { const l = exAwards(id); return l.length ? `<span class="pc-aw" aria-label="Награды: ${esc(l.map(a => a[2]).join(', '))}">${l.map(([i, c, t, s]) => `<span class="aw ci-${c}" title="${esc(t)}. ${esc(s)}">${ic(i, 18, 2.1)}</span>`).join('')}</span>` : ''; };
+/* звёзды рейтинга: закрашены по оценке, рядом число и отзывы */
+const starRow = id => { const e = EX[id] || {}; if (!e.reviews) return `<span class="pc-st"><span class="m">Пока нет отзывов</span></span>`;
+  const full = Math.round(e.rating); return `<span class="pc-st" aria-label="Рейтинг ${String(e.rating).replace('.', ',')}, ${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')}"><span class="stars" aria-hidden="true">${[1, 2, 3, 4, 5].map(n => `<i class="${n <= full ? 'on' : ''}">★</i>`).join('')}</span><b>${String(e.rating).replace('.', ',')}</b><span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')}</span></span>`; };
 /* строка «Партнёрам до 5% · 2 уровня» вне карточек выдачи: в правой колонке услуги и в заказе (запись 48, 47:00: «в заказах… везде»).
    Своя разметка, а не .pc-partner: тот на компьютере встаёт во вторую колонку сетки карточки */
 const partnerBtn = (exId, cls = '') => { if (S.role === 'guest') return ''; const p = (EX[exId] || {}).partner || [5, 2];
@@ -8513,9 +8636,18 @@ function offerCard(o, layout = 'list', x = {}) {
   if (layout === 'tile') return `<div class="pct">${heartBtn(o)}<button data-a="openOffer" data-v="${o.id}" class="pct-b"><span class="pct-p">${photo(o.ph, o.title, 'M')}${ownMark(o)}${discMark(o)}</span><span class="pct-in"><span class="pct-t">${esc(o.title)}</span><span class="pct-pr">${price}</span><span class="pct-m">${guest ? '' : exAva(o.ex, 'xs')}<span class="nm">${esc(exName2(o))}</span><span>${e.reviews ? '★' + NB + String(e.rating).replace('.', ',') : 'нет отзывов'}</span></span></span></button>${partner}</div>`;
   return `<div class="pc ${layout === 'h' ? 'h' : ''}"><div class="pc-top">${heartBtn(o)}<button data-a="openOffer" data-v="${o.id}" class="pc-b"><span class="pc-g">
       <span class="pc-p">${photo(o.ph, o.title, 'M')}${ownMark(o)}${discMark(o)}</span>
-      <span class="pc-c"><span class="pc-t">${esc(o.title)}</span><span class="pc-d"><b class="pc-f">${locLine(o)}</b> · ${esc(o.desc)}</span><span class="pc-pr">${price}</span></span>
+      <span class="pc-c"><span class="pc-t">${esc(o.title)}</span><span class="pc-d"><b class="pc-f">${locLine(o)}</b> · ${esc(o.desc)}</span><span class="pc-pr">${price}</span>${deskMid(o, layout)}</span>
     </span></button></div>
-    <button class="pc-foot" data-a="openOffer" data-v="${o.id}">${guest ? '' : exAva(o.ex, 'pc-ava')}${who}<span class="pc-r">${ratingText(o.ex)}</span>${guest ? '' : factRows(exFacts(o.ex), 'pc-x')}</button>${partner}</div>`;
+    <button class="pc-foot" data-a="openOffer" data-v="${o.id}">${guest ? '' : exAva(o.ex, 'pc-ava')}${who}<span class="pc-r">${ratingText(o.ex)}</span>${desk1(layout) ? starRow(o.ex) : ''}${guest ? '' : factRows(exFacts(o.ex), 'pc-x')}${guest || !desk1(layout) ? '' : awardRow(o.ex)}</button>${partner}</div>`;
+}
+/* широкая карточка списка на компьютере (08.11, видео Максима «список мне вообще не нравится»): середина не пустая —
+   ближайшее свободное время и акция строками, внизу крупная цена и «оплата через защищённый счёт» */
+const desk1 = layout => layout === 'list' && VIEW() === 'desk';
+function deskMid(o, layout) {
+  if (!desk1(layout)) return '';
+  const near = S.role === 'guest' ? '' : nearSlot(o.ex); const p = S.role === 'guest' ? null : promoBest(o);
+  const rows = [near ? ['clock', `Свободно: <b>${esc(near)}</b>`] : null, p ? ['tag', `Акция: <b>${esc(promoLine(p))}</b>`] : null].filter(Boolean);
+  return `${rows.length ? `<span class="pc-k">${rows.map(([i, t]) => `<span>${ic(i, 18, 2)}<span>${t}</span></span>`).join('')}</span>` : ''}<span class="pc-pay">${ic('shield', 18, 2)}<span>Оплата через защищённый счёт</span></span>`;
 }
 A.partnerInfo = id => sheet('Партнёрская программа', `<div class="m">${esc(exName(id))} делится частью оплаты с партнёрами, которые приводят заказчиков: до ${(EX[id].partner || [5])[0]}% на ${pn((EX[id].partner || [5, 2])[1], 'уровень', 'уровня', 'уровней')}. Партнёрская роль подключается отдельно.</div>${btn('Понятно', 'closeSheet', '', 'soft block')}`);
 
