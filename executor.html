@@ -4996,8 +4996,14 @@ img, svg, a { -webkit-user-drag: none; }
 .phone[data-view="desk"][data-lay="aside"] #bar { max-height: calc(100% - var(--hh) - 52px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 /* ---------- 08.11, видео Максима «список мне вообще не нравится»: широкая карточка списка на компьютере ----------
    три части: фото во всю высоту | название, описание, свободное время, крупная цена | панель исполнителя за чертой */
-.pc-k, .pc-pay, .pc-st, .pc-aw { display: none; }
-.phone[data-view="desk"] .pc { grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: minmax(0, 1fr) auto; column-gap: 0; padding: 0; overflow: hidden; }
+.pc-k, .pc-pay, .pc-st, .pc-aw, .pc-inc { display: none; }
+/* «Что входит» посередине: галочки в строку, длинный пункт обрезается */
+.phone[data-view="desk"] .pc-inc { order: 3; display: flex; flex-wrap: wrap; gap: 6px 8px; max-height: 64px; overflow: hidden; }
+.pc-inc > span { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 4px 10px 4px 8px; border-radius: 999px; background: var(--soft2); font-size: 14px; line-height: 20px; color: var(--ink); }
+.pc-inc > span > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pc-inc svg { flex: none; color: var(--ok); }
+.pc-inc > .more { padding: 4px 6px; background: none; color: var(--muted); }
+.phone[data-view="desk"] .pc { grid-template-columns: minmax(0, 1fr) 340px; grid-template-rows: minmax(0, 1fr) auto; column-gap: 0; padding: 0; overflow: hidden; }
 .phone[data-view="desk"] .pc-top { padding: 16px 28px 16px 16px; }
 .phone[data-view="desk"] .pc-b { height: 100%; }
 .phone[data-view="desk"] .pc-g { grid-template-columns: 280px minmax(0, 1fr); gap: 28px; align-items: stretch; height: 100%; }
@@ -5016,7 +5022,7 @@ img, svg, a { -webkit-user-drag: none; }
 .phone[data-view="desk"] .pc-pay { order: 5; display: flex; align-items: center; gap: 6px; font-size: 14px; line-height: 20px; color: var(--muted); }
 .pc-pay svg { flex: none; color: var(--ok); }
 /* панель исполнителя: отделена чертой, светлый фон во всю высоту карточки, строка «Партнёрам» — её низ */
-.phone[data-view="desk"] .pc-foot { grid-column: 2; grid-row: 1; display: grid; grid-template-columns: 56px minmax(0, 1fr); align-content: start; column-gap: 12px; row-gap: 12px; padding: 20px 20px 12px; border: 0; border-left: 1px solid var(--line); border-radius: 0; background: var(--soft2); min-height: 0; }
+.phone[data-view="desk"] .pc-foot { grid-column: 2; grid-row: 1; display: grid; grid-template-columns: 64px minmax(0, 1fr); align-content: start; align-items: center; column-gap: 14px; row-gap: 14px; padding: 22px 24px 14px; border: 0; border-left: 1px solid var(--line); border-radius: 0; background: var(--soft2); min-height: 0; }
 .phone[data-view="desk"] .pc-foot:not(:has(.pc-ava)) { grid-template-columns: minmax(0, 1fr); }
 .phone[data-view="desk"] .pc-who { gap: 4px; }
 .phone[data-view="desk"] .pc-who b { font-size: 18px; line-height: 24px; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; }
@@ -5030,8 +5036,29 @@ img, svg, a { -webkit-user-drag: none; }
 .phone[data-view="desk"] .pc-x { grid-column: 1 / -1; gap: 6px; padding-top: 12px; border-top: 1px solid var(--line); }
 .phone[data-view="desk"] .pc-x > span { color: var(--ink); }
 .phone[data-view="desk"] .pc-aw { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.pc-aw .aw { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex: none; }
-.phone[data-view="desk"] .pc-partner { grid-column: 2; grid-row: 2; align-self: stretch; padding: 12px 20px 16px; border: 0; border-left: 1px solid var(--line); background: var(--soft2); font-size: 14px; line-height: 18px; }
+.pc-aw .aw { position: relative; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+/* компьютер поуже (1280–1400): фото и панель уже, чтобы середине хватало места */
+@media (max-width: 1400px) {
+  .phone[data-view="desk"] .pc { grid-template-columns: minmax(0, 1fr) 290px; }
+  .phone[data-view="desk"] .pc-g { grid-template-columns: 220px minmax(0, 1fr); gap: 22px; }
+  .phone[data-view="desk"] .pc-p { width: 220px; }
+  .phone[data-view="desk"] .pc-top { padding-right: 22px; }
+  .phone[data-view="desk"] .pc-foot { padding: 20px 20px 12px; column-gap: 12px; grid-template-columns: 56px minmax(0, 1fr); }
+  .phone[data-view="desk"] .pc-foot .pc-ava { width: 56px; height: 56px; }
+  .phone[data-view="desk"] .pc-partner { padding: 12px 20px 16px; }
+}
+/* все карточки списка одной высоты: длинное название и описание обрезаются, а не растягивают карточку */
+.phone[data-view="desk"] .pc:not(.h) { height: 336px; }
+.phone[data-view="desk"] .pc:not(.h) .pc-top, .phone[data-view="desk"] .pc:not(.h) .pc-c { min-height: 0; overflow: hidden; }
+.phone[data-view="desk"] .pc:not(.h) .pc-d { -webkit-line-clamp: 2; }
+/* подсказка награды: название и за что, всплывает над значком */
+.aw-tip { position: absolute; bottom: calc(100% + 8px); left: 50%; z-index: 5; width: max-content; max-width: 220px; padding: 8px 12px; border-radius: 12px; background: var(--ink); color: #fff; font-size: 14px; line-height: 18px; text-align: left; white-space: normal;
+  opacity: 0; visibility: hidden; transform: translate(-50%, 4px); transition: opacity .15s ease-out, transform .15s ease-out, visibility .15s; pointer-events: none; }
+.aw-tip b { display: block; font-weight: 700; }
+.pc-aw .aw:first-child .aw-tip { left: 0; transform: translate(0, 4px); }
+@media (hover: hover) and (pointer: fine) { .pc-aw .aw:hover .aw-tip { opacity: 1; visibility: visible; transform: translate(-50%, 0); } .pc-aw .aw:first-child:hover .aw-tip { transform: translate(0, 0); } }
+.phone[data-view="desk"] .pc-foot .pc-ava { width: 64px; height: 64px; }
+.phone[data-view="desk"] .pc-partner { grid-column: 2; grid-row: 2; align-self: stretch; padding: 12px 24px 16px; border: 0; border-left: 1px solid var(--line); background: var(--soft2); font-size: 14px; line-height: 18px; }
 @media (hover: hover) and (pointer: fine) { .phone[data-view="desk"] .pc-foot:hover .pc-who b { color: var(--act); } .phone[data-view="desk"] .pc-partner:hover > span { text-decoration: underline; } }
 /* ---------- 08.11, видео Максима: «Назад» не уезжает при прокрутке и подписывает, куда ведёт ---------- */
 .back-to { display: none; }
@@ -8614,7 +8641,7 @@ const exAwards = id => { const e = EX[id] || {}; if (REAL || !e.name) return [];
     /15 минут|30 минут/.test(exReply(id)) ? ['bolt', 'green', 'Быстрый ответ', `Отвечает ${exReply(id)}`] : null,
     yrs >= 8 ? ['calok', 'blue', 'Опытный', `${pn(yrs, 'год', 'года', 'лет')} на ZELDO`] : null,
   ].filter(Boolean); };
-const awardRow = id => { const l = exAwards(id); return l.length ? `<span class="pc-aw" aria-label="Награды: ${esc(l.map(a => a[2]).join(', '))}">${l.map(([i, c, t, s]) => `<span class="aw ci-${c}" title="${esc(t)}. ${esc(s)}">${ic(i, 18, 2.1)}</span>`).join('')}</span>` : ''; };
+const awardRow = id => { const l = exAwards(id); return l.length ? `<span class="pc-aw" aria-label="Награды: ${esc(l.map(a => a[2]).join(', '))}">${l.map(([i, c, t, s]) => `<span class="aw ci-${c}">${ic(i, 18, 2.1)}<span class="aw-tip"><b>${esc(t)}</b>${esc(s)}</span></span>`).join('')}</span>` : ''; };
 /* звёзды рейтинга: закрашены по оценке, рядом число и отзывы */
 const starRow = id => { const e = EX[id] || {}; if (!e.reviews) return `<span class="pc-st"><span class="m">Пока нет отзывов</span></span>`;
   const full = Math.round(e.rating); return `<span class="pc-st" aria-label="Рейтинг ${String(e.rating).replace('.', ',')}, ${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')}"><span class="stars" aria-hidden="true">${[1, 2, 3, 4, 5].map(n => `<i class="${n <= full ? 'on' : ''}">★</i>`).join('')}</span><b>${String(e.rating).replace('.', ',')}</b><span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')}</span></span>`; };
@@ -8647,7 +8674,9 @@ function deskMid(o, layout) {
   if (!desk1(layout)) return '';
   const near = S.role === 'guest' ? '' : nearSlot(o.ex); const p = S.role === 'guest' ? null : promoBest(o);
   const rows = [near ? ['clock', `Свободно: <b>${esc(near)}</b>`] : null, p ? ['tag', `Акция: <b>${esc(promoLine(p))}</b>`] : null].filter(Boolean);
-  return `${rows.length ? `<span class="pc-k">${rows.map(([i, t]) => `<span>${ic(i, 18, 2)}<span>${t}</span></span>`).join('')}</span>` : ''}<span class="pc-pay">${ic('shield', 18, 2)}<span>Оплата через защищённый счёт</span></span>`;
+  /* «Что входит» — первые три пункта: середина подаёт саму услугу (Максим 07.11: «мы же сильно подаём услугу») */
+  const inc = (o.inc || []).slice(0, 3);
+  return `${inc.length ? `<span class="pc-inc">${inc.map(x => `<span>${ic('check', 16, 2.4)}<span>${esc(x)}</span></span>`).join('')}${o.inc.length > 3 ? `<span class="more">ещё ${o.inc.length - 3}</span>` : ''}</span>` : ''}${rows.length ? `<span class="pc-k">${rows.map(([i, t]) => `<span>${ic(i, 18, 2)}<span>${t}</span></span>`).join('')}</span>` : ''}<span class="pc-pay">${ic('shield', 18, 2)}<span>Оплата через защищённый счёт</span></span>`;
 }
 A.partnerInfo = id => sheet('Партнёрская программа', `<div class="m">${esc(exName(id))} делится частью оплаты с партнёрами, которые приводят заказчиков: до ${(EX[id].partner || [5])[0]}% на ${pn((EX[id].partner || [5, 2])[1], 'уровень', 'уровня', 'уровней')}. Партнёрская роль подключается отдельно.</div>${btn('Понятно', 'closeSheet', '', 'soft block')}`);
 
