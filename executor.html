@@ -5060,6 +5060,30 @@ img, svg, a { -webkit-user-drag: none; }
 .phone[data-view="desk"] .pc-foot .pc-ava { width: 64px; height: 64px; }
 .phone[data-view="desk"] .pc-partner { grid-column: 2; grid-row: 2; align-self: stretch; padding: 12px 24px 16px; border: 0; border-left: 1px solid var(--line); background: var(--soft2); font-size: 14px; line-height: 18px; }
 @media (hover: hover) and (pointer: fine) { .phone[data-view="desk"] .pc-foot:hover .pc-who b { color: var(--act); } .phone[data-view="desk"] .pc-partner:hover > span { text-decoration: underline; } }
+/* ---------- 08.11: спор — версии сторон, решение ZELDO, согласие ---------- */
+.dsp-how { display: grid; gap: 8px; margin: 4px 0 2px; }
+.dsp-how > span { display: flex; align-items: center; gap: 12px; }
+.dsp-how > span > b { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--soft2); color: var(--act); font-size: 14px; }
+.dsp-how > span > span { display: grid; min-width: 0; }
+.dsp-how .t { font-weight: 600; font-size: 14px; line-height: 20px; }
+.dsp-how .m { font-size: 14px; line-height: 18px; }
+.dsp-card { display: grid; gap: 14px; padding: 16px; border-radius: var(--r, 16px); background: var(--card, #fff); box-shadow: var(--sh1, 0 1px 3px rgba(16, 24, 40, .08)); }
+.dsp-top { display: flex; gap: 12px; align-items: flex-start; }
+.dsp-top > svg { flex: none; color: var(--bad, #E5484D); margin-top: 2px; }
+.dsp-top b { display: block; font-size: 18px; line-height: 24px; }
+.dsp-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.dsp-steps > span { display: grid; justify-items: start; gap: 6px; padding-top: 8px; border-top: 3px solid var(--line); font-size: 14px; line-height: 18px; color: var(--muted); }
+.dsp-steps i { font-style: normal; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--soft2); font-size: 12px; font-weight: 700; }
+.dsp-steps .done { border-top-color: var(--ok); color: var(--ink); }
+.dsp-steps .done i { background: var(--ok); color: #fff; }
+.dsp-steps .cur { border-top-color: var(--act); color: var(--ink); font-weight: 600; }
+.dsp-steps .cur i { background: var(--act); color: #fff; }
+.dsp-v { display: grid; gap: 4px; padding: 10px 12px; border-radius: 12px; background: var(--soft2); font-size: 14px; line-height: 20px; }
+.dsp-v .lbl, .dsp-dec .lbl { font-size: 14px; line-height: 18px; color: var(--muted); }
+.dsp-dec { display: grid; gap: 10px; padding: 16px; border-radius: var(--r, 16px); border: 2px solid var(--act); background: var(--card, #fff); }
+.dsp-dec .h2 { margin: 0; }
+.dsp-split { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 14px; }
+.dsp-split b { font-size: 18px; }
 /* ---------- 08.11, видео Максима: «Назад» не уезжает при прокрутке и подписывает, куда ведёт ---------- */
 .back-to { display: none; }
 .phone:not([data-view="phone"]) .back { position: sticky; top: 12px; z-index: 6; align-self: start; justify-self: start; width: max-content; max-width: min(100%, 520px); margin-left: -14px; padding: 8px 18px 8px 12px; border-radius: 999px; background: transparent; box-shadow: none; transition: background-color .2s ease, box-shadow .2s ease; }
@@ -9878,7 +9902,7 @@ function orderActions(o) {
     return h;
   }
   if (o.change) h += changeCard(o);
-  if (o.status === 'dispute') h += `<div class="info warn"><b>Идёт спор</b><span class="m">Разбирает администратор ZELDO, ответ — в течение суток. Он запросит у обеих сторон объяснения и материалы. Деньги ждут решения на защищённом счёте.</span></div>${btn(`${ic('chat', 20)} Написать администратору`, 'supportChat', o.id, 'soft block')}`;
+  if (o.status === 'dispute') h += dspBlock(o);
   if (cust) {
     if (st === 'request') h += `<div class="info"><b>Ждём подтверждения исполнителя</b><span class="m">Обычно отвечают в течение часа. Пришлём уведомление.</span></div>`;
     if (st === 'confirmed') h += btn(`Оплатить ${rub(o.total)}`, 'go', gv('c_checkout', { order: o.id }), 'block');
@@ -10168,10 +10192,25 @@ Object.assign(A, {
     if (next) { o.status = 'confirmed'; toast(`Этап принят. Следующий — «${next.name}»`); } else { o.status = 'done'; toast('Проект принят целиком'); }
     render();
   },
-  disputeAsk(id) { S.dsp = { id, why: '', files: false }; disputeSheet(); },
+  disputeAsk(id) { S.dsp = { id, why: '', text: '', files: false }; disputeSheet(); },
   dspWhy(v) { S.dsp.why = v; disputeSheet(); },
   dspFiles() { S.dsp.files = !S.dsp.files; disputeSheet(); },
-  disputeOk() { const d = S.dsp; const o = orderById(d.id); closeSheet(); setSt(o, 'dispute', `Открыт спор: ${d.why.toLowerCase()}${d.files ? ', материалы приложены' : ''}. Деньги ждут решения на защищённом счёте.`); render(); toast('Спор открыт', 'info'); },
+  disputeOk() {
+    const d = S.dsp; const o = orderById(d.id); const me = dspMe(o); closeSheet();
+    o.dsp = { by: me, why: d.why, text: (d.text || '').trim(), at: Date.now(), stage: 'answer', until: Date.now() + DSP_ANSWER };
+    /* в рабочей версии ход спора ведёт сервер и сам пишет в переписку */
+    setSt(o, 'dispute', REAL ? '' : `Вы открыли спор: ${d.why.toLowerCase()}${d.files ? ', материалы приложены' : ''}. ${DSP_WHO[dspOther(me)]} может ответить до ${whenRu(o.dsp.until)}, потом спор разберёт ZELDO. Деньги ждут решения на защищённом счёте.`);
+    render(); toast('Спор открыт', 'info');
+    dspSimAnswer(o);
+  },
+  dspAnswer(id) { const o = orderById(id); const t = (S.dspAns || '').trim(); if (t.length < 5) return toast('Опишите, что произошло', 'warn');
+    const s = o.dsp; s.ans = { text: t, at: Date.now() }; s.stage = 'ai'; S.dspAns = ''; postMsg(o.chat ? chatById(o.chat) : chatById(o.echat), 'sys', { t: 'Вы ответили по спору. ZELDO разбирает спор, обычно это пара минут.' }); render(); toast('Ответ отправлен', 'info'); sim(3000, () => dspSimOffer(o)); },
+  dspAgree(id) { const o = orderById(id); const a = o.dsp.ai; a.ok[dspMe(o)] = true; render(); toast('Вы согласились с решением', 'info');
+    sim(2500, () => { if (o.status !== 'dispute' || o.dsp.stage !== 'offer') return; a.ok[dspOther(dspMe(o))] = true; dspApply(o, 'обе стороны согласились'); }); },
+  dspObject(id) { S.dspObj = ''; sheet('Не согласны с решением?', `<div class="m">Спор перейдёт к администратору ZELDO. Он изучит заказ, переписку и обе версии и ответит в течение суток. Решение ZELDO пока не вступит в силу.</div>
+    ${field('Что не так с решением, если хотите', `<textarea class="textarea" data-in="dspObj" rows="3" maxlength="800" placeholder="Например: работа сделана, есть фото до и после"></textarea>`)}
+    ${btn('Передать администратору', 'dspObjOk', id, 'danger block')}${btn('Отмена', 'closeSheet', '', 'text block')}`); },
+  dspObjOk(id) { const o = orderById(id); closeSheet(); dspHuman(o, 'Вы не согласились с решением ZELDO', (S.dspObj || '').trim()); render(); toast('Спор передан администратору', 'info'); },
   cancelAsk(id) { const o = orderById(id); dialog({ title: 'Отменить заказ?', text: TL_IDX[o.status] >= 0 ? `Работа ещё не начата: ${rub(o.total)} вернутся на карту полностью.` : 'Заказ ещё не оплачен, списаний не будет.', actions: [['Отменить заказ', 'cancelOk', id, 'danger'], ['Не отменять', 'closeDialog', '', 'soft']] }); },
   cancelOk(id) { S.dialog = null; const o = orderById(id); setSt(o, 'cancel', 'Заказ отменён.'); render(); toast('Заказ отменён', 'info'); },
   changeAsk(id) {
@@ -10222,11 +10261,87 @@ Object.assign(A, {
   guestNeed(what) { needLogin(what); },
 });
 function disputeSheet() {
-  const d = S.dsp;
-  sheet('Открыть спор', `<div class="m">Спор открывают, если стороны не могут договориться о результате или условиях. Деньги останутся на защищённом счёте до решения. Спор разбирает администратор ZELDO.</div>
-    <div class="optlist">${['Работа не сделана', 'Результат не соответствует условиям заказа', 'Исполнитель не пришёл', 'Не договорились об изменении условий'].map(t => opt('dspWhy', t, t, '', d.why === t)).join('')}</div>
+  const d = S.dsp; const o = orderById(d.id); const me = dspMe(o);
+  sheet('Открыть спор', `<div class="m">Спор открывают, если не получается договориться о результате или условиях. Деньги останутся на защищённом счёте до решения.</div>
+    <div class="dsp-how">${[['1', `${DSP_WHO[dspOther(me)]} отвечает`, 'в течение 12 часов'], ['2', 'ZELDO предлагает решение', 'по заказу, переписке и обеим версиям'], ['3', 'Вы соглашаетесь', 'или зовёте администратора']].map(([n, t, s]) => `<span><b>${n}</b><span><span class="t">${t}</span><span class="m">${s}</span></span></span>`).join('')}</div>
+    <div class="optlist">${DSP_WHY[me].map(t => opt('dspWhy', t, t, '', d.why === t)).join('')}</div>
+    ${field('Что случилось', `<textarea class="textarea" data-in="dspText" rows="3" maxlength="1500" placeholder="${me === 'c' ? 'Например: мастер не пришёл в 14:00 и не отвечает на сообщения' : 'Например: работа сдана с фото, заказчик не принимает и не объясняет почему'}">${esc(d.text || '')}</textarea>`, { hint: 'Чем точнее опишете, тем точнее будет решение.' })}
     <button class="opt ${d.files ? 'on' : ''}" data-a="dspFiles"><span class="mark sq"></span><span class="grow"><span class="ot">Приложить фото и файлы</span><span class="os">Из переписки и с устройства</span></span></button>
     ${d.why ? btn('Открыть спор', 'disputeOk', '', 'danger block') : `<button class="btn block" disabled>Открыть спор</button><div class="why center">Причина: выберите, что случилось.</div>`}${btn('Отмена', 'closeSheet', '', 'text block')}`);
+}
+IN.dspText = v => { S.dsp.text = v; };
+IN.dspAns = v => { S.dspAns = v; };
+IN.dspObj = v => { S.dspObj = v; };
+/* ---------- спор (08.11, владелец: «простые случаи решает ИИ; сторона не согласна — подключаем администратора») ----------
+   Шаги o.dsp.stage: answer — ждём версию второй стороны (12 часов); ai — ZELDO разбирает; offer — решение ZELDO ждёт согласия (24 часа);
+   human — разбирает администратор. В рабочей версии всё это ведёт сервер (server.js, блок «споры»), в прототипе — имитация ниже */
+const DSP_ANSWER = 12 * 3600e3, DSP_OFFER = 24 * 3600e3;
+const DSP_WHO = { c: 'Заказчик', e: 'Исполнитель' };
+const DSP_WHY = { c: ['Исполнитель не пришёл', 'Работа не сделана', 'Результат не соответствует условиям заказа', 'Не договорились об изменении условий'],
+  e: ['Заказчик не принимает выполненную работу', 'Заказчик не открыл дверь и не вышел на связь', 'Заказчик просит работу сверх заказа', 'Не договорились об изменении условий'] };
+const DSP_HOW = { refund: 'вернуть деньги заказчику', payout: 'выплатить исполнителю', split: 'поделить сумму', rework: 'вернуть на доработку' };
+const dspMe = o => o.ex === 'alex' ? 'e' : 'c';
+const dspOther = r => r === 'c' ? 'e' : 'c';
+const whenRu = t => new Date(t).toLocaleString('ru-RU', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).replace(',', ' в');
+const dspChat = o => chatById(o.chat) || chatById(o.echat);
+function dspBlock(o) {
+  const s = o.dsp; const me = dspMe(o); const other = dspOther(me);
+  /* спор без хода (старые заказы) и разбор администратором */
+  const human = (why) => `<div class="info warn"><b>Спор разбирает администратор ZELDO</b><span class="m">Он изучит заказ, переписку и обе версии и ответит в течение суток. Деньги ждут решения на защищённом счёте.</span>${why ? `<span class="m">${esc(why)}</span>` : ''}</div>${btn(`${ic('chat', 20)} Написать администратору`, 'supportChat', o.id, 'soft block')}`;
+  if (!s) return human('');
+  const steps = ['Версии сторон', 'Решение ZELDO', 'Согласие сторон'];
+  const at = { answer: 0, ai: 1, offer: 2 }[s.stage] ?? -1;  /* текущий шаг; у разбора администратором шагов нет */
+  const head = `<div class="dsp-card"><div class="dsp-top">${ic('flag', 20, 2)}<span><b>Спор: ${esc(lcFirst(s.why))}</b><span class="m">Открыл${s.by === me ? 'и вы' : ` ${DSP_WHO[s.by].toLowerCase()}`} · деньги ждут решения на защищённом счёте</span></span></div>
+    ${at >= 0 ? `<div class="dsp-steps">${steps.map((t, i) => `<span class="${i < at ? 'done' : i === at ? 'cur' : ''}"><i>${i < at ? ic('check', 14, 3) : i + 1}</i>${t}</span>`).join('')}</div>` : ''}
+    <div class="dsp-v"><span class="lbl">${s.by === me ? 'Ваша версия' : `Версия: ${DSP_WHO[s.by].toLowerCase()}`}</span><div>${esc(s.text || 'Без описания')}</div></div>
+    ${s.ans ? `<div class="dsp-v"><span class="lbl">${s.by === me ? `Ответ: ${DSP_WHO[other].toLowerCase()}` : 'Ваш ответ'}</span><div>${esc(s.ans.text)}</div></div>` : ''}</div>`;
+  if (s.stage === 'answer') {
+    if (s.by === me) return head + `<div class="info"><b>Ждём ответа</b><span class="m">${DSP_WHO[other]} может ответить до ${whenRu(s.until)}. Потом ZELDO разберёт спор, обычно за пару минут. Не ответит — разберём по тому, что есть.</span></div>`;
+    return head + card(`<div class="h2">Ваша версия</div><div class="m">Ответить можно до ${whenRu(s.until)}. Не ответите — ZELDO разберёт спор по тому, что есть.</div>${field('', `<textarea class="textarea" data-in="dspAns" rows="3" maxlength="1500" placeholder="Расскажите, как было: когда пришли, что сделали, о чём договорились">${esc(S.dspAns || '')}</textarea>`)}${btn('Отправить ответ', 'dspAnswer', o.id, 'block')}`);
+  }
+  if (s.stage === 'ai') return head + `<div class="info"><b>ZELDO разбирает спор</b><span class="m">Читаем условия, ход заказа, переписку и обе версии. Обычно это пара минут.</span></div>`;
+  if (s.stage === 'offer' && s.ai) {
+    const a = s.ai;
+    return head + `<div class="dsp-dec"><span class="lbl">Решение ZELDO</span><div class="h2">${cap(DSP_HOW[a.how])}</div>${a.how === 'split' ? `<div class="dsp-split"><span>Исполнителю <b>${rub(a.exec)}</b></span><span>Заказчику вернётся <b>${rub(a.cust)}</b></span></div>` : ''}<div>${esc(a.comment)}</div>
+      <div class="m">Вступит в силу ${whenRu(a.until)}, если никто не возразит. Не согласны — спор разберёт администратор.</div>
+      ${a.ok[me] ? `<div class="info"><span class="m">Вы согласились. ${a.ok[other] ? '' : `Ждём ответа ${{ c: 'заказчика', e: 'исполнителя' }[other]}.`}</span></div>` : `<div class="btns two">${btn('Согласен', 'dspAgree', o.id, '')}${btn('Не согласен', 'dspObject', o.id, 'soft')}</div>`}</div>`;
+  }
+  return head + human(s.human ? s.human.reason : '');
+}
+const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
+/* прототип: вторая сторона отвечает, ZELDO предлагает решение — заготовки по причине спора (в рабочей версии решает ИИ на сервере) */
+const DSP_SIM = {
+  'Исполнитель не пришёл': ['Не смог приехать: сломалась машина. Предупредить не успел, извините.', 'refund', 'Работа не началась: код начала никто не ввёл, а исполнитель сам подтвердил, что не приехал. Поэтому деньги возвращаются заказчику полностью.'],
+  'Работа не сделана': ['Начал, но не закончил: не хватило материалов. Готов вернуть деньги.', 'refund', 'Исполнитель подтвердил, что работа не закончена, и сам предложил вернуть деньги. Поэтому деньги возвращаются заказчику.'],
+  'Результат не соответствует условиям заказа': ['Согласен, в двух местах есть недочёты. Готов приехать и исправить.', 'rework', 'Работа сдана, но заказчик назвал конкретные недочёты, и исполнитель согласен их исправить. Доработок по заказу ещё не было, поэтому заказ возвращается на доработку.'],
+  'Не договорились об изменении условий': ['Половину работы сделали по первым условиям, дальше не сошлись в цене.', 'split', 'Обе стороны подтверждают, что половина работы сделана по первоначальным условиям. Поэтому сумма делится пополам.'],
+  'Заказчик не принимает выполненную работу': ['Вроде всё сделано, просто не успела проверить.', 'payout', 'Работа сдана с фото, а заказчик не назвал недочётов и сам пишет, что всё сделано. Поэтому деньги уходят исполнителю.'],
+  'Заказчик не открыл дверь и не вышел на связь': ['Я был дома, звонок не работал. Мастер не дозвонился через приложение.', 'human', ''],
+  'Заказчик просит работу сверх заказа': ['Думал, что это входит в заказ.', 'payout', 'По условиям заказа работа сделана полностью, а просьба заказчика в них не входила. Поэтому деньги уходят исполнителю. Дополнительную работу можно заказать отдельно.'],
+};
+function dspSimAnswer(o) {
+  sim(5000, () => { const s = o.dsp; if (o.status !== 'dispute' || !s || s.stage !== 'answer') return;
+    const x = DSP_SIM[s.why] || DSP_SIM['Работа не сделана']; s.ans = { text: x[0], at: Date.now() }; s.stage = 'ai';
+    postMsg(dspChat(o), 'sys', { t: `${DSP_WHO[dspOther(s.by)]} ответил по спору. ZELDO разбирает спор.` }); toast(`${DSP_WHO[dspOther(s.by)]} ответил по спору`, 'info');
+    sim(3500, () => dspSimOffer(o)); });
+}
+function dspSimOffer(o) {
+  const s = o.dsp; if (o.status !== 'dispute' || !s || s.stage !== 'ai') return;
+  const x = DSP_SIM[s.why] || DSP_SIM['Работа не сделана']; const how = x[1]; const total = o.total || 0;
+  if (how === 'human') return dspHuman(o, 'Версии сторон расходятся, а проверить по заказу и переписке, кто прав, нельзя. Такой спор решает человек.');
+  const exec = how === 'split' ? Math.round(total / 2) : how === 'payout' ? total : 0;
+  s.ai = { how, exec, cust: how === 'split' ? total - exec : how === 'refund' ? total : 0, comment: x[2], at: Date.now(), until: Date.now() + DSP_OFFER, ok: { c: false, e: false } }; s.stage = 'offer';
+  postMsg(dspChat(o), 'sys', { t: `ZELDO разобрал спор и предлагает: ${DSP_HOW[how]}. ${x[2]}` });
+  notify(dspMe(o) === 'c' ? 'cust' : 'exec', 'Решение по спору', `Заказ № ${o.id}: ${DSP_HOW[how]}`, gv('order', { id: o.id })); toast('ZELDO предложил решение по спору', 'info');
+}
+function dspHuman(o, reason, why) {
+  const s = o.dsp; s.stage = 'human'; s.human = { reason, why: why || null, at: Date.now() };
+  if (!REAL) postMsg(dspChat(o), 'sys', { t: 'Спор передан администратору ZELDO. Ответ — в течение суток.' });
+}
+function dspApply(o, why) {
+  const a = o.dsp.ai; o.dsp.stage = 'done';
+  o.resolution = { how: a.how, comment: `${a.comment} Решение принято автоматически: ${why}.`, exec: a.exec, cust: a.cust, by: 'ai', at: Date.now() };
+  setSt(o, a.how === 'refund' ? 'cancel' : a.how === 'rework' ? 'rework' : 'done', `Решение ZELDO вступило в силу: ${DSP_HOW[a.how]}.`); toast('Решение по спору вступило в силу', 'ok');
 }
 /* смета после осмотра: объёмы по замеру, работа, материалы и расходы отдельными строками (Р5, стр. 44–50) */
 function smetaFor(o) {

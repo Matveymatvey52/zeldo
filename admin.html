@@ -77,6 +77,8 @@ label.f { display: grid; gap: 6px; font-size: 14px; color: var(--muted); }
 .x { float: right; width: 36px; height: 36px; border-radius: 10px; background: var(--card); font-size: 20px; }
 .kv { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 6px 12px; }
 .kv span { color: var(--muted); }
+.kv > b { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.kv.wide { grid-template-columns: 170px minmax(0, 1fr); gap: 10px 14px; }
 .msgs { display: grid; gap: 8px; max-height: 360px; overflow: auto; padding: 4px; }
 .msg { background: var(--card); border-radius: 12px; padding: 8px 12px; box-shadow: 0 1px 0 var(--line); }
 .msg b { font-weight: 600; } .msg .m { font-size: 13px; }
@@ -149,7 +151,7 @@ tr.dim td { opacity: .62; }
 .kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .kpi { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: 2px; padding: 16px 18px; min-height: 148px; }
 .kl { font-size: 14px; font-weight: 600; color: var(--muted); }
-.kv { font-size: 28px; line-height: 36px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi .kv { display: block; font-size: 28px; line-height: 36px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dl { font-size: 13px; line-height: 18px; color: var(--ink); font-variant-numeric: tabular-nums; }
 .kh { font-size: 13px; line-height: 18px; color: var(--muted); margin-top: 6px; }
 .two-c { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
@@ -205,7 +207,12 @@ window.ZDEMO = (() => {
   };
   const nm = id => (U[id] || {}).name || `№ ${id}`;
   const O = [
-    { id: 1012, status: 'dispute', cu: 5, eu: 3, updated: now - 2 * H, data: { svc: 'Химчистка мягкой мебели', what: 'Угловой диван, велюр', total: 4500, date: dk(-1), time: '10:00', addr: 'Москва, ул. Тестовая, 12, кв. 40', resultText: 'Почистила диван и подушки, пятно на спинке вывести не удалось.' },
+    { id: 1012, status: 'dispute', cu: 5, eu: 3, updated: now - 2 * H, data: { svc: 'Химчистка мягкой мебели', what: 'Угловой диван, велюр', total: 4500, date: dk(-1), time: '10:00', addr: 'Москва, ул. Тестовая, 12, кв. 40', resultText: 'Почистила диван и подушки, пятно на спинке вывести не удалось.',
+      /* спор, который ИИ разобрал, а заказчик не согласился (08.11) */
+      dsp: { by: 'c', why: 'Результат не соответствует условиям заказа', text: 'Пятно на спинке осталось, а в заказе было «выведение пятен».', at: now - 30 * H, stage: 'human', until: now - 18 * H,
+        ans: { text: 'Пятно старое, от кофе. Предупреждала до начала, что может не сойти полностью.', at: now - 26 * H },
+        draft: { how: 'split', exec_rub: 3500, confidence: 'high', comment: 'Диван и подушки почищены, но пятно на спинке осталось, хотя выведение пятен входило в заказ. Поэтому сумма делится: исполнителю 3 500 ₽, заказчику вернётся 1 000 ₽.', reasoning: 'Работа сделана, кроме одного пункта. Предупреждение о старом пятне в переписке не нашлось — если оно было устно, решение могло бы быть в пользу исполнителя.', at: now - 26 * H },
+        human: { reason: 'Заказчик не согласен с решением ZELDO', why: 'Заказчик: хочу вернуть всю сумму, диван выглядит так же', at: now - 3 * H } } },
       msgs: [['Анна Белова', 'Здравствуйте! Нужно почистить угловой диван, есть пятно от кофе.', '09:12'], ['Ирина Соколова', 'Здравствуйте! Приеду завтра в 10:00, возьму средство для велюра.', '09:20'], ['ZELDO', 'Заказ № 1012 оплачен, 4 500 ₽ на защищённом счёте', '09:31', 1], ['Ирина Соколова', 'Работа сделана, пятно на спинке старое, полностью не вывелось.', '12:40'], ['Анна Белова', 'Пятно осталось, а это было главное. Платить полную сумму не готова.', '13:05'], ['ZELDO', 'Открыт спор: результат не соответствует условиям заказа. Деньги ждут решения на защищённом счёте', '13:06', 1]] },
     { id: 1011, status: 'done', cu: 6, eu: 4, updated: now - 5 * H, data: { svc: 'Мелкий косметический ремонт', what: '2 часа · полки и карниз', total: 3000, date: dk(-1), time: '16:00' }, msgs: [['Олег Ким', 'Повесить две полки и карниз', '11:00'], ['Дмитрий Орлов', 'Готово, фото приложил', '18:10']] },
     { id: 1010, status: 'work', cu: 5, eu: 4, updated: now - 40 * 60e3, data: { svc: 'Сборка корпусной мебели', what: 'Шкаф-купе 2 м', total: 5200, date: dk(0), time: '12:00' }, msgs: [] },
@@ -228,10 +235,10 @@ window.ZDEMO = (() => {
   };
   const ST = [{ email: 'matvey@пример.рф', role: 'admin', name: 'Матвей Корепин', added: now - 9 * D }, { email: 'maxim@пример.рф', role: 'admin', name: 'Максим Петров', added: now - 9 * D }];
   const LOG = [{ at: now - 2 * H, who: 'Матвей Корепин', act: 'админка: просмотр заказа и переписки', target: '1012' }, { at: now - D, who: 'Максим Петров', act: 'админка: карточка возвращена', target: 'c3: Уберите телефон из описания' }, { at: now - D - H, who: 'Матвей Корепин', act: 'админка: отметка «Проверен»', target: '№ 3 Ирина Соколова' }];
-  let premod = true;
+  let premod = true; let aiDisputes = true;
   const ROLES = { admin: 'Админ', mod: 'Модератор', support: 'Поддержка', analyst: 'Аналитик' };
   const log = (act, target) => LOG.unshift({ at: Date.now(), who: 'Вы (пример)', act: 'админка: ' + act, target: String(target) });
-  const row = o => ({ id: o.id, status: o.status, svc: o.data.svc, total: o.data.total, date: o.data.date, time: o.data.time, cu: o.cu, eu: o.eu, client: nm(o.cu), exec: nm(o.eu), updated: o.updated, resolution: o.data.resolution || null });
+  const row = o => ({ id: o.id, status: o.status, svc: o.data.svc, total: o.data.total, date: o.data.date, time: o.data.time, cu: o.cu, eu: o.eu, client: nm(o.cu), exec: nm(o.eu), updated: o.updated, resolution: o.data.resolution || null, dsp: o.data.dsp ? { stage: o.data.dsp.stage, why: o.data.dsp.why } : null });
   const rate = (id, by) => { const l = R.filter(r => r.target === id && r.by === by && !r.hidden); return l.length ? [Math.round(l.reduce((s, r) => s + r.stars, 0) / l.length * 10) / 10, l.length] : [0, 0]; };
   const HOW = { refund: 'деньги возвращаются заказчику', payout: 'деньги уходят исполнителю', split: 'сумма делится', rework: 'исполнитель доделывает работу', cancel: 'заказ отменён администратором' };
   const err = (status, m) => { throw Object.assign(new Error(m), { status }); };
@@ -249,14 +256,14 @@ window.ZDEMO = (() => {
   return async function (url, b) {
     await new Promise(r => setTimeout(r, 120));
     const u = new URL(url, location.href); const p = u.pathname.replace(/^.*\/api\//, '/api/'); const q = u.searchParams;
-    if (p === '/api/admin/me') return { id: 1, name: 'Матвей Корепин', role: 'admin', roles: ROLES, can: ['summary', 'disputes', 'resolve', 'orders', 'cancel', 'cards', 'reviews', 'users', 'block', 'verify', 'email', 'staff', 'support', 'log', 'settings'], premod };
+    if (p === '/api/admin/me') return { id: 1, name: 'Матвей Корепин', role: 'admin', roles: ROLES, can: ['summary', 'disputes', 'resolve', 'orders', 'cancel', 'cards', 'reviews', 'users', 'block', 'verify', 'email', 'staff', 'support', 'log', 'settings'], premod, aiDisputes, aiOn: true };
     if (p === '/api/admin/summary') return summary();
     if (p === '/api/admin/orders') return { orders: O.filter(o => !q.get('status') || o.status === q.get('status')).map(row) };
     if (p === '/api/admin/order') { const o = O.find(x => x.id === Number(q.get('id'))); log('просмотр заказа и переписки', o.id); return { order: Object.assign(row(o), { data: o.data }), msgs: o.msgs.map(([who, t, at, sys]) => ({ who, t, at, sys: !!sys })) }; }
     if (p === '/api/admin/resolve') { const o = O.find(x => x.id === Number(b.id)); const c = String(b.comment || '').trim(); if (!c) err(400, 'Напишите обеим сторонам, почему такое решение');
       let exec = 0; if (b.how === 'split') { exec = Math.round(Number(b.exec)); if (!(exec > 0 && exec < o.data.total)) err(400, `Исполнителю — от 1 до ${o.data.total - 1} ₽`); }
       o.status = b.how === 'refund' || b.how === 'cancel' ? 'cancel' : b.how === 'rework' ? 'rework' : 'done'; o.updated = Date.now();
-      o.data.resolution = { how: b.how, comment: c, at: Date.now(), exec: b.how === 'split' ? exec : b.how === 'payout' ? o.data.total : 0, cust: b.how === 'split' ? o.data.total - exec : o.status === 'cancel' ? o.data.total : 0 };
+      if (o.data.dsp) o.data.dsp.stage = 'done'; o.data.resolution = { how: b.how, comment: c, at: Date.now(), exec: b.how === 'split' ? exec : b.how === 'payout' ? o.data.total : 0, cust: b.how === 'split' ? o.data.total - exec : o.status === 'cancel' ? o.data.total : 0 };
       o.msgs.push(['ZELDO', `Решение ZELDO по заказу № ${o.id}: ${HOW[b.how]}. ${c}`, new Date().toTimeString().slice(0, 5), 1]); log(`решение по заказу: ${HOW[b.how]}`, `${o.id}: ${c}`); return { ok: true }; }
     if (p === '/api/admin/cards') return { premod, cards: C.filter(c => !q.get('mod') || c.mod === q.get('mod')).map(c => Object.assign({}, c, { who: nm(c.owner) })) };
     if (p === '/api/admin/card') { const c = C.find(x => x.id === b.id); if (b.act === 'ok') { c.mod = 'ok'; c.reason = null; log('карточка опубликована', c.title); } else { c.mod = 'back'; c.reason = b.reason; log('карточка возвращена', `${c.title}: ${b.reason}`); } return { ok: true }; }
@@ -272,7 +279,7 @@ window.ZDEMO = (() => {
       return { tickets: Object.values(T).map(t => { const l = t.msgs[t.msgs.length - 1]; return { user: t.user, name: nm(t.user), status: t.status, last: l.t, lastFrom: l.from, updated: l.at, n: t.msgs.length }; }) };
     }
     if (p === '/api/admin/log') return { log: LOG };
-    if (p === '/api/admin/settings') { premod = !!b.premod; return { ok: true, premod }; }
+    if (p === '/api/admin/settings') { if (b.premod != null) premod = !!b.premod; if (b.aiDisputes != null) aiDisputes = !!b.aiDisputes; return { ok: true, premod, aiDisputes }; }
     return { ok: true };
   };
 })();
@@ -301,6 +308,9 @@ const SECS = [
 ];
 const ST = { request: ['Ждёт подтверждения', 'grey'], confirmed: ['Ждёт оплаты', 'warn'], paid: ['Оплачен, ждёт начала', ''], startReq: ['Подтверждение начала', 'warn'], work: ['В работе', ''], result: ['Результат передан', 'warn'], rework: ['На доработке', 'warn'], done: ['Завершён', 'ok'], dispute: ['Спор', 'bad'], cancel: ['Отменён', 'grey'] };
 const stPill = s => { const [t, k] = ST[s] || [s, 'grey']; return `<span class="pill ${k}">${esc(t)}</span>`; };
+/* шаг спора (08.11): простые споры ведёт ИИ, к человеку — когда сторона не согласна или случай не простой */
+const DSP_ST = { answer: ['Ждёт ответа стороны', 'warn'], ai: ['ИИ разбирает', ''], offer: ['ИИ предложил решение', ''], human: ['Нужен администратор', 'bad'], done: ['Решён', 'ok'] };
+const dspPill = o => { if (o.status !== 'dispute' || !o.dsp) return stPill(o.status); const [t, k] = DSP_ST[o.dsp.stage] || ['Спор', 'bad']; return `<span class="pill ${k}">${esc(t)}</span>`; };
 const can = k => !!S.me && S.me.can.includes(k);
 
 async function load(sec) {
@@ -387,8 +397,11 @@ function vSummary() {
 const tbl = (cols, head, rows, cls = '') => `<div class="card tw"><table class="${cls}"><colgroup>${cols.map(c => `<col${c ? ` style="width:${c}"` : ''}>`).join('')}</colgroup><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
 const cell = (main, sub) => `<span class="c1">${main}</span>${sub != null ? `<span class="c2">${sub}</span>` : ''}`;
 const orderTable = (l, empty) => !l ? '<div class="empty">Загружаем…</div>' : l.length ? tbl(['72px', '', '17%', '17%', '112px', '190px', '128px'], ['№', 'Услуга', 'Заказчик', 'Исполнитель', '<span class="r">Сумма</span>', 'Статус', 'Изменён'],
-  l.map(o => `<tr class="click" data-a="openOrder" data-v="${o.id}"><td class="num">${o.id}</td><td>${cell(esc(o.svc), o.date ? esc([day(o.date), o.time].filter(Boolean).join(', ')) : '')}</td><td>${cell(esc(o.client))}</td><td>${cell(esc(o.exec))}</td><td class="num r">${rub(o.total)}</td><td>${stPill(o.status)}</td><td class="m num">${dt(o.updated)}</td></tr>`)) : `<div class="card empty">${empty}</div>`;
-const vDisputes = () => orderTable(S.data.disputes, 'Открытых споров нет');
+  l.map(o => `<tr class="click" data-a="openOrder" data-v="${o.id}"><td class="num">${o.id}</td><td>${cell(esc(o.svc), o.date ? esc([day(o.date), o.time].filter(Boolean).join(', ')) : '')}</td><td>${cell(esc(o.client))}</td><td>${cell(esc(o.exec))}</td><td class="num r">${rub(o.total)}</td><td>${dspPill(o)}</td><td class="m num">${dt(o.updated)}</td></tr>`)) : `<div class="card empty">${empty}</div>`;
+const vDisputes = () => { const l = S.data.disputes; const rank = o => ({ human: 0, answer: 2, ai: 3, offer: 1 })[(o.dsp || {}).stage] ?? 0;
+  const head = `<div class="row" style="margin-bottom:14px"><div class="grow"></div>${can('settings') ? `<label class="sw"><input type="checkbox" data-ch="aiDisputes" ${S.me.aiDisputes ? 'checked' : ''}> ИИ разбирает простые споры</label>` : ''}</div>
+    <div class="card note"><b>Как идёт спор.</b> Вторая сторона отвечает в течение 12 часов. Потом ИИ читает условия, ход заказа, переписку и обе версии и предлагает решение. Если обе стороны согласны или за сутки никто не возразил, решение исполняется само. Если кто-то не согласен, спор приходит сюда со статусом «Нужен администратор». Сразу к вам, без ИИ: сумма больше 15 000 ₽, ущерб, кража, угрозы, здоровье, полиция и суд. Решить спор вручную можно на любом шаге.${S.me.aiOn ? '' : ' <b>Сейчас ИИ не подключён: все споры идут к администратору.</b>'}</div>`;
+  return head + orderTable(l && l.slice().sort((a, b) => rank(a) - rank(b)), 'Открытых споров нет'); };
 function vOrders() {
   const f = S.flt.orders || '';
   return `<div class="chips">${[['', 'Все'], ['request', 'Ждут подтверждения'], ['confirmed', 'Ждут оплаты'], ['paid', 'Оплачены'], ['work', 'В работе'], ['result', 'Работа сдана'], ['rework', 'На доработке'], ['dispute', 'Спор'], ['done', 'Завершены'], ['cancel', 'Отменены']].map(([k, t]) => `<button class="chip ${f === k ? 'on' : ''}" data-a="fltOrders" data-v="${k}">${t}</button>`).join('')}</div>${orderTable(S.data.orders, 'Таких заказов нет')}`;
@@ -444,6 +457,21 @@ const SUBS = { summary: 'Что требует действий сейчас и 
 const VIEWS = { summary: vSummary, disputes: vDisputes, orders: vOrders, cards: vCards, reviews: vReviews, users: vUsers, support: vSupport, staff: vStaff, log: vLog };
 
 /* заказ и спор — в боковой панели */
+const HOW_RU = { refund: 'вернуть деньги заказчику', payout: 'выплатить исполнителю', split: 'поделить сумму', rework: 'вернуть на доработку', human: 'отдать администратору' };
+function dspCard(o, d) {
+  const s = d.dsp; if (!s) return '';
+  const WHO = { c: 'Заказчик', e: 'Исполнитель' }; const other = s.by === 'c' ? 'e' : 'c';
+  const dr = s.draft; const ai = s.ai;
+  return `<div class="card" style="margin-bottom:12px"><h2>Ход спора</h2><div class="kv wide">
+    <span>Шаг</span><b>${dspPill({ status: o.status, dsp: s })}</b>
+    <span>Открыл</span><b>${WHO[s.by]}, ${dt(s.at)}</b><span>Причина</span><b>${esc(s.why)}</b><span>Версия</span><b>${esc(s.text || '—')}</b>
+    <span>Ответ: ${WHO[other].toLowerCase()}</span><b>${s.ans ? `${esc(s.ans.text)} <span class="m">· ${dt(s.ans.at)}</span>` : s.stage === 'answer' ? `ждём до ${dt(s.until)}` : 'не ответил'}</b>
+    ${dr ? `<span>ИИ</span><b>${esc(HOW_RU[dr.how] || dr.how)}${dr.how === 'split' ? ` · исполнителю ${rub(ai ? ai.exec : dr.exec_rub)}` : ''} · уверенность: ${{ high: 'высокая', medium: 'средняя', low: 'низкая' }[dr.confidence] || dr.confidence}</b>
+      <span>Сторонам</span><b>${esc(dr.comment)}</b><span>Записка вам</span><b>${esc(dr.reasoning)}</b>` : ''}
+    ${ai && s.stage === 'offer' ? `<span>Согласие</span><b>Заказчик: ${ai.ok.c ? 'да' : 'пока нет'} · Исполнитель: ${ai.ok.e ? 'да' : 'пока нет'} · само вступит в силу ${dt(ai.until)}</b>` : ''}
+    ${s.human ? `<span>Почему к вам</span><b>${esc(s.human.reason)}${s.human.why ? `<div class="m">${esc(s.human.why)}</div>` : ''}</b>` : ''}
+  </div></div>`;
+}
 function vDrawer() {
   const x = S.drawer; if (!x) return ''; if (!x.order) return `<div class="scrim" data-a="closeDrawer"></div><aside class="drawer" aria-label="Заказ"><div class="empty">Загружаем…</div></aside>`;
   const o = x.order; const d = o.data || {}; const r = o.resolution;
@@ -453,6 +481,7 @@ function vDrawer() {
   <div class="card" style="margin-bottom:12px"><div class="kv"><span>Услуга</span><b>${esc(o.svc)}</b><span>Что</span><b>${esc(d.what || '—')}</b><span>Заказчик</span><b>${esc(o.client)}</b><span>Исполнитель</span><b>${esc(o.exec)}</b><span>Когда</span><b>${esc([day(d.date), d.time].filter(Boolean).join(', ') || '—')}</b><span>Сумма</span><b>${rub(o.total)}</b>${d.addr ? `<span>Адрес</span><b>${esc(d.addr)}</b>` : ''}${d.resultText ? `<span>Результат</span><b>${esc(d.resultText)}</b>` : ''}</div>
   ${(d.resultPhotos || []).length ? `<div class="row" style="margin-top:10px">${d.resultPhotos.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="Фото результата" style="width:96px;height:96px;object-fit:cover;border-radius:10px"></a>`).join('')}</div>` : ''}</div>
   ${r ? `<div class="card" style="margin-bottom:12px;background:var(--soft)"><b>Решение ZELDO: ${esc(H[r.how] || r.how)}</b>${r.how === 'split' ? `<div class="m">Исполнителю ${rub(r.exec)}, заказчику ${rub(r.cust)}</div>` : ''}<div>${esc(r.comment)}</div><div class="m">${dt(r.at)}</div></div>` : ''}
+  ${dspCard(o, d)}
   ${o.status === 'dispute' && can('resolve') ? `<div class="card" style="margin-bottom:12px"><h2>Решение по спору</h2><div class="opts">
     <label class="opt"><input type="radio" name="how" value="refund"><span><b>Вернуть деньги заказчику</b><div class="m">Заказ отменится, ${rub(o.total)} вернутся заказчику</div></span></label>
     <label class="opt"><input type="radio" name="how" value="payout"><span><b>Выплатить исполнителю</b><div class="m">Заказ закроется, деньги уйдут исполнителю</div></span></label>
@@ -520,6 +549,7 @@ const A = {
 };
 document.addEventListener('click', e => { const el = e.target.closest('[data-a]'); if (!el || !A[el.dataset.a]) return; e.preventDefault(); A[el.dataset.a](el.dataset.v); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.drawer) A.closeDrawer(); if (e.key === 'Enter' && e.target.dataset && e.target.dataset.enter) A[e.target.dataset.enter](); });
+document.addEventListener('change', async e => { if (e.target.dataset.ch === 'aiDisputes') { try { const r = await api('/api/admin/settings', { aiDisputes: e.target.checked }); S.me.aiDisputes = r.aiDisputes; toast(r.aiDisputes ? 'ИИ разбирает простые споры' : 'Все новые споры идут к администратору'); } catch (x) { toast(x.message, true); } } });
 document.addEventListener('change', async e => { if (e.target.dataset.ch === 'premod') { try { const r = await api('/api/admin/settings', { premod: e.target.checked }); S.me.premod = r.premod; toast(r.premod ? 'Новые карточки ждут проверки' : 'Карточки публикуются сразу'); } catch (x) { toast(x.message, true); } } });
 
 /* новые обращения, споры и карточки — без перезагрузки */
