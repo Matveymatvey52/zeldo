@@ -10627,23 +10627,36 @@ Object.assign(A, {
 
 /* ---------- ярлык на экран «Домой» (запись 48, 70:36–82:52): ZELDO открывается как приложение, без строки браузера ---------- */
 const standalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
-let a2hsEvt = null; window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); a2hsEvt = e; });
-function a2hsMaybe() { try { if (standalone() || VIEW() === 'desk' || /jsdom/i.test(navigator.userAgent) || navigator.webdriver || localStorage.getItem('zeldo-a2hs')) return; } catch (e) { return; } setTimeout(() => { if (!S.sheet && !S.dialog) A.a2hs(); }, 2500); }
-const a2hsDone = () => { try { localStorage.setItem('zeldo-a2hs', '1'); } catch (e) { /* без памяти — спросим ещё раз */ } };
+/* 08.11, Максим: «можно ли, чтобы не искать кнопку, а сразу из нашего интерфейса нажал — и оно добавило?»
+   Android (Chrome, Яндекс Браузер, Samsung, Edge) — да: браузер присылает разрешение (beforeinstallprompt), и наша кнопка открывает системное окно установки.
+   Но разрешение приходит не сразу: человек должен хотя бы раз нажать на страницу и пробыть на ней 30 секунд (условия Chrome, web.dev/articles/install-criteria).
+   Раньше окно выскакивало через 2,5 секунды, разрешения ещё не было — показывалась инструкция и больше не предлагалось. Теперь на Android ждём разрешения.
+   iPhone — нет: Safari не даёт сайтам такой возможности ни в одной версии, остаётся инструкция */
+const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const A2HS_KEY = 'zeldo-a2hs2';  /* новый ключ: кто закрыл прежнюю инструкцию, увидит кнопку в одно касание */
+let a2hsEvt = null;
+const a2hsSeen = () => { try { return !!localStorage.getItem(A2HS_KEY); } catch (e) { return true; } };
+const a2hsSkip = () => standalone() || VIEW() === 'desk' || /jsdom/i.test(navigator.userAgent) || navigator.webdriver || a2hsSeen();
+const a2hsShow = () => { if (a2hsSkip()) return; if (S.sheet || S.dialog || S.lbox) { setTimeout(a2hsShow, 4000); return; } A.a2hs(); };
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); a2hsEvt = e; if (S.sheet && /на экране «Домой»/.test(S.sheet.title)) A.a2hs(); else a2hsShow(); });
+window.addEventListener('appinstalled', () => { a2hsEvt = null; a2hsDone(); closeSheet(); toast('ZELDO на экране «Домой». Открывайте его оттуда', 'ok'); });
+function a2hsMaybe() { if (a2hsSkip()) return; setTimeout(() => { if (!a2hsEvt) a2hsShow(); }, IOS ? 2500 : 45000); }
+const a2hsDone = () => { try { localStorage.setItem(A2HS_KEY, '1'); } catch (e) { /* без памяти — спросим ещё раз */ } };
 Object.assign(A, {
   /* 06.11: шаги по версии Safari. С iOS 26 «Поделиться» спрятана в меню •••, а в окне добавления есть переключатель
      «Открыть как веб-приложение» (названия — как в справке Apple). Из Chrome, Яндекс Браузера и Telegram ярлык надёжнее делать через Safari */
-  a2hs() { const ua = navigator.userAgent, ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  a2hs() { const ua = navigator.userAgent, ios = IOS;
     const other = ios && /CriOS|FxiOS|EdgiOS|YaBrowser|OPiOS|GSA\/|Telegram|Instagram|FBAN|FBAV|VKClient/.test(ua), v = other ? 0 : +((ua.match(/Version\/(\d+)/) || [])[1] || 0), sh = ic('share', 18, 2);
     const iosSteps = (other ? '<li>Откройте эту страницу в Safari. Из других браузеров и из Telegram ярлык может открываться обычной вкладкой</li>' : '')
       + (v >= 26 ? `<li>Нажмите ••• рядом с адресной строкой, затем «Поделиться» ${sh}</li>` : v ? `<li>Нажмите «Поделиться» ${sh} внизу экрана</li>` : `<li>Нажмите «Поделиться» ${sh}. Не видно этой кнопки — сначала •••</li>`)
       + '<li>Пролистайте вниз и выберите «На экран „Домой“». Нет такого пункта — нажмите «Редактировать действия» в самом низу</li>'
       + (v && v < 26 ? '<li>Нажмите «Добавить»</li>' : '<li>Проверьте, что включено «Открыть как веб-приложение», и нажмите «Добавить»</li>');
-    sheet('ZELDO на экране «Домой»', `<div class="m">Добавьте ярлык: ZELDO будет открываться как приложение — на весь экран, без строки браузера.</div>
-      ${a2hsEvt ? btn('Добавить на экран «Домой»', 'a2hsGo', '', 'block') : `<ol class="a2hs">${ios ? iosSteps : '<li>Откройте меню браузера ⋮ справа вверху</li><li>Выберите «Добавить на главный экран» или «Установить приложение»</li><li>Подтвердите</li>'}</ol>`}
-      <div class="m">Ярлык уже есть, но открывается с адресной строкой? Удалите его и добавьте заново: телефон запоминает ярлык таким, каким его создали.</div>
+    sheet('ZELDO на экране «Домой»', `<div class="m">${a2hsEvt ? 'Установите ZELDO одним нажатием: он будет открываться как приложение — на весь экран, без строки браузера.' : 'Добавьте ярлык: ZELDO будет открываться как приложение — на весь экран, без строки браузера.'}</div>
+      ${a2hsEvt ? btn(`${ic('home', 20, 2.2)} Установить`, 'a2hsGo', '', 'block') : `<ol class="a2hs">${ios ? iosSteps : '<li>Откройте меню браузера ⋮ справа вверху</li><li>Выберите «Добавить на главный экран» или «Установить приложение»</li><li>Подтвердите</li>'}</ol>`}
+      ${a2hsEvt ? '' : `<div class="m">Ярлык уже есть, но открывается с адресной строкой? Удалите его и добавьте заново: телефон запоминает ярлык таким, каким его создали.</div>`}
       ${btn(a2hsEvt ? 'Не сейчас' : 'Понятно', 'a2hsOk', '', a2hsEvt ? 'text block' : 'block')}`); },
-  async a2hsGo() { closeSheet(); try { a2hsEvt.prompt(); await a2hsEvt.userChoice; } catch (e) { /* браузер отказал — инструкция в «Настройках» */ } a2hsEvt = null; a2hsDone(); },
+  async a2hsGo() { closeSheet(); const ev = a2hsEvt; a2hsEvt = null; if (!ev) return A.a2hs(); a2hsDone();
+    try { ev.prompt(); const r = await ev.userChoice; if (r && r.outcome === 'dismissed') toast('Установить можно позже: «Настройки» → «Добавить на экран „Домой“»', 'info'); } catch (e) { A.a2hs(); } },
   a2hsOk() { closeSheet(); a2hsDone(); },
 });
 const settings1 = SCREENS.settings;
