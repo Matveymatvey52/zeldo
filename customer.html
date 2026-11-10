@@ -4943,6 +4943,8 @@ input, textarea, select { font-size: max(16px, 1em); }
 #chatlist .list, #chatlist .rl, #chatlist .card { min-width: 0; max-width: 100%; }
 #chatlist .card { overflow: hidden; }
 .mrow-t { display: block; margin: 1px 0 2px; color: var(--ink); font-size: 14px; line-height: 18px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.safenote { display: flex; gap: 10px; align-items: flex-start; margin: 4px auto 12px; max-width: 520px; padding: 10px 14px; border-radius: 14px; background: var(--soft2); color: var(--muted); font-size: 14px; line-height: 20px; }
+.safenote svg { flex: none; color: var(--ok); margin-top: 1px; }
 .sharel { display: flex; padding: 12px 14px; border-radius: 14px; background: var(--soft2); font-size: 14px; line-height: 20px; word-break: break-all; user-select: all; -webkit-user-select: all; }
 .mrow-o { display: inline-block; margin-top: 4px; padding: 0 8px; border-radius: 8px; background: var(--soft2); color: var(--muted); font-size: 12px; line-height: 20px; }
 .mrow .cnt { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; font-size: 12px; line-height: 22px; }
@@ -9692,9 +9694,9 @@ const dealChip = ch => !canDeal(ch) ? '' : ch.role === 'exec' ? `<button class="
    Даты и цены не задеваются: «10.11.2026 12» — 10 цифр, но не на 9. Цифры словами — от шести подряд. Соцсети и мессенджеры — по словам и сокращениям */
 const C_NB = '(?<![а-яёa-z0-9_])', C_NA = '(?![а-яёa-z0-9_])';
 /* мессенджеры и соцсети; ник рядом (до «в инсте» или после «инст:») скрывается вместе со словом */
-const C_KW = 'телеграм\\S*|телег[аеиуой]\\S*|тг|тгк|tg|telegram|т\\.?\\s?ме|t\\s?me|ватсап\\S*|вотсап\\S*|вацап\\S*|воцап\\S*|whats\\s?app|вайбер\\S*|viber|инстаграм\\S*|инст[аеуы]?|инсту|insta\\S*|instagram|ig|вконтакт\\S*|вк|vk|одноклассник\\S*|фейсбук\\S*|facebook|ютуб\\S*|youtube|тикток\\S*|tiktok|мессенджер[а-яё]*\\s+max|max\\s?мессенджер\\S*|в\\s+максе|дискорд\\S*|discord|скайп\\S*|skype';
-const CONTACT_RE = [/(https?:\/\/|www\.|t\.me\/|wa\.me\/)\S*/gi, /[\w.\-]+@[\w\-]+\.[a-zа-я]{2,}/gi, /@[a-z0-9_.]{3,}/gi, /\b[\w\-]+\.(ru|com|рф|net|org|me|io|su|by|kz|ua|online|site|pro|info)\b\S*/gi,
-  /[a-z0-9._\-]+\s*(собака|собачка|\(at\)|\[at\])\s*[a-z0-9.\-]+/gi, /\S+\s*(точка|\(dot\))\s*(ру|ком|рф|ru|com|нет|net)(?![а-яёa-z])/gi,
+const C_KW = 'телеграм\\S*|телег[аеиуой]\\S*|тг|тгк|tg|telegram|т\\.?\\s?ме|t\\s?me|ватсап\\S*|вотсап\\S*|вацап\\S*|воцап\\S*|whats\\s?app|вайбер\\S*|viber|инстаграм\\S*|инст[аеуы]?|инсту|insta\\S*|instagram|ig|вконтакт\\S*|вк|vk|одноклассник\\S*|фейсбук\\S*|facebook|ютуб\\S*|youtube|тикток\\S*|tiktok|мессенджер[а-яё]*\\s+max|max\\s?мессенджер\\S*|в\\s+максе|дискорд\\S*|discord|скайп\\S*|skype|гугл\\s?диск\\S*|google\\s?drive|яндекс\\s?диск\\S*|disk\\.yandex\\S*|drive\\.google\\S*|облак[оеау]\\s+mail\\S*';
+const CONTACT_RE = [/[a-z0-9._\-]+\s*(собака|собачка|\(at\)|\[at\])\s*[a-z0-9.\-]+/gi, /(https?:\/\/|www\.|t\.me\/|wa\.me\/)\S*/gi, /[\w.\-]+@[\w\-]+\.[a-zа-я]{2,}/gi, /@[a-z0-9_.]{3,}/gi, /\b[\w\-]+\.(ru|com|рф|net|org|me|io|su|by|kz|ua|online|site|pro|info)\b\S*/gi,
+  /\S+\s*(точка|\(dot\))\s*(ру|ком|рф|ru|com|нет|net)(?![а-яёa-z])/gi,
   new RegExp('(?:[a-z0-9_.]{3,}\\s+(?:в|во|на)\\s+)?' + C_NB + '(' + C_KW + ')' + C_NA + '(?:[\\s:–—\\-]*@?[a-z0-9_.]*[a-z_][a-z0-9_.]{2,})?', 'gi')];
 const C_DIGWORD = '(ноль|нуль|один|одна|два|две|три|четыре|пять|шесть|семь|восемь|девять|десять|одиннадцать|двенадцать|тринадцать|четырнадцать|пятнадцать|шестнадцать|семнадцать|восемнадцать|девятнадцать|двадцать|тридцать|сорок|пятьдесят|шестьдесят|семьдесят|восемьдесят|девяносто|сто|двести|триста|четыреста|пятьсот|шестьсот|семьсот|восемьсот|девятьсот)';
 const C_WORDS = new RegExp(C_NB + C_DIGWORD + '(?:[\\s,.\\-–—]+' + C_DIGWORD + '){5,}' + C_NA, 'gi');
@@ -9815,7 +9817,7 @@ function chatPane(ch) {
   const sub = ord ? `${esc(ord.svc)} · заказ № ${ord.id}` : o ? `По услуге «${esc(o.title)}»` : '';
   const act = ord ? btn('Открыть заказ', 'go', gv('order', { id: ord.id }), 'soft sm') : o && ch.role === 'cust' ? btn('Карточка услуги', 'openOffer', o.id, 'soft sm') : '';
   return `<div class="msgr-r"><div class="msgr-h">${avaByName(ch.with)}<span class="grow">${ch.with === 'Администратор ZELDO' ? `<b class="t18">${esc(ch.with)}</b>` : `<button class="plink" data-a="go" data-v="${ch.role === 'cust' ? gv('c_exec', { id: ch.ex }) : gv('c_client', { name: ch.with })}" aria-label="Профиль: ${esc(ch.with)}"><b class="t18">${esc(ch.with)}</b></button>`}<span class="m">${sub}</span></span>${ord ? orderPill(ord) : ''}${act}${ch.support ? '' : `<button class="iconbtn" data-a="callAsk" data-v="${esc(ch.ex || '')}" aria-label="Позвонить через ZELDO" title="Позвонить через ZELDO">${ic('phone', 22, 2)}</button>`}</div>
-    <div class="msgr-b"><div class="chat">${incStrip(ch)}${ch.msgs.map((m, i) => msgHtml(ch, m, i)).join('')}</div></div><div class="msgr-f">${composerHtml(ch)}</div></div>`;
+    <div class="msgr-b"><div class="chat">${safeNote(ch)}${incStrip(ch)}${ch.msgs.map((m, i) => msgHtml(ch, m, i)).join('')}</div></div><div class="msgr-f">${composerHtml(ch)}</div></div>`;
 }
 /* сообщения на компьютере (07.11, видео Максима «Уведомления zeldo»: «как у Озона — всё в одном месте»):
    слева разделы со счётчиками — переписки в роли заказчика и исполнителя, поддержка, уведомления; посередине список; справа переписка.
@@ -9884,6 +9886,9 @@ A.openChat = id => { if (cur().n === 'chat') replace('chat', { id }); else go('c
 SCREENS.c_msgs = () => chatListScreen('cust');
 SCREENS.e_msgs = () => chatListScreen('exec');
 /* у исполнителя: если диалог начался с заявки, она видна сверху переписки, и её можно подтвердить прямо здесь */
+/* «Не платите вне ZELDO» (разбор Кворка 07.11, совет «Потом»; запись 55: «внедрить фишки из отчёта»): в начале каждой переписки с человеком.
+   Главная беда площадок — договориться мимо них; одна спокойная строка напоминает, что защита есть только внутри */
+const safeNote = ch => ch.support || ch.with === 'Администратор ZELDO' ? '' : `<div class="safenote">${ic('shield', 18, 2)}<span>Платите только через ZELDO: деньги ждут на защищённом счёте, пока работа не принята, а спор разберёт ZELDO. Вне площадки защиты нет.</span></div>`;
 function incStrip(ch) {
   const i = ch.role === 'exec' && ch.inc && S.incoming.find(x => x.id === ch.inc);
   if (!i || i.status !== 'new') return '';
@@ -9933,7 +9938,7 @@ SCREENS.chat = p => {
   const call = `<div style="padding:8px 16px 0">${btn(`${ic('phone', 20)} Позвонить через ZELDO`, 'callAsk', ch.ex || '', 'text block')}</div>`;
   return {
     raw: true, title: esc(ch.with), cls: 'msgp', deskBody: messenger(ch.role, ch), deskBar: '', deskBare: true,
-    body: `${ctx}${call}<div class="chat">${incStrip(ch)}${ch.msgs.map((m, i) => msgHtml(ch, m, i)).join('')}</div>`,
+    body: `${ctx}${call}<div class="chat">${safeNote(ch)}${incStrip(ch)}${ch.msgs.map((m, i) => msgHtml(ch, m, i)).join('')}</div>`,
     bar: composerHtml(ch),
     after: el => { el.scrollTop = el.scrollHeight; const b = el.querySelector('.msgr-b'); if (b) b.scrollTop = b.scrollHeight; },
   };
