@@ -3435,6 +3435,26 @@ window.ZMAP_STYLE = {"version":8,"sources":{"openmaptiles":{"type":"vector","url
   --glow: 255, 168, 96; --glow-a: 0.5; --grad-a: #FF8A3D; --grad-b: #E8590C; --grad-c: #C2410C; --hbm-bg: #FFFFFF; --hbm-ink: #C2410C;
   --pg: #F8F4F0; --pact: #C2410C; --brand: #F26A1B; --act-press: #9A3412; --soft: #FFEFE3; --soft2: #FFF8F2; --line: #EEE2D8; --line2: #D9C5B5; --navy: #3A2314;
 }
+/* 10.11, запись 55: Максиму нравятся оранжевая и чёрная, обсуждали «как военная одежда» (хаки) и фуксию */
+/* чёрная: чёрная шапка и чёрные кнопки на светло-сером, главная кнопка первого экрана белая */
+:root[data-pal="black"] {
+  --rdot-bg: #FFFFFF; --rdot-ink: #111111;
+  --hdr: #0A0A0A; --hdr-sub: #B8B8B8; --hdr-soft: rgba(255, 255, 255, 0.1); --hdr-line: rgba(255, 255, 255, 0.16); --hdr-line2: rgba(255, 255, 255, 0.3);
+  --glow: 120, 120, 120; --glow-a: 0.25; --grad-a: #3A3A3A; --grad-b: #161616; --grad-c: #000000; --hbm-bg: #FFFFFF; --hbm-ink: #111111;
+  --pg: #F2F2F2; --pact: #111111; --brand: #111111; --act-press: #000000; --soft: #ECECEC; --soft2: #F7F7F7; --line: #E3E3E3; --line2: #C6C6C6; --navy: #111111; --sbar: #0A0A0A;
+}
+/* хаки: оливковая шапка, песочный фон, оливковые кнопки */
+:root[data-pal="khaki"] {
+  --hdr: #36432A; --hdr-sub: #D6DCC4;
+  --glow: 128, 142, 74; --glow-a: 0.45; --grad-a: #8A9A4E; --grad-b: #6B7B36; --grad-c: #56642A;
+  --pg: #F3F1E8; --pact: #56642A; --brand: #6B7B36; --act-press: #434E20; --soft: #ECEEDC; --soft2: #FAF9F2; --line: #E2DFCF; --line2: #C7C3A8; --navy: #2B3520;
+}
+/* фуксия: тёмно-ягодная шапка, яркий розовый акцент */
+:root[data-pal="fuchsia"] {
+  --hdr: #460C33; --hdr-sub: #F1C5E0;
+  --glow: 219, 39, 119; --glow-a: 0.5; --grad-a: #EC4899; --grad-b: #DB2777; --grad-c: #BE185D;
+  --pg: #FBF3F8; --pact: #BE185D; --brand: #DB2777; --act-press: #9D174D; --soft: #FCE7F3; --soft2: #FFF7FB; --line: #F0DAE7; --line2: #DDB9CD; --navy: #460C33;
+}
 /* мятная: глубокий зелёно-бирюзовый */
 :root[data-pal="mint"] {
   --hdr: #0D3B36; --hdr-sub: #B8D8D2;
@@ -4907,6 +4927,11 @@ input, textarea, select { font-size: max(16px, 1em); }
 .mrow-h b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mrow-h small { color: var(--muted); font-size: 12px; flex: none; }
 .mrow-s { display: block; color: var(--muted); font-size: 14px; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rl > .grow { min-width: 0; }
+#chatlist .list, #chatlist .rl, #chatlist .card { min-width: 0; max-width: 100%; }
+#chatlist .card { overflow: hidden; }
+.mrow-t { display: block; margin: 1px 0 2px; color: var(--ink); font-size: 14px; line-height: 18px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sharel { display: flex; padding: 12px 14px; border-radius: 14px; background: var(--soft2); font-size: 14px; line-height: 20px; word-break: break-all; user-select: all; -webkit-user-select: all; }
 .mrow-o { display: inline-block; margin-top: 4px; padding: 0 8px; border-radius: 8px; background: var(--soft2); color: var(--muted); font-size: 12px; line-height: 20px; }
 .mrow .cnt { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; font-size: 12px; line-height: 22px; }
 .msgr-r { display: flex; flex-direction: column; min-height: 0; min-width: 0; background: var(--page); }
@@ -5071,6 +5096,23 @@ img, svg, a { -webkit-user-drag: none; }
 /* клавиатура открыта (08.11): нижнее меню прячем, строка ввода — сразу над клавиатурой, без отступа под полоску жестов */
 html.kb #tabs { display: none; }
 html.kb #bar, html.kb .compose { padding-bottom: 8px !important; }
+/* «Мои клиенты» (10.11): цифры сверху, строки клиентов, предпросмотр сообщения */
+.crm-k { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.crm-k > span { display: grid; gap: 2px; padding: 14px; border-radius: var(--r, 18px); background: var(--card); box-shadow: var(--shadow); }
+.crm-k b { font-size: 28px; line-height: 32px; font-variant-numeric: tabular-nums; }
+.crm-k .m { font-size: 14px; line-height: 18px; }
+.crm-l { display: grid; }
+.crm-r { display: flex; gap: 12px; align-items: flex-start; padding: 14px 0; border-top: 1px solid var(--line); }
+.crm-r:first-child { border-top: 0; }
+.crm-h { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.crm-h b { font-size: 18px; line-height: 24px; }
+.crm-r .m { display: block; font-size: 14px; line-height: 20px; }
+.crm-s { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.crm-r > .grow { min-width: 0; }
+.crm-b { display: flex; gap: 8px; flex: none; }
+.phone[data-view="phone"] .crm-r { flex-wrap: wrap; }
+.phone[data-view="phone"] .crm-b { width: 100%; padding-left: 52px; }
+.crm-prev { display: grid; gap: 4px; padding: 12px 14px; border-radius: 14px; background: var(--soft2); font-size: 14px; line-height: 20px; }
 /* ---------- 08.11: спор — версии сторон, решение ZELDO, согласие ---------- */
 .dsp-how { display: grid; gap: 8px; margin: 4px 0 2px; }
 .dsp-how > span { display: flex; align-items: center; gap: 12px; }
@@ -5103,6 +5145,13 @@ html.kb #bar, html.kb .compose { padding-bottom: 8px !important; }
 .phone:not([data-view="phone"]) .back-to::before { content: "·"; margin: 0 8px 0 2px; }
 @media (hover: hover) and (pointer: fine) { .phone:not([data-view="phone"]) .back:hover > span:first-of-type { text-decoration: underline; text-underline-offset: 3px; } }
 @media (prefers-reduced-motion: reduce) { .phone:not([data-view="phone"]) .back { transition: none; } }
+/* телефон (запись 55: «отлистал вниз — кнопки назад нет, жмут не туда»): «Назад» тоже держится сверху при прокрутке,
+   подписана, куда ведёт; под ней подложка, когда под кнопкой уже прокрученный текст */
+.phone[data-view="phone"] .back { position: sticky; top: 8px; z-index: 6; align-self: start; justify-self: start; width: max-content; max-width: calc(100% - 4px); margin-left: -10px; padding: 6px 14px 6px 10px; border-radius: 999px; transition: background-color 0.15s ease, box-shadow 0.15s ease; }
+.phone[data-view="phone"] .back.stuck { background: var(--card); box-shadow: 0 6px 18px rgba(16, 33, 61, 0.14), 0 0 0 1px var(--line); }
+.phone[data-view="phone"] .back-to { display: inline; min-width: 0; max-width: 58vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); font-weight: 400; font-size: 16px; }
+.phone[data-view="phone"] .back-to::before { content: "·"; margin: 0 6px 0 2px; }
+@media (prefers-reduced-motion: reduce) { .phone[data-view="phone"] .back { transition: none; } }
 @media print {
   body > * { display: none !important; }
   body::before { content: "Печать страниц ZELDO недоступна"; display: block; padding: 48px; font: 600 18px/24px "Onest", sans-serif; color: #10213D; }
@@ -5344,7 +5393,7 @@ const LAY = {
   c_offer: 'aside',
   c_orders: 'cab', c_reqview: 'cab', order: 'cab', c_fav: 'cab', c_cab: 'cab', c_aboutme: 'cab', c_sched: 'cab', c_msgs: 'cab', e_msgs: 'cab', chat: 'cab', notifs: 'cab', notifset: 'cab', settings: 'cab', mydata: 'cab', c_client: 'cab', privacy: 'cab',
   e_home: 'cab', e_feed: 'cab', e_offers: 'cab', e_incoming: 'cab', e_orders: 'cab', e_fav: 'cab', e_cab: 'cab', e_services: 'cab', e_schedule: 'cab',
-  e_request: 'cab', deal_offer: 'cab', e_task: 'cab', e_service: 'cab', e_work: 'cab', e_schedset: 'cab', e_promo: 'cab', e_portfolio: 'cab', e_promos: 'cab', e_money: 'cab', e_package: 'cab', e_profile: 'cab',
+  e_request: 'cab', deal_offer: 'cab', e_task: 'cab', e_service: 'cab', e_work: 'cab', e_schedset: 'cab', e_promo: 'cab', e_portfolio: 'cab', e_promos: 'cab', e_clients: 'cab', notifs: 'cab', e_money: 'cab', e_package: 'cab', e_profile: 'cab',
 };
 /* разделы: внизу на телефоне и планшете, в шапке на компьютере */
 /* какой раздел подсвечен: заказ, оплата и перенос — это «Заказы», даже если пришли из переписки (запись 48, 44:41) */
@@ -5435,7 +5484,7 @@ function render(mode) {
   /* «Назад» с подписью, куда ведёт (08.11, видео Максима: «непонятно куда, надо отслеживание пути»). На компьютере и планшете
      кнопка не уезжает при прокрутке: держится сверху, при прокрутке получает подложку */
   const prevName = S.stack.length > 1 ? screenName(S.stack[S.stack.length - 2]) : '';
-  const backLink = S.stack.length > 1 && !scr.noBack ? `<button class="back" data-a="back" ${prevName ? `aria-label="Назад: ${esc(prevName)}"` : ''}>${ic('back', 22, 2.1)}<span>Назад</span>${prevName && view !== 'phone' ? `<span class="back-to">${esc(prevName)}</span>` : ''}</button>` : '';
+  const backLink = S.stack.length > 1 && !scr.noBack ? `<button class="back" data-a="back" ${prevName ? `aria-label="Назад: ${esc(prevName)}"` : ''}>${ic('back', 22, 2.1)}<span>Назад</span>${prevName ? `<span class="back-to">${esc(prevName)}</span>` : ''}</button>` : '';
   const head = scr.title ? `<div class="h1-wrap"><h1 class="h1">${scr.title}</h1>${scr.sub ? `<div class="h1-sub">${scr.sub}</div>` : ''}</div>` : '';
   /* компьютер: у выдачи слева колонка с разделом, местом, сортировкой и фильтрами */
   const main = view === 'desk' && scr.side ? `<div class="dcols"><aside class="dside">${scr.side}</aside><div class="dmain">${body}</div></div>` : body;
@@ -5501,7 +5550,7 @@ addEventListener('popstate', e => {
 /* как назвать экран в подписи «Назад: …» */
 const SCREEN_NAMES = { c_home: 'Главная', e_home: 'Главная', g_home: 'Главная', c_orders: 'Заказы', e_orders: 'Заказы', c_fav: 'Избранное', e_fav: 'Избранное', c_msgs: 'Сообщения', e_msgs: 'Сообщения',
   c_cab: 'Кабинет', e_cab: 'Кабинет', c_catalog: 'Каталог', notifs: 'Уведомления', settings: 'Настройки', c_map: 'Рядом', c_online: 'Онлайн', c_sched: 'Мои записи', e_schedule: 'Расписание',
-  e_services: 'Мои услуги', e_feed: 'Найти заказ', e_incoming: 'Заявки', e_offers: 'Предложения', e_money: 'Деньги', e_promos: 'Акции', chat: 'Переписка', c_results: 'Поиск' };
+  e_services: 'Мои услуги', e_feed: 'Найти заказ', e_incoming: 'Заявки', e_offers: 'Предложения', e_money: 'Деньги', e_promos: 'Акции', e_clients: 'Мои клиенты', chat: 'Переписка', c_results: 'Поиск' };
 function screenName(x) {
   if (!x) return '';
   try {
@@ -6882,7 +6931,7 @@ SCREENS.c_cab = () => ({
       ${rl('Отзывы исполнителей о вас', clientLine(myFirst()), 'go', gv('c_aboutme', {}), { icon: 'user' })}
     </div>`, 'c')}
     ${card(`<div class="h2">Вы также исполнитель</div><div class="m">Шиномонтаж на Профсоюзной: заявки, заказы и расписание — в роли «Исполнитель». Сообщения и события обеих ролей видны в счётчиках.</div>${btn(`Перейти в роль исполнителя ${ic('arr', 20, 2.2)}`, 'setRole', 'exec', 'soft block')}`, 'soft')}
-    ${card(`<div class="list">${rl('Настройки', '', 'settings', '', { icon: 'gear' })}${rl('Помощь', 'Как работает защищённая оплата', 'helpPay', '', { icon: 'info' })}</div>`, 'c')}`,
+    ${card(`<div class="list">${rl('Поддержка ZELDO', 'Отвечаем с 9:00 до 21:00 по Москве', 'supportOpen', '', { icon: 'shield' })}${rl('Поделиться ZELDO', 'Ссылка-приглашение для друзей и клиентов', 'shareApp', '', { icon: 'send' })}${rl('Настройки', '', 'settings', '', { icon: 'gear' })}${rl('Помощь', 'Как работает защищённая оплата', 'helpPay', '', { icon: 'info' })}</div>`, 'c')}`,
 });
 /* что исполнители написали о заказчике: после каждого заказа, выполненного или отменённого */
 SCREENS.c_aboutme = () => {
@@ -8218,10 +8267,11 @@ SCREENS.e_cab = () => ({
       ${rl('Статус и счёт', `${esc(S.profile.status)} · счёт подключён`, 'statusInfo', '', { icon: 'case' })}
       ${rl('Финансы', 'Выплаты, комиссия, эквайринг', 'go', 'e_money', { icon: 'wallet' })}
       ${rl('Мои услуги', pn(S.myServices.length, 'карточка', 'карточки', 'карточек'), 'go', 'e_services', { icon: 'orders' })}
+      ${rl('Мои клиенты', 'База клиентов, напоминания и рассылки', 'go', 'e_clients', { icon: 'user' })}
       ${rl('Отзывы', '★ 4,9 · 214 отзывов', 'go', gv('c_reviews', { id: 'alex' }), { icon: 'star' })}
       ${rl('Профиль глазами заказчика', 'Все ваши направления и услуги', 'go', gv('c_exec', { id: 'alex' }), { icon: 'eye' })}
     </div>`, 'c')}
-    ${card(`<div class="list">${rl('Настройки', '', 'settings', '', { icon: 'gear' })}${rl('Помощь', 'Комиссия, оплата, споры', 'helpExec', '', { icon: 'info' })}</div>`, 'c')}`,
+    ${card(`<div class="list">${rl('Поддержка ZELDO', 'Отвечаем с 9:00 до 21:00 по Москве', 'supportOpen', '', { icon: 'shield' })}${rl('Поделиться ZELDO', 'Ссылка-приглашение для друзей и клиентов', 'shareApp', '', { icon: 'send' })}${rl('Настройки', '', 'settings', '', { icon: 'gear' })}${rl('Помощь', 'Комиссия, оплата, споры', 'helpExec', '', { icon: 'info' })}</div>`, 'c')}`,
 });
 Object.assign(A, {
   statusInfo() { sheet('Статус и счёт', `${sumLines([['Статус', esc(S.profile.status)], ['Расчётный счёт', 'подключён'], ['Чеки', 'формирует банк']])}<div class="m">Исполнителем может быть самозанятый, ИП или ООО. Счёт, оферты и чеки подключаются вместе с банком.</div>${btn('Понятно', 'closeSheet', '', 'soft block')}`); },
@@ -8243,6 +8293,80 @@ SCREENS.e_money = () => {
       <div class="m">Баллы партнёрской программы — отдельно, в кабинете партнёра. С деньгами они не складываются.</div>`,
   };
 };
+
+/* ---------- «Мои клиенты» — CRM мастера и салона (запись 55, Максим 09.11) ----------
+   «У них должна быть база клиентов… приглашение разослать… как в салонах: вы у нас давно не были, приходите;
+   парикмахер — через 30 дней отправляет: пора вам уже подстричься». Уведомления — в приложении, SMS — когда подключим (платные).
+   База строится из выполненных заказов исполнителя. В прототипе к ним добавлена история прошлых визитов (CRM_HIST), чтобы было что показать */
+const CRM_HIST = REAL ? [] : [
+  ['Анна Петрова', 'Шиномонтаж', -31, 3200], ['Анна Петрова', 'Сезонная смена колёс', -190, 4100], ['Анна Петрова', 'Шиномонтаж', -380, 2900], ['Анна Петрова', 'Балансировка колёс', -420, 1600], ['Анна Петрова', 'Шиномонтаж', -560, 2800],
+  ['Олег', 'Шиномонтаж', -35, 2600], ['Олег', 'Сезонная смена колёс', -210, 3900], ['Олег', 'Шиномонтаж', -400, 2500],
+  ['Марина', 'Сезонная смена колёс', -62, 4300], ['Марина', 'Шиномонтаж', -240, 2700],
+  ['Светлана', 'Ремонт проколов шин', -48, 900], ['Светлана', 'Шиномонтаж', -230, 2600],
+  ['Игорь', 'Шиномонтаж', -190, 4600], ['Игорь', 'Балансировка колёс', -365, 1500],
+  ['Денис', 'Сезонная смена колёс', -120, 4000], ['Виктор', 'Шиномонтаж', -95, 3100], ['Ксения', 'Балансировка колёс', -15, 1400],
+].map(([client, svc, d, total]) => ({ client, svc, date: dk(d), total }));
+S.crm = S.crm || { tab: 'all', auto: true, days: 30, sms: false, text: '{имя}, добрый день! Давно вас не видели. Можно записаться на удобное время прямо в ZELDO.', promo: '' };
+const crmDays = k => Math.round((TODAY - fromKey(k)) / 864e5);
+function crmClients() {
+  const visits = CRM_HIST.concat(S.orders.filter(o => o.ex === 'alex' && o.status === 'done' && o.date).map(o => ({ client: o.client, svc: o.svc, date: o.date, total: o.total })));
+  const next = {}; S.orders.filter(o => o.ex === 'alex' && !['done', 'cancel'].includes(o.status) && o.date).forEach(o => { if (!next[o.client] || o.date < next[o.client]) next[o.client] = o.date; });
+  const by = {};
+  visits.forEach(v => { const c = by[v.client] || (by[v.client] = { name: v.client, n: 0, sum: 0, last: '', svcs: [] }); c.n++; c.sum += v.total || 0; if (v.date > c.last) c.last = v.date; if (!c.svcs.includes(v.svc)) c.svcs.push(v.svc); });
+  Object.keys(next).forEach(n => { if (!by[n]) by[n] = { name: n, n: 0, sum: 0, last: '', svcs: [] }; by[n].next = next[n]; });
+  return Object.values(by).map(c => Object.assign(c, { ago: c.last ? crmDays(c.last) : null, sleep: !c.next && c.last && crmDays(c.last) >= S.crm.days })).sort((a, b) => (b.sleep - a.sleep) || ((b.ago || 0) - (a.ago || 0)));
+}
+const crmTabs = () => [['all', 'Все'], ['sleep', `Давно не были · ${S.crm.days}+ дней`], ['loyal', 'Постоянные · 3+ визита'], ['next', 'Записаны']];
+const crmPick = (l, t) => t === 'sleep' ? l.filter(c => c.sleep) : t === 'loyal' ? l.filter(c => c.n >= 3) : t === 'next' ? l.filter(c => c.next) : l;
+const crmChat = name => S.chats.find(c => c.role === 'exec' && c.with === name && !c.support);
+const crmFill = (t, c, p) => t.replace(/\{имя\}/g, c.name.split(' ')[0]).replace(/\{услуга\}/g, (c.svcs[0] || '').toLowerCase()).replace(/\{скидка\}/g, p ? promoLine(p) : '');
+SCREENS.e_clients = () => {
+  const all = crmClients(); const l = crmPick(all, S.crm.tab); const sleep = all.filter(c => c.sleep); const loyal = all.filter(c => c.n >= 2);
+  const row = c => `<div class="crm-r"><span class="ava">${letter(c.name)}</span><span class="grow"><span class="crm-h"><b>${esc(c.name)}</b>${c.sleep ? pill(`не был ${pn(c.ago, 'день', 'дня', 'дней')}`, 'warn', 'clock') : c.next ? pill(`записан: ${dayName(c.next, true)}`, 'ok', 'calok') : ''}</span>
+      <span class="m">${pn(c.n, 'визит', 'визита', 'визитов')}${c.sum ? ` · ${rub(c.sum)}` : ''}${c.last ? ` · последний ${dayName(c.last, true)}` : ''}</span><span class="m crm-s">${esc(c.svcs.join(', '))}</span></span>
+    <span class="crm-b">${btn(ic('chat', 18, 2.2), 'crmChat', c.name, 'soft sm', `aria-label="Написать: ${esc(c.name)}"`)}${btn('Напомнить', 'crmRemind', c.name, c.sleep ? 'sm' : 'soft sm')}</span></div>`;
+  return {
+    title: 'Мои клиенты', sub: 'База клиентов, напоминания и рассылки',
+    body: `<div class="crm-k">${[[all.length, 'клиентов'], [loyal.length, 'вернулись повторно'], [sleep.length, `давно не были`]].map(([n, t]) => `<span><b>${n}</b><span class="m">${t}</span></span>`).join('')}</div>
+      ${card(`<div class="row"><span class="grow"><b class="t18">Автонапоминание</b><span class="m" style="display:block">${S.crm.auto ? `Через ${pn(S.crm.days, 'день', 'дня', 'дней')} после визита клиент получит напоминание${S.crm.sms ? ' в приложении и по SMS' : ' в приложении'}` : 'Выключено'}</span></span>${sw('crmAuto', '', S.crm.auto, 'Автонапоминание')}</div>
+        ${S.crm.auto ? `${field('Через сколько дней после визита', seg('crmDaysSet', [[14, '14'], [30, '30'], [45, '45'], [60, '60'], [90, '90']], S.crm.days, 'sm'))}${btn('Текст напоминания', 'crmText', '', 'text')}` : ''}`)}
+      ${btn(`${ic('send', 20, 2.2)} Разослать предложение`, 'crmBlast', '', 'block')}
+      ${chips('crmTab', crmTabs().map(([v, t]) => [v, t]), v => S.crm.tab === v, { scroll: true })}
+      ${l.length ? card(`<div class="crm-l">${l.map(row).join('')}</div>`, 'c') : emptyBox('Пока никого', S.crm.tab === 'sleep' ? 'Все клиенты были недавно или уже записаны.' : 'Клиенты появятся после первых выполненных заказов.', '', '', '')}
+      <div class="m">Клиенты попадают в базу после выполненного заказа. Их телефоны и почта не видны: напоминания и предложения уходят в переписку ZELDO${S.crm.sms ? ' и SMS' : ''}.</div>`,
+  };
+};
+function crmComposer(title, names, act) {
+  const promos = S.promos.filter(p => p.ex === 'alex' && p.on !== false); const D = S.crmD;
+  const c0 = crmClients().find(c => c.name === names[0]) || { name: names[0] || 'Клиент', svcs: [] }; const p = promos.find(x => x.id === D.promo);
+  sheet(title, `${names.length > 1 ? `<div class="m">Получат: ${pn(names.length, 'клиент', 'клиента', 'клиентов')}</div>` : ''}
+    ${field('Текст', `<textarea class="textarea" data-in="crmDText" rows="4" maxlength="600">${esc(D.text)}</textarea>`, { hint: 'Вместо {имя}, {услуга} и {скидка} каждый увидит своё.' })}
+    ${promos.length ? field('Добавить акцию', chips('crmDPromo', [['', 'Без акции']].concat(promos.map(x => [x.id, x.name || promoLine(x)])), v => (D.promo || '') === v, { scroll: true })) : ''}
+    <div class="crm-prev"><span class="lbl">Так увидит ${esc(c0.name.split(' ')[0])}</span><div>${esc(crmFill(D.text, c0, p))}${p && !/\{скидка\}/.test(D.text) ? `<br><b>${esc(p.name || 'Акция')}:</b> ${esc(promoLine(p))}` : ''}</div></div>
+    <div class="row" style="gap:10px"><span class="grow"><b>Ещё и по SMS</b><span class="m" style="display:block">SMS платные: подключим вместе с договором. Сейчас — в приложении</span></span>${sw('crmSms', '', false, 'SMS')}</div>
+    ${btn(names.length > 1 ? `Отправить ${pn(names.length, 'клиенту', 'клиентам', 'клиентам')}` : 'Отправить', act, '', 'block')}${btn('Отмена', 'closeSheet', '', 'text block')}`);
+}
+IN.crmDText = v => { S.crmD.text = v; };
+Object.assign(A, {
+  crmTab(v) { S.crm.tab = v; render(); },
+  crmAuto() { S.crm.auto = !S.crm.auto; render(); toast(S.crm.auto ? `Напоминание уйдёт через ${pn(S.crm.days, 'день', 'дня', 'дней')} после визита` : 'Автонапоминание выключено', 'info'); },
+  crmDaysSet(v) { S.crm.days = Number(v); render(); },
+  crmSms() { toast('SMS подключим вместе с договором: они платные. Пока напоминания уходят в приложение', 'info'); },
+  crmText() { S.crmD = { names: [], text: S.crm.text, promo: S.crm.promo, act: 'crmTextSave' }; crmComposer('Текст автонапоминания', ['Анна Петрова'], 'crmTextSave'); },
+  crmTextSave() { S.crm.text = S.crmD.text; S.crm.promo = S.crmD.promo; closeSheet(); toast('Текст напоминания сохранён'); },
+  crmDPromo(v) { S.crmD.promo = v; const t = S.crmD.text; crmComposer(S.sheet.title, S.crmD.names.length ? S.crmD.names : ['Анна Петрова'], S.crmD.act); S.crmD.text = t; },
+  crmChat(name) { const ch = crmChat(name); if (ch) return go('chat', { id: ch.id }); if (REAL) return toast('Переписки с этим клиентом нет: напишите из заказа', 'info');
+    const c = { id: uid('ch'), role: 'exec', with: name, unread: 0, msgs: [] }; S.chats.unshift(c); go('chat', { id: c.id }); },
+  crmRemind(name) { S.crmD = { names: [name], text: S.crm.text, promo: S.crm.promo, act: 'crmSend' }; crmComposer(`Напомнить: ${name}`, [name], 'crmSend'); },
+  crmBlast() { const l = crmPick(crmClients(), S.crm.tab === 'next' ? 'all' : S.crm.tab).map(c => c.name);
+    S.crmD = { names: l, text: '{имя}, добрый день! {скидка}. Запишитесь на удобное время в ZELDO.', promo: (S.promos.find(p => p.ex === 'alex' && p.kind === 'next') || {}).id || '', act: 'crmSend' };
+    crmComposer(`Рассылка: ${(crmTabs().find(t => t[0] === S.crm.tab) || ['', 'все'])[1].split(' · ')[0].toLowerCase()}`, l, 'crmSend'); },
+  crmSend() { const D = S.crmD; const promos = S.promos.filter(p => p.ex === 'alex'); const p = promos.find(x => x.id === D.promo); const all = crmClients(); let n = 0, skip = 0;
+    D.names.forEach(name => { let ch = crmChat(name); if (!ch && !REAL) { ch = { id: uid('ch'), role: 'exec', with: name, unread: 0, msgs: [] }; S.chats.unshift(ch); } if (!ch) { skip++; return; }
+      const c = all.find(x => x.name === name) || { name, svcs: [] }; const t = crmFill(D.text, c, p) + (p && !/\{скидка\}/.test(D.text) ? ` ${p.name || 'Акция'}: ${promoLine(p)}.` : '');
+      postMsg(ch, 'me', { t: maskContacts(t).t }); n++; });
+    closeSheet(); render(); toast(n ? `Отправлено ${pn(n, 'клиенту', 'клиентам', 'клиентам')}${skip ? `. Без переписки: ${skip}` : ''}` : 'Некому отправить: нет переписки с этими клиентами', n ? 'ok' : 'info'); },
+});
 
 /* ---------- мастер карточки: 5 шагов, каждый переход сохраняет черновик (Р5, стр. 1–8) ---------- */
 const WZ_STEPS = ['Услуга', 'Описание', 'Условия', 'Цена и допы', 'Проверка'];
@@ -9499,7 +9623,7 @@ function cabNav() {
     it('e_incoming', 'docsearch', 'Поступившие заявки', newIncoming().length, 'orange'), it('e_offers', 'send', 'Заявки по услугам', S.feed.filter(x => !x.my).length, 'violet'),
     it('e_orders', 'orders', 'Заказы', actOrders('exec'), 'green'), it('e_msgs', 'chat', 'Сообщения', unreadMsgs('exec'), 'teal'),
     it('e_services', 'case', 'Мои услуги', S.myServices.length, 'blue', { num: true }), it('e_schedule', 'calok', 'Расписание', 0, 'green'),
-    it('e_portfolio', 'image', 'Портфолио', 0, 'pink'), it('e_promos', 'tag', 'Акции', 0, 'orange'), it('e_money', 'wallet', 'Финансы', 0, 'teal'), it('e_package', 'diamond', 'Пакет и ИИ-помощник', 0, 'violet'),
+    it('e_clients', 'user', 'Мои клиенты', (typeof crmClients === 'function' ? crmClients().filter(c => c.sleep).length : 0), 'teal', { num: true }), it('e_portfolio', 'image', 'Портфолио', 0, 'pink'), it('e_promos', 'tag', 'Акции', 0, 'orange'), it('e_money', 'wallet', 'Финансы', 0, 'teal'), it('e_package', 'diamond', 'Пакет и ИИ-помощник', 0, 'violet'),
   ] : [
     it('c_home', 'home', 'Главная', 0, 'blue'), it('c_orders', 'orders', 'Заказы', actOrders('cust'), 'green', { on: n === 'c_orders' && !reqTab }),
     it('req', 'send', 'Мои заявки', homeNew('cust'), 'violet', { act: 'myReqs', on: reqTab }), it('c_msgs', 'chat', 'Сообщения', unreadMsgs('cust'), 'teal'),
@@ -9511,7 +9635,7 @@ function cabNav() {
   return `<div class="cabtop"><button class="cabtog" data-a="navMini" aria-label="${tl}" title="${tl}" aria-expanded="${!S.navMini}">${ic('panel', 20, 2)}</button></div>
     <div class="cabme"><span class="ava lg">${letter(myName())}</span><span class="grow"><b class="t18">${esc(myName())}</b><span class="m">${ex ? `Исполнитель · ${REAL ? ratingText('alex') : '★ 4,9 · 214 отзывов'}` : `Заказчик${cr ? ` · ★ ${String(cr.avg).replace('.', ',')} от исполнителей` : ''}`}</span></span></div>
     <button class="cabsw" data-a="setRole" data-v="${ex ? 'cust' : 'exec'}" ${tip(sw)}><span class="cs-i">${ic('retry', 18, 2.2)}</span><span class="cs-t">${sw}</span></button>
-    <nav class="cnl">${items.join('')}${it(ex ? 'e_cab' : 'c_cab', 'user', 'Кабинет', 0, 'grey')}</nav>`;
+    <nav class="cnl">${items.join('')}${it(ex ? 'e_cab' : 'c_cab', 'user', 'Кабинет', 0, 'grey')}${it('sup', 'shield', 'Поддержка ZELDO', (chatById('sup') || {}).unread || 0, 'teal', { act: 'supportOpen', on: n === 'chat' && cur().p.id === 'sup' })}${it('share', 'send', 'Поделиться ZELDO', 0, 'violet', { act: 'shareApp', on: false })}</nav>`;
 }
 /* меню кабинета на компьютере сворачивается в полоску квадратиков (04.11); выбор помнит этот браузер.
    Без перерисовки: класс на #phone, и CSS задвигает панель плавно, как шторку */
@@ -9535,7 +9659,15 @@ A.roleTab = v => {
   switchRole(r, ROLE_ROOT[kind][r]); render('new'); toast(`Вы в роли «${ROLE_NAME[r]}»`, 'info');
 };
 const QUICK = { cust: ['Когда сможете?', 'Сколько это будет стоить?', 'Можно фото ваших работ?', 'Спасибо!'], exec: ['Добрый день! Да, сделаю', 'Пришлите фото, пожалуйста', `Могу ${dayName(dk(1)).toLowerCase()} в 10:00`, 'Спасибо!'] };
-const chatFilter = role => { const q = norm(S.chatQ || ''); return chatsFor(role).filter(c => !c.support && (!S.chatNew || c.unread)).filter(c => !q || norm(c.with + ' ' + c.msgs.map(m => m.t || '').join(' ')).includes(q)); };
+/* о чём диалог (запись 55, Максим: «непонятно, кто такой Дмитрий Орлов… сообщение должно быть понятным: с кем и о чём»):
+   заказ — услуга и номер; без заказа — услуга карточки или заявки. Поиск ищет и по услуге, и по её разделу: «ремонт» найдёт «Косметический ремонт квартир» */
+function chatTopic(c) {
+  const o = c.order && orderById(c.order); if (o) return { svc: o.svc, t: `${o.svc} · заказ № ${o.id}` };
+  const of = c.offer && offerById(c.offer); const inc = c.inc && S.incoming.find(x => x.id === c.inc);
+  const svc = (of && of.svc) || (inc && inc.svc) || c.svc || ''; return { svc, t: svc };
+}
+const chatHay = c => { const tp = chatTopic(c); const s = tp.svc && svcBy(tp.svc); return [c.with, tp.t, s ? `${s.c} ${s.s}` : '', c.msgs.map(m => m.t || m.svc || '').join(' ')].join(' '); };
+const chatFilter = role => { const q = norm(S.chatQ || ''); return chatsFor(role).filter(c => !c.support && (!S.chatNew || c.unread)).filter(c => !q || norm(chatHay(c)).includes(q)); };
 /* последнее сообщение диалога и подпись к нему в списке */
 const lastOf = c => { const last = [...c.msgs].reverse().find(m => m.from !== 'sys') || c.msgs[c.msgs.length - 1] || { t: '' }; return [last, last.kind === 'version' ? `Предложение: ${rub(last.v.price)}` : last.kind === 'ask' ? `Просьба изменить условия: ${rub(last.a.price)}` : last.kind === 'brief' ? 'Запрос с условиями' : last.kind === 'file' ? last.name : last.kind === 'voice' ? `Голосовое, ${durText(last.dur)}` : last.t]; };
 /* договорились в переписке (03.11, Максим): предложение уходит карточкой прямо в диалог — примут, и эта же переписка становится заказом с номером.
@@ -9543,12 +9675,26 @@ const lastOf = c => { const last = [...c.msgs].reverse().find(m => m.from !== 's
 const canDeal = ch => !ch.order && !ch.support && ch.with !== 'Администратор ZELDO' && (ch.role === 'exec' || !!(offerById(ch.offer) && offerById(ch.offer).ex !== 'alex'));
 const dealChip = ch => !canDeal(ch) ? '' : ch.role === 'exec' ? `<button class="chip deal" data-a="dealOffer" data-v="${ch.id}">${ic('tag', 18, 2.2)} Предложить заказ</button>` : `<button class="chip deal" data-a="dealBrief" data-v="${ch.id}">${ic('tag', 18, 2.2)} Предложить свои условия</button>`;
 /* контакты в переписке скрыты: телефоны, почта, ссылки и мессенджеры собеседнику не уходят (решение встречи 20.10, правило R-19) */
-const CONTACT_RE = [/(https?:\/\/|www\.|t\.me\/)\S*/gi, /[\w.\-]+@[\w\-]+\.[a-zа-я]{2,}/gi, /@[a-z0-9_.]{3,}/gi, /\b[\w\-]+\.(ru|com|рф|net|org|me|io)\b\S*/gi, /(\+7|\b8)[\s\-()]*\d{3}[\s\-()]*\d{3}[\s\-]*\d{2}[\s\-]*\d{2}|\d{10,}/g, /(телеграм[а-яё]*|telegram|ватсап[а-яё]*|whatsapp|вайбер[а-яё]*|viber|инстаграм[а-яё]*|instagram)/gi];
-function maskContacts(t) { const src = String(t || ''); const out = CONTACT_RE.reduce((s, re) => s.replace(re, '•••'), src); return { t: out, hit: out !== src }; }
+/* контакты (запись 55: «ссылка на Instagram прошла… номер 8, 9, 1, 6 прошёл»): ловим и разбитые, и написанные словами.
+   Номер — по цифрам, как его ни разбивай (пробелы, запятые, точки, скобки): 11 цифр на 7/8 9…, 10 цифр на 9…, карта 12–19 цифр.
+   Даты и цены не задеваются: «10.11.2026 12» — 10 цифр, но не на 9. Цифры словами — от шести подряд. Соцсети и мессенджеры — по словам и сокращениям */
+const C_NB = '(?<![а-яёa-z0-9_])', C_NA = '(?![а-яёa-z0-9_])';
+/* мессенджеры и соцсети; ник рядом (до «в инсте» или после «инст:») скрывается вместе со словом */
+const C_KW = 'телеграм\\S*|телег[аеиуой]\\S*|тг|тгк|tg|telegram|т\\.?\\s?ме|t\\s?me|ватсап\\S*|вотсап\\S*|вацап\\S*|воцап\\S*|whats\\s?app|вайбер\\S*|viber|инстаграм\\S*|инст[аеуы]?|инсту|insta\\S*|instagram|ig|вконтакт\\S*|вк|vk|одноклассник\\S*|фейсбук\\S*|facebook|ютуб\\S*|youtube|тикток\\S*|tiktok|мессенджер[а-яё]*\\s+max|max\\s?мессенджер\\S*|в\\s+максе|дискорд\\S*|discord|скайп\\S*|skype';
+const CONTACT_RE = [/(https?:\/\/|www\.|t\.me\/|wa\.me\/)\S*/gi, /[\w.\-]+@[\w\-]+\.[a-zа-я]{2,}/gi, /@[a-z0-9_.]{3,}/gi, /\b[\w\-]+\.(ru|com|рф|net|org|me|io|su|by|kz|ua|online|site|pro|info)\b\S*/gi,
+  /[a-z0-9._\-]+\s*(собака|собачка|\(at\)|\[at\])\s*[a-z0-9.\-]+/gi, /\S+\s*(точка|\(dot\))\s*(ру|ком|рф|ru|com|нет|net)(?![а-яёa-z])/gi,
+  new RegExp('(?:[a-z0-9_.]{3,}\\s+(?:в|во|на)\\s+)?' + C_NB + '(' + C_KW + ')' + C_NA + '(?:[\\s:–—\\-]*@?[a-z0-9_.]*[a-z_][a-z0-9_.]{2,})?', 'gi')];
+const C_DIGWORD = '(ноль|нуль|один|одна|два|две|три|четыре|пять|шесть|семь|восемь|девять|десять|одиннадцать|двенадцать|тринадцать|четырнадцать|пятнадцать|шестнадцать|семнадцать|восемнадцать|девятнадцать|двадцать|тридцать|сорок|пятьдесят|шестьдесят|семьдесят|восемьдесят|девяносто|сто|двести|триста|четыреста|пятьсот|шестьсот|семьсот|восемьсот|девятьсот)';
+const C_WORDS = new RegExp(C_NB + C_DIGWORD + '(?:[\\s,.\\-–—]+' + C_DIGWORD + '){5,}' + C_NA, 'gi');
+const C_DIGITS = /\+?\d(?:[\s\-–—.,()\/]{0,3}\d){8,}/g;
+const C_PHONE = s => { const d = s.replace(/\D/g, ''); return (d.length === 11 && /^[78]9/.test(d)) || (d.length === 10 && d[0] === '9') || (d.length >= 12 && d.length <= 19); };
+function maskText(src) { let s = String(src == null ? '' : src); s = s.replace(C_DIGITS, m => C_PHONE(m) ? '•••' : m); s = s.replace(C_WORDS, '•••'); return CONTACT_RE.reduce((x, re) => x.replace(re, '•••'), s); }
+function maskContacts(t) { const src = String(t || ''); const out = maskText(src); return { t: out, hit: out !== src }; }
 const contactsHidden = () => toast('Контакты скрыты: номера, почта и ссылки в переписке не передаются. Звоните через ZELDO', 'info');
 /* компьютер (01.11): одно окно мессенджера во всю высоту — диалоги слева, переписка справа, поле ввода внизу */
 const chatRow = (c, curId) => { const [last, lt] = lastOf(c); const on = c.id === curId;
-  return `<button class="mrow ${on ? 'on' : ''}" data-a="openChat" data-v="${c.id}" ${on ? 'aria-current="true"' : ''}>${avaByName(c.with)}<span class="grow"><span class="mrow-h"><b>${esc(c.with)}</b><small>${esc(last.at || '')}</small></span><span class="mrow-s">${esc(lt || '')}</span>${c.order ? `<span class="mrow-o">Заказ № ${c.order}</span>` : ''}</span>${c.unread ? `<span class="cnt">${c.unread}</span>` : ''}</button>`; };
+  const tp = c.support ? { t: '' } : chatTopic(c);
+  return `<button class="mrow ${on ? 'on' : ''}" data-a="openChat" data-v="${c.id}" ${on ? 'aria-current="true"' : ''}>${avaByName(c.with)}<span class="grow"><span class="mrow-h"><b>${esc(c.with)}</b><small>${esc(last.at || '')}</small></span>${tp.t ? `<span class="mrow-t">${esc(tp.t)}</span>` : ''}<span class="mrow-s">${esc(lt || '')}</span></span>${c.unread ? `<span class="cnt">${c.unread}</span>` : ''}</button>`; };
 const chatRows = (role, curId) => { const l = chatFilter(role); return l.length ? l.map(c => chatRow(c, curId)).join('') : '<div class="msgr-none m">Диалогов нет</div>'; };
 const composerHtml = ch => `<div class="composer"><div class="chips scroll" style="margin:0 -12px;padding:0 12px 2px">${dealChip(ch)}${(ch.support ? [] : QUICK[ch.role]).map(t => `<button class="chip" data-a="quickSend" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</div>
       ${composeRow(ch)}</div>`;
@@ -9666,7 +9812,7 @@ const msecOf = ch => (ch && ch.support ? 'sup' : !ch && S.msec === 'notif' ? 'no
 function msgRail(role, sec) {
   const sup = chatById('sup');
   const it = (v, icon, label, n, on) => `<button class="mrail-i ${on ? 'on' : ''}" data-a="msec" data-v="${v}" ${on ? 'aria-current="page"' : ''}><span class="mrail-ic">${ic(icon, 22, 2)}${n ? `<b class="mrail-n">${n}</b>` : ''}</span><span>${label}</span></button>`;
-  return `<nav class="mrail" aria-label="Разделы сообщений">${it('cust', 'user', 'Я заказчик', unreadMsgs('cust'), sec === 'chats' && role === 'cust')}${it('exec', 'tool', 'Я исполнитель', unreadMsgs('exec'), sec === 'chats' && role === 'exec')}${it('sup', 'shield', 'Поддержка', sup ? sup.unread : 0, sec === 'sup')}${it('notif', 'bell', 'Уведомления', unreadNotifs('cust') + unreadNotifs('exec'), sec === 'notif')}</nav>`;
+  return `<nav class="mrail" aria-label="Разделы сообщений">${it('cust', 'user', 'Я заказчик', unreadMsgs('cust'), sec === 'chats' && role === 'cust')}${it('exec', 'tool', 'Я исполнитель', unreadMsgs('exec'), sec === 'chats' && role === 'exec')}</nav>`;  /* запись 55: уведомления — в колокольчике, поддержка — отдельным пунктом меню, в сообщениях только переписки */
 }
 const NROLE = { cust: 'как заказчик', exec: 'как исполнитель', partner: 'как партнёр' };
 function notifRows() {
@@ -9682,7 +9828,7 @@ function messenger(role, ch) {
     ? `<div class="msgr-lh"><div class="row"><b class="h2 grow">Уведомления</b>${S.notifs.some(n => !n.read) ? `<button class="lnk" data-a="readAllN">Прочитать все</button>` : ''}</div>${chipsNew('notifNew', S.notifTab === 'unread', 'Непрочитанные')}</div><div class="msgr-list">${notifRows()}</div>`
     : sec === 'sup'
       ? `<div class="msgr-lh"><b class="h2">Поддержка ZELDO</b><span class="m">Отвечаем с 9:00 до 21:00 по Москве. Спор по заказу — тоже сюда.</span></div><div class="msgr-list">${chatRow(supChatGet(), ch && ch.id)}</div>`
-      : `<div class="msgr-lh"><b class="h2">${role === 'exec' ? 'Я исполнитель' : 'Я заказчик'}</b>${chipsNew('chatNew', !!S.chatNew, 'Только новые')}<span class="search"><input data-in="chatQ|${role}" value="${esc(S.chatQ || '')}" placeholder="Имя или текст" autocomplete="off" aria-label="Поиск по диалогам">${ic('search', 22)}</span></div>
+      : `<div class="msgr-lh"><b class="h2">${role === 'exec' ? 'Я исполнитель' : 'Я заказчик'}</b>${chipsNew('chatNew', !!S.chatNew, 'Только новые')}<span class="search"><input data-in="chatQ|${role}" value="${esc(S.chatQ || '')}" placeholder="Имя, услуга или текст" autocomplete="off" aria-label="Поиск по диалогам">${ic('search', 22)}</span></div>
     <div id="chatlist" class="msgr-list">${chatRows(role, ch && ch.id)}</div>`;
   return `<div class="msgr">${msgRail(role, sec)}<div class="msgr-l">${mid}</div>${right}</div>`;
 }
@@ -9712,14 +9858,14 @@ function chatListScreen(role) {
   const list = chatFilter(role);
   return {
     title: 'Сообщения', cls: 'msgp', deskBody: messenger(role, null), deskBare: true,
-    body: `${roleTabs('msgs')}${card(`<div class="list">${rl('Поддержка ZELDO', 'Отвечаем с 9:00 до 21:00', 'supportOpen', '', { icon: 'shield' })}${rl('Уведомления', (n => n ? `Новых: ${n}` : 'События по заказам')(unreadNotifs('cust') + unreadNotifs('exec')), 'go', 'notifs', { icon: 'bell' })}</div>`, 'c')}${field('Поиск по диалогам', `<span class="search"><input data-in="chatQ|${role}" value="${esc(S.chatQ || '')}" placeholder="Имя или текст" autocomplete="off">${ic('search', 22)}</span>`)}
+    body: `${roleTabs('msgs')}${field('Поиск по диалогам', `<span class="search"><input data-in="chatQ|${role}" value="${esc(S.chatQ || '')}" placeholder="Имя, услуга или текст" autocomplete="off">${ic('search', 22)}</span>`)}
       <div id="chatlist">${chatListHtml(list)}</div>
       <div class="m">Сообщения — это переписка. События по заказам приходят в колокольчик.</div>`,
   };
 }
 function chatListHtml(list) {
   if (!list.length) return emptyBox('Диалогов нет', 'Напишите исполнителю из карточки услуги.', '', '', '');
-  return card(`<div class="h2">Диалоги</div><div class="list">${list.map(c => { const [last, lt] = lastOf(c); return `<button class="rl" data-a="go" data-v="${gv('chat', { id: c.id })}"><span class="lt">${letter(c.with)}</span><span class="grow"><span class="rt">${esc(c.with)}</span><span class="rs clamp2">${esc(lt || '')}${last.at ? ' · ' + esc(last.at) : ''}</span>${c.order ? `<span class="pill grey" style="margin-top:4px">Заказ № ${c.order}</span>` : ''}</span>${c.unread ? `<span class="cnt" style="min-width:30px;height:30px;font-size:14px">${c.unread}</span>` : `<span class="ra">${ic('arr', 22, 2)}</span>`}</button>`; }).join('')}</div>`, 'c');
+  return card(`<div class="h2">Диалоги</div><div class="list">${list.map(c => { const [last, lt] = lastOf(c); return `<button class="rl" data-a="go" data-v="${gv('chat', { id: c.id })}"><span class="lt">${letter(c.with)}</span><span class="grow"><span class="rt">${esc(c.with)}</span>${chatTopic(c).t ? `<span class="mrow-t">${esc(chatTopic(c).t)}</span>` : ''}<span class="rs clamp2">${esc(lt || '')}${last.at ? ' · ' + esc(last.at) : ''}</span></span>${c.unread ? `<span class="cnt" style="min-width:30px;height:30px;font-size:14px">${c.unread}</span>` : `<span class="ra">${ic('arr', 22, 2)}</span>`}</button>`; }).join('')}</div>`, 'c');
 }
 IN.chatQ = (v, role) => { S.chatQ = v; const el = $('#chatlist'); if (el) el.innerHTML = el.classList.contains('msgr-list') ? chatRows(role, cur().n === 'chat' ? cur().p.id : '') : chatListHtml(chatFilter(role)); };
 A.openChat = id => { if (cur().n === 'chat') replace('chat', { id }); else go('chat', { id }); };
@@ -10477,7 +10623,7 @@ function bellPanel() {
     ${btn(`Все уведомления ${ic('arr', 20, 2.2)}`, 'allNotifs', '', 'soft block')}${btn('Закрыть', 'closeAll', '', 'text block')}`;
 }
 Object.assign(A, {
-  bell() { if (VIEW() === 'desk') { S.panel = null; S.sheet = null; renderOverlay(); A.msec('notif'); return; } S.panel = bellPanel(); S.sheet = null; renderOverlay(); },
+  bell() { if (VIEW() === 'desk') { S.panel = null; S.sheet = null; renderOverlay(); go('notifs'); return; } S.panel = bellPanel(); S.sheet = null; renderOverlay(); },
   openNotif(id) { const n = S.notifs.find(x => x.id === id); n.read = true; S.panel = null; S.sheet = null; if (n.role && n.role !== S.role && n.role !== 'partner' && S.role !== 'guest') switchRole(n.role); A.go(n.to); },
   allNotifs() { S.panel = null; renderOverlay(); go('notifs'); },
   readAll() { notifsFor(S.role).forEach(n => { n.read = true; }); render(); },
@@ -10618,6 +10764,7 @@ fitPhone();
 /* раскраски (07.11): шесть на выбор, как в «Рокетбанке»; [ключ, название, шапка, фон, акцент] — для кружков в настройках.
    Выбор хранится на телефоне; тёмная включает и тёмную тему карточек. Цвет шапки — и в метке theme-color: Safari красит под него свою панель */
 const PALS = [['blue', 'Синяя', '#0E1D36', '#EEF2F8', '#0B6CF2'], ['white', 'Белая', '#FFFFFF', '#F2F2F7', '#0071E3'], ['orange', 'Оранжевая', '#D4500B', '#F8F4F0', '#FFFFFF'],
+  ['black', 'Чёрная', '#0A0A0A', '#F2F2F2', '#FFFFFF'], ['khaki', 'Хаки', '#36432A', '#F3F1E8', '#8A9A4E'], ['fuchsia', 'Фуксия', '#460C33', '#FBF3F8', '#EC4899'],
   ['mint', 'Мятная', '#0D3B36', '#EEF5F3', '#1BB59F'], ['violet', 'Фиолетовая', '#24123F', '#F3F0F9', '#9B6BFF'], ['night', 'Тёмная', '#070D18', '#0B1424', '#3D8EF8']];
 function applyPal(k) {
   const p = PALS.find(x => x[0] === k) || PALS[0]; S.pal = p[0]; S.theme = p[0] === 'night' ? 'dark' : 'light';
@@ -10699,6 +10846,19 @@ Object.assign(A, {
 });
 const settings1 = SCREENS.settings;
 SCREENS.settings = p => { const r = settings1(p); r.body += card(`<div class="list">${rl('Добавить на экран «Домой»', 'Открывать ZELDO как приложение', 'a2hs', '', { icon: 'home' })}</div>`, 'c'); return r; };
+/* «Поделиться ZELDO» (запись 55, Максим: «кнопка поделиться вообще платформой… будет реферальная система»).
+   У каждого своя ссылка-приглашение (?ref=…): кто пришёл по ней, запоминается на его телефоне (zeldo-ref) — по этой метке
+   заработает реферальная программа, когда Максим опишет её логику. Телефон — системное окно «Поделиться», компьютер — копия ссылки */
+const myRef = () => (REAL && window.__zme ? 'u' + window.__zme : 'alex');
+const inviteUrl = () => { const u = new URL('./', location.href); u.searchParams.set('ref', myRef()); return u.href; };
+try { const r = new URLSearchParams(location.search).get('ref'); if (r && /^[\w-]{1,40}$/.test(r) && !localStorage.getItem('zeldo-ref')) localStorage.setItem('zeldo-ref', JSON.stringify({ ref: r, at: Date.now() })); } catch (e) { /* без памяти — без метки */ }
+A.shareApp = async () => {
+  const url = inviteUrl(); const text = 'ZELDO — услуги рядом: мастера, ремонт, уборка, красота, обучение. Оплата через защищённый счёт.';
+  if (navigator.share && VIEW() !== 'desk') { try { await navigator.share({ title: 'ZELDO', text, url }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+  let ok = false; try { await navigator.clipboard.writeText(url); ok = true; } catch (e) { /* без доступа к буферу — покажем ссылку */ }
+  sheet('Поделиться ZELDO', `<div class="m">${ok ? 'Ссылка скопирована. Отправьте её друзьям и клиентам — в мессенджере, в соцсетях или письмом.' : 'Скопируйте ссылку и отправьте друзьям и клиентам.'}</div>
+    <div class="sharel"><span class="grow">${esc(url)}</span></div>
+    <div class="m">Это ваша личная ссылка-приглашение. Скоро за приглашённых будут начисляться бонусы.</div>${btn('Готово', 'closeSheet', '', 'soft block')}`); };
 /* пункт бокового меню нажат — меню закрывается */
 document.addEventListener('click', e => { if (S.drawer && e.target.closest('.drawer [data-a]')) setTimeout(() => { S.drawer = false; renderOverlay(); }, 0); });
 
