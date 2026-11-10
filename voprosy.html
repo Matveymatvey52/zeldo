@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E1D36">
+<title>ZELDO · вопросы для решений</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap">
+<!-- Вопросник для Максима (10.11.2026, его голосовые 16:29–19:10): «по одному вопросу, варианты ответа и рекомендация с объяснением;
+     отвечаешь 1, 2, 3 или своим вариантом; потом из всех ответов формируется документ». Без аккаунтов: ответы хранятся на телефоне
+     (localStorage), в конце уходят Матвею в Телеграм одной кнопкой или копируются. Вопросы — разбор Кворка 07.11 и открытые решения дорожной карты -->
+<style>
+:root { --bg: #EEF2F8; --card: #FFFFFF; --ink: #0E1D36; --muted: #5B6B84; --line: #DCE3EE; --soft: #E8F0FE; --act: #0B6CF2; --act-ink: #FFFFFF; --rec: #17733F; --rec-soft: #E7F5EC; --hdr: #0E1D36; }
+@media (prefers-color-scheme: dark) { :root { --bg: #0B1424; --card: #13203A; --ink: #EEF3FB; --muted: #9AA9C0; --line: #24345A; --soft: #172B4D; --act: #3D8EF8; --rec: #5BD08A; --rec-soft: #12301F; --hdr: #070D18; } }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Onest", "Segoe UI", system-ui, sans-serif; -webkit-text-size-adjust: 100%; }
+button, textarea { font: inherit; color: inherit; }
+.top { background: var(--hdr); color: #fff; padding: calc(14px + env(safe-area-inset-top)) 16px 14px; }
+.top .in { max-width: 640px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+.logo { font-weight: 800; letter-spacing: 0.04em; font-size: 20px; }
+.prog { flex: 1; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.16); overflow: hidden; }
+.prog i { display: block; height: 100%; background: #3D8EF8; border-radius: 3px; transition: width 0.25s ease; }
+.cnt { font-size: 14px; color: #C7D2E4; font-variant-numeric: tabular-nums; min-width: 52px; text-align: right; }
+main { max-width: 640px; margin: 0 auto; padding: 20px 16px calc(120px + env(safe-area-inset-bottom)); }
+.blk { font-size: 14px; font-weight: 600; color: var(--act); text-transform: uppercase; letter-spacing: 0.06em; margin: 4px 0 8px; }
+h1 { font-size: 26px; line-height: 32px; margin: 0 0 10px; font-weight: 700; }
+.ctx { color: var(--muted); font-size: 16px; line-height: 24px; margin: 0 0 18px; }
+.rec { background: var(--rec-soft); border-radius: 16px; padding: 14px 16px; margin: 0 0 18px; font-size: 15px; line-height: 22px; }
+.rec b { color: var(--rec); }
+.opts { display: grid; gap: 10px; }
+.opt { display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left; padding: 14px 16px; border-radius: 16px; border: 1.5px solid var(--line); background: var(--card); cursor: pointer; transition: border-color 0.15s ease, background-color 0.15s ease; }
+.opt .n { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--soft); color: var(--act); font-weight: 700; font-size: 15px; }
+.opt .t { display: grid; gap: 4px; font-size: 17px; line-height: 23px; }
+.opt .s { color: var(--muted); font-size: 14px; line-height: 20px; }
+.opt .badge { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--rec-soft); color: var(--rec); font-size: 12px; font-weight: 600; vertical-align: 2px; }
+.opt.on { border-color: var(--act); background: var(--soft); }
+.opt.on .n { background: var(--act); color: var(--act-ink); }
+@media (hover: hover) { .opt:hover { border-color: var(--act); } }
+label.cm { display: block; margin-top: 16px; font-size: 15px; color: var(--muted); }
+textarea { width: 100%; min-height: 84px; margin-top: 6px; padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); font-size: 16px; line-height: 22px; resize: vertical; }
+textarea:focus { outline: none; border-color: var(--act); }
+.bar { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card); box-shadow: 0 -1px 0 var(--line); padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); }
+.bar .in { max-width: 640px; margin: 0 auto; display: flex; gap: 10px; }
+.btn { flex: 1; min-height: 52px; border-radius: 14px; border: 0; background: var(--act); color: var(--act-ink); font-size: 17px; font-weight: 600; cursor: pointer; }
+.btn.soft { flex: 0 0 auto; padding: 0 18px; background: var(--soft); color: var(--act); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+.hello p, .end p { font-size: 17px; line-height: 26px; }
+.hello ol { padding-left: 22px; font-size: 16px; line-height: 26px; color: var(--muted); }
+.sum { display: grid; gap: 10px; margin: 16px 0; }
+.sum div { background: var(--card); border-radius: 14px; padding: 12px 14px; font-size: 15px; line-height: 21px; }
+.sum b { display: block; margin-bottom: 4px; }
+.sum .m { color: var(--muted); }
+.sum button { all: unset; color: var(--act); font-size: 14px; cursor: pointer; margin-top: 6px; display: inline-block; }
+.ok { color: var(--rec); font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .prog i, .opt { transition: none; } }
+</style>
+</head>
+<body>
+<div class="top"><div class="in"><span class="logo">ZELDO</span><span class="prog" aria-hidden="true"><i id="pg" style="width:0"></i></span><span class="cnt" id="cnt"></span></div></div>
+<main id="app"></main>
+<div class="bar"><div class="in" id="bar"></div></div>
+<script>
+/* вопросы: блок, вопрос, пояснение, варианты [текст, подпись], номер рекомендованного (с 1), почему рекомендую */
+const Q = [
+  ['Сроки', 'Офлайн-услуга сдана, заказчик молчит. Через сколько заказ закрывается сам и деньги уходят исполнителю?', 'Стрижка, маникюр, мастер на дому — быстрые сделки. Заказчик видит таймер и кнопку «Есть претензия».',
+    [['Через 1 час', 'Подстригся и ушёл: претензий нет — сделка закрыта'], ['Через 3 часа', 'Чуть больше времени, если работа на выезде'], ['Через 24 часа', 'Как у онлайна, но мастер ждёт деньги сутки']], 1,
+    'Вы сами так сказали: офлайн — быстрые сделки. Часа хватает, чтобы заметить проблему на месте, а мастер не ждёт денег до завтра.'],
+  ['Сроки', 'Онлайн-услуга сдана, заказчик молчит. Через сколько заказ закрывается сам?', 'Дизайн, тексты, сайты: работу надо открыть и проверить.',
+    [['24 часа и одно продление ещё на сутки', 'Заказчик сам нажимает «Нужно больше времени»'], ['48 часов', 'Без продлений'], ['3 дня, как у Кворка', 'Исполнитель дольше ждёт оплату']], 1,
+    'Сутки — как вы предложили. Продление выручит, если работу сдали вечером в пятницу, и не держит исполнителя в ожидании без причины.'],
+  ['Сроки', 'За сколько исполнитель должен подтвердить заявку? Не подтвердил — заявка отменяется, деньги не списаны.', 'Сейчас срока нет: заявка может висеть сколько угодно.',
+    [['2 часа днём, ночью — до 10 утра', 'Ночью мастер спит, утром отвечает'], ['30 минут', 'Как в такси, но мастера на работе не успеют'], ['24 часа', 'Заказчик долго ждёт ответа']], 1,
+    'За два часа заказчик узнаёт, будет ли запись, а мастер успевает ответить между клиентами.'],
+  ['Сроки', 'Исполнитель прислал предложение в переписке, заказчик согласился. Сколько времени на оплату?', 'Пока не оплачено, время в расписании держится за заказчиком.',
+    [['24 часа, но не позже чем за 3 часа до визита', 'Время не пропадает у мастера впустую'], ['2 часа', 'Строже: держим окно недолго'], ['До начала визита', 'Можно оплатить перед самым приходом']], 1,
+    'Суток хватает подумать, а правило «за 3 часа до визита» не даёт мастеру остаться с пустым окном.'],
+  ['Сроки', 'Сколько живёт предложение исполнителя в переписке, если заказчик молчит?', 'После срока предложение гаснет, время в расписании освобождается.',
+    [['3 дня или до времени визита — что раньше', ''], ['24 часа', ''], ['14 дней, как у Кворка', 'Для офлайна слишком долго: цены и окна меняются']], 1,
+    'Три дня — обычный срок, чтобы подумать. Если визит раньше, предложение гаснет к визиту.'],
+  ['Отмены', 'Заказчик отменяет оплаченный заказ меньше чем за сутки до визита. Что получает исполнитель?', 'Раньше чем за сутки — полный возврат заказчику.',
+    [['30 % суммы', 'Мастер уже отказал другим клиентам'], ['50 % суммы', 'Строже к заказчику'], ['Ничего, полный возврат', 'Заказчику проще, мастеру обидно']], 1,
+    '30 % честно возмещает потерянное окно и не отпугивает заказчиков.'],
+  ['Отмены', 'Исполнитель отменил оплаченный заказ сам. Что тогда?', 'Деньги заказчику возвращаются полностью в любом случае.',
+    [['Отметка в профиле, после 3 отмен за месяц — рейтинг ниже', ''], ['Только полный возврат, без последствий', ''], ['Штраф исполнителю', 'Сложно: нужен договор и удержание']], 1,
+    'Отметку видят заказчики, и она мягко дисциплинирует. Штраф требует договора и плохо сочетается с самозанятостью.'],
+  ['Споры', 'Споры с ИИ: начиная с какой суммы спор сразу идёт человеку?', 'Сейчас стоит 15 000 ₽. Ниже — ИИ предлагает решение, стороны соглашаются или зовут администратора.',
+    [['15 000 ₽', 'Как сейчас'], ['5 000 ₽', 'Осторожнее: больше споров у администратора'], ['Без порога', 'ИИ разбирает всё, человек — только при несогласии']], 1,
+    'Большинство заказов дешевле 15 000 ₽, их ИИ закроет быстро, а дорогие и рискованные сразу видит человек.'],
+  ['Споры', 'Сколько времени у сторон, чтобы согласиться с решением ИИ или позвать администратора?', 'Если за это время никто не возразил, решение исполняется само.',
+    [['24 часа', 'Как сейчас'], ['12 часов', 'Быстрее закрываем'], ['48 часов', 'Больше времени подумать']], 1,
+    'За сутки человек точно увидит уведомление и успеет ответить.'],
+  ['Безопасность', 'Чёрный список: что происходит с заблокированным человеком?', 'У Кворка блокировка только прячет услуги, писать заблокированный может.',
+    [['Полный блок: не пишет, не звонит, не заказывает, не видит карточки', ''], ['Только скрыть его из каталога, как у Кворка', '']], 1,
+    'Мастер приходит к заказчику домой. Нужна настоящая защита, а не «скрыть».'],
+  ['Безопасность', 'Сколько исполнителей могут откликнуться на одну «заявку всем»?', 'После лимита заявка закрывается для новых откликов.',
+    [['10', 'Заказчик не тонет в предложениях'], ['20', ''], ['Без лимита', '']], 1,
+    'Десяти предложений хватает, чтобы выбрать. А исполнители знают, что шанс есть, и откликаются охотнее.'],
+  ['Безопасность', 'Нужен ли мини-тест о безопасности перед первым сообщением, как у Кворка?', 'Сейчас в начале каждой переписки стоит строка «Платите только через ZELDO».',
+    [['Нет, хватит строки в переписке', ''], ['Да, три коротких вопроса', 'Ещё один шаг перед первым сообщением']], 1,
+    'Каждый лишний шаг до первого сообщения теряет часть заказчиков, а строка уже напоминает о главном.'],
+  ['Деньги', 'Берём ли сбор с заказчика сверху цены, как Кворк (5 %, не меньше 200 ₽)?', 'Сейчас заказчик платит ровно цену исполнителя, комиссию ZELDO платит исполнитель.',
+    [['Нет, заказчик платит ровно цену', ''], ['Да, сбор сверху', '']], 1,
+    'На Кворке заказ за 600 ₽ обошёлся покупателю в 800 ₽. Честная цена — наше преимущество, его стоит держать.'],
+  ['Деньги', 'Чаевые после приёмки работы?', 'Заказчик может добавить сумму исполнителю, когда принимает работу.',
+    [['Да, по желанию, без комиссии ZELDO', ''], ['Да, с обычной комиссией', ''], ['Нет', '']], 1,
+    'Чаевые — приятная мелочь для мастеров. Без комиссии это ещё и повод прийти на ZELDO.'],
+  ['Юридическое', 'Кто будет оператором данных и стороной соглашения с пользователями?', 'От этого зависят документы, уведомление в Роскомнадзор и договор с банком.',
+    [['ООО', 'Банку и безопасной сделке удобнее'], ['ИП', 'Быстрее открыть'], ['Пока не знаю, обсудим', '']], 1,
+    'Безопасную сделку и эквайринг почти всегда оформляют на юрлицо. ООО сразу снимает вопросы у банка.'],
+  ['Запуск', 'Где держим сервер?', 'Сейчас рабочая версия живёт на ноутбуке Матвея. Нужно облако в России.',
+    [['Яндекс Облако', ''], ['VK Cloud', ''], ['Selectel', '']], 1,
+    'Понятный кабинет, оплата картой российского банка, хорошая документация. Напишите в комментарии, кто заводит аккаунт.'],
+  ['Продукт', 'Какая раскраска будет по умолчанию у новых пользователей?', 'Остальные останутся на выбор в «Настройках».',
+    [['Оранжевая', 'Тёплая, выделяется среди синих сервисов'], ['Синяя', 'Как сейчас'], ['Чёрная', 'Строгая']], 1,
+    'Вам нравится оранжевая. Она тёплая и запоминается, а синих сервисов вокруг много.'],
+  ['Продукт', 'Реферальная программа: сколько получает тот, кто привёл друга?', 'Договорились 05.11: платим только пригласившему, не новичку.',
+    [['10 % комиссии ZELDO с заказов друга в течение 3 месяцев', ''], ['300 ₽ за первый заказ друга', ''], ['Расскажу на встрече', '']], 3,
+    'Логику вы хотели рассказать сами в среду. Если удобнее сразу — выберите вариант или напишите свой.'],
+];
+const KEY = 'zeldo-voprosy-1';
+let st; try { st = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { st = null; }
+if (!st) st = { i: -1, a: {} };
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* без памяти — ответы держатся до закрытия */ } };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const $ = id => document.getElementById(id);
+function head() { const n = Q.length; const i = Math.max(0, Math.min(st.i, n));
+  $('pg').style.width = `${st.i < 0 ? 0 : Math.round(i / n * 100)}%`; $('cnt').textContent = st.i < 0 ? '' : st.i >= n ? 'готово' : `${st.i + 1} из ${n}`; }
+function answerText(k) { const q = Q[k], a = st.a[k] || {}; const pick = a.o ? `${a.o}. ${q[3][a.o - 1][0]}` : 'свой вариант'; return `${pick}${a.c ? ` — ${a.c}` : ''}`; }
+function show() {
+  head(); window.scrollTo(0, 0);
+  if (st.i < 0) {
+    $('app').innerHTML = `<section class="hello"><div class="blk">Вопросы для решений</div><h1>${Q.length} вопросов по запуску ZELDO</h1>
+      <p>По одному вопросу на экране. У каждого — варианты ответа и рекомендация Матвея с объяснением.</p>
+      <ol><li>Выберите вариант или напишите свой.</li><li>Комментарий — по желанию.</li><li>В конце ответы одной кнопкой уходят Матвею в Телеграм.</li></ol>
+      <p class="ctx">Можно прерваться: ответы запоминаются на этом телефоне. Займёт около 10 минут.</p></section>`;
+    $('bar').innerHTML = `<button class="btn" id="go">${Object.keys(st.a).length ? 'Продолжить' : 'Начать'}</button>`;
+    $('go').onclick = () => { st.i = Object.keys(st.a).length ? Math.min(Q.length, Object.keys(st.a).length) : 0; save(); show(); };
+    return;
+  }
+  if (st.i >= Q.length) return end();
+  const k = st.i, q = Q[k], a = st.a[k] || {};
+  $('app').innerHTML = `<div class="blk">${esc(q[0])}</div><h1>${esc(q[1])}</h1><p class="ctx">${esc(q[2])}</p>
+    <div class="rec"><b>Рекомендую ${q[4]}.</b> ${esc(q[5])}</div>
+    <div class="opts" role="radiogroup" aria-label="Варианты ответа">${q[3].map((o, j) => `<button class="opt ${a.o === j + 1 ? 'on' : ''}" role="radio" aria-checked="${a.o === j + 1}" data-o="${j + 1}"><span class="n">${j + 1}</span><span class="t"><span>${esc(o[0])}${j + 1 === q[4] ? '<span class="badge">рекомендую</span>' : ''}</span>${o[1] ? `<span class="s">${esc(o[1])}</span>` : ''}</span></button>`).join('')}</div>
+    <label class="cm" for="cm">Свой вариант или комментарий</label><textarea id="cm" placeholder="Например: да, но с оговоркой…">${esc(a.c || '')}</textarea>`;
+  document.querySelectorAll('.opt').forEach(b => b.onclick = () => { st.a[k] = Object.assign({}, st.a[k], { o: +b.dataset.o }); save(); show(); });
+  $('cm').oninput = e => { st.a[k] = Object.assign({}, st.a[k], { c: e.target.value.trim() }); if (!st.a[k].o && !st.a[k].c) delete st.a[k]; save(); $('nx').disabled = !st.a[k]; };
+  $('bar').innerHTML = `<button class="btn soft" id="bk">Назад</button><button class="btn" id="nx" ${st.a[k] ? '' : 'disabled'}>${k === Q.length - 1 ? 'Готово' : 'Дальше'}</button>`;
+  $('bk').onclick = () => { st.i--; save(); show(); };
+  $('nx').onclick = () => { st.i++; save(); show(); };
+}
+function report() { return `Ответы Максима на вопросы по ZELDO (${new Date().toLocaleDateString('ru-RU')})\n\n` + Q.map((q, k) => `${k + 1}. ${q[1]}\n→ ${st.a[k] ? answerText(k) : 'без ответа'}`).join('\n\n'); }
+function end() {
+  const missed = Q.filter((q, k) => !st.a[k]).length;
+  $('app').innerHTML = `<section class="end"><div class="blk">Готово</div><h1>Спасибо! Осталось отправить ответы Матвею</h1>
+    <p>${missed ? `Без ответа: ${missed}. Можно вернуться к ним или отправить так.` : 'Ответы есть на все вопросы.'} По ним Матвей соберёт итоговый документ.</p>
+    <div class="sum">${Q.map((q, k) => `<div><b>${k + 1}. ${esc(q[1])}</b><span class="${st.a[k] ? '' : 'm'}">${st.a[k] ? esc(answerText(k)) : 'без ответа'}</span><br><button data-k="${k}">Изменить</button></div>`).join('')}</div>
+    <p class="ctx" id="msg"></p></section>`;
+  document.querySelectorAll('.sum button').forEach(b => b.onclick = () => { st.i = +b.dataset.k; save(); show(); });
+  $('bar').innerHTML = `<button class="btn soft" id="cp">Скопировать</button><button class="btn" id="tg">Отправить в Телеграм</button>`;
+  $('tg').onclick = () => { const t = report(); window.open(`https://t.me/share/url?url=${encodeURIComponent(location.origin + location.pathname)}&text=${encodeURIComponent('\n' + t)}`, '_blank'); $('msg').textContent = 'Выберите в Телеграме чат с Матвеем и отправьте.'; };
+  $('cp').onclick = async () => { try { await navigator.clipboard.writeText(report()); $('msg').innerHTML = '<span class="ok">Скопировано.</span> Вставьте в чат с Матвеем.'; } catch (e) { $('msg').textContent = 'Не получилось скопировать. Нажмите «Отправить в Телеграм».'; } };
+}
+show();
+</script>
+</body>
+</html>
