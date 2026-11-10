@@ -225,7 +225,7 @@ function show() {
   if (st.i < 0) {
     $('app').innerHTML = `<section class="hello"><div class="blk">Вопросы для решений</div><h1>${Q.length} вопросов по запуску ZELDO</h1>
       <p>По одному вопросу на экране. У каждого — варианты ответа и рекомендация Матвея с объяснением.</p>
-      <ol><li>Выберите вариант или напишите свой.</li><li>Комментарий — по желанию.</li><li>В конце ответы одной кнопкой уходят Матвею в Телеграм.</li></ol>
+      <ol><li>Выберите вариант или напишите свой.</li><li>Комментарий — по желанию.</li><li>В конце нажмите «Отправить» и выберите чат с Матвеем в Телеграме: сами ответы не уходят.</li></ol>
       <p class="ctx">Можно прерваться: ответы запоминаются на этом телефоне. Займёт около ${Math.ceil(Q.length / 3)} минут.</p></section>`;
     $('bar').innerHTML = `<button class="btn" id="go">${Object.keys(st.a).length ? 'Продолжить' : 'Начать'}</button>`;
     $('go').onclick = () => { st.i = Object.keys(st.a).length ? Math.min(Q.length, Object.keys(st.a).length) : 0; save(); show(); };
@@ -254,13 +254,21 @@ function report(full) {
 function end() {
   const missed = Q.filter((q, k) => !st.a[k]).length;
   $('app').innerHTML = `<section class="end"><div class="blk">Готово</div><h1>Спасибо! Осталось отправить ответы Матвею</h1>
+    <p><b>Сами ответы никуда не уходят.</b> Нажмите «Отправить» внизу, выберите Телеграм, затем чат с Матвеем.</p>
     <p>${missed ? `Без ответа: ${missed}. Можно вернуться к ним или отправить так.` : 'Ответы есть на все вопросы.'} По ним Матвей соберёт итоговый документ.</p>
     <div class="sum">${Q.map((q, k) => `<div><b>${k + 1}. ${esc(q[1])}</b><span class="${st.a[k] ? '' : 'm'}">${st.a[k] ? esc(answerText(k)) : 'без ответа'}</span><br><button data-k="${k}">Изменить</button></div>`).join('')}</div>
     <p class="ctx" id="msg"></p></section>`;
   document.querySelectorAll('.sum button').forEach(b => b.onclick = () => { st.i = +b.dataset.k; save(); show(); });
-  $('bar').innerHTML = `<button class="btn soft" id="cp">Скопировать</button><button class="btn" id="tg">Отправить в Телеграм</button>`;
-  $('tg').onclick = () => { const t = report(); window.open(`https://t.me/share/url?url=${encodeURIComponent(location.origin + location.pathname)}&text=${encodeURIComponent('\n' + t)}`, '_blank'); $('msg').textContent = 'Выберите в Телеграме чат с Матвеем и отправьте.'; };
-  $('cp').onclick = async () => { try { await navigator.clipboard.writeText(report(true)); $('msg').innerHTML = '<span class="ok">Скопировано.</span> Вставьте в чат с Матвеем.'; } catch (e) { $('msg').textContent = 'Не получилось скопировать. Нажмите «Отправить в Телеграм».'; } };
+  $('bar').innerHTML = `<button class="btn soft" id="cp">Скопировать</button><button class="btn" id="tg">Отправить</button>`;
+  /* 11.11.2026: Максим нажал «Я ответил», а сообщение не дошло — длинная ссылка t.me на телефоне теряет текст.
+     Теперь сначала системное «Поделиться» с полным текстом (iPhone, Android), ссылка на Телеграм — только запасной путь. */
+  $('tg').onclick = async () => {
+    if (navigator.share) {
+      try { await navigator.share({ text: report() }); $('msg').innerHTML = '<span class="ok">Готово.</span> Если выбрали чат с Матвеем и нажали «Отправить» — ответы у него.'; return; }
+      catch (e) { if (e && e.name === 'AbortError') { $('msg').textContent = 'Отправка отменена. Нажмите ещё раз и выберите Телеграм → чат с Матвеем.'; return; } }
+    }
+    const t = report(); window.open(`https://t.me/share/url?url=${encodeURIComponent(location.origin + location.pathname)}&text=${encodeURIComponent('\n' + t)}`, '_blank'); $('msg').textContent = 'Выберите в Телеграме чат с Матвеем и отправьте.'; };
+  $('cp').onclick = async () => { try { await navigator.clipboard.writeText(report(true)); $('msg').innerHTML = '<span class="ok">Скопировано.</span> Вставьте в чат с Матвеем.'; } catch (e) { $('msg').textContent = 'Не получилось скопировать. Нажмите «Отправить».'; } };
 }
 show();
 </script>
