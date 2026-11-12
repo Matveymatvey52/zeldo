@@ -6201,7 +6201,7 @@ S.reviews = [
 /* заказы: у каждого номер, переписка привязывается к заказу */
 /* заказ на выезд, который оформляет заказчик, сразу получает его адрес (07.11) */
 const withAddr = o => { if (o.cust && o.fmt === 'visit' && !o.addr) { const a = myAddrText(); if (a) o.addr = a; } return o; };
-function mkOrder(o) { const ord = Object.assign({ id: S.nextOrder++, created: dk(0), log: [] }, withAddr(o)); S.orders.unshift(ord); return ord; }
+function mkOrder(o) { const ord = Object.assign({ id: S.nextOrder++, created: dk(0), log: [], stAt: Date.now() }, withAddr(o)); if (ord.status === 'paid' && !ord.paidAt) ord.paidAt = ord.stAt; S.orders.unshift(ord); return ord; }
 /* демо: ближайший визит заказчика — через час с небольшим, чтобы код начала был виден сразу; поздно вечером — завтра */
 const SOON = (() => { const n = new Date(); const m = Math.ceil((n.getHours() * 60 + n.getMinutes() + 75) / 30) * 30; return m <= 20 * 60 ? [dk(0), tstr(Math.max(m, 9 * 60))] : [dk(1), '10:00']; })();
 S.orders = [
@@ -6946,7 +6946,7 @@ SCREENS.c_aboutme = () => {
       ${list.map(x => card(`<div class="row"><b class="grow">${esc(x.who)}</b><span class="m">${dayName(x.date)}</span></div><div class="row">${'★'.repeat(x.stars)}<span class="m">${RATE_WORD[x.stars]}</span></div>${x.tags.length ? `<div class="chips">${x.tags.map(t => `<span class="pill grey">${esc(t)}</span>`).join('')}</div>` : ''}<div>${esc(x.text)}</div>`, 'c')).join('')}` };
 };
 A.cabSoon = v => sheet(v, `<div class="m">Этот раздел в прототипе не раскрыт: здесь будут обычные поля профиля.</div>${btn('Понятно', 'closeSheet', '', 'soft block')}`);
-A.helpPay = () => sheet('Защищённая оплата', `${bullets(['Вы платите на защищённый счёт площадки', 'Исполнитель получает деньги после того, как вы примете работу', 'Если что-то пошло не так, открываете спор: деньги ждут решения', 'Точный адрес исполнитель узнаёт только после оплаты'])}<div class="m">Пользоваться площадкой бесплатно. Комиссию 10% платит исполнитель из суммы заказа.</div>${btn('Понятно', 'closeSheet', '', 'soft block')}`);
+A.helpPay = () => sheet('Защищённая оплата', `${bullets(['Вы платите на защищённый счёт площадки', 'Исполнитель получает деньги после того, как вы примете работу', 'Если что-то пошло не так, открываете спор: деньги ждут решения', 'Точный адрес исполнитель узнаёт только после оплаты', 'Оплата картой или по СБП, дорогие заказы — в рассрочку. Можно оплатить с баланса ZELDO', 'Отменить бесплатно можно в течение часа после оплаты — деньги вернутся на баланс ZELDO'])}<div class="m">Пользоваться площадкой бесплатно, сверху цены ничего не берём. Комиссию платит исполнитель из суммы заказа.</div>${btn('Понятно', 'closeSheet', '', 'soft block')}`);
 SCREENS.c_become = () => {
   const st = S.becomeSt || '';
   return {
@@ -7540,6 +7540,7 @@ A.pay = v => {
       postMsg(ch, 'sys', { t: `Заказ № ${ord.id} оплачен. Вся переписка сохранена в заказе.`, ok: true });
       S.cfg[o.id] = null; simExec(ord);
     }
+    payMeta(ord);
     S.stack = [S.stack[0], { n: 'c_done', p: { id: ord.id } }]; render('new');
   }, 1200);
 };
@@ -7910,7 +7911,7 @@ SCREENS.e_request = p => {
   else if (i.kind === 'confirm') actions = card(`<div class="h2">Действия</div><div class="list">${rl('Подтвердить заказ', 'Заказчик сможет оплатить', 'incConfirm', i.id, { icon: 'check' })}${rl('Предложить другое время', 'День и время из вашего расписания', 'incOtherTime', i.id, { icon: 'clock' })}${i.chat ? rl('Переписка', 'Если нужно уточнить детали', 'go', gv('chat', { id: i.chat }), { icon: 'chat' }) : ''}</div>`);
   else if (i.kind === 'brief') actions = card(`<div class="h2">Ответить предложением</div><div class="m">Заказчик увидит состав, цену и время одной карточкой и сможет сразу оплатить.</div>
       ${field('Что сделаете', chips('replyInc', REPLY_INC, v => rd.inc.includes(v)))}
-      ${field('Цена', stepper('replyPrice', 'p', rd.price, 100, Infinity, rub, false, 100), { hint: i.budget ? `Заказчик предложил ${budText(i.budget, i.budgetFrom)}. Согласитесь или назовите свою цену.` : '' })}
+      ${field('Цена', stepper('replyPrice', 'p', rd.price, 100, Infinity, rub, false, 100), { hint: i.budget ? `Заказчик предложил ${budText(i.budget, i.budgetFrom)}${youGet(rd.price)}. Согласитесь или назовите свою цену.` : '' })}
       ${pickDayTime('reply', rd, 40, null, '')}
       ${rd.slot ? btn('Отправить предложение', 'replySend', i.id, 'block') : `<button class="btn block" disabled>Отправить предложение</button><div class="why center">Причина: выберите день и время.</div>`}${i.chat ? btn('Открыть переписку', 'go', gv('chat', { id: i.chat }), 'text block') : ''}`);
   else actions = card(`<div class="h2">Быстрый ответ</div><div class="optlist">${Q_ANS.map((t, k) => opt('qAnswer', `${i.id}|${k}`, t, '', false)).join('')}</div>`);
@@ -8280,12 +8281,12 @@ SCREENS.e_cab = () => ({
 });
 Object.assign(A, {
   statusInfo() { sheet('Статус и счёт', `${sumLines([['Статус', esc(S.profile.status)], ['Расчётный счёт', 'подключён'], ['Чеки', 'формирует банк']])}<div class="m">Исполнителем может быть самозанятый, ИП или ООО. Счёт, оферты и чеки подключаются вместе с банком.</div>${btn('Понятно', 'closeSheet', '', 'soft block')}`); },
-  helpExec() { sheet('Как устроены деньги', `${bullets(['Пользоваться площадкой бесплатно', 'Комиссия ZELDO — 10% с заказа, а первые три заказа — без комиссии', 'Эквайринг банка платит исполнитель: по карте около 2,5%, по СБП около 0,3%', 'Деньги приходят после того, как заказчик примет работу', 'Если заказ отменили, комиссию банка не вернут: баланс может уйти в минус'])}${btn('Понятно', 'closeSheet', '', 'soft block')}`); },
+  helpExec() { sheet('Как устроены деньги', `${bullets(['Пользоваться площадкой бесплатно', 'Комиссия ZELDO — 10% с заказа. С постоянных клиентов — 7%, с заказа дороже 500 000 ₽ — 5%', 'Первые три заказа — без комиссии', 'Эквайринг банка платит исполнитель: по карте около 2,5%, по СБП около 0,3%', 'Деньги закрепляются за вами, как только заказчик примет работу, и приходят раз в неделю одной суммой. Сразу — за 3%, но не меньше 200 ₽', 'Чаевые от заказчиков — целиком ваши, без комиссии', 'Значок «Проверен» — после проверки паспорта, статуса в ФНС и первых 5 заказов без жалоб', 'Если заказ отменили, комиссию банка не вернут: баланс может уйти в минус'])}${btn('Понятно', 'closeSheet', '', 'soft block')}`); },
 });
 /* комиссия ZELDO — 10 %, но первые три заказа нового исполнителя — без неё, только эквайринг банка (запись 48, 53:08–53:47) */
 const FREE_N = 3;
 const freeOrder = o => { const l = S.orders.filter(x => x.ex === o.ex && x.status !== 'cancel').sort((a, b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true })); const i = l.indexOf(o); return i >= 0 && i < FREE_N; };
-const payout = o => { const free = freeOrder(o); const fee = free ? 0 : Math.round(o.total * 0.1); const acq = Math.round(o.total * 0.025); return { fee, acq, net: o.total - fee - acq, free }; };
+const payout = o => { const free = freeOrder(o); const rate = feeRate(o); const fee = Math.round(o.total * rate / 100); const acq = Math.round(o.total * 0.025); return { fee, acq, net: o.total - fee - acq, free, rate }; };
 SCREENS.e_money = () => {
   const done = myOrders().filter(o => o.status === 'done'); const wait = myOrders().filter(o => !['done', 'cancel', 'request', 'confirmed'].includes(o.status));
   const sum = (l, f) => l.reduce((a, o) => a + f(o), 0);
@@ -8688,7 +8689,7 @@ IN.wzAdDesc = (v, i) => { S.wiz.addons[Number(i)].desc = v; wzTouch(); };
 IN.wzStName = (v, i) => { S.wiz.st[Number(i)].name = v; wzTouch(); };
 IN.wzVrName = (v, i) => { S.wiz.vr[Number(i)].name = v; wzTouch(); };
 IN.wzNewSvc = v => { S.propose.name = v; };
-CH.wzUpload = async el => { const f = el.files[0]; if (!f) return; const key = uid('up'); PH[key] = { src: await readImg(f) }; const wid = uid('w'); S.portfolio.unshift({ id: wid, ph: key, name: f.name.replace(/\.[^.]+$/, '').slice(0, 30), kind: 'Фото' }); S.wiz.works.unshift(wid); wzTouch(); render(); toast('Фото добавлено и в портфолио'); };
+CH.wzUpload = async el => { const f = el.files[0]; if (!f) return; if (S.wiz.works.length >= 10) { el.value = ''; toast('В карточке — до 10 фото. Уберите одно, чтобы добавить новое', 'info'); return; } const key = uid('up'); PH[key] = { src: await readImg(f) }; const wid = uid('w'); S.portfolio.unshift({ id: wid, ph: key, name: f.name.replace(/\.[^.]+$/, '').slice(0, 30), kind: 'Фото' }); S.wiz.works.unshift(wid); wzTouch(); render(); toast('Фото добавлено и в портфолио'); };
 Object.assign(A, {
   wzGo(v) { const w = S.wiz; const n = Number(v); if (n > w.maxStep) return; w.step = n; wizSave(); render('new'); },
   wzNext() { const w = S.wiz; w.step = Math.min(5, w.step + 1); w.maxStep = Math.max(w.maxStep, w.step); wizSave(); render('new'); },
@@ -8716,7 +8717,7 @@ Object.assign(A, {
   wzOwnAsk(kind) { sheet(kind === 'inc' ? 'Своё: что входит' : 'Своё: что получит заказчик', `${field('Коротко, своими словами', `<input class="input" id="wzown" maxlength="80" placeholder="${kind === 'inc' ? 'Например: подкачка азотом' : 'Например: машина готова к зиме'}" data-enter="wzOwnSave" data-v="${kind}">`)}${btn('Добавить', 'wzOwnSaveBtn', kind, 'block')}`); setTimeout(() => { const i = $('#wzown'); if (i) i.focus(); }, 50); },
   wzOwnSaveBtn(kind) { const i = $('#wzown'); A.wzOwnSave(kind, i); },
   wzOwnSave(kind, el) { const v = ((el && el.value) || '').trim(); if (!v) { toast('Напишите хотя бы пару слов', 'info'); return; } const w = S.wiz; if (kind === 'inc') { w.incOwn.push(v); w.inc.push(v); } else { w.resOwn = v; w.res = v; } wzTouch(); closeSheet(); render(); },
-  wzWork(id) { togIn(S.wiz.works, id); wzTouch(); render(); },
+  wzWork(id) { if (!S.wiz.works.includes(id) && S.wiz.works.length >= 10) return toast('В карточке — до 10 фото. Уберите одно, чтобы добавить новое', 'info'); togIn(S.wiz.works, id); wzTouch(); render(); },
   wzPfSheet() { const w = S.wiz; sheet('Ваше портфолио', `<div class="m">Фото, которые вы загрузили раньше. Отметьте те, что относятся к этой услуге.</div><div class="thumbs">${S.portfolio.filter(p => p.ph).map(p => `<button class="thumb ${w.works.includes(p.id) ? 'on' : ''}" data-a="wzPfTog" data-v="${p.id}" aria-pressed="${w.works.includes(p.id)}" aria-label="${esc(p.name)}">${photo(p.ph, p.name)}${w.works.includes(p.id) ? `<span class="tk">${w.works.indexOf(p.id) + 1}</span>` : ''}</button>`).join('')}</div>${btn('Готово', 'wzPfDone', '', 'block')}`); },
   wzPfTog(id) { togIn(S.wiz.works, id); wzTouch(); A.wzPfSheet(); },
   wzPfDone() { closeSheet(); render(); },
@@ -8830,7 +8831,7 @@ function docCard(w) {
 A.wzDoc = () => { S.wiz.doc = true; wzTouch(); render(); toast('Документ приложен'); };
 
 /* ---------- заказчик по документу «Главная, поиск и заявка, 20.10, ред. 6»: главная, поиск, выдача, фильтры, заявка в 3 шага ---------- */
-const exStatus = id => { const e = EX[id] || {}; return e.reviews < 30 ? ['Новый', 'new'] : ['Стабильный', 'ok']; };
+const exStatus = id => { const e = EX[id] || {}; return !e.reviews ? ['Новый на ZELDO', 'new'] : e.reviews < 30 ? ['Новый', 'new'] : ['Стабильный', 'ok']; };
 const isDeal = o => o.model === 'brief';  /* у каждой услуги есть готовая цена: «договорная» — только если её нет */
 /* цена в карточке: договорная — словом, иначе «от N ₽» и единица */
 const priceHtml = o => isDeal(o) ? 'Договорная' : o.model === 'inspect' ? `осмотр ${rub(priceFrom(o))}` : `${fromWord(o) ? 'от ' : ''}${rub(priceFrom(o))}${o.unit ? ` <small>${esc(o.unit)}</small>` : ''}`;
@@ -10149,7 +10150,7 @@ function orderActions(o) {
     if (st === 'work' || st === 'rework') h += `${st === 'rework' ? `<div class="info warn"><b>Нужна доработка</b><span class="m">${esc(o.reworkText || '')}</span></div>` : ''}${btn('Передать результат', 'resultAsk', o.id, 'block')}`;
     if (st === 'result') h += `<div class="info"><b>Ждём приёмки</b><span class="m">Деньги придут, когда заказчик примет работу.</span></div>`;
     if (['done', 'cancel'].includes(st)) h += clientRateBlock(o);
-    if (st === 'done') { const p = payout(o); h += card(`<div class="h2">Деньги переведены</div>${sumLines([['Сумма заказа', rub(o.total)], [p.free ? 'Комиссия ZELDO: первые 3 заказа без неё' : 'Комиссия ZELDO, 10%', p.free ? rub(0) : '−' + rub(p.fee)], ['Эквайринг банка, ~2,5%', '−' + rub(p.acq)], ['Вам', rub(p.net), 'total']])}`, 'c'); }
+    if (st === 'done') { const p = payout(o); h += card(`<div class="h2">Деньги переведены</div>${sumLines([['Сумма заказа', rub(o.total)], [p.free ? 'Комиссия ZELDO: первые 3 заказа без неё' : `Комиссия ZELDO, ${p.rate}${NB}%${p.rate === 7 ? ' — постоянный клиент' : p.rate === 5 ? ' — заказ дороже 500 000 ₽' : ''}`, p.free ? rub(0) : '−' + rub(p.fee)], ['Эквайринг банка, ~2,5%', '−' + rub(p.acq)], ['Вам', rub(p.net), 'total']])}`, 'c'); }
   }
   return h;
 }
@@ -10375,7 +10376,7 @@ IN.stCode = v => { if (S.stx) S.stx.code = v.replace(/\D/g, '').slice(0, 4); };
 /* заказ на выезд без адреса (например, из переписки): заказчик вписывает его прямо в заказе (07.11) */
 IN.ordAddr = v => { S.ordAddr = v; };
 A.ordAddrSave = id => { const o = orderById(id); const v = (S.ordAddr || myAddrText()).trim(); if (v.length < 5) { toast('Впишите адрес: город, улица и дом', 'info'); return; } o.addr = v; if (!S.myAddrs.length) S.myAddrs.unshift({ id: uid('a'), name: 'Дом', street: v, city: '', district: S.district || '' }); S.ordAddr = ''; render(); toast('Адрес сохранён. Исполнитель увидит его после оплаты'); };
-const setSt = (o, st, msg) => { o.status = st; const c1 = o.chat && chatById(o.chat); const c2 = !c1 && o.echat && chatById(o.echat); if (msg) postMsg(c1 || c2, 'sys', { t: msg }); };
+const setSt = (o, st, msg) => { if (o.status !== st) o.stAt = Date.now(); if (st === 'paid' && !o.paidAt) o.paidAt = Date.now(); if (st === 'done' && !o.doneAt) o.doneAt = Date.now(); o.status = st; const c1 = o.chat && chatById(o.chat); const c2 = !c1 && o.echat && chatById(o.echat); if (msg) postMsg(c1 || c2, 'sys', { t: msg }); };
 Object.assign(A, {
   orderChat(id) { const o = orderById(id); if (S.role === 'exec') { const ch = { id: uid('ch'), role: 'exec', with: o.client, offer: o.offer, order: o.id, unread: 0, msgs: [{ from: 'sys', t: `Переписка по заказу № ${o.id}` }] }; S.chats.unshift(ch); o.echat = ch.id; go('chat', { id: ch.id }); } else { const ch = ensureChat('cust', offerById(o.offer)); ch.order = o.id; o.chat = ch.id; go('chat', { id: ch.id }); } },
   docs(id) { const o = orderById(id); sheet(`Документы · заказ № ${o.id}`, `<div class="list">${rl('Условия заказа', 'PDF · то, на что согласились обе стороны', 'pfOpen', '', { icon: 'doc' })}${TL_IDX[o.status] >= 0 ? rl('Чек об оплате', 'Пришлёт банк', 'pfOpen', '', { icon: 'doc' }) : ''}</div>${btn('Закрыть', 'closeSheet', '', 'soft block')}`); },
@@ -10780,7 +10781,7 @@ function applyPal(k) {
   let m = document.querySelector('meta[name="theme-color"]'); if (!m) { m = document.createElement('meta'); m.name = 'theme-color'; document.head.appendChild(m); } m.content = p[2];
   try { localStorage.setItem('zeldo-pal', p[0]); } catch (e) { /* приватный режим: просто не запомним */ }
 }
-applyPal((() => { try { return localStorage.getItem('zeldo-pal'); } catch (e) { return null; } })() || 'blue');
+applyPal((() => { try { return localStorage.getItem('zeldo-pal'); } catch (e) { return null; } })() || 'orange');
 document.documentElement.dataset.style = 'bold';
 window.__z = { PH, S, A, SCREENS, CATS, DIRS, SERVICES, OFFERS, offerById, offersFor, svcBy, render, go, root, stackTo, startRequest, openWizard, ZP, calc, cfgOf, dk, fromKey, blockers };
 /* ---------- профиль по нажатию на имя (запись 48, 63:49; образец — снимок 6220) ---------- */
@@ -10886,6 +10887,321 @@ addEventListener('hashchange', openFromHash);
 document.addEventListener('click', e => { if (S.drawer && e.target.closest('.drawer [data-a]')) setTimeout(() => { S.drawer = false; renderOverlay(); }, 0); });
 
 if (!REAL) { render('new'); a2hsMaybe(); openFromHash(); }
+
+/* ---------- правила запуска: вопросник Максима 11.11.2026 (задача #33 на GitHub) и встреча 12.11 (запись 61) ----------
+   Баланс ZELDO, сроки шагов с таймером, «Помощь» в заказе, отмена по правилам, неявка, чаевые, поздравление заказчику,
+   подъезд / этаж / домофон для выезда, заметки исполнителя, «Вы получите», мини-тест безопасности, чёрный список,
+   бюджет в ленте заявок, «Новый на ZELDO», 10 откликов, 30 дней на отзыв. Всё в одном месте, поверх экранов из 04–08.
+   Цифры правил — в RULES: поменять решение = поменять одно число. */
+const RULES = { confirmH: 2, nightFrom: 22, nightTo: 8, morningH: 10, payH: 24, payBeforeH: 3, acceptOffH: 1, acceptOnH: 24,
+  cancelFreeMin: 60, lateMin: 15, noShowPct: 30, reviewDays: 30, respMax: 10, photoMax: 10, wdFee: 2, instantFee: 3, instantMin: 200, splitFrom: 10000 };
+S.my = Object.assign({ notes: {}, cnotes: {}, blocked: [], wops: [], safeOk: false }, S.my || {});
+const HOUR = 3600e3, MINUTE = 60e3;
+
+/* ---------- время шага: рабочая версия знает его по журналу заказа (_st), прототип — по o.stAt ---------- */
+function stepAt(o) { const s = o._st; if (Array.isArray(s) && s.length) { const l = s[s.length - 1]; if (l.s === o.status) return l.at; } return o.stAt || null; }
+function paidAtOf(o) { if (o.paidAt) return o.paidAt; const s = (o._st || []).filter(x => x.s === 'paid'); return s.length ? s[0].at : null; }
+/* до какого момента исполнитель подтверждает заявку: 2 часа; заявка ночью (22:00–8:00) — до 10 утра */
+function confirmBy(t0) {
+  const d = new Date(t0); const h = d.getHours();
+  if (h >= RULES.nightFrom || h < RULES.nightTo) { const m = new Date(d); if (h >= RULES.nightFrom) m.setDate(m.getDate() + 1); m.setHours(RULES.morningH, 0, 0, 0); return m.getTime(); }
+  return t0 + RULES.confirmH * HOUR;
+}
+/* срок текущего шага: что ждём, от кого и до какого времени; null — шаг без срока */
+function stepDeadline(o) {
+  const t0 = stepAt(o); if (!t0 || o.stages || o.sub) return null; const online = fmtOf(o) === 'online';
+  if (o.status === 'request') return { at: confirmBy(t0), who: 'e', what: 'подтвердить заявку', miss: 'cancel' };
+  if (o.status === 'confirmed') { const st = startAt(o); let at = t0 + RULES.payH * HOUR; if (st) at = Math.min(at, st.getTime() - RULES.payBeforeH * HOUR); return { at, who: 'c', what: 'оплатить заказ', miss: 'cancel' }; }
+  if (o.status === 'result') { const ext = o.accExt ? 24 * HOUR : 0; return { at: t0 + (online ? RULES.acceptOnH : RULES.acceptOffH) * HOUR + ext, who: 'c', what: 'принять работу', miss: 'done', online }; }
+  return null;
+}
+const leftText = ms => { if (ms <= 0) return 'срок вышел'; const m = Math.ceil(ms / MINUTE); if (m < 60) return `${m}${NB}мин`; const h = Math.floor(m / 60), r = m % 60; if (h < 48) return `${h}${NB}ч${r ? ` ${r}${NB}мин` : ''}`; return pn(Math.round(h / 24), 'день', 'дня', 'дней'); };
+const clockAt = t => { const d = new Date(t); const same = d.toDateString() === new Date().toDateString(); return `${same ? 'сегодня' : dayName(dkey(d)).toLowerCase()}, ${hhmm(d)}`; };
+/* полоска со сроком в заказе: что и кто должен сделать, до скольки и сколько осталось (счётчик идёт сам) */
+function timerBlock(o) {
+  const d = stepDeadline(o); if (!d) return '';
+  const mine = (S.role === 'exec') === (d.who === 'e'); const left = d.at - Date.now();
+  const after = d.miss === 'done' ? 'заказ закроется сам, деньги уйдут исполнителю' : 'заказ отменится сам, деньги не спишутся';
+  const who = mine ? `Вам нужно ${d.what}` : `${d.who === 'e' ? 'Исполнитель должен' : 'Заказчик должен'} ${d.what}`;
+  return `<div class="info tmrbox ${left < HOUR ? 'warn' : ''}"><div class="row"><span class="grow"><b>${who}</b></span><b class="tmr num" data-dl="${d.at}">${leftText(left)}</b></div>
+    <span class="m">До ${clockAt(d.at)}. Если не успеть — ${after}.</span>
+    ${d.miss === 'done' && d.online && !o.accExt && S.role !== 'exec' ? `<button class="lnk" data-a="accExt" data-v="${o.id}">Продлить проверку на сутки (один раз)</button>` : ''}</div>`;
+}
+/* счётчики идут сами; в прототипе по сроку заказ отменяется или закрывается (в рабочей версии это делает сервер) */
+function rulesTick() {
+  document.querySelectorAll('.tmr[data-dl]').forEach(el => { el.textContent = leftText(Number(el.dataset.dl) - Date.now()); });
+  if (REAL) return;
+  let ch = false;
+  S.orders.forEach(o => { const d = stepDeadline(o); if (!d || Date.now() < d.at) return; ch = true;
+    if (d.miss === 'done') { setSt(o, 'done', 'Срок проверки вышел — работа принята автоматически. Деньги переведены исполнителю.'); o.doneAt = Date.now(); }
+    else setSt(o, 'cancel', o.status === 'request' ? 'Исполнитель не подтвердил заявку вовремя — заказ отменён. Деньги не списывались.' : 'Заказ не оплатили вовремя — он отменён.'); });
+  if (ch) render();
+}
+setInterval(rulesTick, 30000);
+A.accExt = id => { const o = orderById(id); if (!o || o.accExt) return; o.accExt = true; postMsg(o.chat && chatById(o.chat), 'sys', { t: 'Заказчик продлил проверку работы на сутки.' }); render(); toast('Проверку продлили на сутки'); };
+
+/* ---------- комиссия: 10 %, постоянный клиент мастера — 7 %, заказ дороже 500 000 ₽ — 5 %, первые три заказа — без неё ---------- */
+const regularClient = o => S.orders.some(x => x !== o && x.ex === o.ex && x.client === o.client && x.status === 'done' && Number(x.id) < Number(o.id));
+const feeRate = o => (freeOrder(o) ? 0 : o.total > 500000 ? 5 : regularClient(o) ? 7 : 10);
+/* «Вы получите» под ценой, которую задаёт исполнитель: минус комиссия и эквайринг (~2,5 %) */
+const youGet = (price, rate = 10) => `<span class="m yget">Вы получите ≈${NB}<b>${rub(Math.round(price * (1 - rate / 100 - 0.025)))}</b>: комиссия ZELDO ${rate}${NB}% и эквайринг банка ~2,5${NB}%. С постоянных клиентов — 7${NB}%, первые три заказа без комиссии.</span>`;
+
+/* ---------- баланс ZELDO (запись 61): возвраты при отмене приходят сюда; можно оплатить заказ, пополнить, вывести на карту ---------- */
+function refundOf(o) {
+  if (o.refund != null) return Number(o.refund) || 0;
+  const rz = o.resolution; if (rz) return rz.how === 'refund' || rz.how === 'cancel' ? o.total : rz.how === 'split' ? Number(rz.cust) || 0 : 0;
+  return 0;
+}
+function walletSum() {
+  let s = 0;
+  S.orders.forEach(o => { if (!o.cust) return; if (o.status === 'cancel' || o.resolution) s += refundOf(o); s -= Number(o.fromBal) || 0; });
+  S.my.wops.forEach(w => { s += w.kind === 'in' ? w.sum : -w.sum; });
+  return Math.max(0, Math.round(s));
+}
+function walletHist() {
+  const l = [];
+  S.orders.forEach(o => { if (!o.cust) return; const r = (o.status === 'cancel' || o.resolution) ? refundOf(o) : 0; if (r) l.push({ at: o.refundAt || stepAt(o) || 0, t: `Возврат по заказу № ${o.id}`, s: r });
+    if (o.fromBal) l.push({ at: paidAtOf(o) || 0, t: `Оплата заказа № ${o.id}`, s: -o.fromBal }); });
+  S.my.wops.forEach(w => l.push({ at: w.at, t: w.kind === 'in' ? 'Пополнение' : `Вывод на карту, комиссия ${RULES.wdFee}${NB}%`, s: w.kind === 'in' ? w.sum : -w.sum }));
+  return l.sort((a, b) => b.at - a.at);
+}
+SCREENS.c_wallet = () => {
+  const sum = walletSum(); const h = walletHist();
+  return { title: 'Баланс ZELDO',
+    body: `${card(`<span class="m">На балансе</span><div class="num" style="font-size:36px;line-height:42px;font-weight:800">${rub(sum)}</div>
+        <div class="m">Сюда приходят деньги за отменённые заказы. Ими можно сразу оплатить другой заказ — без комиссии. Вывести на карту — с комиссией ${RULES.wdFee}${NB}%.</div>
+        <div class="btns two">${btn('Пополнить', 'walIn', '', 'soft')}${sum ? btn('Вывести', 'walOut', '', 'outline') : '<button class="btn outline" disabled>Вывести</button>'}</div>`)}
+      ${card(`<div class="h2">История</div>${h.length ? h.map(x => `<div class="sumline"><span>${esc(x.t)}${x.at ? `<span class="m" style="display:block">${clockAt(x.at)}</span>` : ''}</span><b class="num">${x.s > 0 ? '+' : '−'}${rub(Math.abs(x.s))}</b></div>`).join('') : '<div class="m">Пока операций нет.</div>'}`)}
+      <div class="m">${REAL ? 'Оплата пока тестовая: деньги не списываются и не переводятся. Настоящие пополнение и вывод — после подключения банка.' : 'Прототип: деньги не списываются.'}</div>` };
+};
+Object.assign(A, {
+  walIn() { S.walAmt = S.walAmt || 1000; sheet('Пополнить баланс', `<div class="chips">${[500, 1000, 3000, 5000].map(n => chip('walAmt', n, rub(n), S.walAmt === n, { noCheck: true })).join('')}</div><div class="m">Пополнение — через СБП или карту. Деньги на балансе можно тратить на любые заказы.</div>${btn('Пополнить', 'walInOk', '', 'block')}`); },
+  walAmt(v) { S.walAmt = Number(v); A.walIn(); },
+  walInOk() { S.my.wops.push({ kind: 'in', sum: S.walAmt, at: Date.now() }); closeSheet(); render(); toast(`Баланс пополнен на ${rub(S.walAmt)}`); },
+  walOut() { const s = walletSum(); const fee = Math.round(s * RULES.wdFee / 100); dialog({ title: 'Вывести на карту?', text: `С баланса уйдёт ${rub(s)}. Комиссия ${RULES.wdFee}${NB}% — ${rub(fee)}, на карту придёт ${rub(s - fee)}. Если оставить деньги на балансе, ими можно оплатить следующий заказ без комиссии.`, actions: [['Вывести', 'walOutOk', '', ''], ['Оставить на балансе', 'closeDialog', '', 'soft']] }); },
+  walOutOk() { const s = walletSum(); S.dialog = null; S.my.wops.push({ kind: 'out', sum: s, at: Date.now() }); render(); toast(`Выводим ${rub(s - Math.round(s * RULES.wdFee / 100))} на карту`); },
+});
+/* в кабинете заказчика — строка «Баланс ZELDO» первой в списке */
+{ const cab0 = SCREENS.c_cab; SCREENS.c_cab = p => { const r = cab0(p); r.body = r.body.replace('<div class="list">', `<div class="list">${rl('Баланс ZELDO', `${rub(walletSum())} · возвраты за отмены, оплата заказов`, 'go', 'c_wallet', { icon: 'card' })}`); return r; }; }
+
+/* ---------- оплата: баланс, рассрочка для дорогих заказов, подъезд / этаж / домофон для выезда ---------- */
+{
+  const co0 = SCREENS.c_checkout;
+  SCREENS.c_checkout = p => {
+    const r = co0(p); const ord = p.order ? orderById(p.order) : null; const o = offerById(ord ? ord.offer : p.id);
+    const fmt = ord ? (ord.fmt || o.formats[0]) : cfgOf(o).fmt; const total = ord ? (p.extra && ord.change ? ord.change.sum : ord.total) : calc(o, cfgOf(o)).total;
+    const bal = walletSum(); const m = S.payMethod || 'sbp';
+    S.coVisit = fmt === 'visit' && !(ord && ord.vinfo); const V = S.coV || (S.coV = Object.assign({ ent: '', floor: '', dom: '', nodom: false }, S.my.vlast || {}, { photo: false }));  /* подставляем то, что указали в прошлый раз */
+    const visit = S.coVisit ? card(`<div class="h2">Как найти вас</div><div class="m">Исполнитель увидит это после оплаты, вместе с адресом. Так он не будет звонить с вопросом «где вход».</div>
+      <div class="grid3">${field('Подъезд', `<input class="input" data-in="coV|ent" value="${esc(V.ent)}" inputmode="numeric" maxlength="6" placeholder="2">`)}${field('Этаж', `<input class="input" data-in="coV|floor" value="${esc(V.floor)}" inputmode="numeric" maxlength="4" placeholder="5">`)}${field('Домофон', `<input class="input" data-in="coV|dom" value="${esc(V.dom)}" maxlength="12" placeholder="45К" ${V.nodom ? 'disabled' : ''}>`)}</div>
+      <button class="opt ${V.nodom ? 'on' : ''}" data-a="coNoDom" aria-pressed="${V.nodom}"><span class="mark sq"></span><span class="grow"><span class="ot">Домофона нет</span><span class="os">Частный дом, офис или дверь открыта</span></span></button>
+      ${field('Фото места, если трудно найти', `<label class="btn soft block">${ic('camera', 20, 2)} ${V.photo ? 'Фото добавлено' : 'Добавить фото'}<input type="file" accept="image/*" data-ch="coVPhoto" hidden></label>`)}`, 'c') : '';
+    const balOpt = bal ? `<button class="opt ${S.useBal ? 'on' : ''}" data-a="coUseBal" aria-pressed="${!!S.useBal}"><span class="mark sq"></span><span class="grow"><span class="ot">Списать с баланса ZELDO ${rub(Math.min(bal, total))}</span><span class="os">На балансе ${rub(bal)}${bal < total ? `. Остальное, ${rub(total - bal)}, — способом ниже` : ''}</span></span></button>` : '';
+    const split = total >= RULES.splitFrom ? opt('payM', 'split', 'Рассрочка', `4 платежа по ${rub(Math.ceil(total / 4))} раз в две недели, без переплаты`, m === 'split') : '';
+    /* в готовой разметке: перед вариантами оплаты — «как найти» и баланс, после карты — рассрочка */
+    const sbp = opt('payM', 'sbp', 'СБП', 'Через приложение банка', m === 'sbp'), cardO = opt('payM', 'card', 'Карта', 'Мир, Visa, Mastercard', m === 'card');
+    const at = r.body.indexOf(sbp); const fs = at >= 0 ? Math.max(r.body.lastIndexOf('<div class="field', at), r.body.lastIndexOf('<label class="field', at)) : -1;
+    if (fs >= 0) r.body = r.body.slice(0, fs) + visit + r.body.slice(fs, at) + balOpt + r.body.slice(at).replace(cardO, cardO + split);
+    return r;
+  };
+  IN.coV = (v, k) => { S.coV[k] = v; };
+  CH.coVPhoto = el => { if (el.files && el.files[0]) { S.coV.photo = true; render(); } };
+  A.coNoDom = () => { S.coV.nodom = !S.coV.nodom; if (S.coV.nodom) S.coV.dom = ''; render(); };
+  A.coUseBal = () => { S.useBal = !S.useBal; render(); };
+  const pay0 = A.pay;
+  A.pay = v => {
+    if (S.coVisit) { const V = S.coV || {}; if (!String(V.ent || '').trim() || !String(V.floor || '').trim() || (!V.nodom && !String(V.dom || '').trim())) { toast('Укажите подъезд, этаж и домофон — или отметьте «Домофона нет»', 'info'); return; } }
+    pay0(v);
+  };
+}
+/* после оплаты (05-offer.js вызывает) — когда оплачено, чем, сколько с баланса, как найти заказчика */
+function payMeta(ord) {
+  if (!ord) return;
+  if (!ord.paidAt && ['paid', 'work'].includes(ord.status)) ord.paidAt = Date.now();
+  ord.payBy = S.payMethod || 'sbp';
+  if (S.useBal) { const b = walletSum(); if (b > 0) ord.fromBal = Math.min(b, ord.total) + (Number(ord.fromBal) || 0); S.useBal = false; }
+  if (S.coVisit && S.coV) { ord.vinfo = { ent: String(S.coV.ent).trim(), floor: String(S.coV.floor).trim(), dom: S.coV.nodom ? '' : String(S.coV.dom).trim(), nodom: !!S.coV.nodom, photo: !!S.coV.photo }; S.my.vlast = { ent: ord.vinfo.ent, floor: ord.vinfo.floor, dom: ord.vinfo.dom, nodom: ord.vinfo.nodom }; S.coV = null; S.coVisit = false; }
+}
+const vinfoText = v => v ? [v.ent && `подъезд ${v.ent}`, v.floor && `этаж ${v.floor}`, v.nodom ? 'домофона нет' : v.dom && `домофон ${v.dom}`, v.photo && 'есть фото места'].filter(Boolean).join(', ') : '';
+
+/* ---------- отмена по правилам (вопрос 6): заказчик — бесплатно в первый час после оплаты, дальше — по договорённости или через спор ---------- */
+const freeCancelLeft = o => { const t = paidAtOf(o); return t ? t + RULES.cancelFreeMin * MINUTE - Date.now() : -1; };
+function cancelTo(o, why, refund, by) {
+  o.refund = refund; o.refundAt = Date.now(); o.cancelBy = by;
+  setSt(o, 'cancel', `${why}${refund ? ` ${rub(refund)} вернулись на баланс ZELDO заказчика.` : ''}`);
+}
+const travelFee = o => { const l = (o.lines || []).find(([n]) => /выезд/i.test(n)); return l ? Number(l[1]) || 0 : 0; };
+const noShowFee = o => travelFee(o) || Math.round(o.total * RULES.noShowPct / 100);
+Object.assign(A, {
+  cancelAsk(id) {
+    const o = orderById(id); const paid = TL_IDX[o.status] >= 0;
+    if (!paid) return dialog({ title: 'Отменить заказ?', text: 'Заказ ещё не оплачен, списаний не будет.', actions: [['Отменить заказ', 'cancelOk', id, 'danger'], ['Не отменять', 'closeDialog', '', 'soft']] });
+    const left = freeCancelLeft(o);
+    if (left > 0) return dialog({ title: 'Отменить заказ?', text: `Бесплатно отменить можно ещё ${leftText(left)}. ${rub(o.total)} вернутся на баланс ZELDO: ими можно сразу оплатить другой заказ или вывести на карту.`, actions: [['Отменить заказ', 'cancelOk', id, 'danger'], ['Не отменять', 'closeDialog', '', 'soft']] });
+    sheet('Отменить заказ', `<div class="m">Бесплатно отменить можно в течение часа после оплаты — это время прошло. Теперь отмена — по договорённости с исполнителем или через спор.</div>
+      <div class="list">${o.custCancelAsk ? '<div class="info"><b>Вы уже попросили исполнителя отменить</b><span class="m">Ждём его ответа. Если он согласится, деньги вернутся на баланс ZELDO полностью.</span></div>' : rl('Попросить исполнителя отменить', 'Он увидит просьбу в заказе и в переписке', 'cancelReq', id, { icon: 'chat' })}
+      ${rl('Открыть спор', 'Разберёт ZELDO, деньги ждут решения', 'disputeAsk', id, { icon: 'flag' })}
+      ${rl('Написать в поддержку', 'С 9:00 до 21:00 каждый день', 'supportChat', id, { icon: 'shield' })}</div>${btn('Не отменять', 'closeSheet', '', 'text block')}`);
+  },
+  cancelOk(id) { S.dialog = null; const o = orderById(id); const paid = TL_IDX[o.status] >= 0; cancelTo(o, 'Заказчик отменил заказ.', paid ? o.total : 0, 'c'); render(); toast(paid ? 'Заказ отменён. Деньги на балансе ZELDO' : 'Заказ отменён', 'info'); },
+  cancelReq(id) { closeSheet(); const o = orderById(id); o.custCancelAsk = Date.now(); postMsg(o.chat && chatById(o.chat), 'sys', { t: 'Заказчик просит отменить заказ. Если исполнитель согласится, деньги вернутся заказчику на баланс ZELDO.' });
+    render(); toast('Просьба отправлена исполнителю', 'info');
+    sim(3000, () => { if (o.status === 'cancel') return; cancelTo(o, 'Исполнитель согласился отменить заказ.', o.total, 'agree'); toast(`${exName(o.ex)} согласился. Деньги на балансе ZELDO`); }); },
+  /* исполнитель отменяет сам: отметка в профиле, после трёх отмен за месяц — рейтинг ниже. По просьбе заказчика — без отметки */
+  eCancelAsk(id) { const o = orderById(id); const ask = !!o.custCancelAsk; const paid = TL_IDX[o.status] >= 0;
+    dialog({ title: ask ? 'Отменить по просьбе заказчика?' : 'Отменить заказ?', text: ask ? `Заказчик сам попросил отмену — отметки в профиле не будет.${paid ? ` ${rub(o.total)} вернутся ему на баланс ZELDO.` : ''}` : `В профиле появится отметка об отмене. После трёх отмен за месяц рейтинг снижается.${paid ? ` ${rub(o.total)} вернутся заказчику.` : ''} Если можете — лучше предложите другое время.`,
+      actions: [[ask ? 'Отменить по просьбе' : 'Отменить заказ', 'eCancelOk', id, 'danger'], ['Не отменять', 'closeDialog', '', 'soft']] }); },
+  eCancelOk(id) { S.dialog = null; const o = orderById(id); const ask = !!o.custCancelAsk; const paid = TL_IDX[o.status] >= 0;
+    if (!ask) S.my.eCancels = (S.my.eCancels || []).concat(Date.now()).filter(t => Date.now() - t < 30 * 24 * HOUR);
+    cancelTo(o, ask ? 'Исполнитель отменил заказ по просьбе заказчика.' : 'Исполнитель отменил заказ.', paid ? o.total : 0, ask ? 'agree' : 'e'); render(); toast('Заказ отменён', 'info'); },
+  /* заказчик не открыл дверь и не отвечает (вопрос 26): исполнитель получает плату за выезд, а если её нет — 30 % */
+  eNoShowAsk(id) { const o = orderById(id); const fee = noShowFee(o);
+    dialog({ title: 'Заказчик не на месте?', text: `Отметьте, если заказчик не открыл дверь и не отвечает в переписке и по звонку. Вы получите ${rub(fee)} — ${travelFee(o) ? 'плату за выезд из карточки' : `${RULES.noShowPct}${NB}% суммы`}. Остальное вернётся заказчику на баланс.`, actions: [['Заказчик не пришёл', 'eNoShowOk', id, 'danger'], ['Ещё подожду', 'closeDialog', '', 'soft']] }); },
+  eNoShowOk(id) { S.dialog = null; const o = orderById(id); const fee = noShowFee(o); o.execShare = fee; o.noShow = 'cust'; cancelTo(o, `Заказчик не открыл и не отвечал. Исполнителю — ${rub(fee)} за выезд.`, o.total - fee, 'noshow'); render(); toast(`Отмечено. Вам — ${rub(fee)}`, 'info'); },
+});
+/* неявка исполнителя (уже было: через 15 минут — отмена) — теперь деньги возвращаются на баланс */
+{ const ns0 = A.cNoShowOk; A.cNoShowOk = id => { const o = orderById(id); ns0(id); if (o.status === 'cancel' && o.refund == null) { o.refund = o.sub ? perVisit(o) * (o.sub.total - o.sub.used) : o.total; o.refundAt = Date.now(); o.cancelBy = 'late'; } render(); }; }
+
+/* ---------- «Помощь» в каждом заказе (вопрос 28) ---------- */
+A.helpOrder = id => {
+  const o = orderById(id); const ex = S.role === 'exec'; const w = codeWin(o); const late = !!w.start && Date.now() >= w.start.getTime() + RULES.lateMin * MINUTE && o.status === 'paid';
+  const items = ex ? [
+    ['Заказчик не на месте или не открывает', late ? 'Прошло 15 минут после начала: можно отметить неявку' : 'Отметить неявку можно через 15 минут после начала', late ? 'eNoShowAsk' : 'helpLate', id, 'user'],
+    ['Заказчик не отвечает', 'Напишите и позвоните через ZELDO. Не помогло — напишите нам', 'supportChat', id, 'chat'],
+    ...(['request', 'confirmed', 'paid'].includes(o.status) ? [[o.custCancelAsk ? 'Заказчик просит отменить' : 'Не могу выполнить заказ', o.custCancelAsk ? 'Отмена по просьбе — без отметки в профиле' : 'Отмена с отметкой в профиле', 'eCancelAsk', id, 'x']] : []),
+    ['Другой вопрос', 'Поддержка: с 9:00 до 21:00 каждый день', 'supportChat', id, 'shield']]
+  : [
+    ['Исполнитель опаздывает', late ? 'Прошло 15 минут после начала: можно отменить с полным возвратом' : 'Через 15 минут после начала можно отменить с полным возвратом', late ? 'cNoShowAsk' : 'helpLate', id, 'clock'],
+    ['Исполнитель не отвечает', 'Напишите и позвоните через ZELDO. Не помогло — напишите нам, подберём замену', 'supportChat', id, 'chat'],
+    ...(['result', 'work', 'rework'].includes(o.status) ? [['Сделано не то или плохо', o.status === 'result' ? 'Попросите доработку или откройте спор' : 'Откройте спор: деньги ждут решения', o.status === 'result' ? 'reworkAsk' : 'disputeAsk', id, 'flag']] : []),
+    ...(['request', 'confirmed', 'paid'].includes(o.status) ? [['Отменить или перенести', 'Правила отмены и перенос времени', 'cancelAsk', id, 'x']] : []),
+    ['Другой вопрос', 'Поддержка: с 9:00 до 21:00 каждый день', 'supportChat', id, 'shield']];
+  sheet('Помощь по заказу', `<div class="list">${items.map(([t, s, a, v, i]) => rl(t, s, a, v, { icon: i })).join('')}</div>${btn('Закрыть', 'closeSheet', '', 'text block')}`);
+};
+A.helpLate = id => { const o = orderById(id); const w = codeWin(o); toast(w.start ? `Можно будет с ${hhmm(new Date(w.start.getTime() + RULES.lateMin * MINUTE))}` : 'Сначала должно наступить время заказа', 'info'); };
+
+/* ---------- заметки исполнителя о заказе и клиенте: видит только он (вопрос 36) ---------- */
+const noteBox = (key, val, ph) => card(`<div class="row"><span class="h2 grow">Заметка</span><span class="m">видите только вы</span></div><textarea class="textarea" data-in="${key}" rows="2" maxlength="600" placeholder="${ph}">${esc(val || '')}</textarea>`, 'c');
+IN.ordNote = (v, id) => { S.my.notes[id] = v; };
+IN.cliNote = (v, name) => { S.my.cnotes[name] = v; };
+
+/* ---------- чаевые после приёмки (вопрос 14): по желанию, без комиссии ZELDO ---------- */
+function tipsBlock(o) {
+  if (o.tip) return `<div class="info ok"><b>Чаевые ${rub(o.tip)} отправлены</b><span class="m">Исполнитель получит их целиком: ZELDO с чаевых ничего не берёт.</span></div>`;
+  if (o.tipNo) return '';
+  return card(`<div class="h2">Чаевые исполнителю</div><div class="m">По желанию. Исполнитель получит всю сумму — ZELDO с чаевых ничего не берёт.</div>
+    <div class="chips">${[100, 200, 300, 500].map(n => chip('tipSend', `${o.id}|${n}`, rub(n), false, { noCheck: true })).join('')}</div>${btn('Без чаевых', 'tipNo', o.id, 'text block')}`, 'soft');
+}
+Object.assign(A, {
+  tipSend(v) { const [id, n] = v.split('|'); const o = orderById(id); o.tip = Number(n); postMsg(o.chat && chatById(o.chat), 'sys', { t: `Заказчик оставил чаевые: ${rub(o.tip)}. Спасибо!`, ok: true }); render(); toast('Спасибо! Чаевые отправлены'); },
+  tipNo(id) { orderById(id).tipNo = true; render(); },
+});
+
+/* ---------- поздравление заказчику, когда заказ выполнен (вопрос 35; у исполнителя оно уже было) ---------- */
+function celebrateC(o) {
+  const k = `c|${o.id}`; if (PARTY.has(k)) return; PARTY.add(k);
+  const old = document.querySelector('.party'); if (old) old.remove();
+  const el = document.createElement('div'); el.className = 'party'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-labelledby', 'partyT');
+  const C = ['var(--brand)', '#F5A524', '#17B26A', '#EE46BC'];
+  el.innerHTML = `<div class="party-card"><div class="party-burst" aria-hidden="true">${Array.from({ length: 18 }, (_, i) => `<i style="--a:${i * 20}deg;--d:${96 + (i % 4) * 22}px;--c:${C[i % 4]};--t:${(i % 5) * 25}ms"></i>`).join('')}</div>
+    <span class="party-ic">${ic('check', 40, 2.6)}</span><b class="party-t" id="partyT">Заказ выполнен</b><span class="party-s">${esc(o.svc)}</span>
+    <span class="m">Заказ № ${o.id} · ${esc(exName(o.ex))}<br>Оцените работу — так другие найдут хорошего мастера.</span>
+    <div class="party-b">${btn('Оценить работу', 'partyClose', '', 'block')}</div></div>`;
+  ($('#phone') || document.body).appendChild(el);
+  try { if (navigator.vibrate) navigator.vibrate(18); } catch (e) { /* без вибрации */ }
+  el.addEventListener('click', e => { if (e.target === el) A.partyClose(); });
+}
+{ const acc0 = A.acceptOk; A.acceptOk = id => { acc0(id); const o = orderById(id); if (o && o.status === 'done') { o.doneAt = o.doneAt || Date.now(); celebrateC(o); } }; }
+
+/* ---------- экран заказа: срок шага, «как найти» для исполнителя, заметка, чаевые, «Помощь», отмена исполнителем ---------- */
+{
+  const act0 = orderActions;
+  orderActions = o => {
+    const ex = S.role === 'exec'; let h = timerBlock(o);
+    if (o.custCancelAsk && ex && ['request', 'confirmed', 'paid'].includes(o.status)) h += `<div class="info warn"><b>Заказчик просит отменить заказ</b><span class="m">Если согласны — отмените: отметки в профиле не будет, деньги вернутся заказчику на баланс.</span></div>${btn('Отменить по просьбе заказчика', 'eCancelAsk', o.id, 'soft block')}`;
+    if (ex && o.vinfo && TL_IDX[o.status] >= 0 && !['done', 'cancel'].includes(o.status)) h += `<div class="info"><b>Как найти заказчика</b><span class="m">${esc(vinfoText(o.vinfo))}</span></div>`;
+    const base = act0(o);
+    if (!ex && o.status === 'done') {
+      const old = o.doneAt && Date.now() - o.doneAt > RULES.reviewDays * 24 * HOUR;
+      h += (old && !o.reviewed ? `<div class="info"><span class="m">Отзыв можно оставить в течение ${RULES.reviewDays} дней после заказа — срок прошёл.</span></div>` + base.replace(/^[\s\S]*?(?=<button|<div class="info ok")/, '') : base) + tipsBlock(o) + (o.reviewed || old ? '' : `<div class="m">Отзыв можно оставить в течение ${RULES.reviewDays} дней.</div>`);
+    } else h += base;
+    if (ex && o.status === 'done' && o.tip) h += `<div class="info ok"><b>Чаевые от заказчика: ${rub(o.tip)}</b><span class="m">Целиком ваши, без комиссии.</span></div>`;
+    if (ex && o.status === 'cancel' && o.noShow === 'cust') h += `<div class="info"><b>Вам за выезд: ${rub(o.execShare || 0)}</b><span class="m">Заказчик не открыл и не отвечал.</span></div>`;
+    if (ex) h += noteBox(`ordNote|${o.id}`, S.my.notes[o.id], 'Например: код от калитки, собака во дворе, просил позвонить за 10 минут');
+    return h;
+  };
+  const more0 = orderMore;
+  orderMore = o => {
+    const ex = S.role === 'exec'; const h = more0(o);
+    if (['done', 'cancel'].includes(o.status)) return h;
+    const extra = btn(`${ic('info', 20, 2)} Помощь`, 'helpOrder', o.id, 'soft block') + (ex && ['request', 'confirmed', 'paid'].includes(o.status) && !o.custCancelAsk ? btn('Отменить заказ', 'eCancelAsk', o.id, 'text block') : '');
+    return h ? h.replace('<div class="col g8">', `<div class="col g8">${extra}`) : `<div class="col g8">${extra}</div>`;
+  };
+}
+
+/* ---------- заметка о клиенте в его карточке у исполнителя ---------- */
+{ const cl0 = SCREENS.c_client; if (cl0) SCREENS.c_client = p => { const r = cl0(p); if (S.role === 'exec' && p.name) r.body += noteBox(`cliNote|${esc(p.name)}`, S.my.cnotes[p.name], 'Например: любит утро, просит без запаха химии'); return r; }; }
+
+/* ---------- мини-тест о безопасности перед первым сообщением (вопрос 12, совет из разбора Кворка) ---------- */
+const SAFE_Q = [
+  ['Исполнитель предлагает перевести деньги ему на карту напрямую — «так дешевле». Что делаете?', [['Плачу только через ZELDO', 1], ['Перевожу, если скидка хорошая', 0]], 'Деньги мимо ZELDO не защищены: при обмане их не вернуть.'],
+  ['Можно ли оставить в переписке номер телефона или ник в мессенджере?', [['Нет, связь — только через ZELDO', 1], ['Да, так удобнее', 0]], 'Контакты скрываются сами. Звонок — кнопкой в переписке, номера друг друга не видны.'],
+  ['Когда можно сообщить код начала работы?', [['Только при встрече, когда исполнитель рядом', 1], ['Заранее, в переписке', 0]], 'Код подтверждает, что вы встретились. Заранее его не отправляют.'],
+];
+function safeSheet() {
+  const x = S.safe; const q = SAFE_Q[x.i];
+  sheet('Три вопроса о безопасности', `<div class="m">Один раз, перед первым сообщением. Вопрос ${x.i + 1} из ${SAFE_Q.length}.</div><div class="h2">${q[0]}</div>
+    <div class="optlist">${q[1].map(([t], k) => opt('safeAns', k, t, '', x.wrong === k)).join('')}</div>${x.wrong != null ? `<div class="err">Не совсем так. ${q[2]}</div>` : ''}`);
+}
+A.safeAns = k => { const x = S.safe; if (!x) return; const q = SAFE_Q[x.i]; if (!q[1][Number(k)][1]) { x.wrong = Number(k); return safeSheet(); }
+  x.wrong = null; x.i++; if (x.i < SAFE_Q.length) return safeSheet();
+  S.my.safeOk = true; closeSheet(); toast('Готово. Теперь можно писать'); const then = x.then; S.safe = null; if (then) then(); };
+const safeGate = then => { if (S.my.safeOk || S.role === 'guest') return false; S.safe = { i: 0, wrong: null, then }; safeSheet(); return true; };
+
+/* ---------- чёрный список (вопрос 10): полный блок — не пишет, не звонит, не заказывает, не видит карточки ---------- */
+const peerKeyChat = ch => (ch._cu != null ? `u${ch.role === 'cust' ? ch._eu : ch._cu}` : `n:${ch.with}`);
+const blockedChat = ch => S.my.blocked.some(b => b.k === peerKeyChat(ch));
+Object.assign(A, {
+  blockAsk(chId) { const ch = chatById(chId); const on = blockedChat(ch);
+    dialog({ title: on ? `Разблокировать: ${ch.with}?` : `Заблокировать: ${ch.with}?`, text: on ? 'Снова сможете переписываться и созваниваться.' : 'Этот человек не сможет вам писать, звонить и заказывать у вас, не увидит ваши карточки. Вы тоже перестанете видеть его карточки. Разблокировать можно здесь же.',
+      actions: [[on ? 'Разблокировать' : 'Заблокировать', 'blockOk', chId, on ? '' : 'danger'], ['Отмена', 'closeDialog', '', 'soft']] }); },
+  blockOk(chId) { S.dialog = null; const ch = chatById(chId); const k = peerKeyChat(ch);
+    if (blockedChat(ch)) S.my.blocked = S.my.blocked.filter(b => b.k !== k); else S.my.blocked.push({ k, name: ch.with, at: Date.now() });
+    render(); toast(blockedChat(ch) ? `${ch.with}: в чёрном списке` : `${ch.with}: разблокирован`, 'info'); },
+});
+{ const send0 = A.chatSend; A.chatSend = () => { const ch = cur() && chatById(cur().p.id); if (ch && !ch.support && blockedChat(ch)) return toast('Этот человек в вашем чёрном списке. Разблокировать — внизу переписки', 'info'); if (ch && !ch.support && safeGate(() => send0())) return; send0(); };
+  const q0 = A.quickSend; if (q0) A.quickSend = t => { const ch = cur() && chatById(cur().p.id); if (ch && !ch.support && blockedChat(ch)) return toast('Этот человек в вашем чёрном списке', 'info'); if (ch && !ch.support && safeGate(() => q0(t))) return; q0(t); }; }
+{ const chat0 = SCREENS.chat; SCREENS.chat = p => { const r = chat0(p); const ch = chatById(p.id); if (!ch || ch.support || ch.with === 'Администратор ZELDO') return r;
+    if (blockedChat(ch)) r.body = `<div class="info warn"><b>${esc(ch.with)}: в чёрном списке</b><span class="m">Он не может вам писать, звонить и заказывать у вас, не видит ваши карточки.</span><button class="lnk" data-a="blockAsk" data-v="${ch.id}">Разблокировать</button></div>` + r.body;
+    else r.body += `<div class="center"><button class="lnk m" data-a="blockAsk" data-v="${ch.id}">Заблокировать: ${esc(ch.with)}</button></div>`;
+    return r; }; }
+/* карточки заблокированных не показываем в выдаче */
+const blockedEx = exId => S.my.blocked.some(b => b.k === (String(exId).startsWith('u') ? exId : '') || b.k === `n:${exName(exId)}`);
+{ const af0 = applyFilters; applyFilters = list => af0(list).filter(o => !blockedEx(o.ex)); }
+
+/* ---------- «Новый на ZELDO» (вопрос 40): без отзывов — метка (exStatus, 07b) и место в первой десятке выдачи на 2 недели ---------- */
+const isNewEx = id => { const e = EX[id]; return !!e && !e.reviews && (!e.joined || Date.now() - e.joined < 14 * 24 * HOUR); };
+{ const af1 = applyFilters; applyFilters = list => { const r = af1(list); if (S.sort !== 'def') return r; const nw = r.filter(o => isNewEx(o.ex)); if (!nw.length) return r;
+    const out = r.filter(o => !isNewEx(o.ex)); nw.slice(0, 4).forEach((o, i) => out.splice(Math.min(out.length, 2 + i * 2), 0, o)); nw.slice(4).forEach(o => out.push(o)); return out; }; }
+
+/* ---------- лента заявок исполнителя: бюджет (запись 61), уровень заказчика, лимит в 10 откликов, «Вы получите» ---------- */
+const BUD = [['all', 'Любой бюджет'], ['lt3', 'до 3 000 ₽'], ['3to10', '3 000 – 10 000 ₽'], ['gt10', 'от 10 000 ₽'], ['none', 'Договорная']];
+const budOk = x => { const f = S.feedBud || 'all'; const b = Number(x.budget) || 0; return f === 'all' || (f === 'none' ? !b : f === 'lt3' ? b > 0 && b <= 3000 : f === '3to10' ? b > 3000 && b <= 10000 : b > 10000); };
+{ const fl0 = feedList; feedList = list => fl0(list.filter(budOk));
+  const ef0 = SCREENS.e_feed; SCREENS.e_feed = p => { const r = ef0(p); r.body = r.body.replace('<div id="feedlist"', `<div class="chips scroll" aria-label="Бюджет">${BUD.map(([v, l]) => chip('feedBud', v, l, (S.feedBud || 'all') === v, { noCheck: true })).join('')}</div><div id="feedlist"`); return r; };
+  A.feedBud = v => { S.feedBud = v; render(); }; }
+{ const et0 = SCREENS.e_task; SCREENS.e_task = p => { const r = et0(p); const x = reqById(p.id); if (!x || !isMine(x)) return r;
+    const n = Number(x.offers) || 0; const full = n >= RULES.respMax && !x.my;
+    r.body = r.body.replace('<div class="sumline"><span>Заказчик</span>', `<div class="sumline"><span>Откликнулись</span><b>${n} из ${RULES.respMax}</b></div><div class="sumline"><span>Уровень заказчика</span><b>${clientLine(x.client)}</b></div><div class="sumline"><span>Заказчик</span>`);
+    if (!x.my && S.offerDraft && S.offerDraft.id === x.id) r.body = r.body.replace('<div class="field"><span class="lbl">День</span>', `${youGet(S.offerDraft.price)}<div class="field"><span class="lbl">День</span>`);
+    if (full) r.bar = `<div class="abar"><button class="btn block" disabled>Отправить предложение</button><div class="why center">Причина: на заявку уже откликнулись ${RULES.respMax} исполнителей — больше заказчик не принимает.</div></div>`;
+    return r; }; }
+
+/* ---------- Москва и область (вопрос 43) ---------- */
+CITY_D['Московская область'] = ['Химки', 'Мытищи', 'Красногорск', 'Балашиха', 'Одинцово', 'Подольск', 'Люберцы', 'Королёв'];
+
+/* для автотестов (jt/rules01.js) */
+Object.assign(window.__z, { mkOrder, walletSum, stepDeadline, RULES, setSt, orderById, rulesTick, payout, chatById });
 
 /* ---------- защита от копирования (01.11, решение владельца) ----------
    Компьютер: нет меню правой кнопки, текст не выделяется и не копируется, картинки не перетаскиваются,
