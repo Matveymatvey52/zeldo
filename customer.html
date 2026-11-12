@@ -5836,6 +5836,8 @@ const letter = n => (String(n).replace(/[«»"]/g, '').replace(/^(Салон|С�
 
 /* ---------- карточки исполнителей (то, что видит заказчик) ---------- */
 /* рейтинг заказчика у исполнителей: средняя оценка и число отзывов (прошлые заказы в прототипе) */
+/* сколько заказов заказчик довёл до конца (вопросник 11.11, вопрос 31): в прототипе — пример, в рабочей версии — с сервера */
+const CLIENT_N = { 'Алексей': 4, 'Денис': 17, 'Игорь': 8, 'Ксения': 12, 'Марина': 26, 'Олег': 7, 'Наталья': 3, 'Павел': 13 };
 const CLIENT_REV = { 'Алексей': [5, 2], 'Денис': [4.9, 14], 'Игорь': [5, 6], 'Ксения': [4.7, 9], 'Марина': [4.8, 21], 'Олег': [4.2, 5], 'Наталья': [5, 3], 'Павел': [4.6, 11], 'Сергей': [4.9, 8], 'Ирина': [4.8, 4], 'Виктор': [4.5, 7], 'Ольга': [4.9, 12] };
 const ad = (id, name, desc, price, multi, max, unit, time) => ({ id, name, desc, price, multi, max: multi ? max : 1, unit, time });
 const OFFERS = [
@@ -8324,17 +8326,22 @@ const CRM_HIST = REAL ? [] : [
   ['Игорь', 'Шиномонтаж', -190, 4600], ['Игорь', 'Балансировка колёс', -365, 1500],
   ['Денис', 'Сезонная смена колёс', -120, 4000], ['Виктор', 'Шиномонтаж', -95, 3100], ['Ксения', 'Балансировка колёс', -15, 1400],
 ].map(([client, svc, d, total]) => ({ client, svc, date: dk(d), total }));
-S.crm = S.crm || { tab: 'all', auto: true, days: 30, sms: false, text: '{имя}, добрый день! Давно вас не видели. Можно записаться на удобное время прямо в ZELDO.', promo: '' };
+S.crm = S.crm || { tab: 'all', auto: true, days: 'svc', sms: false, text: '{имя}, добрый день! Давно вас не видели. Можно записаться на удобное время прямо в ZELDO.', promo: '' };
 const crmDays = k => Math.round((TODAY - fromKey(k)) / 864e5);
+/* срок напоминания (вопросник 11.11, вопрос 37): по умолчанию свой у каждой услуги — когда клиенту обычно пора снова */
+const CRM_SVC_DAYS = [[/маникюр|педикюр|ресниц|бров/i, 21], [/стрижк|барбер/i, 30], [/окрашив|колорир/i, 45], [/уборк|клининг/i, 14], [/массаж/i, 14], [/груминг/i, 45], [/химчистк/i, 180], [/шиномонтаж|сезонн|колёс|колес/i, 180], [/мойк/i, 14], [/репетитор|английск|урок/i, 7]];
+const crmSvcDays = svc => { const m = CRM_SVC_DAYS.find(([r]) => r.test(svc || '')); return m ? m[1] : 30; };
+const crmDaysFor = svc => (S.crm.days === 'svc' ? crmSvcDays(svc) : Number(S.crm.days) || 30);
+const crmDaysText = () => (S.crm.days === 'svc' ? 'в срок по услуге' : `через ${pn(S.crm.days, 'день', 'дня', 'дней')}`);
 function crmClients() {
   const visits = CRM_HIST.concat(S.orders.filter(o => o.ex === 'alex' && o.status === 'done' && o.date).map(o => ({ client: o.client, svc: o.svc, date: o.date, total: o.total })));
   const next = {}; S.orders.filter(o => o.ex === 'alex' && !['done', 'cancel'].includes(o.status) && o.date).forEach(o => { if (!next[o.client] || o.date < next[o.client]) next[o.client] = o.date; });
   const by = {};
-  visits.forEach(v => { const c = by[v.client] || (by[v.client] = { name: v.client, n: 0, sum: 0, last: '', svcs: [] }); c.n++; c.sum += v.total || 0; if (v.date > c.last) c.last = v.date; if (!c.svcs.includes(v.svc)) c.svcs.push(v.svc); });
+  visits.forEach(v => { const c = by[v.client] || (by[v.client] = { name: v.client, n: 0, sum: 0, last: '', svcs: [] }); c.n++; c.sum += v.total || 0; if (v.date > c.last) { c.last = v.date; c.lastSvc = v.svc; } if (!c.svcs.includes(v.svc)) c.svcs.push(v.svc); });
   Object.keys(next).forEach(n => { if (!by[n]) by[n] = { name: n, n: 0, sum: 0, last: '', svcs: [] }; by[n].next = next[n]; });
-  return Object.values(by).map(c => Object.assign(c, { ago: c.last ? crmDays(c.last) : null, sleep: !c.next && c.last && crmDays(c.last) >= S.crm.days })).sort((a, b) => (b.sleep - a.sleep) || ((b.ago || 0) - (a.ago || 0)));
+  return Object.values(by).map(c => Object.assign(c, { ago: c.last ? crmDays(c.last) : null, sleep: !c.next && c.last && crmDays(c.last) >= crmDaysFor(c.lastSvc) })).sort((a, b) => (b.sleep - a.sleep) || ((b.ago || 0) - (a.ago || 0)));
 }
-const crmTabs = () => [['all', 'Все'], ['sleep', `Давно не были · ${S.crm.days}+ дней`], ['loyal', 'Постоянные · 3+ визита'], ['next', 'Записаны']];
+const crmTabs = () => [['all', 'Все'], ['sleep', S.crm.days === 'svc' ? 'Пора снова' : `Давно не были · ${S.crm.days}+ дней`], ['loyal', 'Постоянные · 3+ визита'], ['next', 'Записаны']];
 const crmPick = (l, t) => t === 'sleep' ? l.filter(c => c.sleep) : t === 'loyal' ? l.filter(c => c.n >= 3) : t === 'next' ? l.filter(c => c.next) : l;
 const crmChat = name => S.chats.find(c => c.role === 'exec' && c.with === name && !c.support);
 const crmFill = (t, c, p) => t.replace(/\{имя\}/g, c.name.split(' ')[0]).replace(/\{услуга\}/g, (c.svcs[0] || '').toLowerCase()).replace(/\{скидка\}/g, p ? promoLine(p) : '');
@@ -8346,8 +8353,8 @@ SCREENS.e_clients = () => {
   return {
     title: 'Мои клиенты', sub: 'База клиентов, напоминания и рассылки',
     body: `<div class="crm-k">${[[all.length, 'клиентов'], [loyal.length, 'вернулись повторно'], [sleep.length, `давно не были`]].map(([n, t]) => `<span><b>${n}</b><span class="m">${t}</span></span>`).join('')}</div>
-      ${card(`<div class="row"><span class="grow"><b class="t18">Автонапоминание</b><span class="m" style="display:block">${S.crm.auto ? `Через ${pn(S.crm.days, 'день', 'дня', 'дней')} после визита клиент получит напоминание${S.crm.sms ? ' в приложении и по SMS' : ' в приложении'}` : 'Выключено'}</span></span>${sw('crmAuto', '', S.crm.auto, 'Автонапоминание')}</div>
-        ${S.crm.auto ? `${field('Через сколько дней после визита', seg('crmDaysSet', [[14, '14'], [30, '30'], [45, '45'], [60, '60'], [90, '90']], S.crm.days, 'sm'))}${btn('Текст напоминания', 'crmText', '', 'text')}` : ''}`)}
+      ${card(`<div class="row"><span class="grow"><b class="t18">Автонапоминание</b><span class="m" style="display:block">${S.crm.auto ? `${S.crm.days === 'svc' ? 'Когда клиенту по услуге пора снова — маникюр через 3 недели, стрижка через месяц, уборка через 2 недели, шиномонтаж через полгода, — он' : `Через ${pn(S.crm.days, 'день', 'дня', 'дней')} после визита клиент`} получит напоминание${S.crm.sms ? ' в приложении и по SMS' : ' в приложении'}` : 'Выключено'}</span></span>${sw('crmAuto', '', S.crm.auto, 'Автонапоминание')}</div>
+        ${S.crm.auto ? `${field('Когда напоминать', seg('crmDaysSet', [['svc', 'По услуге'], [14, '14'], [30, '30'], [60, '60'], [90, '90']], S.crm.days, 'sm'))}${btn('Текст напоминания', 'crmText', '', 'text')}` : ''}`)}
       ${btn(`${ic('send', 20, 2.2)} Разослать предложение`, 'crmBlast', '', 'block')}
       ${chips('crmTab', crmTabs().map(([v, t]) => [v, t]), v => S.crm.tab === v, { scroll: true })}
       ${l.length ? card(`<div class="crm-l">${l.map(row).join('')}</div>`, 'c') : emptyBox('Пока никого', S.crm.tab === 'sleep' ? 'Все клиенты были недавно или уже записаны.' : 'Клиенты появятся после первых выполненных заказов.', '', '', '')}
@@ -8367,8 +8374,8 @@ function crmComposer(title, names, act) {
 IN.crmDText = v => { S.crmD.text = v; };
 Object.assign(A, {
   crmTab(v) { S.crm.tab = v; render(); },
-  crmAuto() { S.crm.auto = !S.crm.auto; render(); toast(S.crm.auto ? `Напоминание уйдёт через ${pn(S.crm.days, 'день', 'дня', 'дней')} после визита` : 'Автонапоминание выключено', 'info'); },
-  crmDaysSet(v) { S.crm.days = Number(v); render(); },
+  crmAuto() { S.crm.auto = !S.crm.auto; render(); toast(S.crm.auto ? `Напоминание уйдёт ${crmDaysText()}` : 'Автонапоминание выключено', 'info'); },
+  crmDaysSet(v) { S.crm.days = v === 'svc' ? 'svc' : Number(v); render(); },
   crmSms() { toast('SMS подключим вместе с договором: они платные. Пока напоминания уходят в приложение', 'info'); },
   crmText() { S.crmD = { names: [], text: S.crm.text, promo: S.crm.promo, act: 'crmTextSave' }; crmComposer('Текст автонапоминания', ['Анна Петрова'], 'crmTextSave'); },
   crmTextSave() { S.crm.text = S.crmD.text; S.crm.promo = S.crmD.promo; closeSheet(); toast('Текст напоминания сохранён'); },
@@ -10188,7 +10195,7 @@ function clientRateBlock(o) {
 }
 const clientRating = name => { const b = CLIENT_REV[name] || [0, 0]; const add = S.clientRev[name] || []; const extra = add.filter(r => r.fresh); const n = b[1] + extra.length;
   return n ? { avg: Math.round((b[0] * b[1] + extra.reduce((s, r) => s + r.stars, 0)) / n * 10) / 10, n } : null; };
-const clientLine = name => { const r = clientRating(name); return r ? `★${NB}${String(r.avg).replace('.', ',')} · ${pn(r.n, 'отзыв', 'отзыва', 'отзывов')} исполнителей` : 'Пока без отзывов исполнителей'; };
+const clientLine = name => { const r = clientRating(name); const n = CLIENT_N[name]; const co = n != null ? ` · ${pn(n, 'заказ', 'заказа', 'заказов')} на ZELDO` : ''; return r ? `★${NB}${String(r.avg).replace('.', ',')} · ${pn(r.n, 'отзыв', 'отзыва', 'отзывов')} исполнителей${co}` : `Пока без отзывов исполнителей${co}`; };
 IN.crateText = (v, id) => { const o = orderById(id); o.crText = v; const m = $('#cratemod_' + id); if (m) m.innerHTML = rateWarn(v); };
 /* отзыв проверяем так же, как карточки: без телефонов, ссылок и мата */
 const rateWarn = t => { const f = modCheck(t); return f.length ? `<span class="err">Уберите: ${f.join(', ')}. В отзыве нельзя оставлять контакты и грубые слова.</span>` : ''; };
@@ -11003,7 +11010,7 @@ Object.assign(A, {
     const r = co0(p); const ord = p.order ? orderById(p.order) : null; const o = offerById(ord ? ord.offer : p.id);
     const fmt = ord ? (ord.fmt || o.formats[0]) : cfgOf(o).fmt; const total = ord ? (p.extra && ord.change ? ord.change.sum : ord.total) : calc(o, cfgOf(o)).total;
     const bal = walletSum(); const m = S.payMethod || 'sbp';
-    S.coVisit = fmt === 'visit' && !(ord && ord.vinfo); const V = S.coV || (S.coV = Object.assign({ ent: '', floor: '', dom: '', nodom: false }, S.my.vlast || {}, { photo: false }));  /* подставляем то, что указали в прошлый раз */
+    S.coVisit = fmt === 'visit' && !(ord && ord.vinfo); const V = S.coV || (S.coV = Object.assign({ ent: '', floor: '', dom: '', nodom: false }, S.my.vlast || window.__zVisit || {}, { photo: false }));  /* подставляем то, что указали в прошлый раз */
     const visit = S.coVisit ? card(`<div class="h2">Как найти вас</div><div class="m">Исполнитель увидит это после оплаты, вместе с адресом. Так он не будет звонить с вопросом «где вход».</div>
       <div class="grid3">${field('Подъезд', `<input class="input" data-in="coV|ent" value="${esc(V.ent)}" inputmode="numeric" maxlength="6" placeholder="2">`)}${field('Этаж', `<input class="input" data-in="coV|floor" value="${esc(V.floor)}" inputmode="numeric" maxlength="4" placeholder="5">`)}${field('Домофон', `<input class="input" data-in="coV|dom" value="${esc(V.dom)}" maxlength="12" placeholder="45К" ${V.nodom ? 'disabled' : ''}>`)}</div>
       <button class="opt ${V.nodom ? 'on' : ''}" data-a="coNoDom" aria-pressed="${V.nodom}"><span class="mark sq"></span><span class="grow"><span class="ot">Домофона нет</span><span class="os">Частный дом, офис или дверь открыта</span></span></button>
@@ -11168,7 +11175,7 @@ function safeSheet() {
 A.safeAns = k => { const x = S.safe; if (!x) return; const q = SAFE_Q[x.i]; if (!q[1][Number(k)][1]) { x.wrong = Number(k); return safeSheet(); }
   x.wrong = null; x.i++; if (x.i < SAFE_Q.length) return safeSheet();
   S.my.safeOk = true; closeSheet(); toast('Готово. Теперь можно писать'); const then = x.then; S.safe = null; if (then) then(); };
-const safeGate = then => { if (S.my.safeOk || S.role === 'guest') return false; S.safe = { i: 0, wrong: null, then }; safeSheet(); return true; };
+const safeGate = then => { if (S.my.safeOk || window.__zSafe || S.role === 'guest') return false;  /* __zSafe — только автотесты рабочей версии */ S.safe = { i: 0, wrong: null, then }; safeSheet(); return true; };
 
 /* ---------- чёрный список (вопрос 10): полный блок — не пишет, не звонит, не заказывает, не видит карточки ---------- */
 const peerKeyChat = ch => (ch._cu != null ? `u${ch.role === 'cust' ? ch._eu : ch._cu}` : `n:${ch.with}`);
