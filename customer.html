@@ -10915,7 +10915,8 @@ if (!REAL) { render('new'); a2hsMaybe(); openFromHash(); }
 const RULES = { confirmH: 2, nightFrom: 22, nightTo: 8, morningH: 10, payH: 24, payBeforeH: 3, acceptOffH: 1, acceptOnH: 24,
   cancelFreeMin: 60, lateMin: 15, noShowPct: 30, reviewDays: 30, respMax: 10, photoMax: 10, wdFee: 2, instantFee: 3, instantMin: 200, splitFrom: 10000 };
 S.my = Object.assign({ notes: {}, cnotes: {}, blocked: [], wops: [], safeOk: false }, S.my || {});
-const HOUR = 3600e3, MINUTE = 60e3;
+/* сервер на тестовом прогоне сжимает «час» (rh в /api/state, 10-real.js) — таймеры идут с ним в ногу */
+let HOUR = 3600e3, MINUTE = 60e3;
 
 /* ---------- время шага: рабочая версия знает его по журналу заказа (_st), прототип — по o.stAt ---------- */
 function stepAt(o) { const s = o._st; if (Array.isArray(s) && s.length) { const l = s[s.length - 1]; if (l.s === o.status) return l.at; } return o.stAt || null; }
@@ -10923,7 +10924,7 @@ function paidAtOf(o) { if (o.paidAt) return o.paidAt; const s = (o._st || []).fi
 /* до какого момента исполнитель подтверждает заявку: 2 часа; заявка ночью (22:00–8:00) — до 10 утра */
 function confirmBy(t0) {
   const d = new Date(t0); const h = d.getHours();
-  if (h >= RULES.nightFrom || h < RULES.nightTo) { const m = new Date(d); if (h >= RULES.nightFrom) m.setDate(m.getDate() + 1); m.setHours(RULES.morningH, 0, 0, 0); return m.getTime(); }
+  if (HOUR === 3600e3 && (h >= RULES.nightFrom || h < RULES.nightTo)) { const m = new Date(d); if (h >= RULES.nightFrom) m.setDate(m.getDate() + 1); m.setHours(RULES.morningH, 0, 0, 0); return m.getTime(); }
   return t0 + RULES.confirmH * HOUR;
 }
 /* срок текущего шага: что ждём, от кого и до какого времени; null — шаг без срока */
@@ -10994,9 +10995,9 @@ SCREENS.c_wallet = () => {
       <div class="m">${REAL ? 'Оплата пока тестовая: деньги не списываются и не переводятся. Настоящие пополнение и вывод — после подключения банка.' : 'Прототип: деньги не списываются.'}</div>` };
 };
 Object.assign(A, {
-  walIn() { S.walAmt = S.walAmt || 1000; sheet('Пополнить баланс', `<div class="chips">${[500, 1000, 3000, 5000].map(n => chip('walAmt', n, rub(n), S.walAmt === n, { noCheck: true })).join('')}</div><div class="m">Пополнение — через СБП или карту. Деньги на балансе можно тратить на любые заказы.</div>${btn('Пополнить', 'walInOk', '', 'block')}`); },
+  walIn() { S.walAmt = S.walAmt || 1000; sheet('Пополнить баланс', `<div class="chips">${[500, 1000, 3000, 5000].map(n => chip('walAmt', n, rub(n), S.walAmt === n, { noCheck: true })).join('')}</div><input class="input" id="walOwn" inputmode="numeric" maxlength="7" placeholder="Или своя сумма, ₽" style="margin-top:10px"><div class="m">Пополнение — через СБП или карту. Деньги на балансе можно тратить на любые заказы.</div>${btn('Пополнить', 'walInOk', '', 'block')}`); },
   walAmt(v) { S.walAmt = Number(v); A.walIn(); },
-  walInOk() { S.my.wops.push({ kind: 'in', sum: S.walAmt, at: Date.now() }); closeSheet(); render(); toast(`Баланс пополнен на ${rub(S.walAmt)}`); },
+  walInOk() { const own = Number(((document.getElementById('walOwn') || {}).value || '').replace(/\D/g, '')); if (own) S.walAmt = Math.min(own, 1000000); S.my.wops.push({ kind: 'in', sum: S.walAmt, at: Date.now() }); closeSheet(); render(); toast(`Баланс пополнен на ${rub(S.walAmt)}`); },
   walOut() { const s = walletSum(); const fee = Math.round(s * RULES.wdFee / 100); dialog({ title: 'Вывести на карту?', text: `С баланса уйдёт ${rub(s)}. Комиссия ${RULES.wdFee}${NB}% — ${rub(fee)}, на карту придёт ${rub(s - fee)}. Если оставить деньги на балансе, ими можно оплатить следующий заказ без комиссии.`, actions: [['Вывести', 'walOutOk', '', ''], ['Оставить на балансе', 'closeDialog', '', 'soft']] }); },
   walOutOk() { const s = walletSum(); S.dialog = null; S.my.wops.push({ kind: 'out', sum: s, at: Date.now() }); render(); toast(`Выводим ${rub(s - Math.round(s * RULES.wdFee / 100))} на карту`); },
 });

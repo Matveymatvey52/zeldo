@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E1D36">
+<title>ZELDO · что сделано 11–13 ноября</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap">
+<!-- Отчёт для Максима (13.11.2026): что сделано после его ответов на вопросник и встречи 12.11 (запись 61). Оформление — как у вопросника -->
+<style>
+:root { --bg: #EEF2F8; --card: #FFFFFF; --ink: #0E1D36; --muted: #5B6B84; --line: #DCE3EE; --soft: #E8F0FE; --act: #0B6CF2; --rec: #17733F; --rec-soft: #E7F5EC; --warn: #9A5B00; --warn-soft: #FFF3E0; --hdr: #0E1D36; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0B1424; --card: #13203A; --ink: #EEF3FB; --muted: #9AA9C0; --line: #24345A; --soft: #172B4D; --act: #3D8EF8; --rec: #5BD08A; --rec-soft: #12301F; --warn: #F2B35B; --warn-soft: #33240E; --hdr: #070D18; } }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Onest", "Segoe UI", system-ui, sans-serif; -webkit-text-size-adjust: 100%; }
+a { color: var(--act); }
+.top { background: var(--hdr); color: #fff; padding: calc(28px + env(safe-area-inset-top)) 16px 46px; }
+.top .in, main { max-width: 760px; margin: 0 auto; }
+.logo { font-weight: 800; letter-spacing: 0.04em; font-size: 18px; color: #C7D2E4; }
+.top h1 { font-size: 32px; line-height: 38px; margin: 14px 0 10px; font-weight: 700; text-wrap: balance; }
+.top p { margin: 0; font-size: 17px; line-height: 26px; color: #C7D2E4; max-width: 600px; }
+main { padding: 0 16px calc(48px + env(safe-area-inset-bottom)); }
+.nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: -24px 0 18px; }
+.nums div { background: var(--card); border-radius: 16px; padding: 16px; box-shadow: 0 1px 0 var(--line); }
+.nums b { display: block; font-size: 30px; line-height: 34px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.nums span { font-size: 14px; line-height: 19px; color: var(--muted); }
+section { background: var(--card); border-radius: 20px; padding: 22px 20px 18px; margin: 0 0 14px; }
+.blk { font-size: 13px; font-weight: 600; color: var(--act); text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 6px; }
+h2 { font-size: 22px; line-height: 28px; margin: 0 0 12px; font-weight: 700; }
+h3 { font-size: 17px; line-height: 24px; margin: 18px 0 6px; font-weight: 600; }
+p, li { font-size: 16px; line-height: 24px; }
+p { margin: 0 0 10px; }
+ul { margin: 0 0 6px; padding-left: 20px; }
+li { margin: 0 0 6px; }
+li::marker { color: var(--muted); }
+.m { color: var(--muted); }
+.note { background: var(--soft); border-radius: 14px; padding: 12px 14px; margin: 12px 0 4px; font-size: 15px; line-height: 22px; }
+.wait { background: var(--warn-soft); }
+.wait b { color: var(--warn); }
+.go { background: var(--rec-soft); }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0 4px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 50px; padding: 0 20px; border-radius: 14px; background: var(--act); color: #fff; font-size: 17px; font-weight: 600; text-decoration: none; }
+.btn.soft { background: var(--soft); color: var(--act); }
+table { width: 100%; border-collapse: collapse; font-size: 15px; line-height: 21px; margin: 6px 0 4px; }
+td { padding: 9px 0; border-top: 1px solid var(--line); vertical-align: top; }
+td:first-child { padding-right: 14px; color: var(--muted); width: 46%; }
+td b { font-variant-numeric: tabular-nums; }
+footer { text-align: center; color: var(--muted); font-size: 14px; margin-top: 24px; }
+@media (max-width: 480px) { .top h1 { font-size: 27px; line-height: 33px; } h2 { font-size: 20px; line-height: 26px; } section { padding: 18px 16px 14px; } .cta .btn { flex: 1 1 100%; } }
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <div class="logo">ZELDO</div>
+  <h1>Что сделано за 11–13 ноября</h1>
+  <p>Ваши ответы на вопросник и решения встречи 12.11 теперь работают в приложении. Ниже — что изменилось, как пройдёт прогон вдвоём и что ещё нужно решить.</p>
+</div></header>
+
+<main>
+  <div class="nums">
+    <div><b>48</b><span>ответов разобрано и превращено в правила</span></div>
+    <div><b>3</b><span>новые вещи со встречи 12.11</span></div>
+    <div><b>624</b><span>автоматические проверки прошли без ошибок</span></div>
+    <div><b>11</b><span>вопросов осталось, ссылка внизу</span></div>
+  </div>
+
+  <section>
+    <div class="blk">Ваши ответы</div>
+    <h2>Из ответов — в правила</h2>
+    <ul>
+      <li>Все 48 ответов разложены по темам на одной странице: что решили, что уточнить, что уже сделано, с галочками. <a href="https://github.com/Matveymatvey52/zeldo-prototype/issues/33">Открыть итог вопросника</a></li>
+      <li>Четыре задачи «Решить» в плане закрыты вашими ответами, ещё в шесть дописаны решения.</li>
+      <li>Почти всё решённое уже работает: и в прототипе, и в рабочей версии с настоящим сервером.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="blk">Встреча 12.11</div>
+    <h2>Три новые вещи</h2>
+    <h3>Баланс ZELDO</h3>
+    <ul>
+      <li>Деньги за отменённый заказ приходят на баланс. Им можно оплатить следующий заказ.</li>
+      <li>Баланс можно пополнить и вывести на карту, вывод — с комиссией 2 %.</li>
+      <li>В кабинете есть строка «Баланс ZELDO» и экран с историей: пополнения, возвраты, оплаты, выводы.</li>
+    </ul>
+    <h3>Счётчик в заказе</h3>
+    <ul>
+      <li>В каждом заказе видно, чей сейчас ход, что сделать и сколько осталось: «Исполнитель должен подтвердить — 1&nbsp;ч 40&nbsp;мин».</li>
+      <li>Когда до конца меньше часа, счётчик подсвечивается.</li>
+    </ul>
+    <h3>Фильтр по бюджету</h3>
+    <ul>
+      <li>В ленте заявок исполнитель выбирает бюджет: до 3&nbsp;000&nbsp;₽, от 3&nbsp;000 до 10&nbsp;000&nbsp;₽, от 10&nbsp;000&nbsp;₽ или «договорная».</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="blk">Сроки</div>
+    <h2>Заказ движется сам</h2>
+    <table>
+      <tr><td>Исполнитель подтверждает заявку</td><td><b>2 часа</b>, а ночью — до 10 утра</td></tr>
+      <tr><td>Заказчик оплачивает</td><td><b>24 часа</b>, но не позже чем за 3 часа до визита</td></tr>
+      <tr><td>Заказчик принимает офлайн-работу</td><td><b>1 час</b></td></tr>
+      <tr><td>Заказчик принимает онлайн-работу</td><td><b>24 часа</b>, один раз можно продлить на сутки</td></tr>
+      <tr><td>Отзыв</td><td><b>30 дней</b> после выполнения</td></tr>
+    </table>
+    <p class="m" style="margin-top:10px">Срок вышел — сервер сам отменяет заказ или закрывает его и пишет об этом в переписку. Приложение у сторон при этом может быть закрыто.</p>
+  </section>
+
+  <section>
+    <div class="blk">Отмены</div>
+    <h2>Отмены, опоздания, неявки</h2>
+    <ul>
+      <li>Заказчик отменяет оплаченный заказ бесплатно в первый час. Дальше — попросить исполнителя, открыть спор или написать в поддержку. Это правило сервер держит сам.</li>
+      <li>Исполнитель опоздал больше чем на 15 минут — заказчик отменяет и получает все деньги на баланс.</li>
+      <li>Заказчик не открыл и не отвечает — исполнитель получает плату за выезд, а если её нет в карточке, 30&nbsp;% суммы.</li>
+      <li>Исполнитель отменил сам — в профиле отметка. После трёх таких отмен за месяц его рейтинг в выдаче ниже на 0,2. Если он отменил по просьбе заказчика, отметки нет.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="blk">В заказе</div>
+    <h2>У заказчика</h2>
+    <ul>
+      <li>Кнопка «Помощь» в каждом заказе: исполнитель опаздывает, не отвечает, сделано не то, хочу отменить, написать в поддержку. У исполнителя свой набор пунктов.</li>
+      <li>Для выезда обязательны подъезд, этаж и домофон или отметка «Домофона нет». Фото места — по желанию. В следующий раз всё подставляется само.</li>
+      <li>При оплате можно списать деньги с баланса, а заказ от 10&nbsp;000&nbsp;₽ — взять в рассрочку.</li>
+      <li>После приёмки — чаевые: 100, 200, 300 или 500&nbsp;₽. ZELDO с них ничего не берёт.</li>
+      <li>Поздравление «Заказ выполнен» теперь видит и заказчик, а не только исполнитель.</li>
+    </ul>
+    <h2 style="margin-top:22px">У исполнителя</h2>
+    <ul>
+      <li>Под каждой ценой подсказка «Вы получите ≈ …» с учётом комиссии и эквайринга.</li>
+      <li>Заметки к заказу и к клиенту, их видит только он сам.</li>
+      <li>В заявке видно «Откликнулись 4 из 10» и уровень заказчика: оценку от мастеров и сколько заказов он довёл до конца. Когда откликов 10, новые не принимаются.</li>
+      <li>В карточке услуги — до 10 фото.</li>
+      <li>«Мои клиенты» напоминают о повторном визите в срок по услуге: маникюр — через 3 недели, стрижка — через месяц, уборка — через 2 недели, шиномонтаж — через полгода. Можно поставить один срок для всех.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="blk">Доверие</div>
+    <h2>Безопасность</h2>
+    <ul>
+      <li>Перед первым сообщением — мини-тест из трёх вопросов: платить только через ZELDO, не переходить в мессенджеры, не говорить код заранее.</li>
+      <li>Чёрный список ставится прямо из переписки. Заблокированный не пишет, не звонит, не заказывает и не видит карточки того, кто его заблокировал.</li>
+      <li>В админке рядом с кнопкой «Отметить „Проверен“» видно, сколько у исполнителя заказов без жалоб, например «3 из 5».</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="blk">Деньги и выдача</div>
+    <h2>Комиссия, тексты, первые мастера</h2>
+    <ul>
+      <li>Комиссия считается по решённым правилам: 10&nbsp;%, с постоянных клиентов мастера — 7&nbsp;%, с заказа дороже 500&nbsp;000&nbsp;₽ — 5&nbsp;%, первые три заказа без комиссии.</li>
+      <li>Переписаны «Как устроены деньги» и «Защищённая оплата»: выплата раз в неделю или сразу за 3&nbsp;%, чаевые, условия значка «Проверен», способы оплаты, бесплатная отмена в первый час.</li>
+      <li>Мастер без отзывов получает метку «Новый на ZELDO» и место в первой десятке выдачи.</li>
+      <li>Оранжевая раскраска стала основной. В выборе города появилась Московская область.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="blk">Проверка</div>
+    <h2>Как проверено</h2>
+    <ul>
+      <li>Автотесты нажимают кнопки за заказчика и исполнителя и проходят заказ целиком: заявка, оплата, работа, приёмка, отмены, споры, админка. Всего 624 проверки, ошибок нет.</li>
+      <li>Отдельный тест проверяет сроки на сервере: сервер сам отменяет, сам принимает работу, не даёт отменить после первого часа и держит чёрный список.</li>
+      <li>Экраны оплаты, баланса и счётчика просмотрены в Safari: с телефона вы увидите то же самое.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="blk">Прогон вдвоём</div>
+    <h2>Всё готово, ждём удобного времени</h2>
+    <ul>
+      <li>Матвей пришлёт ссылку, она работает около часа. Открывать в Safari.</li>
+      <li>Вход: любая почта, код всегда <b>123456</b>. Писем ждать не нужно.</li>
+      <li>Время ускорено: <b>час в правилах равен минуте</b>. Подтвердить заявку — за 2 минуты, принять работу — за минуту. Так автоотмену и автоприёмку видно прямо на прогоне.</li>
+      <li>Деньги тестовые: с карты ничего не списывается, баланс можно пополнить на любую сумму.</li>
+    </ul>
+    <div class="note go"><b>Что пройти:</b> один заказывает, второй подтверждает, первый оплачивает. Дальше исполнитель начинает работу по коду и сдаёт её, заказчик принимает, оставляет чаевые и отзыв. Отдельно — отмена, спор, чёрный список и «Помощь».</div>
+  </section>
+
+  <section>
+    <div class="blk">Ждёт решения</div>
+    <h2>Что не сделано и почему</h2>
+    <ul>
+      <li><b>Срок приёмки долгих работ</b> — ремонт, шторы. Ждём вашего ответа, вопрос 1.</li>
+      <li><b>Переименование в ZELFIR</b> — нужно решить, когда. Вопросы 8 и 9.</li>
+      <li><b>Облако и постоянная ссылка.</b> Пока сервер работает на компьютере Матвея, и ссылка временная. Вопрос 2.</li>
+      <li><b>Автопроверка паспорта для «Проверен».</b> Сейчас фото паспорта смотрит сотрудник в админке. Вопрос 11.</li>
+      <li><b>Настоящие деньги.</b> Баланс, рассрочка и выплаты работают на экранах, а платежи пойдут после подключения банка.</li>
+    </ul>
+    <div class="note wait"><b>11 коротких вопросов</b> — как в прошлый раз: по одному на экране, варианты и рекомендация. Займёт минут пять. В конце кнопка «Отправить»: выберите Телеграм или почту Матвея.</div>
+    <div class="cta">
+      <a class="btn" href="https://matveymatvey52.github.io/zeldo/voprosy2.html">Ответить на вопросы</a>
+      <a class="btn soft" href="https://matveymatvey52.github.io/zeldo/">Открыть прототип</a>
+    </div>
+  </section>
+
+  <footer>ZELDO · 13 ноября 2026</footer>
+</main>
+</body>
+</html>
