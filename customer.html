@@ -3929,6 +3929,19 @@ img.ph[data-k] { background-size: cover; background-position: center; background
 .party-b { display: grid; gap: 4px; width: 100%; margin-top: 12px; }
 .party-burst { position: absolute; left: 50%; top: 70px; width: 0; height: 0; pointer-events: none; }
 .party-burst i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 2px; background: var(--c); opacity: 0; animation: partyBit 0.9s var(--ease-out) var(--t) forwards; }
+/* 17.11: дождь конфетти поверх экрана (прогон 16.11: «побольше радости») */
+.party-rain { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.party-rain i { position: absolute; top: -16px; left: var(--x); width: 9px; height: 14px; border-radius: 2px; background: var(--c); opacity: 0; transform: rotate(var(--r)) scale(var(--s)); animation: partyFall 1.6s cubic-bezier(0.25, 0.6, 0.4, 1) var(--t) forwards; }
+@keyframes partyFall { 0% { opacity: 1; transform: translate3d(0, 0, 0) rotate(var(--r)) scale(var(--s)); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate3d(-24px, 105vh, 0) rotate(calc(var(--r) + 540deg)) scale(var(--s)); } }
+@media (prefers-reduced-motion: reduce) { .party-rain { display: none; } }
+/* своё имя в кабинете — кнопка в профиль; фото профиля с камерой */
+button.cabme { width: 100%; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: 16px; transition: background-color 0.15s var(--ease-out); }
+@media (hover: hover) { button.cabme:hover { background: var(--soft); } }
+.avapick { position: relative; flex: none; display: inline-grid; cursor: pointer; border-radius: 50%; }
+.avapick-b { position: absolute; right: -2px; bottom: -2px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--act); color: #fff; box-shadow: 0 0 0 2px var(--card); }
+.avapick:focus-within { outline: 2px solid var(--act); outline-offset: 2px; }
+/* блок оценки подсвечивается, когда к нему перешли из поздравления */
+.card.flash { box-shadow: 0 0 0 3px var(--act); transition: box-shadow 0.3s var(--ease-out); }
 @keyframes partyIn { from { opacity: 0; } }
 @keyframes partyCard { from { opacity: 0; transform: translateY(12px) scale(0.96); } }
 @keyframes partyPop { 0% { opacity: 0; transform: scale(0.6); } 60% { opacity: 1; transform: scale(1.08); } 100% { transform: scale(1); } }
@@ -5682,7 +5695,14 @@ document.addEventListener('keydown', e => {
   if (e.key !== 'Enter') return; const el = e.target;
   if (el.dataset && el.dataset.enter && A[el.dataset.enter]) { e.preventDefault(); A[el.dataset.enter](el.dataset.v || el.value, el); }
 });
-const readImg = f => new Promise(res => { if (!f) return res(null); const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
+/* 17.11: фото с телефона (5–8 МБ) сжимаем до 1600 px по длинной стороне, JPEG 0,82. На прогоне 16.11 большое фото
+   раздуло сохранение профиля больше 6 МБ, сервер его отклонил — и вместе с фото не сохранились настройки */
+const readImg = f => new Promise(res => { if (!f) return res(null); const r = new FileReader();
+  r.onload = () => { const src = r.result; if (!/^image\/(jpeg|jpg|png|webp|heic|heif)$/i.test(f.type || '') || f.size < 400e3) return res(src);
+    const im = new Image(); setTimeout(() => res(src), 5000);
+    im.onload = () => { try { const k = Math.min(1, 1600 / Math.max(im.naturalWidth, im.naturalHeight)); const c = document.createElement('canvas'); c.width = Math.round(im.naturalWidth * k); c.height = Math.round(im.naturalHeight * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', 0.82)); } catch (e) { res(src); } };
+    im.onerror = () => res(src); im.src = src; };
+  r.readAsDataURL(f); });
 
 /* ---------- каталог из таблицы (809 действующих услуг) ---------- */
 const FMT_NAME = { off: 'на месте', both: 'онлайн или на месте', hyb: 'онлайн и на месте', on: 'онлайн', '': '' };
@@ -6522,6 +6542,10 @@ Object.assign(A, {
 /* поле времени: свёрнуто в одну строку, по нажатию снизу выезжает окно со временем по частям дня */
 const TP = {};
 const HALF_HOURS = (from = 7 * 60, to = 22 * 60) => { const out = []; for (let m = from; m <= to; m += 30) out.push({ t: tstr(m), ok: true }); return out; };
+/* время на «сегодня»: прошедшее и ближайшие 30 минут не выбрать (прогон 16.11: в 19:43 создалась заявка на 18:00) */
+const nowMin = () => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); };
+const timesFor = (k, from, to) => { const l = HALF_HOURS(from, to); if (!k || k !== dkey(new Date())) return l; const m = nowMin() + 30; return l.map(s => Object.assign(s, { ok: tmin(s.t) >= m })); };
+const whenPast = (k, t) => !!k && (k < dkey(new Date()) || (k === dkey(new Date()) && !!t && tmin(t) < nowMin()));
 const TP_PARTS = [['Утро', 0, 12 * 60], ['День', 12 * 60, 17 * 60], ['Вечер', 17 * 60, 24 * 60]];
 function timeField(id, cfg) {
   TP[id] = cfg; const v = cfg.get(); const list = cfg.list(); const free = list.filter(s => s.ok).length;
@@ -6879,7 +6903,7 @@ SCREENS.c_reviews = p => {
   return {
     title: 'Отзывы',
     body: `${card(e.reviews ? `<div class="h2">Репутация</div><div class="rating" style="font-size:28px;line-height:32px;font-weight:800">${ic('star', 26, 2)} ${String(e.rating).replace('.', ',')}</div><div class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')} после завершённых заказов</div>` : '<div class="h2">Пока нет отзывов</div><div class="m">Отзыв оставляет заказчик, когда примет работу.</div>')}
-      ${list.map(r => card(`<div class="row"><b class="t18 grow">${esc(r.who)}</b><span class="m">${dayName(r.date, true)}</span></div><div class="m" aria-label="Оценка ${r.stars} из 5">${stars(r.stars)}</div>${r.tags && r.tags.length && r.text !== r.tags.join(', ') ? `<div class="m">${r.tags.map(esc).join(' · ')}</div>` : ''}<div>${esc(r.text)}</div>`, 'c')).join('')}`,
+      ${list.map(r => card(`<div class="row"><b class="t18 grow">${esc(r.who)}</b><span class="m">${dayName(r.date, true)}</span></div>${revSvc(r)}<div class="m" aria-label="Оценка ${r.stars} из 5">${stars(r.stars)}</div>${r.tags && r.tags.length && r.text !== r.tags.join(', ') ? `<div class="m">${r.tags.map(esc).join(' · ')}</div>` : ''}<div>${esc(r.text)}</div>`, 'c')).join('')}`,
   };
 };
 
@@ -6941,15 +6965,15 @@ function orderCard(o) {
 /* ---------- кабинет заказчика ---------- */
 SCREENS.c_cab = () => ({
   title: 'Кабинет', cls: 'cabh',
-  body: `<div class="card"><div class="row"><span class="ava lg">${letter(myName())}</span><span class="grow"><span class="h2" style="display:block;font-size:28px;line-height:32px">${esc(myName())}</span><span class="m">+7 916 •••-••-42 · одна учётная запись для всех ролей</span></span></div></div>
+  body: `<div class="card"><div class="row">${avaPick()}<span class="grow"><span class="h2" style="display:block;font-size:28px;line-height:32px">${esc(myName())}</span><span class="m">${REAL ? 'Одна учётная запись для всех ролей' : '+7 916 •••-••-42 · одна учётная запись для всех ролей'}</span></span></div>${btn('Мой профиль: как меня видят исполнители', 'go', gv('c_aboutme', {}), 'text block')}</div>
     ${card(`<div class="list">
       ${rl('Мои данные', 'Имя, телефон, почта, карты', 'go', 'mydata', { icon: 'user' })}
       ${rl('Мои адреса', `${esc(S.myAddrs.map(a => a.name).join(', '))} · для поиска и заявок`, 'myAddrs', 'cab', { icon: 'home' })}
       ${rl('Способы оплаты', 'СБП и карта', 'go', 'mydata', { icon: 'card' })}
-      ${rl('Мои отзывы', 'Оценки выполненных заказов', 'go', gv('order', { id: 1038 }), { icon: 'star' })}
+      ${rl('Мои отзывы', 'Оценки выполненных заказов', 'go', REAL ? gv('c_orders', {}) : gv('order', { id: 1038 }), { icon: 'star' })}
       ${rl('Отзывы исполнителей о вас', clientLine(myFirst()), 'go', gv('c_aboutme', {}), { icon: 'user' })}
     </div>`, 'c')}
-    ${card(`<div class="h2">Вы также исполнитель</div><div class="m">Шиномонтаж на Профсоюзной: заявки, заказы и расписание — в роли «Исполнитель». Сообщения и события обеих ролей видны в счётчиках.</div>${btn(`Перейти в роль исполнителя ${ic('arr', 20, 2.2)}`, 'setRole', 'exec', 'soft block')}`, 'soft')}
+    ${card(`<div class="h2">Вы также исполнитель</div><div class="m">${REAL ? 'Ваши услуги, заявки, заказы и расписание' : 'Шиномонтаж на Профсоюзной: заявки, заказы и расписание'} — в роли «Исполнитель». Сообщения и события обеих ролей видны в счётчиках.</div>${btn(`Перейти в роль исполнителя ${ic('arr', 20, 2.2)}`, 'setRole', 'exec', 'soft block')}`, 'soft')}
     ${card(`<div class="list">${rl('Поддержка ZELDO', 'Отвечаем с 9:00 до 21:00 по Москве', 'supportOpen', '', { icon: 'shield' })}${rl('Поделиться ZELDO', 'Ссылка-приглашение для друзей и клиентов', 'shareApp', '', { icon: 'send' })}${rl('Настройки', '', 'settings', '', { icon: 'gear' })}${rl('Помощь', 'Как работает защищённая оплата', 'helpPay', '', { icon: 'info' })}</div>`, 'c')}`,
 });
 /* что исполнители написали о заказчике: после каждого заказа, выполненного или отменённого */
@@ -6957,7 +6981,7 @@ SCREENS.c_aboutme = () => {
   const list = S.clientRev[myFirst()] || []; const r = clientRating(myFirst());
   return { title: 'Отзывы исполнителей о вас', tabs: false,
     body: `${card(`<div class="row"><b class="h2 grow">${r ? `★${NB}${String(r.avg).replace('.', ',')}` : 'Пока нет оценок'}</b><span class="m">${r ? pn(r.n, 'отзыв', 'отзыва', 'отзывов') : ''}</span></div><div class="m">Исполнитель может оставить отзыв после заказа — выполненного или отменённого. Его видят другие исполнители, когда вы к ним обращаетесь.</div>`)}
-      ${list.map(x => card(`<div class="row"><b class="grow">${esc(x.who)}</b><span class="m">${dayName(x.date)}</span></div><div class="row">${'★'.repeat(x.stars)}<span class="m">${RATE_WORD[x.stars]}</span></div>${x.tags.length ? `<div class="chips">${x.tags.map(t => `<span class="pill grey">${esc(t)}</span>`).join('')}</div>` : ''}<div>${esc(x.text)}</div>`, 'c')).join('')}` };
+      ${list.map(x => card(`<div class="row"><b class="grow">${esc(x.who)}</b><span class="m">${dayName(x.date)}</span></div>${revSvc(x)}<div class="row">${'★'.repeat(x.stars)}<span class="m">${RATE_WORD[x.stars]}</span></div>${x.tags.length ? `<div class="chips">${x.tags.map(t => `<span class="pill grey">${esc(t)}</span>`).join('')}</div>` : ''}<div>${esc(x.text)}</div>`, 'c')).join('')}` };
 };
 A.cabSoon = v => sheet(v, `<div class="m">Этот раздел в прототипе не раскрыт: здесь будут обычные поля профиля.</div>${btn('Понятно', 'closeSheet', '', 'soft block')}`);
 A.helpPay = () => sheet('Защищённая оплата', `${bullets(['Вы платите на защищённый счёт площадки', 'Исполнитель получает деньги после того, как вы примете работу', 'Если что-то пошло не так, открываете спор: деньги ждут решения', 'Точный адрес исполнитель узнаёт только после оплаты', 'Оплата картой или по СБП, дорогие заказы — в рассрочку. Можно оплатить с баланса ZELDO', 'Отменить бесплатно можно в течение часа после оплаты — деньги вернутся на баланс ZELDO'])}<div class="m">Пользоваться площадкой бесплатно, сверху цены ничего не берём. Комиссию платит исполнитель из суммы заказа.</div>${btn('Понятно', 'closeSheet', '', 'soft block')}`);
@@ -7132,7 +7156,7 @@ function calc(o, c) {
     const Q = qtyOf(o); const q = Q ? qtyIn(o, c) : 1; const vv = o.variants ? vOf(o, c) : null;
     if (o.pick && Q) { const pl = pickLines(o, c); if (pl.length) L.push([`${pl.map(l => l[0]).join(', ')}: ${Q[4](q)}`, pl.reduce((s, l) => s + l[1], 0) * q]); }
     else if (o.pick) L.push(...pickLines(o, c));
-    else L.push([`${o.title}${vv ? `, ${lcFirst(vv.name)}` : ''}${Q ? `: ${Q[4](q)}` : ''}`, (vv ? vv.price : o.from) * q]);
+    else L.push([`${o.title}${vv ? `, ${lcFirst(vv.name)}` : ''}${Q ? `: ${Q[4](q)}` : ''}${o.tiers && !vv ? ` по ${rub(tierPrice(o, q))}` : ''}`, (vv ? vv.price : tierPrice(o, q)) * q]);
     if (vv) what.push(vv.name); dur = (o.dur || 60) * (Q && ['за час', 'за занятие', 'за сеанс', 'за приём'].includes(o.unit) ? q : 1); if (o.booking === 'term' || svcTable(o.svc).b === 'term') days = o.term || (ZP.term || {})[o.svc] || 5; if (Q) what.push(Q[4](q));
   }
   what.push(...paramWhat(o, c)); /* ответы заказчика на параметры — в состав заказа при любой модели */
@@ -7161,6 +7185,11 @@ function placeText(o, fmt, paid, ord) {
 const wayOf = (o, c) => (c && c.way) || (o.route === 'B' || o.model === 'brief' || (o.reply && o.reply.stages) ? 'B' : 'A');  /* проект по этапам начинают с брифа */
 const needsSlot = (o, c) => (o.booking === 'slots' || o.booking === 'both') && c.visit !== 'free' && wayOf(o, c) !== 'B';
 const calKey = (o, c) => o.masters && c.master ? `${o.ex}:${c.master}` : o.ex;
+/* минимальная сумма заказа — против «купил сам у себя за 1 ₽» (запись 68); сервер проверяет то же */
+const MIN_ORDER = 300;
+/* цена за м² ступенями по площади (запись 68): [[до, цена], …, [0, цена дальше]] */
+const tierPrice = (o, q) => o.tiers ? (o.tiers.find(t => !t[0] || q <= t[0]) || o.tiers[o.tiers.length - 1])[1] : o.from;
+const tierText = o => o.tiers.map((t, i) => `${i === 0 ? `до ${t[0]} м²` : t[0] ? `${o.tiers[i - 1][0]}–${t[0]} м²` : `больше ${o.tiers[i - 1][0]} м²`} — ${rub(t[1])} за м²`);
 function blockers(o, c) {
   if (o.model === 'tire') { if (!c.wh.some(Boolean)) return 'отметьте хотя бы одно колесо'; if (c.rf && c.lp && o.tire.both == null) return 'RunFlat вместе с низким профилем исполнитель не настроил, напишите ему'; }
   if (o.model === 'wash' && !o.wash.p[c.v][c.g]) return 'выберите вариант мойки для вашей машины';
@@ -7169,6 +7198,8 @@ function blockers(o, c) {
   if (o.model === 'rent' && (!c.from || !c.to)) return !c.from ? 'выберите дату получения' : 'выберите дату возврата';
   if (o.pick && !pickLines(o, c).length) return `отметьте, ${pickOf(o).t === QTYS_T ? 'что и сколько' : 'что'} нужно`;
   if (needsSlot(o, c) && (!c.day || !c.time)) return !c.day ? 'выберите дату' : 'выберите время';
+  if (needsSlot(o, c) && whenPast(c.day, c.time)) return 'это время уже прошло, выберите другое';
+  { const t = calc(o, c).total; if (t > 0 && t < MIN_ORDER) return `минимальная сумма заказа — ${rub(MIN_ORDER)}`; }
   return '';
 }
 
@@ -7380,7 +7411,10 @@ function whenBlock(o, c, r) {
   if (o.booking === 'term') return card(`<div class="h2">Срок</div><div class="row">${ic('cal', 22)}<span class="t18">${pn(r.days || 5, 'день', 'дня', 'дней')} после брифа</span></div><div class="m">${o.model === 'design' && c.way === 'measure' ? 'Дату замера согласуете с исполнителем после подтверждения.' : 'Дату записи выбирать не нужно: работа идёт онлайн.'} Срок — это когда будет готов результат, а не длительность встречи.</div>`, 'c');
   const head = o.booking === 'both' ? seg('cfgSet', [[`${o.id}|visit|slot`, 'По записи'], [`${o.id}|visit|free`, 'Без записи']], `${o.id}|visit|${c.visit}`) : '';
   if (c.visit === 'free') { const wh = workHours(o.ex, dk(0)) || [540, 1260]; return card(`<div class="h2">Когда</div>${head}<div class="info"><b>Живая очередь</b><span class="m">Приезжайте в часы работы: ${tstr(wh[0])}–${tstr(wh[1])}. Точное время не бронируется, место в очереди не держится заранее.</span></div>`); }
-  const dur = Math.max(r.dur, 30); const key = calKey(o, c);
+  /* 16.11.2026, прогон с Максимом: у ремонта на 45 дней допуслуга добавила 10 000 минут, и календарь искал такое окно в одном дне — все дни зачёркнуты.
+     Долгая работа («Когда начать») — выбираем только начало, нужен свободный час; обычная услуга — окно не длиннее рабочего дня */
+  const tdays0 = svcTable(o.svc).b === 'term' ? (o.term || (ZP.term || {})[o.svc] || 0) : 0;
+  const dur = tdays0 ? 60 : Math.min(Math.max(r.dur, 30), 600); const key = calKey(o, c);
   CAL.offer = { get: () => c.day, set: k => { c.day = k; c.time = null; }, off: k => (!workHours(key, k) ? 'off' : dayFull(key, k, dur) ? 'full' : false), legend: `<div class="cal-leg"><span><i style="background:var(--act)"></i>Выбрано</span><span><i style="background:#C9D3E1"></i>Не работает или всё занято</span></div>` };
   const slots = c.day ? freeSlots(key, c.day, dur) : [];
   const tdays = svcTable(o.svc).b === 'term' ? (o.term || (ZP.term || {})[o.svc] || 0) : 0;  /* срок результата из таблицы: выбирают день начала */
@@ -7418,7 +7452,7 @@ SCREENS.c_offer = p => {
   const bl = blockers(o, c); const agree = needsAgree(o, c); const insp = o.model === 'inspect';
   const sendLabel = insp ? 'Записаться на осмотр' : o.route === 'V' || o.priceFrom || (c.needs || []).length ? 'Отправить на согласование' : 'Отправить исполнителю';
   let main;
-  if (o.ex === 'alex' && !preview) return { tabs: false, body: `${heroPh(galOf(o), o.title)}<div class="col g4"><h1 class="h1">${esc(o.title)}</h1><span class="m">${esc(s ? `${s.c} · ${s.s} · ${s.n}` : '')}</span></div><div class="info"><b>Это ваша карточка</b><span class="m">Так её видят заказчики. Заказать у себя нельзя. Изменить карточку можно в роли «Исполнитель».</span></div>${card(`<div>${esc(o.desc)}</div><div class="h2">Что входит</div>${bullets(o.inc)}`)}`, bar: `<div class="abar">${btn('Перейти в роль исполнителя', 'setRole', 'exec', 'block')}</div>` };
+  if (o.ex === 'alex' && !preview) return { tabs: false, body: `${heroPh(galOf(o), o.title)}<div class="col g4"><h1 class="h1">${esc(o.title)}</h1><span class="m">${esc(s ? `${s.c} · ${s.s} · ${s.n}` : '')}</span></div><div class="info"><b>Это ваша карточка</b><span class="m">Так её видят заказчики. Заказать у себя нельзя. Изменить карточку можно в роли «Исполнитель».</span></div>${card(`<div>${esc(o.desc)}</div><div class="h2">Что входит</div>${bullets(o.inc)}${o.tiers ? `<div class="h2">Цена зависит от площади</div>${bullets(tierText(o))}` : ''}`)}`, bar: `<div class="abar">${btn('Перейти в роль исполнителя', 'setRole', 'exec', 'block')}</div>` };
   if (preview) main = `<button class="btn block" disabled>Так увидит заказчик</button>`;
   else if (routeB) main = btn(`Составить запрос ${ic('arr', 20, 2.2)}`, 'go', gv('c_brief', { id: o.id }), 'block');
   else if (bl) main = `<button class="btn block" disabled>${!agree && !insp ? 'Оплатить ' + rub(r.total) : sendLabel}</button>`;
@@ -7432,7 +7466,7 @@ SCREENS.c_offer = p => {
       <div class="col g4 ohead"><h1 class="h1">${esc(o.title)}</h1>${s ? `<span class="m">${esc(`${s.c} · ${s.s} · ${s.n}`)}</span>` : ''}</div>
       ${S.role === 'guest' ? `<button class="card c" data-a="guestNeed" data-v="увидеть имя и профиль исполнителя" style="text-align:left"><span class="row"><span class="ava">${ic('user', 22, 2)}</span><span class="grow">${exLine(o)}<span class="m">${e.reviews ? pn(e.reviews, 'отзыв', 'отзыва', 'отзывов') + ' · ' : ''}${esc(areaText(e.area, o.ex))}</span><span class="m" style="display:block">Имя и связь с исполнителем — после входа</span></span><span class="blue">${ic('lock', 20, 2)}</span></span></button>`
         : `<div class="card c oexec" style="gap:10px"><button data-a="go" data-v="${gv('c_exec', { id: o.ex })}" style="text-align:left"><span class="row">${exAva(o.ex)}<span class="grow">${exLine(o)}<span class="m">${e.reviews ? pn(e.reviews, 'отзыв', 'отзыва', 'отзывов') + ' · ' : ''}${esc(areaText(e.area, o.ex))}</span></span><span class="blue">${ic('arr', 22, 2)}</span></span></button>${o.ex === 'alex' ? '' : `<div class="btns two">${btn(`${ic('chat', 20)} Написать`, 'chatWith', o.id, 'soft')}${btn(`${ic('phone', 20)} Позвонить`, 'callAsk', o.ex, 'soft')}</div>`}</div>`}
-      ${card(`<div>${esc(o.desc)}</div><div class="h2">Что входит</div>${bullets(o.inc)}<div class="h2">Что вы получите</div><div>${esc(o.res)}</div>${bounds.length ? `<div class="h2">Заказывается отдельно</div><div class="m">${bounds.map((x, i) => esc(i ? lcFirst(x) : x)).join(', ')}. Это другие услуги: в эту карточку они не входят.</div>` : ''}`)}
+      ${card(`<div>${esc(o.desc)}</div><div class="h2">Что входит</div>${bullets(o.inc)}${o.tiers ? `<div class="h2">Цена зависит от площади</div>${bullets(tierText(o))}` : ''}<div class="h2">Что вы получите</div><div>${esc(o.res)}</div>${bounds.length ? `<div class="h2">Заказывается отдельно</div><div class="m">${bounds.map((x, i) => esc(i ? lcFirst(x) : x)).join(', ')}. Это другие услуги: в эту карточку они не входят.</div>` : ''}`)}
       ${preview || o.model === 'brief' || o.model === 'inspect' ? '' : wayField(o, c)}
       <div class="row wrap">${pillRow}${o.formats.includes('online') ? pill('Можно онлайн', '', 'globe') : ''}${o.docs ? pill('Документы проверены', 'ok', 'shield') : ''}</div>
       ${promoInfo(o, c)}
@@ -7684,7 +7718,7 @@ SCREENS.c_reqview = p => {
     body: `${card(`<div class="h2">Сведения о задаче</div><div>${esc(r.what)}</div>${r.text ? `<div class="m">«${esc(r.text)}»</div>` : ''}${reqFilesHtml(r.files)}<div class="sumline"><span>Где</span><b>${esc(r.whereText)}</b></div><div class="sumline"><span>Когда</span><b>${esc(r.whenText)}</b></div><div class="sumline"><span>Цена</span><b>${r.budgetFrom ? `${rub(r.budgetFrom)} – ${rub(r.budget)}` : r.budget ? rub(r.budget) : 'договорная'}</b></div><div class="sumline"><span>Кому</span><b>${r.to === 'all' ? 'всем подходящим' : pn(r.pick.length, 'исполнитель', 'исполнителя', 'исполнителей')}</b></div>`)}
       <div class="sec"><span class="h2">Предложения</span><span class="m">${r.offers.length}</span></div>
       ${r.offers.length ? r.offers.map(x => card(`${fresh.has(x) ? `<span class="newtag">${ic('spark', 14, 2.4)} Новое предложение</span>` : ''}<div class="row">${exAva(x.ex)}<span class="grow"><b class="t18" style="display:block">${esc(exName(x.ex))}</b><span class="m">${EX[x.ex].reviews ? `★ ${String(EX[x.ex].rating).replace('.', ',')}` : 'Нет отзывов'} · ${esc(areaText(EX[x.ex].area, x.ex))}</span></span><b class="t18 num">${rub(x.price)}</b></div><div>${esc(x.text)}</div><div class="m">${ic('clock', 16, 2)} ${esc(x.when)}</div>${r.status === 'open' ? `<div class="btns two">${btn('Написать', 'chatWith', x.offer, 'soft')}${btn('Выбрать', 'reqChoose', `${r.id}|${x.id}`)}</div>` : r.chosen === x.id ? pill('Вы выбрали', 'ok', 'check') : ''}`)).join('')
-        : `${skel(2)}<div class="m">Предложения появятся здесь, мы пришлём уведомление.</div>`}`,
+        : `<div class="info"><b>Пока никто не откликнулся</b><span class="m">Исполнители уже видят заявку и пришлют свои цены. О каждом предложении сообщим уведомлением, следить за экраном не нужно.</span></div>`}`,
   };
 };
 A.reqChoose = v => {
@@ -8023,8 +8057,9 @@ Object.assign(A, {
   profDirAdd() { sheet('Добавить направление', `<div class="chips">${CATS.map(c => chip('profDirPick', c.name, esc(c.name), S.profile.dirs.includes(c.name))).join('')}</div>${btn('Готово', 'closeSheetRender', '', 'block')}`); },
   profDirPick(v) { togIn(S.profile.dirs, v); A.profDirAdd(); },
   closeSheetRender() { closeSheet(); render(); },
-  profPoint() { S.profile.points.push({ id: uid('p'), name: 'Ленинский пр-т, 99', zone: 'м. Новаторская' }); render(); toast('Точка добавлена'); },
-  profAI() { S.profile.about = 'Шиномонтаж с 2014 года на Профсоюзной. Работаю с RunFlat и низким профилем, балансирую на стенде. Приезжаю на выезд по ЮЗАО.'; render(); toast('Помощник предложил текст. Поправьте под себя'); },
+  /* 17.11: в рабочей версии — настоящий адрес через поиск, а не выдуманная точка прототипа */
+  profPoint() { if (REAL) { A.addrOpen('prof'); return; } S.profile.points.push({ id: uid('p'), name: 'Ленинский пр-т, 99', zone: 'м. Новаторская' }); render(); toast('Точка добавлена'); },
+  profAI() { const my = S.myServices.map(m => m.title).filter(Boolean).slice(0, 2); S.profile.about = REAL ? `${my.length ? `${my.join(', ')}.` : 'Работаю аккуратно и в срок.'} Перед началом согласую список работ и цену. Если что-то пойдёт не по плану — сразу напишу.` : 'Шиномонтаж с 2014 года на Профсоюзной. Работаю с RunFlat и низким профилем, балансирую на стенде. Приезжаю на выезд по ЮЗАО.'; render(); toast('Помощник предложил текст. Поправьте под себя'); },
   profSave() { back(); toast('Профиль сохранён. Новые карточки возьмут эти данные'); },
 });
 
@@ -8281,14 +8316,14 @@ SCREENS.e_fav = () => { const favs = allReqs().filter(x => S.favReqs.includes(x.
 /* ---------- кабинет исполнителя и финансы (лист 37: деньги и баллы раздельно) ---------- */
 SCREENS.e_cab = () => ({
   title: 'Кабинет', cls: 'cabh',
-  body: `<div class="card"><div class="row"><span class="ava lg">${letter(myName())}</span><span class="grow"><span class="h2" style="display:block;font-size:28px;line-height:32px">${esc(myName())}</span><span class="row wrap">${REAL && !EX.alex.ver ? '' : pill('Проверен', '', 'diamond')}<span class="rating">${ic('star', 16, 2)} 4,9</span><span class="m">214 отзывов</span></span></span></div></div>
+  body: `<div class="card"><div class="row">${avaPick()}<span class="grow"><span class="h2" style="display:block;font-size:28px;line-height:32px">${esc(myName())}</span><span class="row wrap">${REAL && !EX.alex.ver ? '' : pill('Проверен', '', 'diamond')}${REAL ? `<span class="m">${ratingText('alex')}</span>` : `<span class="rating">${ic('star', 16, 2)} 4,9</span><span class="m">214 отзывов</span>`}</span></span></div>${btn('Мой профиль: как меня видят заказчики', 'go', gv('c_exec', { id: 'alex' }), 'text block')}</div>
     ${card(`<div class="list">
       ${rl('Профиль и направления', 'Заполняется один раз для всех карточек', 'go', 'e_profile', { icon: 'user' })}
       ${rl('Статус и счёт', `${esc(S.profile.status)} · счёт подключён`, 'statusInfo', '', { icon: 'case' })}
       ${rl('Финансы', 'Выплаты, комиссия, эквайринг', 'go', 'e_money', { icon: 'wallet' })}
       ${rl('Мои услуги', pn(S.myServices.length, 'карточка', 'карточки', 'карточек'), 'go', 'e_services', { icon: 'orders' })}
       ${rl('Мои клиенты', 'База клиентов, напоминания и рассылки', 'go', 'e_clients', { icon: 'user' })}
-      ${rl('Отзывы', '★ 4,9 · 214 отзывов', 'go', gv('c_reviews', { id: 'alex' }), { icon: 'star' })}
+      ${rl('Отзывы', REAL ? ratingText('alex') : '★ 4,9 · 214 отзывов', 'go', gv('c_reviews', { id: 'alex' }), { icon: 'star' })}
       ${rl('Профиль глазами заказчика', 'Все ваши направления и услуги', 'go', gv('c_exec', { id: 'alex' }), { icon: 'eye' })}
     </div>`, 'c')}
     ${card(`<div class="list">${rl('Поддержка ZELDO', 'Отвечаем с 9:00 до 21:00 по Москве', 'supportOpen', '', { icon: 'shield' })}${rl('Поделиться ZELDO', 'Ссылка-приглашение для друзей и клиентов', 'shareApp', '', { icon: 'send' })}${rl('Настройки', '', 'settings', '', { icon: 'gear' })}${rl('Помощь', 'Комиссия, оплата, споры', 'helpExec', '', { icon: 'info' })}</div>`, 'c')}`,
@@ -8347,7 +8382,7 @@ const crmChat = name => S.chats.find(c => c.role === 'exec' && c.with === name &
 const crmFill = (t, c, p) => t.replace(/\{имя\}/g, c.name.split(' ')[0]).replace(/\{услуга\}/g, (c.svcs[0] || '').toLowerCase()).replace(/\{скидка\}/g, p ? promoLine(p) : '');
 SCREENS.e_clients = () => {
   const all = crmClients(); const l = crmPick(all, S.crm.tab); const sleep = all.filter(c => c.sleep); const loyal = all.filter(c => c.n >= 2);
-  const row = c => `<div class="crm-r"><span class="ava">${letter(c.name)}</span><span class="grow"><span class="crm-h"><b>${esc(c.name)}</b>${c.sleep ? pill(`не был ${pn(c.ago, 'день', 'дня', 'дней')}`, 'warn', 'clock') : c.next ? pill(`записан: ${dayName(c.next, true)}`, 'ok', 'calok') : ''}</span>
+  const row = c => `<div class="crm-r">${avaByName(c.name)}<span class="grow"><span class="crm-h"><b>${esc(c.name)}</b>${c.sleep ? pill(`не был ${pn(c.ago, 'день', 'дня', 'дней')}`, 'warn', 'clock') : c.next ? pill(`записан: ${dayName(c.next, true)}`, 'ok', 'calok') : ''}</span>
       <span class="m">${pn(c.n, 'визит', 'визита', 'визитов')}${c.sum ? ` · ${rub(c.sum)}` : ''}${c.last ? ` · последний ${dayName(c.last, true)}` : ''}</span><span class="m crm-s">${esc(c.svcs.join(', '))}</span></span>
     <span class="crm-b">${btn(ic('chat', 18, 2.2), 'crmChat', c.name, 'soft sm', `aria-label="Написать: ${esc(c.name)}"`)}${btn('Напомнить', 'crmRemind', c.name, c.sleep ? 'sm' : 'soft sm')}</span></div>`;
   return {
@@ -8459,8 +8494,9 @@ function wizFromOffer(o, ms) {
     w.tp = { tab: t.transfers[0], base: t.p[t.transfers[0]][t.diams[0]][0], step: 50, p: { car: JSON.parse(JSON.stringify(t.p.car || {})), off: JSON.parse(JSON.stringify(t.p.off || {})) }, rf: t.rf || 300, lp: t.lp || 200, both: t.both || 450, dur: { car: (t.dur.car || [12, 40]).slice(), off: (t.dur.off || [9, 30]).slice() }, manual: true };
   }
   if (o.variants && ['pack', 'hair'].includes(o.model)) { w.vars = true; w.vr = o.variants.map(v => mkVar(v.name, v.inc || o.inc, v.res || o.res, v.price, v.term || 5, v.dur || 60)); }
-  w.addons = (o.addons || []).map(a => ({ name: a.name, desc: a.desc || '', price: a.price, multi: a.multi, max: a.max, unit: a.unit || 'шт.', tm: a.time.m || 0, vars: [] }));
+  w.addons = (o.addons || []).map(a => ({ name: a.name, desc: a.desc || '', price: a.price, multi: a.multi, max: a.max, unit: a.unit || 'шт.', tm: a.time.m || 0, td: a.time.k === 'days' ? a.time.d : 0, vars: [] }));
   w.prp = JSON.parse(JSON.stringify(o.prp || prpDefault(o.svc, priceFrom(o), o.unit === 'за м²'))); w.pick = o.pick || null;
+  w.tiers = o.tiers ? [o.tiers[1][1], o.tiers[2][1]] : null; if (o.tiers) w.price = o.tiers[0][1];
   w.step = 1; w.maxStep = 5; return w;
 }
 function openWizard(id) {
@@ -8564,6 +8600,10 @@ function wzUnitField(w) {
     : field('Цена указывается', `<div class="fixu">${esc(us[0])}</div>`, { hint: hint(us[0]) })) + more;
 }
 
+/* цена за м² ступенями по площади (запись 68: «до 50 квадратов одна цена, от 50 до 100 — другая») */
+function wzTiersHtml(w) {
+  return `<div class="row"><span class="grow"><b style="display:block">Цена зависит от площади</b><span class="m">Например, на маленькой площади метр дороже, на большой — дешевле.</span></span>${sw('wzTiers', '', !!w.tiers, 'Цена зависит от площади')}</div>${w.tiers ? `<div class="grid2">${field('50–100 м², за м²', stepper('wzTier', '0', w.tiers[0], 50, Infinity, rub, true, 50))}${field('Больше 100 м², за м²', stepper('wzTier', '1', w.tiers[1], 50, Infinity, rub, true, 50))}</div><span class="m">Заказчик увидит все три цены, итог посчитается по его площади.</span>` : ''}`;
+}
 /* шаг 4: цена и допы — полная цена для каждого сочетания, всё на одном экране */
 function wzStep4(w) {
   let price;
@@ -8583,7 +8623,7 @@ function wzStep4(w) {
     price = pickCard(w);
   } else {
     price = card(`<div class="h2">Как считать цену</div><div class="optlist">${opt('wzPT', 'fixed', 'Точная цена', 'Заказчик видит итог и может оплатить сразу', w.priceType === 'fixed')}${opt('wzPT', 'from', 'От — зависит от объёма', 'Заказчик отправит условия, вы подтвердите окончательную цену до оплаты', w.priceType === 'from')}${opt('wzPT', 'deal', 'После описания задачи', 'Заказчик опишет задачу, вы пришлёте предложение с ценой', w.priceType === 'deal')}</div>
-      ${w.priceType !== 'deal' ? `${field(w.priceType === 'from' ? 'Цена от' : 'Цена', stepper('wzPrice', 'p', w.price, 100, Infinity, rub, false, x => x >= 10000 ? 1000 : x >= 2000 ? 500 : 100))}${wzUnitField(w)}` : `${field('Ориентир для заказчика, от', stepper('wzPrice', 'p', w.price, 100, Infinity, rub, false, x => x >= 10000 ? 1000 : x >= 2000 ? 500 : 100))}`}`);
+      ${w.priceType !== 'deal' ? `${field(w.tiers && w.unit === 'за м²' ? 'Цена до 50 м², за м²' : w.priceType === 'from' ? 'Цена от' : 'Цена', stepper('wzPrice', 'p', w.price, 100, Infinity, rub, false, x => x >= 10000 ? 1000 : x >= 2000 ? 500 : 100))}${wzUnitField(w)}${w.unit === 'за м²' ? wzTiersHtml(w) : ''}` : `${field('Ориентир для заказчика, от', stepper('wzPrice', 'p', w.price, 100, Infinity, rub, false, x => x >= 10000 ? 1000 : x >= 2000 ? 500 : 100))}`}`);
   }
   const stages = w.stages || isProject(w) ? card(`<div class="row"><span class="grow"><span class="h2" style="display:block">Оплата по этапам</span><span class="m">Для крупных работ: у этапа свой результат и цена. Деньги за этап придут после его приёмки, следующий этап начнётся после приёмки предыдущего.</span></span>${sw('wzStages', '', w.stages, 'Оплата по этапам')}</div>
       ${w.stages ? `${w.st.map((s, i) => `<div class="addon"><div class="ah"><input class="input" data-in="wzStName|${i}" value="${esc(s.name)}" aria-label="Название этапа"><button class="iconbtn" data-a="wzStDel" data-v="${i}" aria-label="Удалить этап">${ic('x', 20, 2.2)}</button></div>${stepper('wzStPrice', `${i}|1000`, s.price, 1000, Infinity, rub, true, 1000)}</div>`).join('')}<button class="chip add" data-a="wzStAdd" style="justify-self:start">${ic('plus', 16, 2.4)} Этап</button><div class="sumline total"><span>Весь проект</span><b>${rub(w.st.reduce((a, s) => a + s.price, 0))}</b></div>` : ''}`) : '';
@@ -8596,7 +8636,7 @@ function wzStep4(w) {
       <input class="input" style="min-height:44px;font-size:14px;padding:8px 12px;border-radius:13px" data-in="wzAdDesc|${i}" value="${esc(a.desc || '')}" placeholder="Что входит в одну единицу (по желанию)" maxlength="60" aria-label="Краткое описание допа">
       <div class="row wrap">${stepper('wzAdPrice', `${i}`, a.price, 0, Infinity, rub, true, x => x >= 1000 ? 100 : x >= 200 ? 50 : 10)}<span class="m">${a.multi ? 'за ' + esc(a.unit) : 'за раз'}</span></div>
       ${seg('wzAdMulti', [[`${i}|0`, 'Один раз', 'нельзя взять дважды'], [`${i}|1`, 'Несколько', 'сколько угодно в одном заказе']], `${i}|${a.multi ? 1 : 0}`)}
-      ${field('Время', stepper('wzAdTm', `${i}`, a.tm, 0, Infinity, m => m ? `+${mins(m)}` : 'не добавляет', false, 5), { hint: a.tm ? (a.multi ? 'Добавится к работе за каждую штуку.' : 'Добавится к работе один раз.') : 'Работа не станет дольше.' })}
+      ${byTerm(w) ? field('На сколько дней дольше', stepper('wzAdTd', `${i}`, a.td || 0, 0, 60, d => d ? `+${pn(d, 'день', 'дня', 'дней')}` : 'не добавляет', false, 1), { hint: a.td ? 'Столько дней добавится к сроку работы.' : 'Срок работы не изменится.' }) : field('Сколько времени добавит', stepper('wzAdTm', `${i}`, a.tm, 0, 480, m => m ? `+${mins(m)}` : 'не добавляет', false, 5), { hint: a.tm ? (a.multi ? 'Добавится к работе за каждую штуку. Не больше 8 часов.' : 'Добавится к работе один раз. Не больше 8 часов.') : 'Работа не станет дольше.' })}
       ${w.vars && w.vr.length > 1 ? `<span class="lbl">Для каких вариантов</span><div class="chips">${chip('wzAdVar', `${i}|*`, 'Для всех', !a.vars.length, { noCheck: true })}${w.vr.map((v, k) => chip('wzAdVar', `${i}|${k}`, esc(v.name || `Вариант ${k + 1}`), a.vars.includes(k))).join('')}</div>` : ''}
       ${incN.includes(norm(a.name)) ? `<span class="err">Это уже входит в работу: второй раз за доплату продавать нельзя.</span>` : ''}
     </div>`).join('')}
@@ -8611,9 +8651,9 @@ const prpStep = x => x >= 5000 ? 500 : x >= 1000 ? 100 : x >= 100 ? 50 : 10;
 function prpCard(w) {
   const ps = svcParams(w.svc).filter(p => (p.r === 'sur' || p.r === 'each') && w.prp[p.id]); if (!ps.length || isTire(w)) return '';
   const per = unitParam(w.unit) ? ' ' + w.unit : '';
-  return card(`<div class="h2">Доплаты по ответам заказчика</div><div class="m">Заказчик отвечает на эти вопросы в карточке и сразу видит вашу доплату${per ? `, она тоже ${esc(w.unit)}` : ''}. Площадка ничего не прибавляет.</div>
+  return card(`<div class="h2">Доплаты по ответам заказчика</div><div class="m">Заказчик отвечает на эти вопросы в карточке и сразу видит вашу доплату${per ? `. Доплата за вариант считается ${esc(w.unit)}, доплата за штуку — один раз` : ''}. Площадка ничего не прибавляет.</div>
     ${ps.map(p => { const pp = w.prp[p.id];
-      const rows = p.t === 'да / нет' ? [['yes', 'Если «да»']] : p.r === 'each' ? [['each', p.inc ? `За каждый сверх ${p.inc}` : 'За каждый']] : p.v.slice(p.t === 'один из списка' ? 1 : 0).map(x => [x, x]);
+      const rows = p.t === 'да / нет' ? [['yes', 'Если «да»']] : p.r === 'each' ? [['each', p.inc ? `Больше ${p.inc}: доплата за 1 шт., один раз` : 'Доплата за 1 шт., один раз']] : p.v.slice(p.t === 'один из списка' ? 1 : 0).map(x => [x, x]);
       return `<div class="addon"><b class="t18">${esc(p.n)}</b>${p.t === 'один из списка' ? `<span class="m">«${esc(p.v[0])}» — без доплаты</span>` : ''}${rows.map(([k, l]) => { const x = prpVal(pp, k); return `<div class="row"><span class="grow">${esc(l)}</span>${stepper('wzPrp', `${p.id}|${k}|${prpStep(x)}`, x, 0, Infinity, y => y ? '+' + rub(y) : 'без доплаты', true, prpStep(x))}</div>`; }).join('')}</div>`; }).join('')}`);
 }
 function pickCard(w) {
@@ -8666,7 +8706,7 @@ function wizToOffer(w, id) {
     booking: onlyOnline(w) ? 'term' : !w.fmts.includes('point') ? 'slots' : w.visit.length === 2 ? 'both' : w.visit[0] === 'free' ? 'free' : 'slots',
     zone: REAL ? (S.profile.points[0] || {}).zone || '' : `${S.profile.points[0].zone}, 1,2 км от вас`, addr: REAL ? (S.profile.points[0] || {}).name || '' : `${S.profile.points[0].name}, вход со двора`, unit: w.unit,
     need: w.fmts.includes('online') && w.onl.mat.length ? w.onl.mat.slice() : null,
-    addons: w.addons.filter(a => a.name.trim()).map((a, i) => ({ id: 'a' + i, name: a.name, desc: a.desc || '', price: a.price, multi: a.multi, max: a.multi ? a.max : 1, unit: a.unit, time: a.tm ? { k: a.multi ? 'each' : 'once', m: a.tm } : { k: 'none' }, vars: w.vars && a.vars.length ? a.vars.map(k => 'p' + k) : null })) };
+    addons: w.addons.filter(a => a.name.trim()).map((a, i) => ({ id: 'a' + i, name: a.name, desc: a.desc || '', price: a.price, multi: a.multi, max: a.multi ? a.max : 1, unit: a.unit, time: byTerm(w) ? (a.td ? { k: 'days', d: a.td } : { k: 'none' }) : a.tm ? { k: a.multi ? 'each' : 'once', m: Math.min(a.tm, 480) } : { k: 'none' }, vars: w.vars && a.vars.length ? a.vars.map(k => 'p' + k) : null })) };
   if (isTire(w)) {
     const ds = w.tire.diams.slice().sort((a, b) => a - b); const p = {}; w.tire.transfers.forEach(tr => { p[tr] = {}; ds.forEach(d => { p[tr][d] = ((w.tp.p[tr] || {})[d] || [0, 0]).slice(); }); });
     Object.assign(o, { model: 'tire', unit: 'за колесо', tire: { diams: ds, p, rf: w.tire.rf ? w.tp.rf : null, lp: w.tire.lp ? w.tp.lp : null, both: w.tire.rf && w.tire.lp && w.tire.both ? w.tp.both : null, dur: JSON.parse(JSON.stringify(w.tp.dur)), rfDur: 3, transfers: w.tire.transfers.slice() } });
@@ -8675,7 +8715,8 @@ function wizToOffer(w, id) {
     const pp = priceParam(w.svc); const vp = pp && variants.every(v => pp.v.includes(v.name)) ? pp.id : null;
     Object.assign(o, onlyOnline(w) ? { model: 'pack', unit: '', variants } : { model: 'hair', unit: '', variants, custom: true }, { varParam: vp });
   } else if (w.priceType === 'deal') Object.assign(o, { model: 'generic', priceFrom: !w.pick, dur: w.dur, term: w.term, from: w.price, brief: [['Что важно', ['Срочно', 'Нужна консультация', 'Есть фото', 'Есть свои материалы']]], reply: { price: w.price, dur: w.dur, inc: w.inc.slice(0, 3), text: 'Посмотрел задачу. Предлагаю так.' } });
-  else Object.assign(o, { model: 'generic', from: w.price, dur: w.dur, term: w.term, priceFrom: w.priceType === 'from' }, w.pick ? { pick: w.pick, unit: unitParam(w.unit) ? w.unit : '' } : {});
+  else { Object.assign(o, { model: 'generic', from: w.price, dur: w.dur, term: w.term, priceFrom: w.priceType === 'from' }, w.pick ? { pick: w.pick, unit: unitParam(w.unit) ? w.unit : '' } : {});
+    o.tiers = w.tiers && w.unit === 'за м²' && !w.pick ? [[50, w.price], [100, w.tiers[0]], [0, w.tiers[1]]] : null; if (o.tiers) o.from = Math.min(...o.tiers.map(t => t[1])); }
   o.prp = JSON.parse(JSON.stringify(w.prp || {}));
   if (w.doc) o.docs = true;
   const sb = subOf(w); if (sb.on && subFits(w)) o.sub = { visits: sb.n, per: sb.per, disc: sb.disc, miss: { k: sb.miss, h: sb.h } };
@@ -8729,7 +8770,7 @@ Object.assign(A, {
   wzProposeSheet() { const P = S.propose; sheet('Предложить новую услугу', `<div class="m">Мы проверим, нет ли такой услуги под другим названием, и добавим её в каталог. Карточку создадите после этого.</div>${field('Раздел', `<div class="chips scroll">${CATS.map(c => chip('wzPropCat', c.name, esc(c.name), P.cat === c.name, { noCheck: true })).join('')}</div>`)}${field('Как называется услуга', `<input class="input" data-in="wzNewSvc" value="${esc(P.name)}" maxlength="80" placeholder="Например: ремонт дисков с напылением">`)}${btn('Отправить предложение', 'wzProposeOk', '', 'block')}${btn('Отмена', 'closeSheet', '', 'text block')}`); },
   wzPropCat(v) { S.propose.cat = v; A.wzProposeSheet(); },
   wzProposeOk() { if (!S.propose.name.trim()) { toast('Напишите название услуги', 'info'); return; } closeSheet(); notify('exec', 'Предложение в каталог отправлено', `${S.propose.name} · ${S.propose.cat}`, 'e_services'); toast('Отправили на проверку каталога. Пока можно выбрать ближайшую услугу'); },
-  wzAI() { const w = S.wiz; const s = svcBy(w.svc); w.desc = isTire(w) ? 'Шиномонтаж на Профсоюзной: снимем колёса, перебортируем шины и отбалансируем на стенде. Работаю с RunFlat и низким профилем с 2014 года.' : `${sugFor(w.svc).desc[0]} Работаю в районе ${S.profile.points[0].zone.replace('м. ', '')}, ${s.f === 'off' ? 'приезжаю или принимаю у себя' : 'можно онлайн'}.`; wzTouch(); render(); toast('Помощник написал черновик. Поправьте под себя'); },
+  wzAI() { const w = S.wiz; const s = svcBy(w.svc); w.desc = isTire(w) && !REAL ? 'Шиномонтаж на Профсоюзной: снимем колёса, перебортируем шины и отбалансируем на стенде. Работаю с RunFlat и низким профилем с 2014 года.' : `${sugFor(w.svc).desc[0]}${(S.profile.points[0] || {}).zone ? ` Работаю в районе ${S.profile.points[0].zone.replace('м. ', '')},` : ''} ${s.f === 'off' ? 'приезжаю или принимаю у себя' : 'можно онлайн'}.`.replace(/\. ([а-я])/, (m, c) => '. ' + c.toUpperCase()); wzTouch(); render(); toast('Помощник написал черновик. Поправьте под себя'); },
   wzTpl() { const w = S.wiz; const list = sugFor(w.svc).desc; const i = (list.indexOf(w.desc) + 1) % list.length; w.desc = list[i]; wzTouch(); render(); },
   wzInc(v) { togIn(S.wiz.inc, v); wzTouch(); render(); },
   wzRes(v) { S.wiz.res = v; wzTouch(); render(); },
@@ -8779,7 +8820,10 @@ Object.assign(A, {
   wzAdPrice(v) { const [i, d] = v.split('|'); const a = S.wiz.addons[Number(i)]; const step = a.price >= 1000 ? 100 : a.price >= 200 ? 50 : 10; a.price = Math.max(0, a.price + step * Number(d)); wzTouch(); render(); },
   wzAdMulti(v) { const [i, m] = v.split('|'); const a = S.wiz.addons[Number(i)]; a.multi = m === '1'; if (a.multi && a.max < 2) a.max = 4; wzTouch(); render(); },
   wzAdMax(v) { const [i, d] = v.split('|'); const a = S.wiz.addons[Number(i)]; a.max = clamp(a.max + Number(d), 2, 50); wzTouch(); render(); },
-  wzAdTm(v) { const [i, d] = v.split('|').map(Number); const a = S.wiz.addons[i]; a.tm = clamp(a.tm + 5 * d, 0, Infinity); wzTouch(); render(); },
+  wzAdTd(v) { const [i, d] = v.split('|').map(Number); const a = S.wiz.addons[i]; a.td = clamp((a.td || 0) + d, 0, 60); wzTouch(); render(); },
+  wzTiers() { const w = S.wiz; w.tiers = w.tiers ? null : [w.price, w.price]; wzTouch(); render(); },
+  wzTier(v) { const [i, d] = v.split('|').map(Number); const w = S.wiz; w.tiers[i] = clamp(w.tiers[i] + 50 * d, 50, Infinity); wzTouch(); render(); },
+  wzAdTm(v) { const [i, d] = v.split('|').map(Number); const a = S.wiz.addons[i]; a.tm = clamp(a.tm + 5 * d, 0, 480); wzTouch(); render(); },
   wzAdVar(v) { const [i, k] = v.split('|'); const a = S.wiz.addons[Number(i)]; if (k === '*') a.vars = []; else togIn(a.vars, Number(k)); wzTouch(); render(); },
   wzSubmit() {
     const w = S.wiz; wizSave();
@@ -9129,7 +9173,7 @@ SCREENS.c_sfilters = () => {
       ${locFilterHtml(f, s)}
       ${card(`<div class="h2">Дата: точная или период</div><span class="m">Это пожелание, не подтверждение свободного времени. Для точной даты нажмите один день, для периода — начало и конец.</span>
         ${calendarHtml('sf')}<div class="m">${f.from ? (f.to ? `Период: ${dayName(f.from).toLowerCase()} — ${dayName(f.to).toLowerCase()}` : `Дата: ${dayName(f.from).toLowerCase()}`) : 'Дата не выбрана'}${f.from ? ` · <button class="lnk" data-a="sfDateClear" style="display:inline">Убрать</button>` : ''}</div>
-        ${timeField('sf', { label: 'Время', title: 'Желаемое время', ph: 'Любое время', list: () => HALF_HOURS(), get: () => f.time, set: t => { f.time = t; }, clear: 'Любое время', note: 'Это пожелание: исполнитель подтвердит время отдельно.' })}`, 'c')}
+        ${timeField('sf', { label: 'Время', title: 'Желаемое время', ph: 'Любое время', list: () => timesFor(f.to ? null : f.from), get: () => f.time, set: t => { f.time = t; }, clear: 'Любое время', note: 'Это пожелание: исполнитель подтвердит время отдельно.' })}`, 'c')}
       ${card(`<div class="h2">Цена</div>${numeric ? `${field('Не дороже', stepper('sfPrice', 'p', f.pmax || Math.max(...offers.map(priceFrom)), 500, Infinity, rub, false, budStep))}<span class="m">Учитывается цена «от» в карточке.</span>` : s ? '<div class="m">У этой услуги есть договорная цена: сумму и условия согласуют до оплаты, числовой фильтр не применяется.</div>' : '<div class="m">Выберите услугу, чтобы фильтровать по цене.</div>'}`, 'c')}`,
     bar: `<div class="abar"><div class="btns two">${btn('Сбросить фильтры', 'sfReset', '', 'outline')}${btn('Применить', 'sfApply', '', '')}</div>${btn('Отмена', 'back', '', 'text block')}</div>`,
   };
@@ -9160,7 +9204,7 @@ const reqBudgetText = R => R.btype === 'fix' ? rub(R.budget) : R.btype === 'rang
 function reqBlock(R) {
   const s = R.svc && svcById(R.svc);
   if (R.step === 1 && !s) return 'выберите услугу';
-  if (R.step === 2) { if (!R.from) return R.when === 'range' ? 'выберите начало периода' : 'выберите дату'; if (R.when === 'range' && !R.to) return 'выберите конец периода'; }
+  if (R.step === 2) { if (!R.from) return R.when === 'range' ? 'выберите начало периода' : 'выберите дату'; if (R.when === 'range' && !R.to) return 'выберите конец периода'; if (whenPast(R.when === 'range' ? R.to : R.from, R.when === 'range' ? null : R.time)) return R.time && R.from === dkey(new Date()) ? `сегодня ${R.time} уже прошло, выберите время позже` : 'эта дата уже прошла'; }
   return '';
 }
 SCREENS.c_req = () => {
@@ -9183,7 +9227,7 @@ SCREENS.c_req = () => {
     body = `${field('Формат', chips('reqFmt', fmts, v => v === R.fmt))}
       ${R.fmt === 'online' ? '<div class="info"><span class="m">Онлайн: адрес и район не нужны.</span></div>' : field('Где', `<button class="fakefield svcf addrf" data-a="addrOpen" data-v="req"><span class="grow"><span class="t18" style="display:block">${esc(R.addr || 'Укажите адрес')}</span>${R.district ? `<span class="m">Район: ${esc(R.district)}, ${esc(R.city)}</span>` : ''}</span>${ic('arr', 20, 2.2)}</button>`, { hint: 'Исполнители увидят только район и город. Точный адрес — после оплаты.' })}
       <div class="field"><span class="lbl">Когда?</span>${seg('reqWhen', [['exact', 'Точная дата'], ['range', 'Интервал']], R.when)}${calendarHtml('rq')}<span class="m">${R.when === 'range' ? (R.from ? (R.to ? `С ${dayName(R.from).toLowerCase()} по ${dayName(R.to).toLowerCase()}` : `Начало: ${dayName(R.from).toLowerCase()}. Нажмите конец периода.`) : 'Нажмите начало периода, затем конец.') : R.from ? `Дата: ${dayName(R.from).toLowerCase()}` : 'Нажмите на число.'}</span></div>
-      ${timeField('rqt', { label: 'Время', title: 'Желаемое время', ph: 'Любое время', list: () => HALF_HOURS(), get: () => R.time, set: t => { R.time = t; }, clear: 'Любое время', hint: 'Время — ваше пожелание, не подтверждение свободного времени.' })}
+      ${timeField('rqt', { label: 'Время', title: 'Желаемое время', ph: 'Любое время', list: () => timesFor(R.when === 'exact' ? R.from : null), get: () => R.time, set: t => { R.time = t; }, clear: 'Любое время', hint: 'Время — ваше пожелание, не подтверждение свободного времени.' })}
       ${field('Бюджет', `<div class="optlist">${opt('reqBt', 'fix', 'Сумма', 'Сколько готовы заплатить', R.btype === 'fix')}${opt('reqBt', 'range', 'Диапазон', 'От и до', R.btype === 'range')}${opt('reqBt', 'deal', 'Договорная', 'Исполнители предложат свою цену', R.btype === 'deal')}</div>
         ${R.btype === 'fix' ? stepper('reqBudget', 'budget', R.budget, 500, Infinity, rub, false, budStep) : R.btype === 'range' ? `<div class="grid2">${field('От', stepper('reqBudget', 'budgetFrom', R.budgetFrom, 500, Infinity, rub, true, budStep))}${field('До', stepper('reqBudget', 'budget', R.budget, 500, Infinity, rub, true, budStep))}</div>` : ''}`, { hint: 'Бюджет — ваше пожелание, а не цена исполнителя.' })}`;
     bar = `<div class="abar">${bl ? `<button class="btn block" disabled>Проверить заявку</button><div class="why center">Причина: ${bl}.</div>` : btn('Проверить заявку', 'reqStep', '3', 'block')}<div class="btns two">${btn('Назад', 'reqStep', '1', 'outline')}${btn('Сохранить черновик', 'reqSave', '', 'outline')}</div></div>`;
@@ -9515,6 +9559,7 @@ function addrApply(a) {
   const leave = () => { S.addrQ = ''; S.addrRes = null; if (cur().n === 'addr') back(); else { closeSheet(); render(); } };
   if (mode === 'req') { Object.assign(S.req, { addr: a.street, city, district, lat: a.lat, lng: a.lng }); leave(); return; }
   if (mode === 'pick') { S.pickC = [a.lat, a.lng]; S.pickZ = 16; S.pickAddr = Object.assign({}, a, { city, district, at: geoKey(a.lat, a.lng) }); leave(); return; }
+  if (mode === 'prof') { S.profile.points.push({ id: uid('p'), name: a.street, zone: district ? `${district}, ${city}` : city }); leave(); toast('Точка добавлена'); return; }
   if (mode === 'cab') { S.myAddrs.push({ id: uid('ad'), name: 'Другой адрес', street: a.street, city, district, lat: a.lat, lng: a.lng }); leave(); toast('Адрес сохранён в «Моих адресах»'); return; }
   setMe(a.lat, a.lng, a.name || a.street, a.src || 'addr', { city, district, addr: a.street }); leave(); toast(`Ищем от: ${a.name || a.street}`);
 }
@@ -9658,7 +9703,7 @@ function cabNav() {
   ];
   const tl = S.navMini ? 'Развернуть меню' : 'Свернуть меню'; const sw = `Перейти в роль «${ex ? 'Заказчик' : 'Исполнитель'}»`;
   return `<div class="cabtop"><button class="cabtog" data-a="navMini" aria-label="${tl}" title="${tl}" aria-expanded="${!S.navMini}">${ic('panel', 20, 2)}</button></div>
-    <div class="cabme"><span class="ava lg">${letter(myName())}</span><span class="grow"><b class="t18">${esc(myName())}</b><span class="m">${ex ? `Исполнитель · ${REAL ? ratingText('alex') : '★ 4,9 · 214 отзывов'}` : `Заказчик${cr ? ` · ★ ${String(cr.avg).replace('.', ',')} от исполнителей` : ''}`}</span></span></div>
+    <button class="cabme" data-a="go" data-v="${ex ? gv('c_exec', { id: 'alex' }) : gv('c_aboutme', {})}" aria-label="Мой профиль: как меня видят ${ex ? 'заказчики' : 'исполнители'}">${myAva('lg')}<span class="grow"><b class="t18">${esc(myName())}</b><span class="m">${ex ? `Исполнитель · ${REAL ? ratingText('alex') : '★ 4,9 · 214 отзывов'}` : `Заказчик${cr ? ` · ★ ${String(cr.avg).replace('.', ',')} от исполнителей` : ''}`}</span></span></button>
     <button class="cabsw" data-a="setRole" data-v="${ex ? 'cust' : 'exec'}" ${tip(sw)}><span class="cs-i">${ic('retry', 18, 2.2)}</span><span class="cs-t">${sw}</span></button>
     <nav class="cnl">${items.join('')}${it(ex ? 'e_cab' : 'c_cab', 'user', 'Кабинет', 0, 'grey')}${it('sup', 'shield', 'Поддержка ZELDO', (chatById('sup') || {}).unread || 0, 'teal', { act: 'supportOpen', on: n === 'chat' && cur().p.id === 'sup' })}${it('share', 'send', 'Поделиться ZELDO', 0, 'violet', { act: 'shareApp', on: false })}</nav>`;
 }
@@ -9800,12 +9845,16 @@ const composeRow = ch => S.rec && S.rec.ch === ch.id
    Бывает редко, поэтому можно ярко: одна вспышка конфетти, сумма набегает. Один раз на заказ; если анимация выключена в системе — просто карточка.
    Сумма — та же, что в «Финансах» и в заказе: «Вам», за вычетом комиссии и эквайринга */
 const PARTY = new Set();
+/* после поздравления — сразу к блоку оценки (запись 69: «Оценить заказчика — он мне никуда не перешёл») */
+const toRate = id => setTimeout(() => { const el = document.getElementById(id); if (el) { if (el.scrollIntoView) el.scrollIntoView({ block: 'center' }); const b = el.closest('.card'); if (b) { b.classList.add('flash'); setTimeout(() => b.classList.remove('flash'), 1600); } } }, 60);
+/* дождь конфетти поверх экрана: 1,6 с, один раз; при «уменьшить движение» не показывается */
+const partyRain = () => { const C = ['var(--brand)', '#F5A524', '#17B26A', '#EE46BC', '#3D8EF8']; return `<div class="party-rain" aria-hidden="true">${Array.from({ length: 36 }, (_, i) => `<i style="--x:${(i * 37) % 100}%;--c:${C[i % 5]};--t:${(i % 9) * 70}ms;--r:${(i * 53) % 360}deg;--s:${0.7 + (i % 4) * 0.15}"></i>`).join('')}</div>`; };
 function celebrate(o, sum, title = 'Заказ закрыт') {
   const k = `${o.id}|${title}|${o.sub ? o.sub.used : ''}`; if (PARTY.has(k)) return; PARTY.add(k);
   const old = document.querySelector('.party'); if (old) old.remove();
   const el = document.createElement('div'); el.className = 'party'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-labelledby', 'partyT');
   const C = ['var(--brand)', '#F5A524', '#17B26A', '#EE46BC'];
-  el.innerHTML = `<div class="party-card"><div class="party-burst" aria-hidden="true">${Array.from({ length: 18 }, (_, i) => `<i style="--a:${i * 20}deg;--d:${96 + (i % 4) * 22}px;--c:${C[i % 4]};--t:${(i % 5) * 25}ms"></i>`).join('')}</div>
+  el.innerHTML = `${partyRain()}<div class="party-card"><div class="party-burst" aria-hidden="true">${Array.from({ length: 18 }, (_, i) => `<i style="--a:${i * 20}deg;--d:${96 + (i % 4) * 22}px;--c:${C[i % 4]};--t:${(i % 5) * 25}ms"></i>`).join('')}</div>
     <span class="party-ic">${ic('check', 40, 2.6)}</span><b class="party-t" id="partyT">${title}</b><span class="party-s">Деньги ваши</span><b class="party-sum num">${rub(sum)}</b>
     <span class="m">Заказ № ${o.id} · ${esc(o.client)}${o.sub ? `<br>Визит ${o.sub.used} из ${o.sub.total}` : sum !== o.total ? `<br>Из ${rub(o.total)} — за вычетом ${payout(o).free ? 'эквайринга банка: первые три заказа без комиссии ZELDO' : 'комиссии и эквайринга'}` : ''}</span>
     <div class="party-b">${btn('Отлично', 'partyClose', '', 'block')}${o.status === 'done' ? btn('Оценить заказчика', 'partyRate', String(o.id), 'text block') : ''}</div></div>`;
@@ -9819,7 +9868,8 @@ function celebrate(o, sum, title = 'Заказ закрыт') {
 }
 Object.assign(A, {
   partyClose() { const el = document.querySelector('.party'); if (!el) return; el.classList.add('out'); setTimeout(() => el.remove(), 160); },
-  partyRate(id) { A.partyClose(); if (S.role !== 'exec') switchRole('exec'); go('order', { id: Number(id) || id }); },
+  partyRate(id) { A.partyClose(); if (S.role !== 'exec') switchRole('exec'); go('order', { id: Number(id) || id }); toRate('crate_' + id); },
+  partyRateC(id) { A.partyClose(); if (S.role === 'exec') switchRole('cust'); go('order', { id: Number(id) || id }); toRate('rate_' + id); },
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.querySelector('.party')) A.partyClose(); });
 
@@ -10156,7 +10206,7 @@ function orderActions(o) {
     if (st === 'paid') h += noShowBlock(o) + codeBlock(o);
     if (st === 'startReq') h += `<div class="info warn"><b>Исполнитель начал работу</b><span class="m">${codeWin(o).k === 'none' ? 'Подтвердите, что он приступил.' : 'Исполнитель на месте, но не получил ваш код и прислал фото. Подтвердите, если он действительно приступил.'} Без вашего подтверждения работа не считается начатой.</span></div>${btn('Подтвердить начало', 'confirmStart', o.id, 'block')}`;
     if (st === 'result') h += `<div class="info"><b>Результат передан</b><span class="m">${esc(o.resultText || 'Работа выполнена по списку.')}</span>${resPhotosHtml(o)}</div><div class="btns">${btn(o.kind === 'rent' ? 'Закрыть заказ' : 'Принять работу', 'acceptWork', o.id, 'block')}${o.kind === 'rent' ? '' : !o.reworks ? btn('Попросить доработку', 'reworkAsk', o.id, 'soft block') : `<div class="m">Бесплатная доработка уже была. Если результат не устраивает, откройте спор.</div>`}${btn('Открыть спор', 'disputeAsk', o.id, 'text block')}</div>`;
-    if (st === 'done' && !o.reviewed) h += card(`<div class="row"><span class="h2 grow">Оцените работу</span>${o.rateTmp ? `<b class="rs-w">${RATE_WORD[o.rateTmp]}</b>` : ''}</div>${starPick('rate', o.id, o.rateTmp || 0)}${o.rateTmp ? `<div class="chips">${['Вовремя', 'Аккуратно', 'Цена как в карточке', 'Вежливо'].map(x => chip('rateTag', `${o.id}|${x}`, x, (o.rateTags || []).includes(x))).join('')}</div>
+    if (st === 'done' && !o.reviewed) h += card(`<div class="row" id="rate_${o.id}"><span class="h2 grow">Оцените работу</span>${o.rateTmp ? `<b class="rs-w">${RATE_WORD[o.rateTmp]}</b>` : ''}</div>${starPick('rate', o.id, o.rateTmp || 0)}${o.rateTmp ? `<div class="chips">${['Вовремя', 'Аккуратно', 'Цена как в карточке', 'Вежливо'].map(x => chip('rateTag', `${o.id}|${x}`, x, (o.rateTags || []).includes(x))).join('')}</div>
       <label class="field"><span class="lbl">Отзыв, если хотите</span><textarea class="textarea" data-in="rateText|${o.id}" rows="3" maxlength="600" placeholder="Расскажите, как всё прошло: что понравилось, что можно улучшить">${esc(o.rateText || '')}</textarea><span id="ratemod_${o.id}">${rateWarn(o.rateText)}</span></label>
       ${btn('Отправить отзыв', 'rateSend', o.id, 'block')}` : ''}`, 'soft');
     if (st === 'done' && o.reviewed) h += `<div class="info ok"><b>Спасибо за отзыв</b><span class="m">Он появится в профиле исполнителя.</span></div>`;
@@ -10187,7 +10237,7 @@ const CR_TAGS = { done: ['Чётко описал задачу', 'Был на м
 function clientRateBlock(o) {
   if (o.custReviewed) return `<div class="info ok"><b>Отзыв о заказчике отправлен</b><span class="m">Его увидят исполнители, к которым ${esc(o.client)} обратится.</span></div>`;
   const tags = CR_TAGS[o.status === 'cancel' ? 'cancel' : 'done'];
-  return card(`<div class="row"><span class="h2 grow">Оцените заказчика</span>${o.crTmp ? `<b class="rs-w">${RATE_WORD[o.crTmp]}</b>` : ''}</div>
+  return card(`<div class="row" id="crate_${o.id}"><span class="h2 grow">Оцените заказчика</span>${o.crTmp ? `<b class="rs-w">${RATE_WORD[o.crTmp]}</b>` : ''}</div>
     <div class="m">${o.status === 'cancel' ? 'Заказ отменён, но вы уже общались. Отзыв поможет другим исполнителям.' : 'Оценку увидят исполнители, к которым этот заказчик обратится.'}</div>
     ${starPick('crate', o.id, o.crTmp || 0)}${o.crTmp ? `<div class="chips">${tags.map(x => chip('crateTag', `${o.id}|${x}`, x, (o.crTags || []).includes(x))).join('')}</div>
     <label class="field"><span class="lbl">Отзыв, если хотите</span><textarea class="textarea" data-in="crateText|${o.id}" rows="3" maxlength="600" placeholder="Как прошло общение и заказ">${esc(o.crText || '')}</textarea><span id="cratemod_${o.id}">${rateWarn(o.crText)}</span></label>
@@ -10209,7 +10259,7 @@ SCREENS.order = p => {
   return {
     title: `Заказ № ${o.id}`,
     body: `${card(`<div class="row top"><span class="bigth" style="width:56px;height:56px;border-radius:14px;overflow:hidden;flex:none">${photo(of.ph, '', 'M')}</span><span class="grow"><span class="h2" style="display:block">${esc(o.svc)}</span><span class="m">${esc(o.what)}</span></span><b class="t18 num">${rub(o.total)}</b></div><div class="row wrap">${orderPill(o)}${nextStepText(o) ? `<span class="m">${nextStepText(o)}</span>` : ''}</div>
-        <div class="ocontact">${ex ? `<span class="ava">${letter(o.client)}</span>` : exAva(o.ex)}<span class="grow"><span class="m" style="display:block">${ex ? 'Заказчик' : 'Исполнитель'}</span><button class="plink" data-a="go" data-v="${ex ? gv('c_client', { name: o.client }) : gv('c_exec', { id: o.ex })}" aria-label="Профиль: ${esc(ex ? o.client : exName(o.ex))}"><b>${esc(ex ? o.client : exName(o.ex))}</b></button>${ex ? `<span class="m" style="display:block">${clientLine(o.client)}</span>` : ''}</span>
+        <div class="ocontact">${ex ? avaByName(o.client) : exAva(o.ex)}<span class="grow"><span class="m" style="display:block">${ex ? 'Заказчик' : 'Исполнитель'}</span><button class="plink" data-a="go" data-v="${ex ? gv('c_client', { name: o.client }) : gv('c_exec', { id: o.ex })}" aria-label="Профиль: ${esc(ex ? o.client : exName(o.ex))}"><b>${esc(ex ? o.client : exName(o.ex))}</b></button>${ex ? `<span class="m" style="display:block">${clientLine(o.client)}</span>` : ''}</span>
           ${ch ? `<button class="cbtn" data-a="go" data-v="${gv('chat', { id: ch.id })}" aria-label="Написать">${ic('chat', 22, 2)}${ch.unread ? `<i class="cdot"></i>` : ''}</button>` : `<button class="cbtn" data-a="orderChat" data-v="${o.id}" aria-label="Написать">${ic('chat', 22, 2)}</button>`}
           <button class="cbtn" data-a="callAsk" data-v="${ex ? '' : o.ex}" aria-label="Позвонить через ZELDO">${ic('phone', 22, 2)}</button></div>
         ${ex ? '' : partnerBtn(o.ex)}`)}
@@ -10264,7 +10314,7 @@ function codeBlock(o) {
   const w = codeWin(o); const rent = o.kind === 'rent'; const nm = rent ? 'Код получения' : 'Код начала работы';
   if (w.k === 'none' || w.k === 'nodate') return '';
   const vis = o.sub ? `<span class="m">визит ${o.sub.used + 1} из ${o.sub.total}</span>` : '';
-  if (w.k === 'early') return `<div class="info"><div class="row"><b class="grow">${nm}</b>${vis}</div><span class="m">Появится за 2 часа до ${rent ? 'получения' : 'начала'}: ${atText(w.at)}. Покажете QR или продиктуете 4 цифры, когда ${rent ? 'будете забирать вещь' : 'исполнитель будет рядом'}.</span><button class="lnk" data-a="codeNow" data-v="${o.id}">Показать код сейчас (прототип)</button></div>`;
+  if (w.k === 'early') return `<div class="info"><div class="row"><b class="grow">${nm}</b>${vis}</div><span class="m">Появится за 2 часа до ${rent ? 'получения' : 'начала'}: ${atText(w.at)}. Покажете QR или продиктуете 4 цифры, когда ${rent ? 'будете забирать вещь' : 'исполнитель будет рядом'}.</span>${btn('Показать код сейчас', 'codeNow', String(o.id), 'soft block')}</div>`;
   const code = startCode(o); const nextH = new Date((Math.floor(Date.now() / 3600000) + 1) * 3600000); const point = fmtOf(o) === 'point';
   const how = o.free ? 'Покажите QR или продиктуйте код, когда подойдёт ваша очередь.' : rent ? 'Покажите QR или продиктуйте код, когда будете забирать вещь.' : point ? 'Покажите QR мастеру или продиктуйте код, когда придёте.' : 'Покажите QR исполнителю или продиктуйте код, когда он будет рядом.';
   return card(`<div class="row"><span class="h2 grow">${nm}</span>${vis}</div><div class="m">${how}</div>
@@ -10635,9 +10685,18 @@ SCREENS.resched = p => {
 CH.resFiles = el => { const fs = [...el.files].slice(0, 10 - S.resDraft.photos.length); el.value = ''; fs.forEach(f => S.resDraft.photos.push({ src: URL.createObjectURL(f), name: f.name, file: f })); resultSheet(); };
 /* куда уходят фото: в прототипе — в заказ и переписку на этом телефоне; в рабочей версии 10-real.js загружает их на сервер */
 function resultPhotosOut(o, photos) { o.resultPhotos = photos.map(p => p.src); const ch = chatById(o.echat || o.chat); photos.forEach(p => postMsg(ch, 'me', { kind: 'file', name: p.name, size: 'Фото результата', img: true, src: p.src })); }
+/* что сделано — по услуге заказа (прогон 16.11: в ремонте квартиры предлагались «Балансировка» и «Старые шины») */
+const RES_TAGS = [
+  [/шин|колёс|колес|баланс/i, ['Балансировка сделана', 'Давление проверено', 'Старые шины упакованы']],
+  [/ремонт|отделк|плитк|покраск|обо[ий]|штукатур|ламинат|потол|сантех|электр|монтаж|сборк|установк/i, ['Работы по смете выполнены', 'Мусор вывезен', 'Объект убран после работ']],
+  [/уборк|клининг|мойк|химчист/i, ['Уборка по списку сделана', 'Мусор вынесен']],
+  [/маникюр|педикюр|стриж|окрашив|бров|ресниц|массаж|макияж|укладк|космет/i, ['Процедура проведена', 'Рекомендации по уходу даны']],
+  [/дизайн|логотип|сайт|текст|перевод|видео|фото|монтаж ролик/i, ['Файлы переданы', 'Правки внесены']],
+];
+const resTags = o => { const s = (o && (o.svc || o.what)) || ''; const hit = RES_TAGS.find(([re]) => re.test(s)); return ['Работа выполнена по списку', ...(hit ? hit[1] : [])]; };
 function resultSheet() {
   const d = S.resDraft;
-  sheet('Передать результат', `${field('Что сделано', chips('resTag', ['Работа выполнена по списку', 'Балансировка сделана', 'Давление проверено', 'Старые шины упакованы'], v => d.tags.includes(v)))}
+  sheet('Передать результат', `${field('Что сделано', chips('resTag', resTags(orderById(d.id)), v => d.tags.includes(v)))}
     ${field('Фото результата', `<div class="resph">${d.photos.map((p, i) => `<span class="thumb"><img src="${esc(p.src)}" alt="Фото ${i + 1}"><button class="resph-x" data-a="resPhDel" data-v="${i}" aria-label="Убрать фото ${i + 1}">${ic('x', 16, 2.6)}</button></span>`).join('')}${d.photos.length < 10 ? `<label class="resph-add">${ic('plus', 24, 2.2)}<span>Добавить фото</span><input type="file" accept="image/*" multiple data-ch="resFiles" hidden></label>` : ''}</div>`, { hint: d.photos.length ? `Фото: ${d.photos.length}. Заказчик увидит их в заказе и в переписке.` : 'С камеры или из галереи, до 10 штук. Фото помогают быстрее принять работу.' })}
     <div class="m">Передача результата не означает приёмку: деньги придут, когда заказчик её подтвердит.</div>${btn('Передать результат', 'resSend', '', 'block')}`);
 }
@@ -10813,10 +10872,10 @@ function exStats(id) {
 SCREENS.c_client = p => {
   const n = p.name || ''; const list = S.clientRev[n] || []; const mine = S.orders.filter(o => o.ex === 'alex' && o.client === n);
   return { title: esc(n), sub: 'Заказчик',
-    body: `${card(`<div class="row"><span class="ava lg">${letter(n)}</span><span class="grow"><b class="t18" style="display:block">${esc(n)}</b><span class="m">${clientLine(n)}</span></span></div>
+    body: `${card(`<div class="row">${avaByName(n, 'lg')}<span class="grow"><b class="t18" style="display:block">${esc(n)}</b><span class="m">${clientLine(n)}</span></span></div>
       ${sumLines([['Заказов у вас', String(mine.length)], ['Выполнено', String(mine.filter(o => o.status === 'done').length)], ['Отменено', String(mine.filter(o => o.status === 'cancel').length)]])}
       <div class="m">Телефон и адрес скрыты. Связь — через переписку и звонок через ZELDO.</div>`)}
-      ${list.length ? list.map(x => card(`<div class="row"><b class="grow">${esc(x.who)}</b><span class="m">${dayName(x.date)}</span></div><div>${'★'.repeat(x.stars)}</div><div>${esc(x.text)}</div>`, 'c')).join('') : '<div class="m">Отзывов исполнителей о нём пока нет.</div>'}` };
+      ${list.length ? list.map(x => card(`<div class="row"><b class="grow">${esc(x.who)}</b><span class="m">${dayName(x.date)}</span></div>${revSvc(x)}<div>${'★'.repeat(x.stars)}</div><div>${esc(x.text)}</div>`, 'c')).join('') : '<div class="m">Отзывов исполнителей о нём пока нет.</div>'}` };
 };
 
 /* ---------- мои данные (запись 48, 47:56–48:43): видит только сам человек — имя, телефон, почта; карты для оплаты ---------- */
@@ -11123,10 +11182,10 @@ function celebrateC(o) {
   const old = document.querySelector('.party'); if (old) old.remove();
   const el = document.createElement('div'); el.className = 'party'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-labelledby', 'partyT');
   const C = ['var(--brand)', '#F5A524', '#17B26A', '#EE46BC'];
-  el.innerHTML = `<div class="party-card"><div class="party-burst" aria-hidden="true">${Array.from({ length: 18 }, (_, i) => `<i style="--a:${i * 20}deg;--d:${96 + (i % 4) * 22}px;--c:${C[i % 4]};--t:${(i % 5) * 25}ms"></i>`).join('')}</div>
-    <span class="party-ic">${ic('check', 40, 2.6)}</span><b class="party-t" id="partyT">Заказ выполнен</b><span class="party-s">${esc(o.svc)}</span>
-    <span class="m">Заказ № ${o.id} · ${esc(exName(o.ex))}<br>Оцените работу — так другие найдут хорошего мастера.</span>
-    <div class="party-b">${btn('Оценить работу', 'partyClose', '', 'block')}</div></div>`;
+  el.innerHTML = `${partyRain()}<div class="party-card"><div class="party-burst" aria-hidden="true">${Array.from({ length: 18 }, (_, i) => `<i style="--a:${i * 20}deg;--d:${96 + (i % 4) * 22}px;--c:${C[i % 4]};--t:${(i % 5) * 25}ms"></i>`).join('')}</div>
+    <span class="party-ic">${ic('check', 40, 2.6)}</span><b class="party-t" id="partyT">Ура, готово!</b><span class="party-s">${esc(o.svc)}</span>
+    <span class="m">Заказ № ${o.id} выполнен. ${esc(exName(o.ex))} получит оплату — спасибо, что выбрали ZELDO!<br>Пара слов о работе поможет другим найти хорошего мастера.</span>
+    <div class="party-b">${btn('Оценить работу', 'partyRateC', String(o.id), 'block')}${btn('Позже', 'partyClose', '', 'text block')}</div></div>`;
   ($('#phone') || document.body).appendChild(el);
   try { if (navigator.vibrate) navigator.vibrate(18); } catch (e) { /* без вибрации */ }
   el.addEventListener('click', e => { if (e.target === el) A.partyClose(); });
@@ -11222,6 +11281,20 @@ CITY_D['Московская область'] = ['Химки', 'Мытищи', '
 
 /* для автотестов (jt/rules01.js) */
 Object.assign(window.__z, { mkOrder, walletSum, stepDeadline, RULES, setSt, orderById, rulesTick, payout, chatById });
+
+/* ---------- фото профиля (запись 69: «А фотографий нет?»): квадрат 240×240, JPEG; в рабочей версии едет в публичный профиль ---------- */
+/* объявлены функциями, а не const: шапка кабинета на компьютере рисуется раньше, чем выполняется этот файл (17.11: «Cannot access 'myAva' before initialization») */
+function myAva(cls = '') { const a = (S.profile || {}).ava; return `<span class="ava ${cls}">${a ? `<img src="${esc(a)}" alt="">` : letter(myName())}</span>`; }
+function avaPick() { return `<label class="avapick" title="Фото профиля">${myAva('lg')}<span class="avapick-b" aria-hidden="true">${ic('camera', 16, 2.2)}</span><input type="file" accept="image/*" data-ch="avaPick" aria-label="Загрузить фото профиля" hidden></label>`; }
+const avaShrink = f => new Promise((ok, no) => { const u = URL.createObjectURL(f); const im = new Image();
+  im.onload = () => { const s = Math.min(im.naturalWidth, im.naturalHeight); const c = document.createElement('canvas'); c.width = c.height = 240; c.getContext('2d').drawImage(im, (im.naturalWidth - s) / 2, (im.naturalHeight - s) / 2, s, s, 0, 0, 240, 240); URL.revokeObjectURL(u); ok(c.toDataURL('image/jpeg', 0.8)); };
+  im.onerror = () => { URL.revokeObjectURL(u); no(new Error('не картинка')); }; im.src = u; });
+CH.avaPick = async el => { const f = el.files && el.files[0]; el.value = ''; if (!f) return;
+  try { S.profile = S.profile || {}; S.profile.ava = await avaShrink(f); EX.alex.ava = S.profile.ava; render(); toast('Фото профиля обновлено'); } catch (e) { toast('Не получилось открыть фото. Попробуйте другое', 'info'); } };
+/* ---------- отзыв связан с заказом (запись 69): услуга, а участникам — ссылка на заказ ---------- */
+function revSvc(r) { const o = r.order != null ? orderById(r.order) : null; const svc = r.svc || (o && o.svc) || ''; if (!svc && !o) return '';
+  return `<div class="m">${esc(svc)}${o ? `${svc ? ' · ' : ''}<button class="lnk" data-a="go" data-v="${gv('order', { id: o.id })}">заказ № ${o.id}</button>` : ''}</div>`; }
+Object.assign(window.__z, { timesFor, whenPast, resTags, tierPrice, tierText, revSvc, MIN_ORDER, blockers, cfgOf, wizApplySvc, wizToOffer, wizFromOffer: typeof wizFromOffer === 'function' ? wizFromOffer : null });
 
 /* ---------- защита от копирования (01.11, решение владельца) ----------
    Компьютер: нет меню правой кнопки, текст не выделяется и не копируется, картинки не перетаскиваются,
