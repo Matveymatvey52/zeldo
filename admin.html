@@ -420,7 +420,7 @@ function vCards() {
   if (!l) return head + '<div class="empty">Загружаем…</div>';
   return head + (l.length ? `<div class="grid cards">${l.map(c => `<div class="card pc"><div class="ph" ${c.ph ? `style="background-image:url('${esc(c.ph)}')"` : ''}>${c.ph ? '' : '<span class="m">Без своих фото</span>'}</div>
     <div class="row nw"><b class="grow ell">${esc(c.title)}</b>${c.mod === 'review' ? '<span class="pill warn">Ждёт модератора</span>' : c.mod === 'back' ? '<span class="pill bad">Возвращена</span>' : c.hidden ? '<span class="pill grey">Скрыта автором</span>' : '<span class="pill ok">В каталоге</span>'}</div>
-    <div class="m ell">${esc(c.svc)} · ${esc(c.who)}${c.from ? ` · от ${rub(c.from)}${c.unit ? ' ' + esc(c.unit) : ''}` : ''}</div><div class="clamp3">${esc(c.desc)}</div>
+    <div class="m ell">${esc(c.svc)} · ${esc(c.who)}${c.from ? ` · от ${rub(c.from)}${c.unit ? ' ' + esc(c.unit) : ''}` : ''}</div><div class="clamp3">${esc(c.desc)}</div>${c.doc ? `<div><a href="${esc(c.doc.url)}" target="_blank" rel="noopener">📄 Документ: ${esc(c.doc.name)}</a></div>` : ''}
     ${autoHtml(c.auto)}${c.reason ? `<div class="m clamp2"><b>Причина возврата:</b> ${esc(c.reason)}</div>` : ''}
     <div class="row pc-act">${c.mod !== 'ok' ? `<button class="btn sm" data-a="cardOk" data-v="${esc(c.id)}">Опубликовать</button>` : ''}${c.mod !== 'back' ? `<button class="btn sm danger" data-a="cardBack" data-v="${esc(c.id)}">Вернуть на исправление</button>` : ''}</div></div>`).join('')}</div>` : '<div class="card empty">Карточек нет</div>');
 }

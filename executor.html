@@ -7026,6 +7026,8 @@ const QTY = {
   'за км': [10, 5, 5, 1000, x => `${x}${NB}км`], 'за документ': [1, 1, 1, 20, x => pn(x, 'документ', 'документа', 'документов')],
   'за пару': [1, 1, 1, 20, x => pn(x, 'пара', 'пары', 'пар')], 'за пробу': [1, 1, 1, 50, x => pn(x, 'проба', 'пробы', 'проб')],
   'за лид': [20, 5, 5, 1000, x => pn(x, 'лид', 'лида', 'лидов')], 'за вакансию': [1, 1, 1, 20, x => pn(x, 'вакансия', 'вакансии', 'вакансий')],
+  /* 18.11 (прогон «исполнитель → заказчик»): этих единиц из таблицы Р5 не было — заказчик не мог указать, сколько зубов, и цена считалась за один */
+  'за створку': [2, 1, 1, 50, x => pn(x, 'створка', 'створки', 'створок')], 'за зуб': [1, 1, 1, 32, x => pn(x, 'зуб', 'зуба', 'зубов')], 'за заседание': [1, 1, 1, 30, x => pn(x, 'заседание', 'заседания', 'заседаний')],
 };
 /* шаг бюджета: до 10 000 ₽ — по 500, дальше — по 1 000 */
 const budStep = x => x >= 10000 ? 1000 : 500;
@@ -7188,6 +7190,15 @@ function placeText(o, fmt, paid, ord) {
 const wayOf = (o, c) => (c && c.way) || (o.route === 'B' || o.model === 'brief' || (o.reply && o.reply.stages) ? 'B' : 'A');  /* проект по этапам начинают с брифа */
 const needsSlot = (o, c) => (o.booking === 'slots' || o.booking === 'both') && c.visit !== 'free' && wayOf(o, c) !== 'B';
 const calKey = (o, c) => o.masters && c.master ? `${o.ex}:${c.master}` : o.ex;
+/* окно, которое ищем в календаре: долгая работа («Когда начать») — час на начало, обычная — не длиннее рабочего дня */
+const slotDur = (o, r) => { const td = svcTable(o.svc).b === 'term' ? (o.term || (ZP.term || {})[o.svc] || 0) : 0; return td ? 60 : Math.min(Math.max(r.dur, 30), 600); };
+/* 18.11 (прогон двоих): отметил пункт прайса или доп — выбранное время раньше молча сбрасывалось («Причина: выберите время»).
+   Теперь время остаётся, если работа в него ещё помещается; не помещается — снимаем и говорим почему */
+function retime(o, c) {
+  if (!c.time || !c.day) return;
+  const ok = freeSlots(calKey(o, c), c.day, slotDur(o, calc(o, c))).some(x => x.t === c.time && x.ok);
+  if (!ok) { c.time = null; toast('Выбранное время больше не помещается: работа стала длиннее. Выберите другое', 'info'); }
+}
 /* минимальная сумма заказа — против «купил сам у себя за 1 ₽» (запись 68); сервер проверяет то же */
 const MIN_ORDER = 100;  /* 17.11: 300 ₽ не давал оплатить «Изготовление ключей» за 200 ₽; 1 ₽ всё равно не пройдёт */
 /* цена за м² ступенями по площади (запись 68): [[до, цена], …, [0, цена дальше]] */
@@ -7416,8 +7427,7 @@ function whenBlock(o, c, r) {
   if (c.visit === 'free') { const wh = workHours(o.ex, dk(0)) || [540, 1260]; return card(`<div class="h2">Когда</div>${head}<div class="info"><b>Живая очередь</b><span class="m">Приезжайте в часы работы: ${tstr(wh[0])}–${tstr(wh[1])}. Точное время не бронируется, место в очереди не держится заранее.</span></div>`); }
   /* 16.11.2026, прогон с Максимом: у ремонта на 45 дней допуслуга добавила 10 000 минут, и календарь искал такое окно в одном дне — все дни зачёркнуты.
      Долгая работа («Когда начать») — выбираем только начало, нужен свободный час; обычная услуга — окно не длиннее рабочего дня */
-  const tdays0 = svcTable(o.svc).b === 'term' ? (o.term || (ZP.term || {})[o.svc] || 0) : 0;
-  const dur = tdays0 ? 60 : Math.min(Math.max(r.dur, 30), 600); const key = calKey(o, c);
+  const dur = slotDur(o, r); const key = calKey(o, c);
   CAL.offer = { get: () => c.day, set: k => { c.day = k; c.time = null; }, off: k => (!workHours(key, k) ? 'off' : dayFull(key, k, dur) ? 'full' : false), legend: `<div class="cal-leg"><span><i style="background:var(--act)"></i>Выбрано</span><span><i style="background:#C9D3E1"></i>Не работает или всё занято</span></div>` };
   const slots = c.day ? freeSlots(key, c.day, dur) : [];
   const tdays = svcTable(o.svc).b === 'term' ? (o.term || (ZP.term || {})[o.svc] || 0) : 0;  /* срок результата из таблицы: выбирают день начала */
@@ -7486,20 +7496,21 @@ IN.prText = (v, k) => { const [id, p] = k.split('|'); const c = cfgOf(offerById(
 const togKey = (v, k) => { const [id, x] = v.split('|'); const c = cfgOf(offerById(id)); togIn(c[k], x); render(); };
 Object.assign(A, {
   prSet(v) { const [id, p, x] = v.split('|'); const o = offerById(id); const c = cfgOf(o); c.pr = c.pr || {}; const pm = svcParams(o.svc).find(q => q.id === p);
-    c.pr[p] = c.pr[p] === x && (!pm || pm.r === 'info') ? null : x; c.time = null; render(); },  /* у доплаты всегда выбрано значение: первое — без доплаты */
-  prQty(v) { const [id, p, x, d] = v.split('|'); const c = cfgOf(offerById(id)); c.pr = c.pr || {}; c.pr[p] = c.pr[p] || {}; c.pr[p][x] = clamp((c.pr[p][x] || 0) + Number(d), 0, Infinity); c.time = null; render(); },
-  prStep(v) { const [id, p, step, min, max, base, d] = v.split('|'); const c = cfgOf(offerById(id)); c.pr = c.pr || {}; c.pr[p] = clamp((c.pr[p] || Number(base) || Number(min)) + Number(step) * Number(d), Number(min), Number(max));  /* от того, что на экране: у квартиры площадь по умолчанию, а не нижняя граница */ c.time = null; render(); },
+    c.pr[p] = c.pr[p] === x && (!pm || pm.r === 'info') ? null : x; retime(offerById(id), c); render(); },  /* у доплаты всегда выбрано значение: первое — без доплаты */
+  prQty(v) { const [id, p, x, d] = v.split('|'); const c = cfgOf(offerById(id)); c.pr = c.pr || {}; c.pr[p] = c.pr[p] || {}; c.pr[p][x] = clamp((c.pr[p][x] || 0) + Number(d), 0, Infinity); retime(offerById(id), c); render(); },
+  prStep(v) { const [id, p, step, min, max, base, d] = v.split('|'); const c = cfgOf(offerById(id)); c.pr = c.pr || {}; c.pr[p] = clamp((c.pr[p] || Number(base) || Number(min)) + Number(step) * Number(d), Number(min), Number(max));  /* от того, что на экране: у квартиры площадь по умолчанию, а не нижняя граница */ retime(offerById(id), c); render(); },
   prTog(v) { const [id, p, x] = v.split('|'); const c = cfgOf(offerById(id)); c.pr = c.pr || {}; c.pr[p] = c.pr[p] || []; togIn(c.pr[p], x); render(); },
   prYes(v) { const [id, p] = v.split('|'); const c = cfgOf(offerById(id)); c.pr = c.pr || {}; c.pr[p] = !c.pr[p]; render(); },
   prNum(v) { const [id, p, d] = v.split('|'); const c = cfgOf(offerById(id)); c.pr = c.pr || {}; c.pr[p] = clamp((c.pr[p] == null ? 1 : c.pr[p]) + Number(d), 0, Infinity); render(); },
   cfgSet(v) {
     const [id, k, val] = v.split('|'); const o = offerById(id); const c = cfgOf(o); c[k] = val !== '' && !isNaN(val) ? Number(val) : val;
-    if (['master', 'fmt', 'v', 'g', 'd', 'tr'].includes(k)) c.time = null;
+    if (['master', 'fmt'].includes(k)) c.time = null;  /* другой мастер или формат — другое расписание */
     if (k === 'v') { const ok = addonsFor(o, c).map(a => a.id); Object.keys(c.add).forEach(a => { if (!ok.includes(a)) delete c.add[a]; }); if (c.fn) { const fns = (vOf(o, c).fns) || {}; Object.keys(c.fn).forEach(f => { if (!fns[f]) delete c.fn[f]; }); } }
+    if (['v', 'g', 'd', 'tr'].includes(k)) retime(o, c);
     render();
   },
-  cfgTog(v) { const [id, k] = v.split('|'); const c = cfgOf(offerById(id)); c[k] = !c[k]; c.time = null; render(); },
-  cfgStep(v) { const [id, k, step, min, max, d] = v.split('|'); const c = cfgOf(offerById(id)); c[k] = clamp(c[k] + Number(step) * Number(d), Number(min), Number(max)); c.time = null; render(); },
+  cfgTog(v) { const [id, k] = v.split('|'); const c = cfgOf(offerById(id)); c[k] = !c[k]; retime(offerById(id), c); render(); },
+  cfgStep(v) { const [id, k, step, min, max, d] = v.split('|'); const c = cfgOf(offerById(id)); c[k] = clamp(c[k] + Number(step) * Number(d), Number(min), Number(max)); retime(offerById(id), c); render(); },
   cfgFile(id) { const c = cfgOf(offerById(id)); c.files = Math.min(6, c.files + 1); render(); toast('Файл прикреплён'); },
   fnTog(v) { const [id, k] = v.split('|'); const c = cfgOf(offerById(id)); c.fn = c.fn || {}; c.fn[k] = !c.fn[k]; render(); },
   needTog(v) { togKey(v, 'needs'); },
@@ -7509,10 +7520,10 @@ Object.assign(A, {
   extraTog(v) { togKey(v, 'extra'); },
   noteTog(v) { togKey(v, 'note'); },
   noteOpen(id) { cfgOf(offerById(id)).noteOpen = true; render(); setTimeout(() => { const t = document.querySelector('[data-in^="cfgNote"]'); if (t) t.focus(); }, 30); },
-  wheel(v) { const [id, i] = v.split('|'); const c = cfgOf(offerById(id)); c.wh[i] = !c.wh[i]; c.time = null; render(); },
-  wheelAll(id) { const c = cfgOf(offerById(id)); const all = c.wh.every(Boolean); c.wh = c.wh.map(() => !all); c.time = null; render(); },
-  addQ(v) { const [id, aid, d] = v.split('|'); const o = offerById(id); const a = o.addons.find(x => x.id === aid); const c = cfgOf(o); c.add[aid] = clamp((c.add[aid] || 0) + Number(d), 0, Infinity); c.time = null; render(); },
-  addTog(v) { const [id, aid] = v.split('|'); const c = cfgOf(offerById(id)); c.add[aid] = c.add[aid] ? 0 : 1; c.time = null; render(); },
+  wheel(v) { const [id, i] = v.split('|'); const c = cfgOf(offerById(id)); c.wh[i] = !c.wh[i]; retime(offerById(id), c); render(); },
+  wheelAll(id) { const c = cfgOf(offerById(id)); const all = c.wh.every(Boolean); c.wh = c.wh.map(() => !all); retime(offerById(id), c); render(); },
+  addQ(v) { const [id, aid, d] = v.split('|'); const o = offerById(id); const a = o.addons.find(x => x.id === aid); const c = cfgOf(o); c.add[aid] = clamp((c.add[aid] || 0) + Number(d), 0, Infinity); retime(offerById(id), c); render(); },
+  addTog(v) { const [id, aid] = v.split('|'); const c = cfgOf(offerById(id)); c.add[aid] = c.add[aid] ? 0 : 1; retime(offerById(id), c); render(); },
   pickTime(t) { cfgOf(offerById(cur().p.id)).time = t; render(); },
   checkout(id) { if (S.role === 'guest') return needLogin('оформить заказ'); go('c_checkout', { id }); },
   sendToExec(id) {
@@ -8739,7 +8750,7 @@ function wizToOffer(w, id) {
   else { Object.assign(o, { model: 'generic', from: w.price, dur: w.dur, term: w.term, priceFrom: w.priceType === 'from' }, w.pick ? { pick: w.pick, unit: unitParam(w.unit) ? w.unit : '' } : {});
     o.tiers = w.tiers && w.unit === 'за м²' && !w.pick ? [[50, w.price], [100, w.tiers[0]], [0, w.tiers[1]]] : null; if (o.tiers) o.from = Math.min(...o.tiers.map(t => t[1])); }
   o.prp = JSON.parse(JSON.stringify(w.prp || {}));
-  if (w.doc) o.docs = true;
+  if (w.doc) { o.docs = true; if (w.doc.fid) { o.docFid = w.doc.fid; o.docName = w.doc.name; } }
   const sb = subOf(w); if (sb.on && subFits(w)) o.sub = { visits: sb.n, per: sb.per, disc: sb.disc, miss: { k: sb.miss, h: sb.h } };
   if (w.stages) o.stagesInfo = w.st.map(x => ({ name: x.name, pct: x.pct || 0 }));
   const prev = OFFERS.findIndex(x => x.id === id); if (prev >= 0) OFFERS[prev] = o; else OFFERS.push(o);
@@ -8911,9 +8922,14 @@ function routeInfo(w) {
 function docCard(w) {
   if (!w.svc || !svcCard(w.svc).docs) return '';
   return card(`<div class="h2">Документ для этой услуги</div><div class="m">Без лицензии, допуска или диплома эту услугу оказывать нельзя. Приложите документ: заказчик увидит отметку «Документы проверены».</div>
-    ${w.doc ? `<div class="info ok"><span class="m">Документ приложен. Проверим его вместе с карточкой.</span></div>` : btn(`${ic('clip', 20)} Приложить документ`, 'wzDoc', '', 'soft block')}`);
+    ${w.doc ? `<div class="info ok"><span class="m">Документ приложен${w.doc.name ? `: ${esc(w.doc.name)}` : ''}. Проверим его вместе с карточкой.</span></div>` : ''}<label class="btn soft block">${ic('clip', 20)} ${w.doc ? 'Заменить документ' : 'Приложить документ'}<input type="file" accept="image/*,application/pdf" data-ch="wzDocFile" hidden></label><div class="m">Фото или PDF. Документ увидит только администратор ZELDO.</div>`);
 }
-A.wzDoc = () => { S.wiz.doc = true; wzTouch(); render(); toast('Документ приложен'); };
+/* 18.11 (прогон двоих по всем категориям): «Приложить документ» раньше только ставил отметку — файла не было. Теперь это настоящий файл:
+   фото сжимаем, PDF как есть; в рабочей версии 10-real.js загружает его на сервер, в админке у карточки — ссылка */
+A.wzDoc = () => { S.wiz.doc = { name: 'Документ' }; wzTouch(); render(); };
+CH.wzDocFile = async el => { const f = el.files && el.files[0]; el.value = ''; if (!f) return; if (f.size > 10 * 1048576) { toast('Файл больше 10 МБ. Сфотографируйте документ или сожмите PDF', 'info'); return; }
+  const data = /^image\//.test(f.type) ? await readImg(f) : await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
+  S.wiz.doc = { name: f.name || 'Документ', data }; wzTouch(); render(); toast('Документ приложен'); };
 
 /* ---------- заказчик по документу «Главная, поиск и заявка, 20.10, ред. 6»: главная, поиск, выдача, фильтры, заявка в 3 шага ---------- */
 const exStatus = id => { const e = EX[id] || {}; return !e.reviews ? ['Новый на ZELDO', 'new'] : e.reviews < 30 ? ['Новый', 'new'] : ['Стабильный', 'ok']; };
@@ -11331,7 +11347,7 @@ function revPhotos(r) { const ph = (r && r.photos) || []; return ph.length ? `<d
 CH.ratePh = async el => { const id = el.dataset.v; const o = orderById(id) || orderById(Number(id)); if (!o) return; const fs = [...el.files].slice(0, 5 - (o.ratePh || []).length); el.value = ''; o.ratePh = o.ratePh || [];
   for (const f of fs) o.ratePh.push({ src: await readImg(f), name: f.name || 'Фото.jpg' }); render(); };
 A.ratePhDel = v => { const [id, i] = v.split('|'); const o = orderById(id) || orderById(Number(id)); if (o && o.ratePh) { o.ratePh.splice(Number(i), 1); render(); } };
-Object.assign(window.__z, { revPhotos, ratePhField, svcTable, SERVICES, OFFERS, qtyLabel });
+Object.assign(window.__z, { revPhotos, ratePhField, svcTable, SERVICES, OFFERS, qtyLabel, EX, svcBy, calc, qtyOf, resultSheet: typeof resultSheet === 'function' ? resultSheet : null });
 
 /* ---------- защита от копирования (01.11, решение владельца) ----------
    Компьютер: нет меню правой кнопки, текст не выделяется и не копируется, картинки не перетаскиваются,
