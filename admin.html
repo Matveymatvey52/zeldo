@@ -561,7 +561,7 @@ function render() {
   root.innerHTML = `<div class="app"><nav aria-label="Разделы"><div class="logo">ZELDO<small>Админка</small></div><div class="who"><b>${esc(S.me.name)}</b>${esc(S.me.roles[S.me.role])}</div>
     ${secs.map(([k, t]) => `<button class="it ${k === sec ? 'on' : ''}" data-a="sec" data-v="${k}" ${k === sec ? 'aria-current="page"' : ''}><span>${t}</span>${badge[k] ? `<span class="n hot">${badge[k]}</span>` : ''}</button>`).join('')}
     <div class="sp"></div><button class="out" data-a="logout">Выйти</button></nav>
-    <main><h1>${(SECS.find(x => x[0] === sec) || [])[1]}</h1><p class="sub">${SUBS[sec]}</p>${VIEWS[sec]()}</main></div>${vDrawer()}`;
+    <main>${S.me.skip ? '<div class="card note" style="margin-bottom:14px"><b>Тестовый режим.</b> Реквизиты, паспорта, карточки для модератора, отзывы с одного адреса, выплаты и возвраты на карту проходят без вас, споры решает простое правило. Человек видит на экране, что в настоящей версии это проверяет администратор. Перед запуском сервер включается без ZSKIP_ADMIN.</div>' : ''}<h1>${(SECS.find(x => x[0] === sec) || [])[1]}</h1><p class="sub">${SUBS[sec]}</p>${VIEWS[sec]()}</main></div>${vDrawer()}`;
   document.scrollingElement.scrollTop = scroll;
   Object.entries(keep).forEach(([id, v]) => { const el = document.getElementById(id); if (el) el.value = v; }); if (how) { const r = document.querySelector(`input[name="how"][value="${how}"]`); if (r) r.checked = true; } if (focus && document.getElementById(focus)) document.getElementById(focus).focus();
   const tm = $('#tmsgs'); if (tm) tm.scrollTop = tm.scrollHeight;
