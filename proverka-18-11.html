@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E1D36">
+<title>ZELDO · проверка регистрации</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap">
+<!-- Инструкция для Максима (18.11.2026): как пройти весь путь с нуля — исполнитель с реквизитами, заказчик, деньги, админка. Оформление — как у отчёта 13.11 -->
+<style>
+:root { --bg: #EEF2F8; --card: #FFFFFF; --ink: #0E1D36; --muted: #5B6B84; --line: #DCE3EE; --soft: #E8F0FE; --act: #0B6CF2; --rec: #17733F; --rec-soft: #E7F5EC; --warn: #9A5B00; --warn-soft: #FFF3E0; --hdr: #0E1D36; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0B1424; --card: #13203A; --ink: #EEF3FB; --muted: #9AA9C0; --line: #24345A; --soft: #172B4D; --act: #3D8EF8; --rec: #5BD08A; --rec-soft: #12301F; --warn: #F2B35B; --warn-soft: #33240E; --hdr: #070D18; } }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Onest", "Segoe UI", system-ui, sans-serif; -webkit-text-size-adjust: 100%; }
+a { color: var(--act); }
+.top { background: var(--hdr); color: #fff; padding: calc(28px + env(safe-area-inset-top)) 16px 46px; }
+.top .in, main { max-width: 760px; margin: 0 auto; }
+.logo { font-weight: 800; letter-spacing: 0.04em; font-size: 18px; color: #C7D2E4; }
+.top h1 { font-size: 32px; line-height: 38px; margin: 14px 0 10px; font-weight: 700; text-wrap: balance; }
+.top p { margin: 0; font-size: 17px; line-height: 26px; color: #C7D2E4; max-width: 600px; }
+main { padding: 0 16px calc(48px + env(safe-area-inset-bottom)); }
+.nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: -24px 0 18px; }
+.nums div { background: var(--card); border-radius: 16px; padding: 16px; box-shadow: 0 1px 0 var(--line); }
+.nums b { display: block; font-size: 30px; line-height: 34px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.nums span { font-size: 14px; line-height: 19px; color: var(--muted); }
+section { background: var(--card); border-radius: 20px; padding: 22px 20px 18px; margin: 0 0 14px; }
+.blk { font-size: 13px; font-weight: 600; color: var(--act); text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 6px; }
+h2 { font-size: 22px; line-height: 28px; margin: 0 0 12px; font-weight: 700; }
+h3 { font-size: 17px; line-height: 24px; margin: 18px 0 6px; font-weight: 600; }
+p, li { font-size: 16px; line-height: 24px; }
+p { margin: 0 0 10px; }
+ul { margin: 0 0 6px; padding-left: 20px; }
+li { margin: 0 0 6px; }
+li::marker { color: var(--muted); }
+.m { color: var(--muted); }
+.note { background: var(--soft); border-radius: 14px; padding: 12px 14px; margin: 12px 0 4px; font-size: 15px; line-height: 22px; }
+.wait { background: var(--warn-soft); }
+.wait b { color: var(--warn); }
+.go { background: var(--rec-soft); }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0 4px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 50px; padding: 0 20px; border-radius: 14px; background: var(--act); color: #fff; font-size: 17px; font-weight: 600; text-decoration: none; }
+.btn.soft { background: var(--soft); color: var(--act); }
+table { width: 100%; border-collapse: collapse; font-size: 15px; line-height: 21px; margin: 6px 0 4px; }
+td { padding: 9px 0; border-top: 1px solid var(--line); vertical-align: top; }
+td:first-child { padding-right: 14px; color: var(--muted); width: 46%; }
+td b { font-variant-numeric: tabular-nums; }
+footer { text-align: center; color: var(--muted); font-size: 14px; margin-top: 24px; }
+@media (max-width: 480px) { .top h1 { font-size: 27px; line-height: 33px; } h2 { font-size: 20px; line-height: 26px; } section { padding: 18px 16px 14px; } .cta .btn { flex: 1 1 100%; } }
+
+ol { margin: 0 0 6px; padding-left: 22px; } ol li { margin: 0 0 8px; }
+.kbd { display: inline-block; background: var(--soft); border-radius: 8px; padding: 1px 8px; font-weight: 600; white-space: nowrap; }
+.code { font-variant-numeric: tabular-nums; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 15px; letter-spacing: 0.02em; }
+.ok { color: var(--rec); font-weight: 600; }
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <div class="logo">ZELDO</div>
+  <h1>Регистрация с нуля: как проверить</h1>
+  <p>Весь путь теперь работает по-настоящему: вход, исполнитель со статусом и счётом для выплат, паспорт для значка «Проверен», заказчик, деньги и выплаты. Ниже — что нажимать и что должно получиться.</p>
+</div></header>
+
+<main>
+  <div class="nums">
+    <div><b>111</b><span>проверок кнопками: два исполнителя и заказчик с нуля, админ</span></div>
+    <div><b>284</b><span>экрана новых аккаунтов без остатков прототипа</span></div>
+    <div><b>40</b><span>проверок сервера: реквизиты, деньги, письма</span></div>
+    <div><b>0</b><span>ошибок во всех прогонах</span></div>
+  </div>
+
+  <section>
+    <div class="blk">Перед проверкой</div>
+    <h2>Что нужно</h2>
+    <ul>
+      <li>Ссылку присылает Матвей. Сервер работает на его компьютере, ссылка живёт около часа.</li>
+      <li>Код входа для любой почты — <span class="kbd code">123456</span>. Каждая новая почта — новый человек с нуля. Почту можно придумать: test1@mail.ru, test2@mail.ru.</li>
+      <li>Деньги тестовые: ничего не списывается и не переводится.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="blk">Шаг 1</div>
+    <h2>Исполнитель с нуля</h2>
+    <ol>
+      <li>Почта → <span class="kbd">Получить код</span> → <span class="kbd code">123456</span> → <span class="kbd">Войти</span>.</li>
+      <li>Имя и фамилия, две галочки: соглашение и согласие на обработку данных. Без галочек дальше не пустит.</li>
+      <li>«Что хотите делать в ZELDO?» → <span class="kbd">Предлагать свои услуги</span>. Откроется «Как начать продавать»: три шага и паспорт по желанию.</li>
+      <li><b>Статус и реквизиты.</b> Самозанятый, ИП или ООО. Потом ФИО или название, ИНН, для ИП — ОГРНИП, для ООО — ОГРН и КПП. Затем БИК и номер счёта.
+        <ul>
+          <li>По БИК банк подставится сам.</li>
+          <li>Ошибётесь в одной цифре ИНН или счёта — приложение покажет это у поля и не отправит.</li>
+          <li>Самозанятого ZELDO проверяет в налоговой. С компьютера Матвея сайт налоговой не открывается (VPN за границей), поэтому реквизиты уйдут сотруднику на проверку. Публиковать карточки можно сразу. В облаке в России налоговая будет отвечать сама.</li>
+        </ul>
+      </li>
+      <li><b>Профиль.</b> Фото (в «Кабинете» — кружок с камерой), «О себе», <span class="kbd">+ Точка</span> — адрес, где принимаете.</li>
+      <li><b>Первая карточка.</b> <span class="kbd">Добавить услугу</span>, пять шагов, <span class="kbd">Отправить на проверку</span>. Если начать с карточки и не заполнить реквизиты, приложение само отправит в реквизиты, а после сохранения опубликует карточку.</li>
+      <li><b>По желанию — значок «Проверен».</b> «Кабинет» → «Значок „Проверен“» → фото разворота паспорта. Для проверки подойдёт любое фото, настоящий паспорт не нужен. Значок ставится сам, когда паспорт проверен, статус подтверждён и пять заказов прошли без жалоб.</li>
+    </ol>
+    <div class="note"><b>Реквизиты для теста.</b> Можно ввести свои: на сервере они лежат зашифрованными и стираются вместе с аккаунтом («Настройки» → «Удалить аккаунт»). Можно эти — программа подобрала их так, чтобы сошлись контрольные числа:<br>
+      Самозанятый: ИНН <span class="code">500100700708</span>, БИК <span class="code">044525225</span>, счёт <span class="code">40817810638040000007</span>.<br>
+      ИП: ИНН <span class="code">770200300710</span>, ОГРНИП <span class="code">318774600000071</span>, БИК <span class="code">044525974</span>, счёт <span class="code">40802810310000000007</span>.</div>
+  </section>
+
+  <section>
+    <div class="blk">Шаг 2</div>
+    <h2>Заказчик с нуля</h2>
+    <ol>
+      <li>Другая почта, тот же код. «Что хотите делать?» → <span class="kbd">Заказывать услуги</span>. Сразу открывается главная.</li>
+      <li>«Кабинет» → «Баланс ZELDO» → <span class="kbd">Пополнить</span>. Это тестовые деньги.</li>
+      <li>Найти карточку исполнителя, выбрать время, <span class="kbd">Оплатить</span>, отметить «Списать с баланса ZELDO».</li>
+      <li>Исполнитель вводит код с телефона заказчика, сдаёт работу, заказчик принимает.</li>
+      <li>В кабинете заказчика есть <span class="kbd">Стать исполнителем</span>: тот же путь, что в шаге 1, без новой регистрации.</li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="blk">Шаг 3</div>
+    <h2>Деньги</h2>
+    <ul>
+      <li><b>Исполнитель:</b> «Кабинет» → «Финансы». Видно, сколько доступно, когда придёт выплата (понедельник, 10:00 по Москве) и на какой счёт. По каждому заказу: сумма, комиссия ZELDO (первые три заказа без неё), эквайринг банка, сколько пришло вам.</li>
+      <li><span class="kbd">Вывести сейчас</span> — комиссия 3 %, но не меньше 200 ₽. В понедельник те же деньги придут без комиссии.</li>
+      <li><b>Заказчик:</b> отмена в первый час после оплаты — вся сумма возвращается на баланс. С баланса можно оплатить следующий заказ или вернуть деньги на карту (комиссия 2 %).</li>
+      <li>Баланс и заработок теперь считает сервер. Телефон не может приписать себе денег или списать с баланса больше, чем на нём есть.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="blk">Шаг 4</div>
+    <h2>Админка</h2>
+    <p>Адрес — та же ссылка с <span class="kbd">/admin</span> в конце. Вход той же почтой и кодом. Доступ к админке выдаёт Матвей.</p>
+    <ul>
+      <li><b>«Проверка».</b> Реквизиты исполнителей и ответ налоговой. ИП и ООО сверить по выписке ЕГРИП или ЕГРЮЛ (ссылка там же) → <span class="kbd">Реквизиты верны</span> или <span class="kbd">Вернуть на исправление</span> с причиной. Фото паспорта → <span class="kbd">Паспорт проверен</span>. После решения фото удаляется с сервера, остаётся отметка.</li>
+      <li><b>«Выплаты».</b> Каждый понедельник сервер сам создаёт заявки на всё заработанное. «Сразу» — если исполнитель попросил сам. Админ переводит деньги из банка и нажимает <span class="kbd">Отправлено</span>. Человек получает уведомление. Возвраты баланса заказчикам — там же.</li>
+      <li>В «Сводке» новые строки: «Реквизиты и паспорта ждут проверки» и «Деньги ждут перевода».</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="blk">Ещё</div>
+    <h2>Письма и удаление аккаунта</h2>
+    <ul>
+      <li><b>Письма о заказах.</b> Когда ZELDO закрыт, на почту приходят письма: новая заявка, оплата, сдача работы, спор, новое сообщение, выплата. Не чаще раза в 10 минут по одному заказу. Отключить: «Настройки» → «Письма о заказах». В тестовом режиме с кодом 123456 письма не отправляются, включатся при запуске.</li>
+      <li><b>Удалить аккаунт.</b> «Настройки» → «Удалить аккаунт» → написать <span class="kbd">УДАЛИТЬ</span>. Стираются имя, почта, профиль, реквизиты, паспорт и карточки. Пока есть незавершённые заказы или деньги на балансе, удалить нельзя. Той же почтой потом можно зарегистрироваться заново.</li>
+      <li>В политике обработки данных и в согласии теперь указаны ИНН, реквизиты и фото паспорта: что собираем, зачем и когда удаляем.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="blk">До запуска</div>
+    <h2>Что осталось — это не код</h2>
+    <ul>
+      <li><b>Банк.</b> Эквайринг и безопасная сделка: настоящие деньги и автоматические выплаты. Пока выплаты по реквизитам переводит админ и отмечает в админке. С банком так тоже начинают.</li>
+      <li><b>Облако в России и постоянная ссылка.</b> Заодно налоговая будет сама подтверждать самозанятых.</li>
+      <li><b>Юридическое лицо оператора, юрист, уведомление в Роскомнадзор.</b> Без этого документы не дописать.</li>
+      <li><b>Выключить тестовый код 123456</b> перед настоящими людьми.</li>
+      <li><b>Вопросник № 2.</b> В нём есть вопрос о проверке паспорта: подтвердите, что схема «фото → проверка сотрудником → удаление» подходит.</li>
+    </ul>
+    <div class="note wait"><b>Партнёра пока не проверяем.</b> Его роль ждёт вашего файла: кто это, какой процент и сколько уровней.</div>
+  </section>
+
+  <footer>ZELDO · 18 ноября 2026</footer>
+</main>
+</body>
+</html>

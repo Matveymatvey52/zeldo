@@ -6902,7 +6902,7 @@ SCREENS.c_exec = p => {
     body: `<div class="card" style="justify-items:center;text-align:center">${exAva(p.id, 'lg')}<div class="h1">${esc(e.name)}</div>${e.biz ? `<div class="m">${esc(e.biz)} · с ${e.since} года</div>` : ''}
         <div class="row" style="justify-content:center">${REAL && !e.ver ? '' : pill('Проверен', '', 'diamond')}${e.reviews ? `<span class="rating t18">${ic('star', 18, 2)} ${String(e.rating).replace('.', ',')}</span><span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')}</span>` : '<span class="m">Пока нет отзывов</span>'}</div>
         <div class="m">${esc(areaText(e.area, p.id))}</div></div>
-      ${card(`<div class="h2">Об исполнителе</div><div>${esc(e.about)}</div>`)}${exStats(p.id)}
+      ${e.about ? card(`<div class="h2">Об исполнителе</div><div>${esc(e.about)}</div>`) : ''}${exStats(p.id)}
       ${exHoursCard(p.id)}
       <div class="h2">Услуги исполнителя</div>
       ${listSearch(`ex_${p.id}`, 'Найти среди услуг исполнителя', q => { const ents = Object.entries(byCat).map(([c, l]) => [c, l.filter(o => offerHit(o, q))]).filter(([, l]) => l.length); return ents.length ? ents.map(([c, list]) => `<div class="col g12"><div class="sec"><span class="h2">${esc(c)}</span><span class="m">${pn(list.length, 'услуга', 'услуги', 'услуг')}</span></div>${list.map(o => offerCard(o)).join('')}</div>`).join('') : noHits(); })}
@@ -7806,7 +7806,7 @@ SCREENS.e_home = () => {
       deskBare: true,
       body: '', deskBody: `<div class="dhero"><div class="grow"><h1 class="dhero-t">Здравствуйте, ${esc(myFirst())}</h1><span class="dhero-s">Заявки заказчиков по вашим услугам и в других темах.</span></div>
           <button class="dhero-q" data-a="go" data-v="${gv('e_feed', { scope: 'mine' })}">${ic('search', 20, 2.2)}<span>Например: шиномонтаж R17 или сборка шкафа</span><b>Найти заказ</b></button></div>
-        <div class="dstats">${stat('calok', 'green', today.length, `${plural(today.length, 'заказ', 'заказа', 'заказов')} сегодня`, 'e_schedule')}${stat('docsearch', 'orange', S.incLoaded ? inc.length : '…', S.incLoaded ? plural(inc.length, 'новая личная заявка', 'новые личные заявки', 'новых личных заявок') : 'новых личных заявок', 'e_incoming')}${stat('send', 'violet', offersN, `${plural(offersN, 'заявка', 'заявки', 'заявок')} по вашим услугам`, 'e_offers')}${stat('star', 'blue', '4,9', '214 отзывов', gv('c_reviews', { id: 'alex' }))}</div>
+        <div class="dstats">${stat('calok', 'green', today.length, `${plural(today.length, 'заказ', 'заказа', 'заказов')} сегодня`, 'e_schedule')}${stat('docsearch', 'orange', S.incLoaded ? inc.length : '…', S.incLoaded ? plural(inc.length, 'новая личная заявка', 'новые личные заявки', 'новых личных заявок') : 'новых личных заявок', 'e_incoming')}${stat('send', 'violet', offersN, `${plural(offersN, 'заявка', 'заявки', 'заявок')} по вашим услугам`, 'e_offers')}${stat('star', 'blue', REAL ? (EX.alex.reviews ? String(EX.alex.rating).replace('.', ',') : '—') : '4,9', REAL ? (EX.alex.reviews ? pn(EX.alex.reviews, 'отзыв', 'отзыва', 'отзывов') : 'отзывов пока нет') : '214 отзывов', gv('c_reviews', { id: 'alex' }))}</div>
         <div class="dgrid2">${card(`<div class="sec"><span class="h2">Сегодня</span><button class="lnk" data-a="go" data-v="e_schedule">Расписание ${ic('arr', 16, 2.2)}</button></div><div class="drows">${todayL}</div>`)}
           ${card(`<div class="sec"><span class="h2">Поступившие заявки</span><button class="lnk" data-a="go" data-v="e_incoming">Все ${ic('arr', 16, 2.2)}</button></div><div class="drows">${incL}</div>`)}</div>
         ${card(`<div class="sec"><span class="h2">Мои услуги</span><span class="row">${btn(`${ic('plus', 18, 2.4)} Добавить услугу`, 'newService', '', 'soft sm')}<button class="lnk" data-a="go" data-v="e_services">Все ${ic('arr', 16, 2.2)}</button></span></div><div class="drows two">${svcL}</div>`)}`,
@@ -10838,7 +10838,7 @@ SCREENS.g_home = () => ({
   body: `${card(`<div class="h2">Услуги рядом</div><div class="m">Поиск и просмотр без входа в аккаунт.</div>${goBtn('Найти услугу', 'c_find')}`)}
     <div class="sec"><span class="h2">Популярные категории</span><button class="lnk" data-a="go" data-v="c_catalog">Все ${ic('arr', 16, 2.2)}</button></div>
     <div class="hscroll">${DIRS.map(d => `<div class="pop">${catTile(d.name, 'openDir', d.id, d.ph)}</div>`).join('')}</div>
-    ${['tire1', 'clean1', 'logo1'].map(id => offerCard(offerById(id))).join('')}`,
+    ${(REAL ? OFFERS.filter(o => !o.hidden && o.ex !== 'alex').slice(-3) : ['tire1', 'clean1', 'logo1'].map(offerById)).filter(Boolean).map(o => offerCard(o)).join('')}`,  /* 18.11: в рабочей версии — настоящие карточки, в пустом каталоге гость не падает */
 });
 SCREENS.g_how = () => ({
   title: 'Как это работает',

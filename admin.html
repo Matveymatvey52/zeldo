@@ -188,6 +188,9 @@ tr.dim td { opacity: .62; }
 @media (max-width: 1200px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 860px) { .two-c { grid-template-columns: 1fr; } .fn { grid-template-columns: 110px minmax(0, 1fr) 32px 40px; } }
 @media (prefers-reduced-motion: reduce) { .drawer { animation: none; } .sw input, .sw input::after { transition: none; } }
+.pc .kv { grid-template-columns: 92px minmax(0, 1fr); }
+.pc .kv b { overflow-wrap: anywhere; min-width: 0; }
+.pc .kv b.num { white-space: normal; letter-spacing: 0; }
 </style>
 </head>
 <body>
@@ -253,10 +256,20 @@ window.ZDEMO = (() => {
   C[0].auto = { hard: [], soft: ['Фото похоже на фото другого исполнителя: «Сборка шкафов недорого», Сергей Л.'], info: [], at: now - 30 * 60e3 };
   C[1].auto = { hard: [], soft: [], info: [], at: now - 4 * D };
   C[2].auto = { hard: [], soft: [], info: ['Были контакты — скрыты автоматически'], at: now - D };
+  const CHK = [
+    { id: 31, name: 'Ольга Мастерова', verified: false, clean: 2, kyc: { st: 'wait', note: '' }, kycFile: null, payreq: { status: 'Самозанятый', who: 'Мастерова Ольга Ивановна', inn: '500100700169', ogrn: '', kpp: '', bank: 'ПАО Сбербанк', bik: '044525225', acc: '40817810838040000001', st: 'wait', note: '', npd: { msg: 'Сайт налоговой не ответил — проверьте вручную' } } },
+    { id: 32, name: 'Сергей Плиткин', verified: false, clean: 5, kyc: { st: 'ok', note: '' }, kycFile: null, payreq: { status: 'ИП', who: 'Плиткин Сергей Петрович', inn: '770200300189', ogrn: '318774600000015', kpp: '', bank: 'АО "ТБанк"', bik: '044525974', acc: '40802810510000000001', st: 'wait', note: '', npd: {} } },
+    { id: 33, name: 'Анна Чистова', verified: true, clean: 9, kyc: { st: 'ok', note: '' }, kycFile: null, payreq: { status: 'Самозанятый', who: 'Чистова Анна Сергеевна', inn: '500100700190', ogrn: '', kpp: '', bank: 'ПАО Сбербанк', bik: '044525225', acc: '40817810838040000002', st: 'auto', note: '', npd: { msg: '500100700190 является плательщиком налога на профессиональный доход' } } },
+  ];
+  const PAY = [
+    { id: 7, user: 33, name: 'Анна Чистова', kind: 'payout', sum: 18450, fee: 0, net: 18450, status: 'wait', at: now - 5 * 3600e3, fast: false, note: '', to: 'Самозанятый Чистова Анна Сергеевна, ИНН 500100700190, ПАО Сбербанк (БИК 044525225), счёт 40817810838040000002' },
+    { id: 6, user: 32, name: 'Сергей Плиткин', kind: 'payout', sum: 9700, fee: 291, net: 9409, status: 'wait', at: now - 8 * 3600e3, fast: true, note: '', to: 'ИП Плиткин Сергей Петрович, ИНН 770200300189, АО "ТБанк" (БИК 044525974), счёт 40802810510000000001' },
+    { id: 5, user: 3, name: 'Пётр Заказов', kind: 'withdraw', sum: 2500, fee: 50, net: 2450, status: 'paid', at: now - 2 * D, done: now - D, fast: false, note: '', to: 'На карту, с которой человек платил' },
+  ];
   return async function (url, b) {
     await new Promise(r => setTimeout(r, 120));
     const u = new URL(url, location.href); const p = u.pathname.replace(/^.*\/api\//, '/api/'); const q = u.searchParams;
-    if (p === '/api/admin/me') return { id: 1, name: 'Матвей Корепин', role: 'admin', roles: ROLES, can: ['summary', 'disputes', 'resolve', 'orders', 'cancel', 'cards', 'reviews', 'users', 'block', 'verify', 'email', 'staff', 'support', 'log', 'settings'], premod, aiDisputes, aiOn: true };
+    if (p === '/api/admin/me') return { id: 1, name: 'Матвей Корепин', role: 'admin', roles: ROLES, can: ['summary', 'disputes', 'resolve', 'orders', 'cancel', 'cards', 'reviews', 'users', 'block', 'verify', 'email', 'staff', 'support', 'log', 'settings', 'money'], premod, aiDisputes, aiOn: true };
     if (p === '/api/admin/summary') return summary();
     if (p === '/api/admin/orders') return { orders: O.filter(o => !q.get('status') || o.status === q.get('status')).map(row) };
     if (p === '/api/admin/order') { const o = O.find(x => x.id === Number(q.get('id'))); log('просмотр заказа и переписки', o.id); return { order: Object.assign(row(o), { data: o.data }), msgs: o.msgs.map(([who, t, at, sys]) => ({ who, t, at, sys: !!sys })) }; }
@@ -278,6 +291,13 @@ window.ZDEMO = (() => {
       if (q.get('id')) { const t = T[Number(q.get('id'))]; return Object.assign({ name: nm(t.user) }, t); }
       return { tickets: Object.values(T).map(t => { const l = t.msgs[t.msgs.length - 1]; return { user: t.user, name: nm(t.user), status: t.status, last: l.t, lastFrom: l.from, updated: l.at, n: t.msgs.length }; }) };
     }
+    /* 18.11: проверка реквизитов и паспортов, выплаты — выдуманные люди и числа для показа */
+    if (p === '/api/admin/checks') return { users: CHK };
+    if (p === '/api/admin/payreq') { const x = CHK.find(c => c.id === Number(b.id)); x.payreq.st = b.act === 'ok' ? 'ok' : 'bad'; x.payreq.note = b.act === 'bad' ? b.note : ''; log(b.act === 'ok' ? 'реквизиты проверены' : 'реквизиты вернули', x.name); return { ok: true }; }
+    if (p === '/api/admin/kyc') { const x = CHK.find(c => c.id === Number(b.id)); x.kyc = { st: b.act === 'ok' ? 'ok' : 'bad', note: b.act === 'bad' ? b.note : '' }; x.kycFile = null; log(b.act === 'ok' ? 'паспорт проверен, фото удалено' : 'паспорт не принят', x.name); return { ok: true }; }
+    if (p === '/api/admin/payouts') { if (b) { const x = PAY.find(y => y.id === Number(b.id)); x.status = b.act === 'paid' ? 'paid' : 'rejected'; x.note = b.note || ''; x.done = Date.now(); log(b.act === 'paid' ? 'выплата отмечена' : 'заявка отклонена', x.name); }
+      const pd = new Date(); pd.setDate(pd.getDate() + ((8 - pd.getDay()) % 7 || 7)); pd.setHours(10, 0, 0, 0);
+      return { payDay: pd.getTime(), items: PAY.filter(x => !q.get('status') || x.status === q.get('status')) }; }
     if (p === '/api/admin/log') return { log: LOG };
     if (p === '/api/admin/settings') { if (b.premod != null) premod = !!b.premod; if (b.aiDisputes != null) aiDisputes = !!b.aiDisputes; return { ok: true, premod, aiDisputes }; }
     return { ok: true };
@@ -287,7 +307,7 @@ window.ZDEMO = (() => {
 <script>
 'use strict';
 /* состояние и связь с сервером */
-const S = { me: null, sec: 'summary', data: {}, drawer: null, login: { step: 'email', email: '', err: '' }, flt: {} };
+const S = { me: null, sec: 'summary', data: {}, drawer: null, login: { step: 'email', email: '', err: '' }, flt: { payouts: 'wait' } };
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const rub = n => n == null ? '—' : `${Math.round(n).toLocaleString('ru-RU')} ₽`;
 const dt = t => t ? new Date(t).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
@@ -303,7 +323,7 @@ function toast(t, bad) { let el = $('.toast'); if (!el) { el = document.createEl
 
 /* разделы: ключ, название, право с сервера */
 const SECS = [
-  ['summary', 'Сводка', 'summary'], ['disputes', 'Споры', 'disputes'], ['orders', 'Заказы', 'orders'], ['cards', 'Карточки', 'cards'],
+  ['summary', 'Сводка', 'summary'], ['disputes', 'Споры', 'disputes'], ['orders', 'Заказы', 'orders'], ['payouts', 'Выплаты', 'money'], ['cards', 'Карточки', 'cards'], ['checks', 'Проверка', 'verify'],
   ['reviews', 'Отзывы', 'reviews'], ['users', 'Пользователи', 'users'], ['support', 'Поддержка', 'support'], ['staff', 'Сотрудники', 'staff'], ['log', 'Журнал', 'log'],
 ];
 const ST = { request: ['Ждёт подтверждения', 'grey'], confirmed: ['Ждёт оплаты', 'warn'], paid: ['Оплачен, ждёт начала', ''], startReq: ['Подтверждение начала', 'warn'], work: ['В работе', ''], result: ['Результат передан', 'warn'], rework: ['На доработке', 'warn'], done: ['Завершён', 'ok'], dispute: ['Спор', 'bad'], cancel: ['Отменён', 'grey'] };
@@ -325,6 +345,8 @@ async function load(sec) {
     if (sec === 'support') d.tickets = (await api('/api/admin/support')).tickets;
     if (sec === 'staff') d.staff = (await api('/api/admin/staff')).staff;
     if (sec === 'log') d.log = (await api('/api/admin/log')).log;
+    if (sec === 'checks') d.checks = (await api('/api/admin/checks')).users;
+    if (sec === 'payouts') { const r = await api('/api/admin/payouts' + (S.flt.payouts ? '?status=' + S.flt.payouts : '')); d.payouts = r.items; d.payDay = r.payDay; }
   } catch (e) { if (e.status === 401) return boot(); toast(e.message, true); }
   render();
 }
@@ -357,6 +379,8 @@ function vSummary() {
   const s = S.data.summary; if (!s) return '<div class="empty">Загружаем…</div>';
   const a = s.attention; const w = s.week.now, p = s.week.prev;
   const att = [
+    [(a.checks || {}).n, 'Реквизиты и паспорта ждут проверки', (a.checks || {}).n ? `Исполнители уже могут продавать, но значок «Проверен» и выплаты ждут вас. Самая давняя заявка — ${ago(a.checks.oldest)}.` : '', 'sec', 'checks', 'warn'],
+    [(a.payouts || {}).n, 'Деньги ждут перевода', (a.payouts || {}).n ? `Выплаты исполнителям и возвраты на карту. Самая давняя заявка — ${ago(a.payouts.oldest)}.` : '', 'goSec', 'payouts|wait', 'warn'],
     [a.disputes.n, 'Споры без решения', a.disputes.n ? `Самый давний ждёт ${ago(a.disputes.oldest)}. Деньги заморожены, пока вы не решите.` : '', 'sec', 'disputes', 'bad'],
     [a.support.n, 'Обращения без ответа', a.support.n ? `Самое давнее ждёт ${ago(a.support.oldest)}.` : '', 'sec', 'support', 'warn'],
     [a.cards.n, 'Карточки ждут модератора', a.cards.n ? `Автопроверка нашла замечания. Самая давняя ждёт ${ago(a.cards.oldest)}.` : '', 'goSec', 'cards|review', 'warn'],
@@ -453,8 +477,39 @@ function vStaff() {
   <div class="card" style="margin-top:14px"><h2>Что может каждая роль</h2><div class="kv2"><span>Админ</span><b>Всё: заказы, пользователи, споры, модерация, деньги, сотрудники</b><span>Модератор</span><b>Карточки, отзывы, профили, споры. Без денег</b><span>Поддержка</span><b>Обращения, просмотр заказов, ответы. Без денег</b><span>Аналитик</span><b>Сводка и цифры</b></div></div>`;
 }
 const vLog = () => { const l = S.data.log; return !l ? '<div class="empty">Загружаем…</div>' : tbl(['136px', '20%', '30%', ''], ['Когда', 'Кто', 'Что', 'Подробно'], l.map(a => `<tr><td class="m num">${dt(a.at)}</td><td>${cell(esc(a.who))}</td><td>${cell(esc(String(a.act).replace(/^админка: /, '')))}</td><td>${cell(`<span class="m">${esc(a.target || '')}</span>`)}</td></tr>`)); };
+
+/* ---------- проверка исполнителей (18.11): реквизиты, ответ налоговой и фото паспорта ----------
+   Самозанятого налоговая проверяет сама (если сайт ФНС ответил). ИП и ООО — сверить по выписке ЕГРИП / ЕГРЮЛ.
+   Паспорт: сверить ФИО с реквизитами и что фото читается. После решения фото удаляется с сервера. */
+const PST = { auto: ['Налоговая подтвердила', 'ok'], wait: ['Ждёт проверки', 'warn'], ok: ['Проверено', 'ok'], bad: ['Вернули на исправление', 'bad'] };
+const KST = { wait: ['Ждёт проверки', 'warn'], ok: ['Проверен', 'ok'], bad: ['Не принят', 'bad'] };
+function vChecks() {
+  const l = S.data.checks; if (!l) return '<div class="empty">Загружаем…</div>';
+  const head = `<div class="card note"><b>Что проверять.</b> Самозанятого налоговая подтверждает сама, если её сайт ответил. Если нет — откройте <a href="https://npd.nalog.ru/check-status/" target="_blank" rel="noopener">проверку статуса на сайте ФНС</a> и впишите ИНН. ИП и ООО сверьте по <a href="https://egrul.nalog.ru/" target="_blank" rel="noopener">выписке ЕГРИП / ЕГРЮЛ</a>: ИНН, ОГРН и что фирма действует. Паспорт: ФИО совпадает с реквизитами, фото читается. После решения фото паспорта удаляется с сервера. Значок «Проверен» ставится сам: паспорт, статус и пять заказов без жалоб.</div>`;
+  const rank = x => ((x.payreq && x.payreq.st === 'wait') || x.kyc.st === 'wait') ? 0 : 1;
+  return head + (l.length ? `<div class="grid cards">${l.slice().sort((a, b) => rank(a) - rank(b)).map(x => { const p = x.payreq; const k = x.kyc;
+    return `<div class="card pc"><div class="row nw"><b class="grow ell">${esc(x.name)}</b>${x.verified ? '<span class="pill ok">Проверен</span>' : `<span class="m">без жалоб ${Math.min(5, x.clean)} из 5</span>`}</div>
+    ${p ? `<div class="kv"><span>Статус</span><b>${esc(p.status)} <span class="pill ${PST[p.st] ? PST[p.st][1] : 'grey'}">${PST[p.st] ? PST[p.st][0] : esc(p.st)}</span></b><span>${p.status === 'ООО' ? 'Организация' : 'ФИО'}</span><b>${esc(p.who)}</b><span>ИНН</span><b class="num">${esc(p.inn)}</b>${p.ogrn ? `<span>${p.status === 'ИП' ? 'ОГРНИП' : 'ОГРН'}</span><b class="num">${esc(p.ogrn)}</b>` : ''}${p.kpp ? `<span>КПП</span><b class="num">${esc(p.kpp)}</b>` : ''}<span>Банк</span><b>${esc(p.bank || '—')} · БИК <span class="num">${esc(p.bik)}</span></b><span>Счёт</span><b class="num">${esc(p.acc)}</b>
+      ${p.npd && p.npd.msg ? `<span>Налоговая</span><b>${esc(p.npd.msg)}</b>` : ''}${p.note ? `<span>Причина</span><b>${esc(p.note)}</b>` : ''}</div>
+      <div class="row pc-act">${p.st !== 'ok' && p.st !== 'auto' ? `<button class="btn sm" data-a="prOk" data-v="${x.id}">Реквизиты верны</button>` : ''}${p.st !== 'bad' ? `<button class="btn sm danger" data-a="prBad" data-v="${x.id}">Вернуть на исправление</button>` : ''}</div>` : '<div class="m">Реквизитов ещё нет</div>'}
+    <div class="row nw" style="margin-top:6px"><b class="grow">Паспорт</b>${k.st ? `<span class="pill ${KST[k.st][1]}">${KST[k.st][0]}</span>` : '<span class="m">не загружен</span>'}</div>
+    ${x.kycFile ? `<a href="${esc(x.kycFile)}" target="_blank" rel="noopener" title="Открыть фото: просмотр попадёт в журнал"><img src="${esc(x.kycFile)}" alt="Фото паспорта" style="width:100%;max-height:220px;object-fit:contain;border-radius:12px;background:var(--soft)"></a>
+      <div class="row pc-act"><button class="btn sm" data-a="kycOk" data-v="${x.id}">Паспорт проверен</button><button class="btn sm danger" data-a="kycBad" data-v="${x.id}">Не принят</button></div>` : k.note ? `<div class="m">${esc(k.note)}</div>` : ''}</div>`; }).join('')}</div>` : '<div class="card empty">Реквизитов и паспортов на проверку пока нет</div>');
+}
+/* ---------- выплаты (18.11): заявки исполнителей и возвраты баланса на карту. Пока банк не подключён, админ переводит сам и отмечает ---------- */
+const PAYST = { wait: ['Ждёт перевода', 'warn'], paid: ['Отправлено', 'ok'], rejected: ['Отклонено', 'bad'] };
+function vPayouts() {
+  const f = S.flt.payouts || ''; const l = S.data.payouts;
+  const head = `<div class="chips">${[['wait', 'Ждут перевода'], ['paid', 'Отправлены'], ['rejected', 'Отклонены'], ['', 'Все']].map(([k, t]) => `<button class="chip ${f === k ? 'on' : ''}" data-a="fltPay" data-v="${k}">${t}</button>`).join('')}</div>
+    <div class="card note"><b>Как платим.</b> Каждый понедельник в 10:00 по Москве сервер сам создаёт заявку на всё, что исполнитель заработал за принятые заказы, без комиссии. «Сразу» — исполнитель попросил сам, комиссия 3 %, не меньше 200 ₽. Переведите «К переводу» по реквизитам из банка и нажмите «Отправлено». Возврат баланса заказчику — на карту, с которой он платил. Пока деньги тестовые, переводить не нужно, достаточно отметки.${S.data.payDay ? ` Ближайшая выплата: ${dt(S.data.payDay)}.` : ''}</div>`;
+  if (!l) return head + '<div class="empty">Загружаем…</div>';
+  return head + (l.length ? tbl(['48px', '15%', '140px', '124px', '116px', '', '150px', '214px'], ['№', 'Кто', 'Что', '<span class="r">Сумма</span>', '<span class="r">К переводу</span>', 'Куда', 'Статус', ''],
+    l.map(x => `<tr><td class="num">${x.id}</td><td>${cell(esc(x.name), dt(x.at))}</td><td>${cell(x.kind === 'payout' ? 'Исполнителю' : 'Возврат на карту', x.kind === 'payout' ? (x.fast ? 'сразу, по просьбе' : 'по понедельникам') : 'заказчику')}</td><td class="num r">${cell(rub(x.sum), x.fee ? `комиссия ${rub(x.fee)}` : 'без комиссии')}</td><td class="num r"><b>${rub(x.net)}</b></td><td><span class="clamp2" title="${esc(x.to || '')}">${esc(x.to || '—')}</span></td><td>${cell(`<span class="pill ${PAYST[x.status][1]}">${PAYST[x.status][0]}</span>`, x.note ? esc(x.note) : x.done ? dt(x.done) : '')}</td>
+      <td class="r">${x.status === 'wait' ? `<div class="acts"><button class="btn sm" data-a="payPaid" data-v="${x.id}">Отправлено</button><button class="btn sm danger" data-a="payRej" data-v="${x.id}">Отклонить</button></div>` : ''}</td></tr>`)) : '<div class="card empty">Заявок нет</div>');
+}
 const SUBS = { summary: 'Что требует действий сейчас и как прошла неделя.', disputes: 'Споры по заказам. Деньги ждут на защищённом счёте, пока вы не примете решение.', orders: 'Все заказы. Откройте заказ, чтобы увидеть ход и переписку: просмотр попадёт в журнал.', cards: 'Карточки исполнителей и результат автопроверки. Вернуть можно с причиной: исполнитель увидит её и исправит.', reviews: 'Скрытый отзыв не влияет на рейтинг. Причина остаётся в админке.', users: 'Поиск по имени или по точной почте. Почта показывается целиком только админу, просмотр пишется в журнал.', support: 'Обращения из диалога «Поддержка ZELDO» в приложении.', staff: 'Кто работает в админке и в какой роли.', log: 'Кто из сотрудников что открыл и что сделал.' };
-const VIEWS = { summary: vSummary, disputes: vDisputes, orders: vOrders, cards: vCards, reviews: vReviews, users: vUsers, support: vSupport, staff: vStaff, log: vLog };
+SUBS.checks = 'Реквизиты исполнителей и фото паспортов. Просмотр пишется в журнал.'; SUBS.payouts = 'Деньги, которые нужно перевести: выплаты исполнителям и возвраты на карту заказчикам. Видит только админ.';
+const VIEWS = { checks: vChecks, payouts: vPayouts, summary: vSummary, disputes: vDisputes, orders: vOrders, cards: vCards, reviews: vReviews, users: vUsers, support: vSupport, staff: vStaff, log: vLog };
 
 /* заказ и спор — в боковой панели */
 const HOW_RU = { refund: 'вернуть деньги заказчику', payout: 'выплатить исполнителю', split: 'поделить сумму', rework: 'вернуть на доработку', human: 'отдать администратору' };
@@ -497,7 +552,7 @@ function render() {
   const root = $('#root');
   if (!S.me) { const l = S.login; root.innerHTML = `<div class="login card"><div class="logo">ZELDO<small>Админка</small></div>${S.denied ? `<p>Эта почта не сотрудник ZELDO. Доступ выдаёт админ в разделе «Сотрудники».</p><button class="btn soft" data-a="logout">Войти другой почтой</button>` : l.step === 'email' ? `<label class="f">Почта сотрудника<input class="in" id="le" type="email" autocomplete="email" value="${esc(l.email)}" data-enter="lsend"></label><div class="row" style="margin-top:12px"><button class="btn" data-a="lsend">Получить код</button></div>` : `<p class="m">Код отправили на ${esc(l.to)}. Он действует 10 минут.</p><label class="f">Код из письма<input class="in" id="lc" inputmode="numeric" autocomplete="one-time-code" maxlength="6" data-enter="lverify"></label><div class="row" style="margin-top:12px"><button class="btn" data-a="lverify">Войти</button><button class="btn soft" data-a="lback">Другая почта</button></div>`}${l.err ? `<p style="color:var(--bad)">${esc(l.err)}</p>` : ''}</div>`; return; }
   if (!S.me.name) { root.innerHTML = `<div class="login card"><div class="logo">ZELDO<small>Админка</small></div><label class="f">Как вас подписывать в ответах пользователям<input class="in" id="nm" autocomplete="name" maxlength="60" placeholder="Например: Матвей Корепин" data-enter="saveName"></label><p class="m">Пользователи увидят только имя и первую букву фамилии.</p><div class="row"><button class="btn" data-a="saveName">Продолжить</button></div></div>`; const i = $('#nm'); if (i) i.focus(); return; }
-  const s = S.data.summary || {}; const badge = { disputes: s.disputes, support: s.support, cards: (s.cards || {}).review };
+  const s = S.data.summary || {}; const at = s.attention || {}; const badge = { disputes: (at.disputes || {}).n, support: (at.support || {}).n, cards: (at.cards || {}).n, checks: (at.checks || {}).n, payouts: (at.payouts || {}).n };
   const secs = SECS.filter(([, , k]) => can(k));
   const sec = secs.some(x => x[0] === S.sec) ? S.sec : secs[0][0];
   const scroll = document.scrollingElement.scrollTop;
@@ -544,6 +599,13 @@ const A = {
   async openTicket(id) { try { S.data.ticket = await api('/api/admin/support?id=' + id); render(); } catch (e) { toast(e.message, true); } },
   async ticketSend() { const t = S.data.ticket; const text = $('#treply').value.trim(); if (!text) return; try { S.data.ticket = await api('/api/admin/support', { user: t.user, text }); $('#treply').value = ''; render(); load('support'); counts(); } catch (e) { toast(e.message, true); } },
   async ticketSt(st) { const t = S.data.ticket; try { S.data.ticket = await api('/api/admin/support', { user: t.user, status: st }); render(); load('support'); counts(); } catch (e) { toast(e.message, true); } },
+  fltPay(v) { S.flt.payouts = v; load('payouts'); },
+  async prOk(id) { try { await api('/api/admin/payreq', { id: Number(id), act: 'ok' }); toast('Реквизиты отмечены проверенными'); load('checks'); counts(); } catch (e) { toast(e.message, true); } },
+  async prBad(id) { const note = prompt('Что исправить? Исполнитель увидит это в «Статусе и реквизитах»'); if (!note) return; try { await api('/api/admin/payreq', { id: Number(id), act: 'bad', note }); toast('Реквизиты вернули исполнителю'); load('checks'); counts(); } catch (e) { toast(e.message, true); } },
+  async kycOk(id) { if (!confirm('Паспорт проверен? Фото удалится с сервера, останется отметка.')) return; try { await api('/api/admin/kyc', { id: Number(id), act: 'ok' }); toast('Паспорт проверен, фото удалено'); load('checks'); counts(); } catch (e) { toast(e.message, true); } },
+  async kycBad(id) { const note = prompt('Что не так с фото? Например: «нечитаемо, переснимите без бликов»'); if (!note) return; try { await api('/api/admin/kyc', { id: Number(id), act: 'bad', note }); toast('Фото не принято и удалено'); load('checks'); counts(); } catch (e) { toast(e.message, true); } },
+  async payPaid(id) { if (!confirm('Деньги переведены? Человек получит уведомление.')) return; try { const r = await api('/api/admin/payouts', { id: Number(id), act: 'paid' }); S.data.payouts = r.items; toast('Отмечено: отправлено'); load('payouts'); counts(); } catch (e) { toast(e.message, true); } },
+  async payRej(id) { const note = prompt('Почему отклоняете? Человек увидит причину, деньги снова станут доступны'); if (!note) return; try { await api('/api/admin/payouts', { id: Number(id), act: 'rejected', note }); toast('Заявка отклонена'); load('payouts'); counts(); } catch (e) { toast(e.message, true); } },
   async staffAdd() { const email = $('#sfe').value.trim(); const role = $('#sfr').value; try { S.data.staff = (await api('/api/admin/staff', { email, role })).staff; toast('Сотрудник добавлен'); render(); } catch (e) { toast(e.message, true); } },
   async staffDel(email) { if (!confirm(`Убрать доступ к админке у ${email}?`)) return; try { S.data.staff = (await api('/api/admin/staff', { email, role: null })).staff; toast('Доступ убран'); render(); } catch (e) { toast(e.message, true); } },
 };
@@ -554,7 +616,7 @@ document.addEventListener('change', async e => { if (e.target.dataset.ch === 'pr
 
 /* новые обращения, споры и карточки — без перезагрузки */
 let es = null;
-function listen() { if (window.ZDEMO) return; if (es) es.close(); es = new EventSource('/api/events'); es.onmessage = e => { let ev; try { ev = JSON.parse(e.data); } catch (x) { return; } if (ev.t === 'adm' || ev.t === 'order' || ev.t === 'card') { counts(); if (['support', 'disputes', 'cards'].includes(S.sec)) load(S.sec); if (ev.t === 'adm' && S.data.ticket && S.data.ticket.user === ev.user) A.openTicket(ev.user); } }; }
+function listen() { if (window.ZDEMO) return; if (es) es.close(); es = new EventSource('/api/events'); es.onmessage = e => { let ev; try { ev = JSON.parse(e.data); } catch (x) { return; } if (ev.t === 'adm' || ev.t === 'order' || ev.t === 'card') { counts(); if (['support', 'disputes', 'cards', 'checks', 'payouts'].includes(S.sec)) load(S.sec); if (ev.t === 'adm' && S.data.ticket && S.data.ticket.user === ev.user) A.openTicket(ev.user); } }; }
 async function boot() {
   try { S.me = await api('/api/admin/me'); S.denied = false; } catch (e) { S.me = null; S.denied = e.status === 403; render(); if (!S.denied) { const i = $('#le'); if (i) i.focus(); } return; }
   render(); load(S.me.can.includes('summary') ? 'summary' : SECS.find(x => S.me.can.includes(x[2]))[0]); listen();
