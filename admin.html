@@ -324,7 +324,7 @@ function toast(t, bad) { let el = $('.toast'); if (!el) { el = document.createEl
 /* разделы: ключ, название, право с сервера */
 const SECS = [
   ['summary', 'Сводка', 'summary'], ['disputes', 'Споры', 'disputes'], ['orders', 'Заказы', 'orders'], ['payouts', 'Выплаты', 'money'], ['cards', 'Карточки', 'cards'], ['checks', 'Проверка', 'verify'],
-  ['reviews', 'Отзывы', 'reviews'], ['ref', 'Партнёры', 'ref'], ['aw', 'Награды', 'ref'], ['users', 'Пользователи', 'users'], ['support', 'Поддержка', 'support'], ['staff', 'Сотрудники', 'staff'], ['log', 'Журнал', 'log'],
+  ['reviews', 'Отзывы', 'reviews'], ['users', 'Пользователи', 'users'], ['support', 'Поддержка', 'support'], ['staff', 'Сотрудники', 'staff'], ['log', 'Журнал', 'log'],
 ];
 const ST = { request: ['Ждёт подтверждения', 'grey'], confirmed: ['Ждёт оплаты', 'warn'], paid: ['Оплачен, ждёт начала', ''], startReq: ['Подтверждение начала', 'warn'], work: ['В работе', ''], result: ['Результат передан', 'warn'], rework: ['На доработке', 'warn'], done: ['Завершён', 'ok'], dispute: ['Спор', 'bad'], cancel: ['Отменён', 'grey'] };
 const stPill = s => { const [t, k] = ST[s] || [s, 'grey']; return `<span class="pill ${k}">${esc(t)}</span>`; };
@@ -346,8 +346,6 @@ async function load(sec) {
     if (sec === 'staff') d.staff = (await api('/api/admin/staff')).staff;
     if (sec === 'log') d.log = (await api('/api/admin/log')).log;
     if (sec === 'checks') d.checks = (await api('/api/admin/checks')).users;
-    if (sec === 'ref') d.ref = await api('/api/admin/ref');
-    if (sec === 'aw') d.aw = await api('/api/admin/awards');
     if (sec === 'payouts') { const r = await api('/api/admin/payouts' + (S.flt.payouts ? '?status=' + S.flt.payouts : '')); d.payouts = r.items; d.payDay = r.payDay; }
   } catch (e) { if (e.status === 401) return boot(); toast(e.message, true); }
   render();
@@ -453,7 +451,7 @@ function vCards() {
 function vReviews() {
   const l = S.data.reviews; if (!l) return '<div class="empty">Загружаем…</div>';
   return l.length ? tbl(['19%', '17%', '108px', '', '84px', '132px'], ['Кто', 'О ком', 'Оценка', 'Текст', 'Заказ', ''],
-    l.map(r => `<tr class="${r.hidden ? 'dim' : ''}"><td>${cell(esc(r.authorName), r.by === 'c' ? 'заказчик' : 'исполнитель')}</td><td>${cell(esc(r.targetName))}</td><td class="num stars">${'★'.repeat(r.stars)}<span class="st0">${'★'.repeat(5 - r.stars)}</span></td><td><span class="clamp2">${esc(r.text || (r.tags || []).join(', ') || '—')}</span>${r.hidden ? `<span class="c2">Скрыт: ${esc(r.hideReason || '')}</span>` : ''}</td><td>${cell(`<span class="num">№ ${r.order}</span>`, esc([r.svc, r.odate ? new Date(r.odate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }) : ''].filter(Boolean).join(', ')))}</td><td class="r">${r.hidden ? `<button class="btn sm soft wfix" data-a="revShow" data-v="${r.order}|${r.by}">Вернуть</button>` : `<button class="btn sm danger wfix" data-a="revHide" data-v="${r.order}|${r.by}">Скрыть</button>`}</td></tr>`)) : '<div class="card empty">Отзывов пока нет</div>';
+    l.map(r => `<tr class="${r.hidden ? 'dim' : ''}"><td>${cell(esc(r.authorName), r.by === 'c' ? 'заказчик' : 'исполнитель')}</td><td>${cell(esc(r.targetName))}</td><td class="num stars">${'★'.repeat(r.stars)}<span class="st0">${'★'.repeat(5 - r.stars)}</span></td><td><span class="clamp2">${esc(r.text || (r.tags || []).join(', ') || '—')}</span>${r.hidden ? `<span class="c2">Скрыт: ${esc(r.hideReason || '')}</span>` : ''}</td><td class="num">${r.order}</td><td class="r">${r.hidden ? `<button class="btn sm soft wfix" data-a="revShow" data-v="${r.order}|${r.by}">Вернуть</button>` : `<button class="btn sm danger wfix" data-a="revHide" data-v="${r.order}|${r.by}">Скрыть</button>`}</td></tr>`)) : '<div class="card empty">Отзывов пока нет</div>';
 }
 function vUsers() {
   const l = S.data.users;
@@ -506,49 +504,12 @@ function vPayouts() {
     <div class="card note"><b>Как платим.</b> Каждый понедельник в 10:00 по Москве сервер сам создаёт заявку на всё, что исполнитель заработал за принятые заказы, без комиссии. «Сразу» — исполнитель попросил сам, комиссия 3 %, не меньше 200 ₽. Переведите «К переводу» по реквизитам из банка и нажмите «Отправлено». Возврат баланса заказчику — на карту, с которой он платил. Пока деньги тестовые, переводить не нужно, достаточно отметки.${S.data.payDay ? ` Ближайшая выплата: ${dt(S.data.payDay)}.` : ''}</div>`;
   if (!l) return head + '<div class="empty">Загружаем…</div>';
   return head + (l.length ? tbl(['48px', '15%', '140px', '124px', '116px', '', '150px', '214px'], ['№', 'Кто', 'Что', '<span class="r">Сумма</span>', '<span class="r">К переводу</span>', 'Куда', 'Статус', ''],
-    l.map(x => `<tr><td class="num">${x.id}</td><td>${cell(esc(x.name), dt(x.at))}</td><td>${cell(x.kind === 'payout' ? 'Исполнителю' : x.kind === 'ptsout' ? 'Баллы в рубли' : 'Возврат на карту', x.kind === 'payout' ? (x.fast ? 'сразу, по просьбе' : 'по понедельникам') : x.kind === 'ptsout' ? 'партнёру, ИП или ООО, комиссия 5 %' : 'заказчику')}</td><td class="num r">${cell(rub(x.sum), x.fee ? `комиссия ${rub(x.fee)}` : 'без комиссии')}</td><td class="num r"><b>${rub(x.net)}</b></td><td><span class="clamp2" title="${esc(x.to || '')}">${esc(x.to || '—')}</span></td><td>${cell(`<span class="pill ${PAYST[x.status][1]}">${PAYST[x.status][0]}</span>`, x.note ? esc(x.note) : x.done ? dt(x.done) : '')}</td>
+    l.map(x => `<tr><td class="num">${x.id}</td><td>${cell(esc(x.name), dt(x.at))}</td><td>${cell(x.kind === 'payout' ? 'Исполнителю' : 'Возврат на карту', x.kind === 'payout' ? (x.fast ? 'сразу, по просьбе' : 'по понедельникам') : 'заказчику')}</td><td class="num r">${cell(rub(x.sum), x.fee ? `комиссия ${rub(x.fee)}` : 'без комиссии')}</td><td class="num r"><b>${rub(x.net)}</b></td><td><span class="clamp2" title="${esc(x.to || '')}">${esc(x.to || '—')}</span></td><td>${cell(`<span class="pill ${PAYST[x.status][1]}">${PAYST[x.status][0]}</span>`, x.note ? esc(x.note) : x.done ? dt(x.done) : '')}</td>
       <td class="r">${x.status === 'wait' ? `<div class="acts"><button class="btn sm" data-a="payPaid" data-v="${x.id}">Отправлено</button><button class="btn sm danger" data-a="payRej" data-v="${x.id}">Отклонить</button></div>` : ''}</td></tr>`)) : '<div class="card empty">Заявок нет</div>');
 }
 const SUBS = { summary: 'Что требует действий сейчас и как прошла неделя.', disputes: 'Споры по заказам. Деньги ждут на защищённом счёте, пока вы не примете решение.', orders: 'Все заказы. Откройте заказ, чтобы увидеть ход и переписку: просмотр попадёт в журнал.', cards: 'Карточки исполнителей и результат автопроверки. Вернуть можно с причиной: исполнитель увидит её и исправит.', reviews: 'Скрытый отзыв не влияет на рейтинг. Причина остаётся в админке.', users: 'Поиск по имени или по точной почте. Почта показывается целиком только админу, просмотр пишется в журнал.', support: 'Обращения из диалога «Поддержка ZELDO» в приложении.', staff: 'Кто работает в админке и в какой роли.', log: 'Кто из сотрудников что открыл и что сделал.' };
 SUBS.checks = 'Реквизиты исполнителей и фото паспортов. Просмотр пишется в журнал.'; SUBS.payouts = 'Деньги, которые нужно перевести: выплаты исполнителям и возвраты на карту заказчикам. Видит только админ.';
-/* партнёры «Мои связи» (20.11): кто включил, команда, баллы; начисления, где заказчик и получатель входили с одного адреса, — на проверку */
-function vRef() {
-  const d = S.data.ref; if (!d) return '<div class="empty">Загружаем…</div>';
-  const P = { kyc: ['Включены', 'ok'], test: ['Включены, тест', 'ok'], '': ['Не включены', 'grey'] };
-  const chk = d.chk.length ? `<h2 style="margin:0 0 10px">Начисления на проверке</h2><div class="card note" style="margin-bottom:12px">Получатель баллов входил в ZELDO с того же адреса, что заказчик или исполнитель. Так бывает у семьи и коллег, но так же выглядит накрутка: человек приглашает сам себя. Одобрите — баллы начислятся. Отклоните — эта часть останется исполнителю.</div>`
-    + tbl(['96px', '', '', '', '120px', '230px'], ['Заказ', 'Кому баллы', 'Заказчик', 'Исполнитель', '<span class="r">Баллов</span>', ''],
-      d.chk.map(x => `<tr><td class="num">${cell('№ ' + x.order, x.lvl ? `${x.lvl}-й уровень, ${String(x.pct).replace('.', ',')} %` : '1 % за исполнителя')}</td><td>${cell(esc(x.user))}</td><td>${cell(esc(x.cust))}</td><td>${cell(esc(x.exec), esc(x.svc))}</td><td class="num r">${cell(String(x.sum), x.closed ? 'заказ закрыт' : 'заказ ещё идёт')}</td>
-        <td class="r">${can('verify') ? `<div class="acts"><button class="btn sm" data-a="refChk" data-v="${x.order}|${x.lvl}|1">Одобрить</button><button class="btn sm danger" data-a="refChk" data-v="${x.order}|${x.lvl}|0">Отклонить</button></div>` : ''}</td></tr>`)) : '';
-  const min = `<div class="card" style="margin-bottom:14px"><div class="row"><span class="grow"><b>Вывод баллов в рубли</b><span class="c2">Только ИП и ООО, комиссия 5 %. Минимум — ${num(d.min)} баллов.</span></span>${can('settings') ? `<input class="in" id="refMin" style="width:120px" inputmode="numeric" value="${d.min}"><button class="btn soft" data-a="refMin">Сохранить минимум</button>` : ''}</div></div>`;
-  const ppl = d.people.length ? tbl(['48px', '', '150px', '110px', '110px', '110px', '110px', '110px'], ['№', 'Партнёр', '«Мои связи»', '<span class="r">Команда</span>', '<span class="r">Доступно</span>', '<span class="r">На проверке</span>', '<span class="r">Ждут включения</span>', '<span class="r">Сгорело</span>'],
-    d.people.map(x => `<tr><td class="num">${x.id}</td><td>${cell(esc(x.name), x.inv ? 'пригласил: ' + esc(x.inv) : 'пришёл сам')}</td><td>${cell(`<span class="pill ${P[x.partner] ? P[x.partner][1] : 'grey'}">${P[x.partner] ? P[x.partner][0] : esc(x.partner)}</span>`, x.at ? dt(x.at) : '')}</td><td class="num r">${cell(String(x.team), `1-й уровень: ${x.l1}${x.execs ? `, исполнителей ${x.execs}` : ''}`)}</td><td class="num r">${num(x.avail)}</td><td class="num r">${num(x.hold)}</td><td class="num r">${num(x.lock)}</td><td class="num r">${num(x.burned)}</td></tr>`)) : '<div class="card empty">Пока никто никого не пригласил</div>';
-  return chk + min + ppl;
-}
-/* награды (20.11): пороги, которых нет в документах Максима. Пусто — ступень не выдаётся, человек видит «критерии утверждаются» */
-function vAw() {
-  const d = S.data.aw; if (!d) return '<div class="empty">Загружаем…</div>'; const c = d.cfg; const ed = can('settings');
-  const inp = (path, v, ph) => `<input class="in" style="width:96px" data-aw="${path}" inputmode="decimal" value="${v == null ? '' : String(v).replace('.', ',')}" placeholder="${ph || 'пусто'}" ${ed ? '' : 'disabled'}>`;
-  const row = (t, cells) => `<tr><td>${t}</td>${cells.map(x => `<td>${x}</td>`).join('')}</tr>`;
-  const ex = tbl(['', '150px', '150px', '170px', '150px'], ['Ступень исполнителя', 'Заказов, от', 'Оценка, от', 'Со спором, не больше %', 'На ZELDO, месяцев'],
-    [['stable', 'Стабильный'], ['reliable', 'Надёжный'], ['choice', 'Выбор ZELDO']].map(([k, n]) => row(n, ['done', 'rating', 'dsp', 'months'].map(f => inp(`exec.${k}.${f}`, c.exec[k][f])))));
-  const bd = tbl(['', '170px', '170px'], ['Значок исполнителя', 'Порог', 'Минимум заказов / клиентов / отзывов'],
-    [row('Точно в срок — начали вовремя, %', [inp('badges.ontime.pct', c.badges.ontime.pct), inp('badges.ontime.min', c.badges.ontime.min)]), row('Возвращаются снова — повторных клиентов, %', [inp('badges.repeat.pct', c.badges.repeat.pct), inp('badges.repeat.min', c.badges.repeat.min)]),
-     row('Высокая оценка — средняя оценка от', [inp('badges.top.rating', c.badges.top.rating), inp('badges.top.min', c.badges.top.min)]), row('Без нарушений — дней без отмен по своей вине и проигранных споров', [inp('badges.clean.days', c.badges.clean.days), inp('badges.clean.min', c.badges.clean.min)])]);
-  const cu = tbl(['', '170px', '220px'], ['Ступень заказчика', 'Принятых заказов, от', 'Отмен после оплаты, не больше'], [['checked', 'Проверен'], ['reliable', 'Надёжный']].map(([k, n]) => row(n, [inp(`cust.${k}.done`, c.cust[k].done), inp(`cust.${k}.cancels`, c.cust[k].cancels)])));
-  const rf = tbl(['', '220px'], ['Уровень в «Моих связях» (каждая ветка отдельно)', 'Сколько нужно'], [row('Искра — лично приглашённых с действием', ['1, утверждено']), row('Импульс — лично приглашённых с действием', ['3, утверждено']),
-    row('Поток — лично приглашённых, которые сами привели человека с действием', [inp('ref.flow', c.ref.flow)]), row('Орбита — то же', [inp('ref.orbit', c.ref.orbit)]), row('Экосистема — то же', [inp('ref.eco', c.ref.eco)])]);
-  const pk = tbl(['', '150px', '160px', '190px'], ['Пакет на 30 дней', 'Исполнителю: комиссия', 'Заказчику', 'Порог повтора, ₽'],
-    d.table.map((x, i) => row(x.name, [`${String(x.fee).replace('.', ',')} %`, x.disc ? `${x.disc} % на ${x.uses} заказ${x.uses === 1 ? '' : x.uses < 5 ? 'а' : 'ов'} · не подключено` : 'умный подбор', inp(`pkg.thr.${i}`, c.pkg.thr[i])])));
-  return `<div class="card note" style="margin-bottom:14px">В документах Максима названия ступеней утверждены, а пороги — нет («критерии не дополняются»). Пустое поле — ступень не выдаётся, человек видит «критерии утверждаются». «Проверен» у исполнителя работает уже сейчас: паспорт, статус в налоговой и пять заказов без жалоб.</div>
-    <h2 style="margin:0 0 10px">Исполнитель</h2>${ex}${bd}<h2 style="margin:14px 0 10px">Заказчик</h2>${cu}<div class="card note" style="margin:10px 0">После первой принятой покупки заказчик сам получает пакет «Искра» на 30 дней: умный подбор, без скидки.</div>
-    <h2 style="margin:14px 0 10px">«Мои связи»</h2>${rf}<h2 style="margin:14px 0 10px">Пакеты</h2>
-    <div class="card note" style="margin-bottom:10px">Порог 10 000 ₽ утверждён, 50/100/200/400 тыс. — предварительные, «требуют проверки экономики». Включённые пакеты снижают комиссию исполнителя на 30 дней. Скидка заказчику не подключена: не решено, кто её оплачивает.</div>
-    <label class="row" style="margin-bottom:10px;gap:8px"><input type="checkbox" id="awOn" ${c.pkg.on ? 'checked' : ''} ${ed ? '' : 'disabled'}><b>Выдавать пакеты</b></label>${pk}
-    ${ed ? '<button class="btn" data-a="awSave" style="margin-top:14px">Сохранить пороги</button>' : ''}`;
-}
-SUBS.aw = 'Ступени исполнителя и заказчика, значки, уровни «Моих связей» и пакеты на 30 дней. Меняет только админ.';
-SUBS.ref = 'Кто кого пригласил, баллы партнёров и начисления, которые ждут проверки. 1 балл = 1 ₽, баллы живут 10 месяцев.';
-const VIEWS = { aw: vAw, ref: vRef, checks: vChecks, payouts: vPayouts, summary: vSummary, disputes: vDisputes, orders: vOrders, cards: vCards, reviews: vReviews, users: vUsers, support: vSupport, staff: vStaff, log: vLog };
+const VIEWS = { checks: vChecks, payouts: vPayouts, summary: vSummary, disputes: vDisputes, orders: vOrders, cards: vCards, reviews: vReviews, users: vUsers, support: vSupport, staff: vStaff, log: vLog };
 
 /* заказ и спор — в боковой панели */
 const HOW_RU = { refund: 'вернуть деньги заказчику', payout: 'выплатить исполнителю', split: 'поделить сумму', rework: 'вернуть на доработку', human: 'отдать администратору' };
@@ -643,11 +604,6 @@ const A = {
   async prBad(id) { const note = prompt('Что исправить? Исполнитель увидит это в «Статусе и реквизитах»'); if (!note) return; try { await api('/api/admin/payreq', { id: Number(id), act: 'bad', note }); toast('Реквизиты вернули исполнителю'); load('checks'); counts(); } catch (e) { toast(e.message, true); } },
   async kycOk(id) { if (!confirm('Паспорт проверен? Фото удалится с сервера, останется отметка.')) return; try { await api('/api/admin/kyc', { id: Number(id), act: 'ok' }); toast('Паспорт проверен, фото удалено'); load('checks'); counts(); } catch (e) { toast(e.message, true); } },
   async kycBad(id) { const note = prompt('Что не так с фото? Например: «нечитаемо, переснимите без бликов»'); if (!note) return; try { await api('/api/admin/kyc', { id: Number(id), act: 'bad', note }); toast('Фото не принято и удалено'); load('checks'); counts(); } catch (e) { toast(e.message, true); } },
-  async awSave() { const cfg = { exec: {}, badges: {}, cust: {}, ref: {}, pkg: { thr: [], on: !!(document.getElementById('awOn') || {}).checked } };
-    document.querySelectorAll('[data-aw]').forEach(el => { const ps = el.dataset.aw.split('.'); const v = el.value.trim(); if (ps[0] === 'pkg') { cfg.pkg.thr[Number(ps[2])] = v.replace(/\s/g, ''); return; } let o = cfg; ps.slice(0, -1).forEach(k => { o[k] = o[k] || {}; o = o[k]; }); o[ps[ps.length - 1]] = v; });
-    try { S.data.aw = await api('/api/admin/awards', { cfg }); toast('Пороги сохранены'); render(); } catch (e) { toast(e.message, true); } },
-  async refChk(v) { const [order, lvl, ok] = v.split('|'); try { S.data.ref = await api('/api/admin/ref', { act: 'chk', order: Number(order), lvl: Number(lvl), ok: ok === '1' }); toast(ok === '1' ? 'Начисление одобрено' : 'Начисление отклонено: эта часть останется исполнителю'); render(); } catch (e) { toast(e.message, true); } },
-  async refMin() { const v = Number((document.getElementById('refMin') || {}).value || 0); try { S.data.ref = await api('/api/admin/ref', { act: 'min', v }); toast('Минимум сохранён'); render(); } catch (e) { toast(e.message, true); } },
   async payPaid(id) { if (!confirm('Деньги переведены? Человек получит уведомление.')) return; try { const r = await api('/api/admin/payouts', { id: Number(id), act: 'paid' }); S.data.payouts = r.items; toast('Отмечено: отправлено'); load('payouts'); counts(); } catch (e) { toast(e.message, true); } },
   async payRej(id) { const note = prompt('Почему отклоняете? Человек увидит причину, деньги снова станут доступны'); if (!note) return; try { await api('/api/admin/payouts', { id: Number(id), act: 'rejected', note }); toast('Заявка отклонена'); load('payouts'); counts(); } catch (e) { toast(e.message, true); } },
   async staffAdd() { const email = $('#sfe').value.trim(); const role = $('#sfr').value; try { S.data.staff = (await api('/api/admin/staff', { email, role })).staff; toast('Сотрудник добавлен'); render(); } catch (e) { toast(e.message, true); } },

@@ -6492,13 +6492,7 @@ AFTER_RENDER.push(lcActAlign); addEventListener('resize', lcActAlign);
 /* гость не видит имени исполнителя: только «проверенный исполнитель», рейтинг и район */
 const exName2 = o => S.role === 'guest' ? 'Проверенный исполнитель' : (EX[o.ex] || {}).name || '';
 const exLine = o => { const e = EX[o.ex] || {}; return `<span class="on2"><b>${esc(exName2(o))}</b>${S.role === 'guest' || (REAL && !e.ver) ? '' : `<span class="vbadge">${ic('diamond', 14, 2)} Проверен</span>`}${e.reviews ? `<span class="rating">${ic('star', 15, 2)}${String(e.rating).replace('.', ',')}</span>` : '<span class="m">Нет отзывов</span>'}</span>`; };
-/* 20.11: проценты партнёрам задаёт исполнитель — 5–40 % на 3–5 уровней (документы Максима); своя настройка у услуги главнее общей.
-   В рабочей версии берём с сервера (EX[…].ref), в прототипе — по умолчанию 10/7/5/3/1 = 26 % */
-const REF_DEF = [10, 7, 5, 3, 1];
-const refLv = (ex, cardId) => { const r = (EX[ex] || {}).ref; return (r && ((cardId && r.svc && r.svc[cardId]) || r.lv)) || REF_DEF; };
-const refOf = (ex, cardId) => { const lv = refLv(ex, cardId); return [Math.round(lv.reduce((a, x) => a + x, 0) * 10) / 10, lv.length]; };
-const refPct = x => String(x).replace('.', ',') + NB + '%';
-const partnerLine = o => { const p = refOf(o.ex, o.id); return `<span class="partner">Партнёрам до ${refPct(p[0])} · ${pn(p[1], 'уровень', 'уровня', 'уровней')}</span>`; };
+const partnerLine = o => { const p = (EX[o.ex] || {}).partner || [5, 2]; return `<span class="partner">Партнёрам до ${p[0]}% · ${pn(p[1], 'уровень', 'уровня', 'уровней')}</span>`; };
 const heartBtn = o => { const on = S.favs.includes(o.id); return `<button class="heart ${on ? 'on' : ''}" data-a="fav" data-v="${o.id}" aria-label="${on ? 'Убрать из избранного' : 'В избранное'}" aria-pressed="${on}">${ic('heart', 20, 2)}</button>`; };
 /* список: фото слева, рядом название, цена и исполнитель; под фото — описание в две строки (пустого места нет).
    плитка и лента: фото, название в две строки, цена, исполнитель — без описания */
@@ -7474,7 +7468,7 @@ function asideMore(o) {
   const facts = [...exFacts(o.ex), ...(near ? [['clock', `Ближайшее свободное время: ${near}`]] : [])];
   return `${factRows(facts, 'asum-f')}
     <div class="asum-safe">${ic('shield', 22, 2)}<span><b>Оплата через ZELDO</b><span class="m">Деньги ждут на защищённом счёте, пока вы не примете работу.</span></span></div>
-    ${partnerBtn(o.ex, 'bare', o.id)}`;
+    ${partnerBtn(o.ex, 'bare')}`;
 }
 SCREENS.c_offer = p => {
   const o = offerById(p.id); const e = EX[o.ex]; const c = cfgOf(o); const s = svcBy(o.svc);
@@ -7502,7 +7496,6 @@ SCREENS.c_offer = p => {
       ${preview || o.model === 'brief' || o.model === 'inspect' ? '' : wayField(o, c)}
       <div class="row wrap">${pillRow}${o.formats.includes('online') ? pill('Можно онлайн', '', 'globe') : ''}${o.docs ? pill('Документы проверены', 'ok', 'shield') : ''}</div>
       ${promoInfo(o, c)}
-      ${preview || VIEW() === 'desk' ? '' : partnerBtn(o.ex, '', o.id)}
       ${routeB ? card(`<div class="h2">Как договоримся</div>${bullets(replyOf(o).stages ? ['Вы отмечаете, что нужно, и прикладываете фото', 'Исполнитель присылает план по этапам: у каждого этапа свой результат, цена и срок', 'Платите за текущий этап — деньги уходят исполнителю после его приёмки'] : ['Вы отмечаете, что нужно, прикладываете фото и, если хотите, называете свою цену', 'Исполнитель соглашается или присылает свои условия с ценой', 'Соглашаетесь и оплачиваете — переписка становится заказом с номером'])}${svcCard(o.svc).why ? `<div class="m"><b>Почему так:</b> ${esc(lcFirst(svcCard(o.svc).why))}</div>` : ''}<div class="m">${(() => { const est = calc(o, c).total; return est > 0 ? `<b>Предварительно: ≈ ${rub(est)}</b> — считается по вашим ответам ниже. Ориентир исполнителя: ${priceLabel(o)}. Окончательную цену он назовёт в ответе.` : `Ориентир: ${priceLabel(o)}. Это не окончательная цена.`; })()}</div>`, 'soft') + paramsBlock(o, c) : `${configBlock(o, c)}${paramsBlock(o, c)}${subBlock(o, c)}${addonsBlock(o, c)}${needBlock(o, c)}${placeBlock(o, c)}${whenBlock(o, c, r)}${noteBlock(o, c)}${totalCard(o, c, r)}`}
       ${related.length ? `<div class="col g12"><div class="h2">Другие услуги этой тематики у исполнителя</div><div class="hscroll">${related.map(x => offerCard(x, 'h')).join('')}</div><button class="lnk" data-a="go" data-v="${gv('c_exec', { id: o.ex })}">Все услуги исполнителя ${ic('arr', 18, 2.2)}</button><span class="m">Это отдельные услуги: в текущий заказ они не добавляются.</span></div>` : ''}`,
     bar: `<div class="abar">${routeB && !preview ? `<div class="asum-p"><span class="m">Ориентир</span><b>${priceLabel(o)}</b></div>` : ''}${!routeB && !preview ? `<div class="tot"><span>${insp ? 'Осмотр' : agree ? 'Предварительно' : 'Итого'}</span><b>${r.total > 0 ? rub(r.total) : '—'}</b></div>` : ''}<div class="two"><button class="btn outline" data-a="chatWith" data-v="${o.id}" aria-label="Написать исполнителю" ${preview ? 'disabled' : ''}>${ic('chat', 22)}</button>${main}</div>${bl && !preview && !routeB ? `<div class="why center">Причина: ${bl}.</div>` : ''}<div class="asum">${routeB || agree ? `<span class="m">${routeB ? 'Исполнитель назовёт цену после запроса' : 'Сначала подтвердит исполнитель, потом оплата'}</span>` : ''}
@@ -8369,9 +8362,7 @@ Object.assign(A, {
 /* комиссия ZELDO — 10 %, но первые три заказа нового исполнителя — без неё, только эквайринг банка (запись 48, 53:08–53:47) */
 const FREE_N = 3;
 const freeOrder = o => { const l = S.orders.filter(x => x.ex === o.ex && x.status !== 'cancel').sort((a, b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true })); const i = l.indexOf(o); return i >= 0 && i < FREE_N; };
-/* 20.11: партнёрам — по уровням, зафиксированным при оплате (o.ref с сервера): пустые уровни остаются исполнителю */
-const refPool = o => o.ref && Array.isArray(o.ref.lv) ? o.ref.lv.reduce((a, x, i) => a + ((o.ref.on || [])[i] ? Math.round(o.total * x / 100) : 0), 0) : 0;
-const payout = o => { const free = freeOrder(o); const rate = feeRate(o); const fee = Math.round(o.total * rate / 100); const acq = Math.round(o.total * 0.025); const pool = refPool(o); return { fee, acq, pool, net: o.total - fee - acq - pool, free, rate }; };
+const payout = o => { const free = freeOrder(o); const rate = feeRate(o); const fee = Math.round(o.total * rate / 100); const acq = Math.round(o.total * 0.025); return { fee, acq, net: o.total - fee - acq, free, rate }; };
 SCREENS.e_money = () => {
   const done = myOrders().filter(o => o.status === 'done'); const wait = myOrders().filter(o => !['done', 'cancel', 'request', 'confirmed'].includes(o.status));
   const sum = (l, f) => l.reduce((a, o) => a + f(o), 0);
@@ -8984,8 +8975,8 @@ const starRow = id => { const e = EX[id] || {}; if (!e.reviews) return `<span cl
   const full = Math.round(e.rating); return `<span class="pc-st" aria-label="Рейтинг ${String(e.rating).replace('.', ',')}, ${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')}"><span class="stars" aria-hidden="true">${[1, 2, 3, 4, 5].map(n => `<i class="${n <= full ? 'on' : ''}">★</i>`).join('')}</span><b>${String(e.rating).replace('.', ',')}</b><span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')}</span></span>`; };
 /* строка «Партнёрам до 5% · 2 уровня» вне карточек выдачи: в правой колонке услуги и в заказе (запись 48, 47:00: «в заказах… везде»).
    Своя разметка, а не .pc-partner: тот на компьютере встаёт во вторую колонку сетки карточки */
-const partnerBtn = (exId, cls = '', cardId = '', ordId = '') => { if (S.role === 'guest') return ''; const o = ordId ? orderById(ordId) : null; const lv = o && o.ref ? o.ref.lv : refLv(exId, cardId); const p = [Math.round(lv.reduce((a, x) => a + x, 0) * 10) / 10, lv.length];
-  return `<button class="pline ${cls}" data-a="partnerInfo" data-v="${esc(`${exId}|${cardId || ''}|${ordId || ''}`)}"><span>Партнёрам <b>до ${refPct(p[0])}</b> · ${pn(p[1], 'уровень', 'уровня', 'уровней')}</span>${ic('right', 18, 2.2)}</button>`; };
+const partnerBtn = (exId, cls = '') => { if (S.role === 'guest') return ''; const p = (EX[exId] || {}).partner || [5, 2];
+  return `<button class="pline ${cls}" data-a="partnerInfo" data-v="${esc(exId)}"><span>Партнёрам <b>до ${p[0]}%</b> · ${pn(p[1], 'уровень', 'уровня', 'уровней')}</span>${ic('right', 18, 2.2)}</button>`; };
 const factRows = (l, cls) =>l.length ? `<span class="${cls}">${l.map(([i, t]) => `<span>${ic(i, 18, 2)}<span>${t}</span></span>`).join('')}</span>` : '';
 
 /* карточка как в документе: фото слева с сердцем, название, описание, формат и цена; ниже — исполнитель, статус, отзывы; строка партнёрам */
@@ -8994,7 +8985,7 @@ const discMark = o => { const p = S.role === 'guest' ? null : promoBest(o); retu
 function offerCard(o, layout = 'list', x = {}) {
   const e = EX[o.ex] || {}; const st = exStatus(o.ex); const price = x.price || priceHtml(o);
   const who = `<span class="pc-who"><b>${esc(exName2(o))}</b>${S.role === 'guest' ? '' : `<span class="pill ${st[1] === 'new' ? '' : 'ok'} sm">${st[0]}</span>`}</span>`;
-  const rp = refOf(o.ex, o.id); const partner = S.role === 'guest' ? '' : `<button class="pc-partner" data-a="partnerInfo" data-v="${esc(`${o.ex}|${o.id}|`)}"><span>Партнёрам <b>до ${refPct(rp[0])}</b> · ${pn(rp[1], 'уровень', 'уровня', 'уровней')}</span>${ic('right', 18, 2.2)}</button>`;
+  const partner = S.role === 'guest' ? '' : `<button class="pc-partner" data-a="partnerInfo" data-v="${o.ex}"><span>Партнёрам <b>до ${(e.partner || [5])[0]}%</b> · ${pn((e.partner || [5, 2])[1], 'уровень', 'уровня', 'уровней')}</span>${ic('right', 18, 2.2)}</button>`;
   const guest = S.role === 'guest';
   /* плитка (06.11): маленькое фото исполнителя у имени и строка «Партнёрам до …» внизу, как в списке */
   if (layout === 'tile') return `<div class="pct">${heartBtn(o)}<button data-a="openOffer" data-v="${o.id}" class="pct-b"><span class="pct-p">${photo(o.ph, o.title, 'M')}${ownMark(o)}${discMark(o)}</span><span class="pct-in"><span class="pct-t">${esc(o.title)}</span><span class="pct-pr">${price}</span><span class="pct-m">${guest ? '' : exAva(o.ex, 'xs')}<span class="nm">${esc(exName2(o))}</span><span>${e.reviews ? '★' + NB + String(e.rating).replace('.', ',') : 'нет отзывов'}</span></span></span></button>${partner}</div>`;
@@ -9015,14 +9006,7 @@ function deskMid(o, layout) {
   const inc = (o.inc || []).slice(0, 3);
   return `${inc.length ? `<span class="pc-inc">${inc.map(x => `<span>${ic('check', 16, 2.4)}<span>${esc(x)}</span></span>`).join('')}${o.inc.length > 3 ? `<span class="more">ещё ${o.inc.length - 3}</span>` : ''}</span>` : ''}${rows.length ? `<span class="pc-k">${rows.map(([i, t]) => `<span>${ic(i, 18, 2)}<span>${t}</span></span>`).join('')}</span>` : ''}<span class="pc-pay">${ic('shield', 18, 2)}<span>Оплата через защищённый счёт</span></span>`;
 }
-/* 20.11: что значит строка «Партнёрам до …»: кому и сколько, и что цена для заказчика та же */
-A.partnerInfo = v => { const [id, cardId, ordId] = String(v).split('|'); const o = ordId ? orderById(Number(ordId) || ordId) : null; const lv = o && o.ref ? o.ref.lv : refLv(id, cardId);
-  const who = ['тому, кто пригласил заказчика', 'кто пригласил его', 'кто пригласил того', 'четвёртому уровню', 'пятому уровню'];
-  sheet('Партнёрская программа', `<div class="m">${esc(exName(id))} отдаёт партнёрам ZELDO часть цены: тем, кто привёл заказчика в ZELDO. Цена для заказчика та же: делится исполнитель.</div>
-    <div class="col g4">${lv.map((x, i) => `<div class="sumline"><span>${i + 1} уровень: ${who[i]}</span><b>${refPct(x)}</b></div>`).join('')}</div>
-    ${o && o.ref ? `<div class="m">По этому заказу условия зафиксированы при оплате. ${o.ref.on && o.ref.on.some(Boolean) ? `Заняты уровни: ${o.ref.on.map((x, i) => x ? i + 1 : 0).filter(Boolean).join(', ')}. Баллы партнёры получат после приёмки работы.` : 'У заказчика нет пригласивших: всё остаётся исполнителю.'}</div>` : '<div class="m">Нет человека на уровне — эта часть остаётся исполнителю. Баллами партнёры оплачивают до 90 % своих заказов.</div>'}
-    ${REAL ? btn('Мои связи: пригласить и получать баллы', 'goRef', '', 'soft block') : ''}${btn('Понятно', 'closeSheet', '', 'text block')}`); };
-A.goRef = () => { closeSheet(); go('p_home'); };
+A.partnerInfo = id => sheet('Партнёрская программа', `<div class="m">${esc(exName(id))} делится частью оплаты с партнёрами, которые приводят заказчиков: до ${(EX[id].partner || [5])[0]}% на ${pn((EX[id].partner || [5, 2])[1], 'уровень', 'уровня', 'уровней')}. Партнёрская роль подключается отдельно.</div>${btn('Понятно', 'closeSheet', '', 'soft block')}`);
 
 /* ---------- главная (лист 1): два независимых действия, бонусы, категории, «Рядом» / «Онлайн», «Вы смотрели» ---------- */
 SCREENS.c_home = () => {
@@ -9759,13 +9743,13 @@ function cabNav() {
     it('e_incoming', 'docsearch', 'Поступившие заявки', newIncoming().length, 'orange'), it('e_offers', 'send', 'Заявки по услугам', S.feed.filter(x => !x.my).length, 'violet'),
     it('e_orders', 'orders', 'Заказы', actOrders('exec'), 'green'), it('e_msgs', 'chat', 'Сообщения', unreadMsgs('exec'), 'teal'),
     it('e_services', 'case', 'Мои услуги', S.myServices.length, 'blue', { num: true }), it('e_schedule', 'calok', 'Расписание', 0, 'green'),
-    it('e_clients', 'user', 'Мои клиенты', (typeof crmClients === 'function' ? crmClients().filter(c => c.sleep).length : 0), 'teal', { num: true }), it('e_portfolio', 'image', 'Портфолио', 0, 'pink'), it('e_promos', 'tag', 'Акции', 0, 'orange'), it('e_money', 'wallet', 'Финансы', 0, 'teal'), it('e_package', 'diamond', 'Пакет и ИИ-помощник', 0, 'violet'), ...(REAL ? [it('p_home', 'people', 'Мои связи', 0, 'violet')] : []),
+    it('e_clients', 'user', 'Мои клиенты', (typeof crmClients === 'function' ? crmClients().filter(c => c.sleep).length : 0), 'teal', { num: true }), it('e_portfolio', 'image', 'Портфолио', 0, 'pink'), it('e_promos', 'tag', 'Акции', 0, 'orange'), it('e_money', 'wallet', 'Финансы', 0, 'teal'), it('e_package', 'diamond', 'Пакет и ИИ-помощник', 0, 'violet'),
   ] : [
     it('c_home', 'home', 'Главная', 0, 'blue'), it('c_orders', 'orders', 'Заказы', actOrders('cust'), 'green', { on: n === 'c_orders' && !reqTab }),
     it('req', 'send', 'Мои заявки', homeNew('cust'), 'violet', { act: 'myReqs', on: reqTab }), it('c_msgs', 'chat', 'Сообщения', unreadMsgs('cust'), 'teal'),
     it('c_fav', 'heart', 'Избранное', S.favs.length, 'pink', { num: true }), it('c_sched', 'calok', 'Мои записи', 0, 'orange'),
     /* «мои бонусы» под рукой, как просил Максим (запись 48, 93:51) */
-    it('bonus', 'gift', 'Мои бонусы', bonusLive().length, 'orange', { act: 'myBonuses', on: false, num: true }), it('c_aboutme', 'star', 'Отзывы обо мне', 0, 'orange'), ...(REAL ? [it('p_home', 'people', 'Мои связи', 0, 'violet')] : []),
+    it('bonus', 'gift', 'Мои бонусы', bonusLive().length, 'orange', { act: 'myBonuses', on: false, num: true }), it('c_aboutme', 'star', 'Отзывы обо мне', 0, 'orange'),
   ];
   const tl = S.navMini ? 'Развернуть меню' : 'Свернуть меню'; const sw = `Перейти в роль «${ex ? 'Заказчик' : 'Исполнитель'}»`;
   return `<div class="cabtop"><button class="cabtog" data-a="navMini" aria-label="${tl}" title="${tl}" aria-expanded="${!S.navMini}">${ic('panel', 20, 2)}</button></div>
@@ -9925,7 +9909,7 @@ function celebrate(o, sum, title = 'Заказ закрыт') {
   const C = ['var(--brand)', '#F5A524', '#17B26A', '#EE46BC'];
   el.innerHTML = `${partyRain()}<div class="party-card"><div class="party-burst" aria-hidden="true">${Array.from({ length: 18 }, (_, i) => `<i style="--a:${i * 20}deg;--d:${96 + (i % 4) * 22}px;--c:${C[i % 4]};--t:${(i % 5) * 25}ms"></i>`).join('')}</div>
     <span class="party-ic">${ic('check', 40, 2.6)}</span><b class="party-t" id="partyT">${title}</b><span class="party-s">Деньги ваши</span><b class="party-sum num">${rub(sum)}</b>
-    <span class="m">Заказ № ${o.id} · ${esc(o.client)}${o.sub ? `<br>Визит ${o.sub.used} из ${o.sub.total}` : sum !== o.total ? `<br>Из ${rub(o.total)} — за вычетом ${payout(o).free ? `эквайринга банка${payout(o).pool ? ' и части партнёрам' : ''}: первые три заказа без комиссии ZELDO` : `комиссии, эквайринга${payout(o).pool ? ' и части партнёрам' : ''}`}` : ''}</span>
+    <span class="m">Заказ № ${o.id} · ${esc(o.client)}${o.sub ? `<br>Визит ${o.sub.used} из ${o.sub.total}` : sum !== o.total ? `<br>Из ${rub(o.total)} — за вычетом ${payout(o).free ? 'эквайринга банка: первые три заказа без комиссии ZELDO' : 'комиссии и эквайринга'}` : ''}</span>
     <div class="party-b">${btn('Отлично', 'partyClose', '', 'block')}${o.status === 'done' ? btn('Оценить заказчика', 'partyRate', String(o.id), 'text block') : ''}</div></div>`;
   ($('#phone') || document.body).appendChild(el);
   /* сумма набегает от нуля за 0,7 с, к концу медленнее */
@@ -10334,7 +10318,7 @@ SCREENS.order = p => {
         <div class="ocontact">${ex ? avaByName(o.client) : exAva(o.ex)}<span class="grow"><span class="m" style="display:block">${ex ? 'Заказчик' : 'Исполнитель'}</span><button class="plink" data-a="go" data-v="${ex ? gv('c_client', { name: o.client }) : gv('c_exec', { id: o.ex })}" aria-label="Профиль: ${esc(ex ? o.client : exName(o.ex))}"><b>${esc(ex ? o.client : exName(o.ex))}</b></button>${ex ? `<span class="m" style="display:block">${clientLine(o.client)}</span>` : ''}</span>
           ${ch ? `<button class="cbtn" data-a="go" data-v="${gv('chat', { id: ch.id })}" aria-label="Написать">${ic('chat', 22, 2)}${ch.unread ? `<i class="cdot"></i>` : ''}</button>` : `<button class="cbtn" data-a="orderChat" data-v="${o.id}" aria-label="Написать">${ic('chat', 22, 2)}</button>`}
           <button class="cbtn" data-a="callAsk" data-v="${ex ? '' : o.ex}" aria-label="Позвонить через ZELDO">${ic('phone', 22, 2)}</button></div>
-        ${partnerBtn(o.ex, '', o.offer, o.id)}`)}
+        ${ex ? '' : partnerBtn(o.ex)}`)}
       ${orderActions(o)}
       ${subCard(o)}
       ${card(`<div class="h2">${o.stages ? 'Этапы' : 'Ход заказа'}</div>${steps}`)}
@@ -11364,11 +11348,8 @@ const avaShrink = f => new Promise((ok, no) => { const u = URL.createObjectURL(f
 CH.avaPick = async el => { const f = el.files && el.files[0]; el.value = ''; if (!f) return;
   try { S.profile = S.profile || {}; S.profile.ava = await avaShrink(f); EX.alex.ava = S.profile.ava; render(); toast('Фото профиля обновлено'); } catch (e) { toast('Не получилось открыть фото. Попробуйте другое', 'info'); } };
 /* ---------- отзыв связан с заказом (запись 69): услуга, а участникам — ссылка на заказ ---------- */
-/* 20.11, владелец: «в отзывах помечалось, к какому заказу был отзыв» — везде: услуга, номер заказа и его дата */
-function revSvc(r) { const o = r.order != null ? orderById(r.order) : null; const svc = r.svc || (o && o.svc) || ''; if (!svc && r.order == null) return '';
-  const od = r.odate || (o && o.date) || ''; const dt = /^\d{4}-\d\d-\d\d$/.test(od) ? ` от ${fromKey(od).getDate()}${NB}${MONG[fromKey(od).getMonth()]}` : '';
-  const num = r.order == null ? '' : o ? `<button class="lnk" data-a="go" data-v="${gv('order', { id: o.id })}">заказ № ${o.id}${dt}</button>` : `заказ № ${r.order}${dt}`;
-  return `<div class="m">${esc(svc)}${svc && num ? ' · ' : ''}${num}</div>`; }
+function revSvc(r) { const o = r.order != null ? orderById(r.order) : null; const svc = r.svc || (o && o.svc) || ''; if (!svc && !o) return '';
+  return `<div class="m">${esc(svc)}${o ? `${svc ? ' · ' : ''}<button class="lnk" data-a="go" data-v="${gv('order', { id: o.id })}">заказ № ${o.id}</button>` : ''}</div>`; }
 Object.assign(window.__z, { timesFor, whenPast, resTags, tierPrice, tierText, revSvc, MIN_ORDER, blockers, cfgOf, wizApplySvc, wizToOffer, wizFromOffer: typeof wizFromOffer === 'function' ? wizFromOffer : null });
 
 /* ---------- фото к отзыву (запись 69: «фото, видео в отзывах»): до 5 фото, сжатые на телефоне ---------- */
