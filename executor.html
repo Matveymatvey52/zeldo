@@ -5172,6 +5172,8 @@ html.kb #bar, html.kb .compose { padding-bottom: 8px !important; }
 .back-to { display: none; }
 .phone:not([data-view="phone"]) .back { position: sticky; top: 12px; z-index: 6; align-self: start; justify-self: start; width: max-content; max-width: min(100%, 520px); margin-left: -14px; padding: 8px 18px 8px 12px; border-radius: 999px; background: transparent; box-shadow: none; transition: background-color .2s ease, box-shadow .2s ease; }
 .phone:not([data-view="phone"]) .back.stuck { background: var(--card); box-shadow: 0 6px 20px rgba(16, 33, 61, 0.12), 0 0 0 1px var(--line); }
+/* 23.11, владелец: «всё съезжает» — в кабинете на компьютере «Назад» стоит на месте, а не плавает поверх строк: слева и так меню кабинета */
+.phone[data-view="desk"] .cabp .back, .phone[data-view="desk"] .cabp .back.stuck { position: static; background: transparent; box-shadow: none; }
 .phone:not([data-view="phone"]) .back-to { display: inline; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); font-weight: 400; }
 .phone:not([data-view="phone"]) .back-to::before { content: "·"; margin: 0 8px 0 2px; }
 @media (hover: hover) and (pointer: fine) { .phone:not([data-view="phone"]) .back:hover > span:first-of-type { text-decoration: underline; text-underline-offset: 3px; } }
@@ -5405,6 +5407,8 @@ const TABS = {
   exec: [['e_home', 'home', 'Главная'], ['e_orders', 'orders', 'Заказы'], ['e_fav', 'heart', 'Избранное'], ['e_msgs', 'chat', 'Сообщения'], ['e_cab', 'user', 'Кабинет']],
 };
 const ROLE_NAME = { cust: 'Заказчик', exec: 'Исполнитель', guest: 'Гость' };
+/* подпись роли в шапке; в «Моих связях» рабочая версия и макет показывают «Партнёр» (10c-ref.js переопределяет) */
+let roleLabel = () => ROLE_NAME[S.role];
 
 /* одна учётная запись — несколько ролей: счётчики считаются по каждой роли отдельно */
 const ROLES = [['cust', 'Заказчик'], ['exec', 'Исполнитель'], ['partner', 'Партнёр']];
@@ -5454,7 +5458,7 @@ function deskHeader() {
   const nav = g ? '' : `${item(pre + 'orders', 'orders', 'Заказы', ordersAll())}${item(pre + 'fav', 'heart', 'Избранное')}${item(pre + 'msgs', 'chat', 'Сообщения', msgs)}${item('notifs', 'bell', 'Уведомления', bell, 'bell')}${item(pre + 'cab', 'user', 'Кабинет')}`;
   const place = typeof meText === 'function' ? meText() : 'Москва';
   return `<div class="dh"><div class="dh-top"><div class="dh-w">
-      ${g ? '' : `<button class="dh-role" data-a="roleMenu" aria-haspopup="dialog">Вы: <b>${ROLE_NAME[S.role]}</b>${other ? `<b class="dh-n">${other}</b>` : ''}${ic('down', 14, 2.4)}</button>`}
+      ${g ? '' : `<button class="dh-role" data-a="roleMenu" aria-haspopup="dialog">Вы: <b>${roleLabel()}</b>${other ? `<b class="dh-n">${other}</b>` : ''}${ic('down', 14, 2.4)}</button>`}
       <button class="dh-l" data-a="pickCity">${ic('pin', 16, 2)}${esc(place)}</button>
       <span class="hgap"></span>
       ${g ? '' : ex ? `<button class="dh-l dh-plus" data-a="newService">${ic('plus', 16, 2.4)}Добавить услугу</button>` : `<button class="dh-l dh-plus" data-a="newRequest">${ic('plus', 16, 2.4)}Разместить заявку</button>`}
@@ -5479,7 +5483,7 @@ function header() {
   const other = ROLES.filter(([r]) => r !== S.role && r !== 'partner').reduce((a, [r]) => a + allNew(r), 0);
   return `<div class="hdr">
     <button class="iconbtn hmenu" data-a="drawer" aria-label="Меню">${ic('menu', 24, 2.2)}</button><button class="logo" data-a="logoHome" aria-label="ZELDO, на главную">ZELDO</button>
-    <button class="role" data-a="roleMenu" aria-haspopup="dialog" aria-label="Роль: ${ROLE_NAME[S.role]}${other ? `, в других ролях новых: ${other}` : ''}">${ROLE_NAME[S.role]}${other ? `<span class="rdot">${other}</span>` : ''} ${ic('down', 16, 2.4)}</button>
+    <button class="role" data-a="roleMenu" aria-haspopup="dialog" aria-label="Роль: ${roleLabel()}${other ? `, в других ролях новых: ${other}` : ''}">${roleLabel()}${other ? `<span class="rdot">${other}</span>` : ''} ${ic('down', 16, 2.4)}</button>
     ${hsq()}<span class="hgap"></span>
     <nav class="hnav" aria-label="Разделы">${navItems('hn')}</nav>
     <button class="hbtn hs" data-a="openSearch" aria-label="Поиск">${ic('search')}</button>
@@ -11552,6 +11556,9 @@ if (REAL || window.__zDemo) {
     .plv.pc b { color: var(--act); font-size: 17px; }
     .rop { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--line); }
     .rop:first-of-type { border-top: 0; padding-top: 4px; }
+    .rop .rv { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex: none; text-align: right; }
+    #phone[data-view="desk"] .cabp.pscr .ltabs { display: none; }  /* на компьютере вкладки — в меню слева */
+    .rtag { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 14px; line-height: 18px; } .rtag .mut { color: var(--muted); }
     /* 23.11, владелец: «налепил телефонную версию на компьютер» — люди команды на компьютере в три колонки, на планшете в две */
     #phone[data-view="desk"] .ropg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 28px; }
     #phone[data-view="tab"] .ropg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
@@ -11578,7 +11585,7 @@ if (REAL || window.__zDemo) {
   /* ---------- «Мои связи»: баллы, команда, ссылки, отчёты ---------- */
   const OP_ST = { ok: ['Доступно', 'ok'], hold: ['На проверке', ''], check: ['Проверяет ZELDO', 'warn'], lock: ['Ждут включения', 'grey'], gone: ['Сгорели', 'grey'], wait: ['В работе', 'warn'], paid: ['Отправлено', 'ok'], rejected: ['Не прошёл', 'bad'] };
   const opRow = op => { const st = OP_ST[op.st]; const sub = [op.sub, op.st === 'hold' && op.until ? `доступны с ${dDay(op.until)}` : '', op.st === 'ok' && op.exp ? `сгорят ${dDay(op.exp)}` : ''].filter(Boolean).join(' · ');
-    return `<div class="rop"><span class="grow"><b>${esc(op.t)}</b><span class="m">${esc(sub)}</span><span class="m">${dDay(op.at)}</span></span><span class="col g4" style="align-items:flex-end"><span class="ps ${op.s > 0 ? 'plus' : ''}">${op.s > 0 ? '+' : '−'}${fmtN(Math.abs(op.s))}</span>${st ? pill(st[0], st[1]) : ''}</span></div>`; };
+    return `<div class="rop"><span class="grow"><b>${esc(op.t)}</b><span class="m">${esc(sub)}</span><span class="m">${dDay(op.at)}</span></span><span class="rv"><span class="ps ${op.s > 0 ? 'plus' : ''}">${op.s > 0 ? '+' : '−'}${fmtN(Math.abs(op.s))}</span>${st ? pill(st[0], st[1]) : ''}</span></div>`; };
   function pTabPts(f) {
     const p = f.pts; const on = !!f.partner.st;
     const big = `<div class="p3"><div class="main"><b>${fmtN(on ? p.avail : p.lock)}</b><span>${on ? 'Доступно' : 'Ждут включения'}</span></div><div><b>${fmtN(p.hold)}</b><span>На проверке</span></div><div><b>${fmtN(p.reserve)}</b><span>В резерве</span></div></div>`;
@@ -11593,7 +11600,7 @@ if (REAL || window.__zDemo) {
     const inv = f.inv ? card(`<div class="row"><span class="ri">${ic('user', 22)}</span><span class="grow"><span class="m" style="display:block">Вас пригласил</span><b>${esc(f.inv.name)}</b></span></div>`, 'c')
       : f.canBind ? card(`<div class="h2">Кто вас пригласил?</div><div class="m">Если вас позвали в ZELDO, впишите код этого человека. Указать можно один раз и только до первого заказа.</div>${field('Код приглашения', `<input class="input" id="pbind" data-in="pBindIn" data-enter="pBind" maxlength="12" autocomplete="off" placeholder="Например: K7M2QX" value="${esc(S.pBind || '')}" style="text-transform:uppercase">`)}${btn('Сохранить', 'pBind', '', 'soft block')}`) : '';
     const lv = `<div class="plv">${t.lv.map((n, i) => `<div><b>${n}</b><span>${i + 1} уровень</span></div>`).join('')}</div>`;
-    const people = t.people.length ? t.people.slice(0, 200).map(x => `<div class="rop"><span class="grow"><b>${esc(x.name)}</b><span class="m">${x.lvl}-й уровень · с ${dDay(x.at)}</span></span><span class="col g4" style="align-items:flex-end">${x.exec ? pill('Исполнитель', '') : pill('Заказчик', 'grey')}${x.act ? '<span class="m pok">заказывал</span>' : '<span class="m">пока без заказов</span>'}</span></div>`).join('') : '<div class="m">Пока никого. Отправьте ссылку из вкладки «Ссылки».</div>';
+    const people = t.people.length ? t.people.slice(0, 200).map(x => `<div class="rop"><span class="grow"><b>${esc(x.name)}</b><span class="m">${x.lvl}-й уровень · с ${dDay(x.at)}</span><span class="rtag">${x.exec ? pill('Исполнитель', '') : pill('Заказчик', 'grey')}<span class="${x.act ? 'pok' : 'mut'}">${x.act ? 'заказывал' : 'пока без заказов'}</span></span></span></div>`).join('') : '<div class="m">Пока никого. Отправьте ссылку из вкладки «Ссылки».</div>';
     return `${inv}${card(`<div class="row"><span class="h2 grow">Моя команда</span><b>${pn(t.total, 'человек', 'человека', 'человек')}</b></div>${lv}
         <div class="m">1-й уровень — те, кого пригласили вы. 2-й — кого пригласили они, и так до пятого. С их заказов вам идут баллы по процентам исполнителя.</div>`)}
       ${card(`<div class="row top"><span class="ri" style="color:var(--act)">${ic('case', 22)}</span><span class="grow"><b>Исполнители, которых вы привели: ${t.execs}</b><span class="m" style="display:block">С каждого их заказа — 1 % из комиссии ZELDO. Считаются только те, кого вы пригласили сами.</span></span></div>`, 'c')}
@@ -11625,7 +11632,7 @@ if (REAL || window.__zDemo) {
         ${bullets(['Баллами оплачивают до 90 % любого заказа', 'ИП и ООО могут вывести их в рубли', 'Цена для друзей не меняется: делится исполнитель'])}
         ${btn('Включить «Мои связи»', 'go', 'p_on', 'block')}${f.pts.lock + f.pts.hold ? `<div class="m">Уже ждут вас: ${pts(f.pts.lock + f.pts.hold)}. Станут доступны после включения.</div>` : ''}`, 'soft');
     const body = t === 'team' ? pTabTeam(f) : t === 'links' ? pTabLinks(f) : t === 'rep' ? pTabRep(f) : pTabPts(f);
-    return { title: 'Мои связи', sub: 'Партнёрская программа ZELDO',
+    return { title: 'Мои связи', sub: 'Партнёрская программа ZELDO', cls: 'pscr',
       body: `${head}${ltabs('pTab', [['pts', 'Баллы'], ['team', 'Команда', f.team.total || ''], ['links', 'Ссылки'], ['rep', 'Отчёты']], t)}${body}
         ${card(`<div class="list">${rl('Как это работает', 'Уровни, проверка 10 дней, срок 10 месяцев, вывод', 'pHow', '', { icon: 'info' })}${rl('Правила программы', 'Что можно и что нельзя', 'pRules', '', { icon: 'doc' })}${rl('Написать в поддержку', 'Если начисление кажется неверным', 'supportOpen', '', { icon: 'chat' })}</div>`, 'c')}` };
   };
@@ -11798,11 +11805,49 @@ if (REAL || window.__zDemo) {
   SCREENS.c_cab = p => { const r = cCab1(p); const f = F();
     const row = rl('Мои связи', f && f.partner.st ? `${pts(f.pts.avail)} доступно · ${pn(f.team.total, 'человек', 'человека', 'человек')} в команде` : f && (f.pts.lock + f.pts.hold) ? `Ждут включения: ${pts(f.pts.lock + f.pts.hold)}` : 'Баллы за тех, кого вы пригласили', 'go', 'p_home', { icon: 'people' });
     r.body = r.body.replace('<div class="list">', `<div class="list">${row}`); return r; };
-  /* меню роли: «Партнёр» открывает «Мои связи»; подпись — что там, а не «активация отдельно» */
-  A.roleMenu = () => { const f = F(); S.panel = rolePanel().replace('Активация отдельно', f && f.partner.st ? `«Мои связи»: ${pts(f.pts.avail)} доступно` : '«Мои связи»: баллы за приглашённых'); S.sheet = null; renderOverlay(); };
-  /* меню роли: «Партнёр» открывает «Мои связи» */
+  /* ---------- партнёр — своё пространство (23.11, владелец: «всё почему-то в исполнителе открывается») ----------
+     «Мои связи» открываются отдельным разделом: в шапке «Вы: Партнёр», на компьютере слева меню партнёра — баллы, команда, ссылки,
+     отчёты, награды, вывод. Вернуться к заказчику или исполнителю — кнопкой в меню или переключателем роли */
+  const P_SCR = ['p_home', 'p_on', 'p_out', 'p_awards'];
+  const inPartner = () => !!S.stack[0] && P_SCR.includes(S.stack[0].n);
+  const homeOf = r => (r === 'exec' ? 'e_home' : 'c_home');
+  roleLabel = () => (inPartner() ? 'Партнёр' : ROLE_NAME[S.role]);
+  const partnerSub = () => { const f = F(); return f && f.partner.st ? `«Мои связи»: ${pts(f.pts.avail)} доступно` : '«Мои связи»: баллы за приглашённых'; };
+  const openPartner = (tab, sub) => { S.panel = null; S.sheet = null; if (tab) S.pTab = tab; S.stack = [{ n: 'p_home', p: {} }].concat(sub ? [{ n: sub, p: {} }] : []); render('new'); renderOverlay(); };
+  const goP0 = A.go;
+  A.go = v => (v === 'p_home' ? openPartner() : goP0(v));
+  A.pNav = v => (['p_awards', 'p_out', 'p_on'].includes(v) ? openPartner(null, v) : openPartner(v));
+  const rolePanel0 = rolePanel;
+  rolePanel = function () {
+    if (!inPartner()) return rolePanel0().replace('Активация отдельно', partnerSub());
+    const row = (r, t, sub, on) => `<button class="rl" data-a="setRole" data-v="${r}"><span class="grow"><span class="rt">${t}</span><span class="rs">${sub}</span></span><span class="ra">${ic(on ? 'check' : 'arr', 22, 2.2)}</span></button>`;
+    return `<div class="card c soft"><span class="m">${esc(myName())} · одна учётная запись</span><b class="t18">Сейчас: Партнёр</b></div>
+      <div class="h2">Выберите роль</div>
+      <div class="list">${row('cust', 'Заказчик', 'Заказы, записи, избранное', false)}${row('exec', 'Исполнитель', 'Услуги, заявки и деньги', false)}${row('partner', 'Партнёр', 'Текущая роль · ' + partnerSub(), true)}${row('guest', 'Посмотреть как гость', 'Без входа в аккаунт', false)}</div>
+      ${btn('Закрыть', 'closeAll', '', 'soft block')}`;
+  };
+  A.roleMenu = () => { S.panel = rolePanel(); S.sheet = null; renderOverlay(); };
   const setRole0 = A.setRole;
-  A.setRole = r => { if (r !== 'partner') return setRole0(r); S.panel = null; S.sheet = null; if (S.role === 'guest') return setRole0('cust'); go('p_home'); renderOverlay(); };
+  A.setRole = r => {
+    if (r === 'partner') { if (S.role === 'guest') return setRole0('cust'); return openPartner(); }
+    if (inPartner()) { S.stack = [{ n: homeOf(S.role), p: {} }]; if (r === S.role) { S.panel = null; render('new'); renderOverlay(); return; } }
+    return setRole0(r);
+  };
+  const pSpend0 = A.pSpend;
+  A.pSpend = () => { if (inPartner()) S.stack = [{ n: homeOf(S.role), p: {} }]; pSpend0(); };
+  /* меню слева на компьютере — разделы партнёра, а не исполнителя */
+  const cabNav0 = cabNav;
+  cabNav = function () {
+    if (!inPartner()) return cabNav0();
+    const f = F() || { pts: { avail: 0 }, team: { total: 0 }, partner: {} }; const n = cur().n; const t = S.pTab || 'pts'; const home = n === 'p_home';
+    const tip = l => `data-tip="${esc(l)}"${S.navMini ? ` title="${esc(l)}"` : ''}`;
+    const it = (act, v, icn, label, cnt, hue, on) => `<button class="cni ${on ? 'on' : ''}" data-a="${act}" data-v="${v}" ${tip(label)} ${on ? 'aria-current="page"' : ''}><span class="ci ci-${hue}">${ic(icn, 20, 2)}</span><span class="grow">${label}</span>${cnt ? `<b class="cnum">${cnt}</b>` : ''}</button>`;
+    const tl = S.navMini ? 'Развернуть меню' : 'Свернуть меню'; const back = `Вернуться: ${ROLE_NAME[S.role] || 'Заказчик'}`;
+    return `<div class="cabtop"><button class="cabtog" data-a="navMini" aria-label="${tl}" title="${tl}" aria-expanded="${!S.navMini}">${ic('panel', 20, 2)}</button></div>
+      <button class="cabme" data-a="pNav" data-v="pts" aria-label="Мои связи: баллы">${myAva('lg')}<span class="grow"><b class="t18">${esc(myName())}</b><span class="m">Партнёр · ${f.partner.st ? `${pts(f.pts.avail)} доступно` : 'не включено'}</span></span></button>
+      <button class="cabsw" data-a="setRole" data-v="${S.role === 'exec' ? 'exec' : 'cust'}" ${tip(back)}><span class="cs-i">${ic('retry', 18, 2.2)}</span><span class="cs-t">${back}</span></button>
+      <nav class="cnl">${it('pNav', 'pts', 'wallet', 'Баллы', 0, 'blue', home && t === 'pts')}${it('pNav', 'team', 'people', 'Команда', f.team.total, 'violet', home && t === 'team')}${it('pNav', 'links', 'send', 'Ссылки и QR-код', 0, 'teal', home && t === 'links')}${it('pNav', 'rep', 'doc', 'Отчёты', 0, 'green', home && t === 'rep')}${it('pNav', 'p_awards', 'gift', 'Награды и преимущества', 0, 'orange', n === 'p_awards')}${f.partner.st ? it('pNav', 'p_out', 'case', 'Вывести в рубли', 0, 'pink', n === 'p_out') : it('pNav', 'p_on', 'check', 'Включить «Мои связи»', 0, 'pink', n === 'p_on')}${it('supportOpen', '', 'shield', 'Поддержка ZELDO', 0, 'teal', false)}</nav>`;
+  };
 
   /* ---------- оплата: часть баллами, 10–90 % цены после скидки, по умолчанию выключено ---------- */
   const co1 = SCREENS.c_checkout;
