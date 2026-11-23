@@ -5437,6 +5437,8 @@ const LAY = {
   c_orders: 'cab', c_reqview: 'cab', order: 'cab', c_fav: 'cab', c_cab: 'cab', c_aboutme: 'cab', c_sched: 'cab', c_msgs: 'cab', e_msgs: 'cab', chat: 'cab', notifs: 'cab', notifset: 'cab', settings: 'cab', mydata: 'cab', c_client: 'cab', privacy: 'cab',
   e_home: 'cab', e_feed: 'cab', e_offers: 'cab', e_incoming: 'cab', e_orders: 'cab', e_fav: 'cab', e_cab: 'cab', e_services: 'cab', e_schedule: 'cab',
   e_request: 'cab', deal_offer: 'cab', e_task: 'cab', e_service: 'cab', e_work: 'cab', e_schedset: 'cab', e_promo: 'cab', e_portfolio: 'cab', e_promos: 'cab', e_clients: 'cab', notifs: 'cab', e_money: 'cab', e_package: 'cab', e_profile: 'cab',
+  /* 23.11: «Мои связи», награды и проценты партнёрам — тоже в кабинете: на компьютере меню слева и карточки во всю ширину, не телефонная колонка */
+  p_home: 'cab', p_on: 'cab', p_out: 'cab', p_awards: 'cab', e_refset: 'cab', e_level: 'cab', c_level: 'cab', e_kyc: 'cab',
 };
 /* разделы: внизу на телефоне и планшете, в шапке на компьютере */
 /* какой раздел подсвечен: заказ, оплата и перенос — это «Заказы», даже если пришли из переписки (запись 48, 44:41) */
@@ -9759,13 +9761,13 @@ function cabNav() {
     it('e_incoming', 'docsearch', 'Поступившие заявки', newIncoming().length, 'orange'), it('e_offers', 'send', 'Заявки по услугам', S.feed.filter(x => !x.my).length, 'violet'),
     it('e_orders', 'orders', 'Заказы', actOrders('exec'), 'green'), it('e_msgs', 'chat', 'Сообщения', unreadMsgs('exec'), 'teal'),
     it('e_services', 'case', 'Мои услуги', S.myServices.length, 'blue', { num: true }), it('e_schedule', 'calok', 'Расписание', 0, 'green'),
-    it('e_clients', 'user', 'Мои клиенты', (typeof crmClients === 'function' ? crmClients().filter(c => c.sleep).length : 0), 'teal', { num: true }), it('e_portfolio', 'image', 'Портфолио', 0, 'pink'), it('e_promos', 'tag', 'Акции', 0, 'orange'), it('e_money', 'wallet', 'Финансы', 0, 'teal'), it('e_package', 'diamond', 'Пакет и ИИ-помощник', 0, 'violet'), ...(REAL ? [it('p_home', 'people', 'Мои связи', 0, 'violet')] : []),
+    it('e_clients', 'user', 'Мои клиенты', (typeof crmClients === 'function' ? crmClients().filter(c => c.sleep).length : 0), 'teal', { num: true }), it('e_portfolio', 'image', 'Портфолио', 0, 'pink'), it('e_promos', 'tag', 'Акции', 0, 'orange'), it('e_money', 'wallet', 'Финансы', 0, 'teal'), it('e_package', 'diamond', 'Пакет и ИИ-помощник', 0, 'violet'), ...(REAL || window.__zDemo ? [it('p_home', 'people', 'Мои связи', 0, 'violet', { on: ['p_home', 'p_on', 'p_out', 'p_awards'].includes(n) })] : []),
   ] : [
     it('c_home', 'home', 'Главная', 0, 'blue'), it('c_orders', 'orders', 'Заказы', actOrders('cust'), 'green', { on: n === 'c_orders' && !reqTab }),
     it('req', 'send', 'Мои заявки', homeNew('cust'), 'violet', { act: 'myReqs', on: reqTab }), it('c_msgs', 'chat', 'Сообщения', unreadMsgs('cust'), 'teal'),
     it('c_fav', 'heart', 'Избранное', S.favs.length, 'pink', { num: true }), it('c_sched', 'calok', 'Мои записи', 0, 'orange'),
     /* «мои бонусы» под рукой, как просил Максим (запись 48, 93:51) */
-    it('bonus', 'gift', 'Мои бонусы', bonusLive().length, 'orange', { act: 'myBonuses', on: false, num: true }), it('c_aboutme', 'star', 'Отзывы обо мне', 0, 'orange'), ...(REAL ? [it('p_home', 'people', 'Мои связи', 0, 'violet')] : []),
+    it('bonus', 'gift', 'Мои бонусы', bonusLive().length, 'orange', { act: 'myBonuses', on: false, num: true }), it('c_aboutme', 'star', 'Отзывы обо мне', 0, 'orange'), ...(REAL || window.__zDemo ? [it('p_home', 'people', 'Мои связи', 0, 'violet', { on: ['p_home', 'p_on', 'p_out', 'p_awards'].includes(n) })] : []),
   ];
   const tl = S.navMini ? 'Развернуть меню' : 'Свернуть меню'; const sw = `Перейти в роль «${ex ? 'Заказчик' : 'Исполнитель'}»`;
   return `<div class="cabtop"><button class="cabtog" data-a="navMini" aria-label="${tl}" title="${tl}" aria-expanded="${!S.navMini}">${ic('panel', 20, 2)}</button></div>
@@ -11560,10 +11562,14 @@ if (REAL || window.__zDemo) {
     .plv b { display: block; font-size: 20px; line-height: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
     .plv span { display: block; font-size: 12px; line-height: 16px; color: var(--muted); }
     .plv.pc b { color: var(--act); font-size: 17px; }
-    .pop { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--line); }
-    .pop:first-of-type { border-top: 0; padding-top: 4px; }
-    .pop .grow { min-width: 0; } .pop .grow b { display: block; overflow-wrap: anywhere; }
-    .pop .ps { font-weight: 800; white-space: nowrap; font-variant-numeric: tabular-nums; } .pop .ps.plus { color: var(--ok); }
+    .rop { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--line); }
+    .rop:first-of-type { border-top: 0; padding-top: 4px; }
+    /* 23.11, владелец: «налепил телефонную версию на компьютер» — люди команды на компьютере в три колонки, на планшете в две */
+    #phone[data-view="desk"] .ropg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 28px; }
+    #phone[data-view="tab"] .ropg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
+    #phone[data-view="desk"] .ropg > .rop:nth-child(-n+3), #phone[data-view="tab"] .ropg > .rop:nth-child(-n+2) { border-top: 0; padding-top: 4px; }
+    .rop .grow { min-width: 0; flex: 1; } .rop .grow b { display: block; overflow-wrap: anywhere; } .rop .grow .m { display: block; }
+    .rop .ps { font-weight: 800; white-space: nowrap; font-variant-numeric: tabular-nums; } .rop .ps.plus { color: var(--ok); }
     .refrow { display: flex; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid var(--line); }
     .refrow:first-child { border-top: 0; }
     .refrow .grow { min-width: 0; } .refrow .grow b { display: block; }
@@ -11584,7 +11590,7 @@ if (REAL || window.__zDemo) {
   /* ---------- «Мои связи»: баллы, команда, ссылки, отчёты ---------- */
   const OP_ST = { ok: ['Доступно', 'ok'], hold: ['На проверке', ''], check: ['Проверяет ZELDO', 'warn'], lock: ['Ждут включения', 'grey'], gone: ['Сгорели', 'grey'], wait: ['В работе', 'warn'], paid: ['Отправлено', 'ok'], rejected: ['Не прошёл', 'bad'] };
   const opRow = op => { const st = OP_ST[op.st]; const sub = [op.sub, op.st === 'hold' && op.until ? `доступны с ${dDay(op.until)}` : '', op.st === 'ok' && op.exp ? `сгорят ${dDay(op.exp)}` : ''].filter(Boolean).join(' · ');
-    return `<div class="pop"><span class="grow"><b>${esc(op.t)}</b><span class="m">${esc(sub)}</span><span class="m">${dDay(op.at)}</span></span><span class="col g4" style="align-items:flex-end"><span class="ps ${op.s > 0 ? 'plus' : ''}">${op.s > 0 ? '+' : '−'}${fmtN(Math.abs(op.s))}</span>${st ? pill(st[0], st[1]) : ''}</span></div>`; };
+    return `<div class="rop"><span class="grow"><b>${esc(op.t)}</b><span class="m">${esc(sub)}</span><span class="m">${dDay(op.at)}</span></span><span class="col g4" style="align-items:flex-end"><span class="ps ${op.s > 0 ? 'plus' : ''}">${op.s > 0 ? '+' : '−'}${fmtN(Math.abs(op.s))}</span>${st ? pill(st[0], st[1]) : ''}</span></div>`; };
   function pTabPts(f) {
     const p = f.pts; const on = !!f.partner.st;
     const big = `<div class="p3"><div class="main"><b>${fmtN(on ? p.avail : p.lock)}</b><span>${on ? 'Доступно' : 'Ждут включения'}</span></div><div><b>${fmtN(p.hold)}</b><span>На проверке</span></div><div><b>${fmtN(p.reserve)}</b><span>В резерве</span></div></div>`;
@@ -11599,11 +11605,11 @@ if (REAL || window.__zDemo) {
     const inv = f.inv ? card(`<div class="row"><span class="ri">${ic('user', 22)}</span><span class="grow"><span class="m" style="display:block">Вас пригласил</span><b>${esc(f.inv.name)}</b></span></div>`, 'c')
       : f.canBind ? card(`<div class="h2">Кто вас пригласил?</div><div class="m">Если вас позвали в ZELDO, впишите код этого человека. Указать можно один раз и только до первого заказа.</div>${field('Код приглашения', `<input class="input" id="pbind" data-in="pBindIn" data-enter="pBind" maxlength="12" autocomplete="off" placeholder="Например: K7M2QX" value="${esc(S.pBind || '')}" style="text-transform:uppercase">`)}${btn('Сохранить', 'pBind', '', 'soft block')}`) : '';
     const lv = `<div class="plv">${t.lv.map((n, i) => `<div><b>${n}</b><span>${i + 1} уровень</span></div>`).join('')}</div>`;
-    const people = t.people.length ? t.people.slice(0, 200).map(x => `<div class="pop"><span class="grow"><b>${esc(x.name)}</b><span class="m">${x.lvl}-й уровень · с ${dDay(x.at)}</span></span><span class="col g4" style="align-items:flex-end">${x.exec ? pill('Исполнитель', '') : pill('Заказчик', 'grey')}${x.act ? '<span class="m pok">заказывал</span>' : '<span class="m">пока без заказов</span>'}</span></div>`).join('') : '<div class="m">Пока никого. Отправьте ссылку из вкладки «Ссылки».</div>';
+    const people = t.people.length ? t.people.slice(0, 200).map(x => `<div class="rop"><span class="grow"><b>${esc(x.name)}</b><span class="m">${x.lvl}-й уровень · с ${dDay(x.at)}</span></span><span class="col g4" style="align-items:flex-end">${x.exec ? pill('Исполнитель', '') : pill('Заказчик', 'grey')}${x.act ? '<span class="m pok">заказывал</span>' : '<span class="m">пока без заказов</span>'}</span></div>`).join('') : '<div class="m">Пока никого. Отправьте ссылку из вкладки «Ссылки».</div>';
     return `${inv}${card(`<div class="row"><span class="h2 grow">Моя команда</span><b>${pn(t.total, 'человек', 'человека', 'человек')}</b></div>${lv}
         <div class="m">1-й уровень — те, кого пригласили вы. 2-й — кого пригласили они, и так до пятого. С их заказов вам идут баллы по процентам исполнителя.</div>`)}
       ${card(`<div class="row top"><span class="ri" style="color:var(--act)">${ic('case', 22)}</span><span class="grow"><b>Исполнители, которых вы привели: ${t.execs}</b><span class="m" style="display:block">С каждого их заказа — 1 % из комиссии ZELDO. Считаются только те, кого вы пригласили сами.</span></span></div>`, 'c')}
-      ${card(`<div class="h2">Люди</div>${people}`, 'c')}`;
+      ${card(`<div class="h2">Люди</div><div class="ropg">${people}</div>`, 'c')}`;
   }
   const inviteLink = () => { const f = F(); const u = new URL('/', location.href); if (f) u.searchParams.set('ref', f.code); return u.href; };
   function pTabLinks(f) {
