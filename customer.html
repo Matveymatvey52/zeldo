@@ -6492,7 +6492,13 @@ AFTER_RENDER.push(lcActAlign); addEventListener('resize', lcActAlign);
 /* гость не видит имени исполнителя: только «проверенный исполнитель», рейтинг и район */
 const exName2 = o => S.role === 'guest' ? 'Проверенный исполнитель' : (EX[o.ex] || {}).name || '';
 const exLine = o => { const e = EX[o.ex] || {}; return `<span class="on2"><b>${esc(exName2(o))}</b>${S.role === 'guest' || (REAL && !e.ver) ? '' : `<span class="vbadge">${ic('diamond', 14, 2)} Проверен</span>`}${e.reviews ? `<span class="rating">${ic('star', 15, 2)}${String(e.rating).replace('.', ',')}</span>` : '<span class="m">Нет отзывов</span>'}</span>`; };
-const partnerLine = o => { const p = (EX[o.ex] || {}).partner || [5, 2]; return `<span class="partner">Партнёрам до ${p[0]}% · ${pn(p[1], 'уровень', 'уровня', 'уровней')}</span>`; };
+/* 20.11: проценты партнёрам задаёт исполнитель — 5–40 % на 3–5 уровней (документы Максима); своя настройка у услуги главнее общей.
+   В рабочей версии берём с сервера (EX[…].ref), в прототипе — по умолчанию 10/7/5/3/1 = 26 % */
+const REF_DEF = [10, 7, 5, 3, 1];
+const refLv = (ex, cardId) => { const r = (EX[ex] || {}).ref; return (r && ((cardId && r.svc && r.svc[cardId]) || r.lv)) || REF_DEF; };
+const refOf = (ex, cardId) => { const lv = refLv(ex, cardId); return [Math.round(lv.reduce((a, x) => a + x, 0) * 10) / 10, lv.length]; };
+const refPct = x => String(x).replace('.', ',') + NB + '%';
+const partnerLine = o => { const p = refOf(o.ex, o.id); return `<span class="partner">Партнёрам до ${refPct(p[0])} · ${pn(p[1], 'уровень', 'уровня', 'уровней')}</span>`; };
 const heartBtn = o => { const on = S.favs.includes(o.id); return `<button class="heart ${on ? 'on' : ''}" data-a="fav" data-v="${o.id}" aria-label="${on ? 'Убрать из избранного' : 'В избранное'}" aria-pressed="${on}">${ic('heart', 20, 2)}</button>`; };
 /* список: фото слева, рядом название, цена и исполнитель; под фото — описание в две строки (пустого места нет).
    плитка и лента: фото, название в две строки, цена, исполнитель — без описания */
@@ -7468,7 +7474,7 @@ function asideMore(o) {
   const facts = [...exFacts(o.ex), ...(near ? [['clock', `Ближайшее свободное время: ${near}`]] : [])];
   return `${factRows(facts, 'asum-f')}
     <div class="asum-safe">${ic('shield', 22, 2)}<span><b>Оплата через ZELDO</b><span class="m">Деньги ждут на защищённом счёте, пока вы не примете работу.</span></span></div>
-    ${partnerBtn(o.ex, 'bare')}`;
+    ${partnerBtn(o.ex, 'bare', o.id)}`;
 }
 SCREENS.c_offer = p => {
   const o = offerById(p.id); const e = EX[o.ex]; const c = cfgOf(o); const s = svcBy(o.svc);
@@ -7496,6 +7502,7 @@ SCREENS.c_offer = p => {
       ${preview || o.model === 'brief' || o.model === 'inspect' ? '' : wayField(o, c)}
       <div class="row wrap">${pillRow}${o.formats.includes('online') ? pill('Можно онлайн', '', 'globe') : ''}${o.docs ? pill('Документы проверены', 'ok', 'shield') : ''}</div>
       ${promoInfo(o, c)}
+      ${preview || VIEW() === 'desk' ? '' : partnerBtn(o.ex, '', o.id)}
       ${routeB ? card(`<div class="h2">Как договоримся</div>${bullets(replyOf(o).stages ? ['Вы отмечаете, что нужно, и прикладываете фото', 'Исполнитель присылает план по этапам: у каждого этапа свой результат, цена и срок', 'Платите за текущий этап — деньги уходят исполнителю после его приёмки'] : ['Вы отмечаете, что нужно, прикладываете фото и, если хотите, называете свою цену', 'Исполнитель соглашается или присылает свои условия с ценой', 'Соглашаетесь и оплачиваете — переписка становится заказом с номером'])}${svcCard(o.svc).why ? `<div class="m"><b>Почему так:</b> ${esc(lcFirst(svcCard(o.svc).why))}</div>` : ''}<div class="m">${(() => { const est = calc(o, c).total; return est > 0 ? `<b>Предварительно: ≈ ${rub(est)}</b> — считается по вашим ответам ниже. Ориентир исполнителя: ${priceLabel(o)}. Окончательную цену он назовёт в ответе.` : `Ориентир: ${priceLabel(o)}. Это не окончательная цена.`; })()}</div>`, 'soft') + paramsBlock(o, c) : `${configBlock(o, c)}${paramsBlock(o, c)}${subBlock(o, c)}${addonsBlock(o, c)}${needBlock(o, c)}${placeBlock(o, c)}${whenBlock(o, c, r)}${noteBlock(o, c)}${totalCard(o, c, r)}`}
       ${related.length ? `<div class="col g12"><div class="h2">Другие услуги этой тематики у исполнителя</div><div class="hscroll">${related.map(x => offerCard(x, 'h')).join('')}</div><button class="lnk" data-a="go" data-v="${gv('c_exec', { id: o.ex })}">Все услуги исполнителя ${ic('arr', 18, 2.2)}</button><span class="m">Это отдельные услуги: в текущий заказ они не добавляются.</span></div>` : ''}`,
     bar: `<div class="abar">${routeB && !preview ? `<div class="asum-p"><span class="m">Ориентир</span><b>${priceLabel(o)}</b></div>` : ''}${!routeB && !preview ? `<div class="tot"><span>${insp ? 'Осмотр' : agree ? 'Предварительно' : 'Итого'}</span><b>${r.total > 0 ? rub(r.total) : '—'}</b></div>` : ''}<div class="two"><button class="btn outline" data-a="chatWith" data-v="${o.id}" aria-label="Написать исполнителю" ${preview ? 'disabled' : ''}>${ic('chat', 22)}</button>${main}</div>${bl && !preview && !routeB ? `<div class="why center">Причина: ${bl}.</div>` : ''}<div class="asum">${routeB || agree ? `<span class="m">${routeB ? 'Исполнитель назовёт цену после запроса' : 'Сначала подтвердит исполнитель, потом оплата'}</span>` : ''}
@@ -8362,7 +8369,9 @@ Object.assign(A, {
 /* комиссия ZELDO — 10 %, но первые три заказа нового исполнителя — без неё, только эквайринг банка (запись 48, 53:08–53:47) */
 const FREE_N = 3;
 const freeOrder = o => { const l = S.orders.filter(x => x.ex === o.ex && x.status !== 'cancel').sort((a, b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true })); const i = l.indexOf(o); return i >= 0 && i < FREE_N; };
-const payout = o => { const free = freeOrder(o); const rate = feeRate(o); const fee = Math.round(o.total * rate / 100); const acq = Math.round(o.total * 0.025); return { fee, acq, net: o.total - fee - acq, free, rate }; };
+/* 20.11: партнёрам — по уровням, зафиксированным при оплате (o.ref с сервера): пустые уровни остаются исполнителю */
+const refPool = o => o.ref && Array.isArray(o.ref.lv) ? o.ref.lv.reduce((a, x, i) => a + ((o.ref.on || [])[i] ? Math.round(o.total * x / 100) : 0), 0) : 0;
+const payout = o => { const free = freeOrder(o); const rate = feeRate(o); const fee = Math.round(o.total * rate / 100); const acq = Math.round(o.total * 0.025); const pool = refPool(o); return { fee, acq, pool, net: o.total - fee - acq - pool, free, rate }; };
 SCREENS.e_money = () => {
   const done = myOrders().filter(o => o.status === 'done'); const wait = myOrders().filter(o => !['done', 'cancel', 'request', 'confirmed'].includes(o.status));
   const sum = (l, f) => l.reduce((a, o) => a + f(o), 0);
@@ -8975,8 +8984,8 @@ const starRow = id => { const e = EX[id] || {}; if (!e.reviews) return `<span cl
   const full = Math.round(e.rating); return `<span class="pc-st" aria-label="Рейтинг ${String(e.rating).replace('.', ',')}, ${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')}"><span class="stars" aria-hidden="true">${[1, 2, 3, 4, 5].map(n => `<i class="${n <= full ? 'on' : ''}">★</i>`).join('')}</span><b>${String(e.rating).replace('.', ',')}</b><span class="m">${pn(e.reviews, 'отзыв', 'отзыва', 'отзывов')}</span></span>`; };
 /* строка «Партнёрам до 5% · 2 уровня» вне карточек выдачи: в правой колонке услуги и в заказе (запись 48, 47:00: «в заказах… везде»).
    Своя разметка, а не .pc-partner: тот на компьютере встаёт во вторую колонку сетки карточки */
-const partnerBtn = (exId, cls = '') => { if (S.role === 'guest') return ''; const p = (EX[exId] || {}).partner || [5, 2];
-  return `<button class="pline ${cls}" data-a="partnerInfo" data-v="${esc(exId)}"><span>Партнёрам <b>до ${p[0]}%</b> · ${pn(p[1], 'уровень', 'уровня', 'уровней')}</span>${ic('right', 18, 2.2)}</button>`; };
+const partnerBtn = (exId, cls = '', cardId = '', ordId = '') => { if (S.role === 'guest') return ''; const o = ordId ? orderById(ordId) : null; const lv = o && o.ref ? o.ref.lv : refLv(exId, cardId); const p = [Math.round(lv.reduce((a, x) => a + x, 0) * 10) / 10, lv.length];
+  return `<button class="pline ${cls}" data-a="partnerInfo" data-v="${esc(`${exId}|${cardId || ''}|${ordId || ''}`)}"><span>Партнёрам <b>до ${refPct(p[0])}</b> · ${pn(p[1], 'уровень', 'уровня', 'уровней')}</span>${ic('right', 18, 2.2)}</button>`; };
 const factRows = (l, cls) =>l.length ? `<span class="${cls}">${l.map(([i, t]) => `<span>${ic(i, 18, 2)}<span>${t}</span></span>`).join('')}</span>` : '';
 
 /* карточка как в документе: фото слева с сердцем, название, описание, формат и цена; ниже — исполнитель, статус, отзывы; строка партнёрам */
@@ -8985,7 +8994,7 @@ const discMark = o => { const p = S.role === 'guest' ? null : promoBest(o); retu
 function offerCard(o, layout = 'list', x = {}) {
   const e = EX[o.ex] || {}; const st = exStatus(o.ex); const price = x.price || priceHtml(o);
   const who = `<span class="pc-who"><b>${esc(exName2(o))}</b>${S.role === 'guest' ? '' : `<span class="pill ${st[1] === 'new' ? '' : 'ok'} sm">${st[0]}</span>`}</span>`;
-  const partner = S.role === 'guest' ? '' : `<button class="pc-partner" data-a="partnerInfo" data-v="${o.ex}"><span>Партнёрам <b>до ${(e.partner || [5])[0]}%</b> · ${pn((e.partner || [5, 2])[1], 'уровень', 'уровня', 'уровней')}</span>${ic('right', 18, 2.2)}</button>`;
+  const rp = refOf(o.ex, o.id); const partner = S.role === 'guest' ? '' : `<button class="pc-partner" data-a="partnerInfo" data-v="${esc(`${o.ex}|${o.id}|`)}"><span>Партнёрам <b>до ${refPct(rp[0])}</b> · ${pn(rp[1], 'уровень', 'уровня', 'уровней')}</span>${ic('right', 18, 2.2)}</button>`;
   const guest = S.role === 'guest';
   /* плитка (06.11): маленькое фото исполнителя у имени и строка «Партнёрам до …» внизу, как в списке */
   if (layout === 'tile') return `<div class="pct">${heartBtn(o)}<button data-a="openOffer" data-v="${o.id}" class="pct-b"><span class="pct-p">${photo(o.ph, o.title, 'M')}${ownMark(o)}${discMark(o)}</span><span class="pct-in"><span class="pct-t">${esc(o.title)}</span><span class="pct-pr">${price}</span><span class="pct-m">${guest ? '' : exAva(o.ex, 'xs')}<span class="nm">${esc(exName2(o))}</span><span>${e.reviews ? '★' + NB + String(e.rating).replace('.', ',') : 'нет отзывов'}</span></span></span></button>${partner}</div>`;
@@ -9006,7 +9015,14 @@ function deskMid(o, layout) {
   const inc = (o.inc || []).slice(0, 3);
   return `${inc.length ? `<span class="pc-inc">${inc.map(x => `<span>${ic('check', 16, 2.4)}<span>${esc(x)}</span></span>`).join('')}${o.inc.length > 3 ? `<span class="more">ещё ${o.inc.length - 3}</span>` : ''}</span>` : ''}${rows.length ? `<span class="pc-k">${rows.map(([i, t]) => `<span>${ic(i, 18, 2)}<span>${t}</span></span>`).join('')}</span>` : ''}<span class="pc-pay">${ic('shield', 18, 2)}<span>Оплата через защищённый счёт</span></span>`;
 }
-A.partnerInfo = id => sheet('Партнёрская программа', `<div class="m">${esc(exName(id))} делится частью оплаты с партнёрами, которые приводят заказчиков: до ${(EX[id].partner || [5])[0]}% на ${pn((EX[id].partner || [5, 2])[1], 'уровень', 'уровня', 'уровней')}. Партнёрская роль подключается отдельно.</div>${btn('Понятно', 'closeSheet', '', 'soft block')}`);
+/* 20.11: что значит строка «Партнёрам до …»: кому и сколько, и что цена для заказчика та же */
+A.partnerInfo = v => { const [id, cardId, ordId] = String(v).split('|'); const o = ordId ? orderById(Number(ordId) || ordId) : null; const lv = o && o.ref ? o.ref.lv : refLv(id, cardId);
+  const who = ['тому, кто пригласил заказчика', 'кто пригласил его', 'кто пригласил того', 'четвёртому уровню', 'пятому уровню'];
+  sheet('Партнёрская программа', `<div class="m">${esc(exName(id))} отдаёт партнёрам ZELDO часть цены: тем, кто привёл заказчика в ZELDO. Цена для заказчика та же: делится исполнитель.</div>
+    <div class="col g4">${lv.map((x, i) => `<div class="sumline"><span>${i + 1} уровень: ${who[i]}</span><b>${refPct(x)}</b></div>`).join('')}</div>
+    ${o && o.ref ? `<div class="m">По этому заказу условия зафиксированы при оплате. ${o.ref.on && o.ref.on.some(Boolean) ? `Заняты уровни: ${o.ref.on.map((x, i) => x ? i + 1 : 0).filter(Boolean).join(', ')}. Баллы партнёры получат после приёмки работы.` : 'У заказчика нет пригласивших: всё остаётся исполнителю.'}</div>` : '<div class="m">Нет человека на уровне — эта часть остаётся исполнителю. Баллами партнёры оплачивают до 90 % своих заказов.</div>'}
+    ${REAL ? btn('Мои связи: пригласить и получать баллы', 'goRef', '', 'soft block') : ''}${btn('Понятно', 'closeSheet', '', 'text block')}`); };
+A.goRef = () => { closeSheet(); go('p_home'); };
 
 /* ---------- главная (лист 1): два независимых действия, бонусы, категории, «Рядом» / «Онлайн», «Вы смотрели» ---------- */
 SCREENS.c_home = () => {
@@ -9743,13 +9759,13 @@ function cabNav() {
     it('e_incoming', 'docsearch', 'Поступившие заявки', newIncoming().length, 'orange'), it('e_offers', 'send', 'Заявки по услугам', S.feed.filter(x => !x.my).length, 'violet'),
     it('e_orders', 'orders', 'Заказы', actOrders('exec'), 'green'), it('e_msgs', 'chat', 'Сообщения', unreadMsgs('exec'), 'teal'),
     it('e_services', 'case', 'Мои услуги', S.myServices.length, 'blue', { num: true }), it('e_schedule', 'calok', 'Расписание', 0, 'green'),
-    it('e_clients', 'user', 'Мои клиенты', (typeof crmClients === 'function' ? crmClients().filter(c => c.sleep).length : 0), 'teal', { num: true }), it('e_portfolio', 'image', 'Портфолио', 0, 'pink'), it('e_promos', 'tag', 'Акции', 0, 'orange'), it('e_money', 'wallet', 'Финансы', 0, 'teal'), it('e_package', 'diamond', 'Пакет и ИИ-помощник', 0, 'violet'),
+    it('e_clients', 'user', 'Мои клиенты', (typeof crmClients === 'function' ? crmClients().filter(c => c.sleep).length : 0), 'teal', { num: true }), it('e_portfolio', 'image', 'Портфолио', 0, 'pink'), it('e_promos', 'tag', 'Акции', 0, 'orange'), it('e_money', 'wallet', 'Финансы', 0, 'teal'), it('e_package', 'diamond', 'Пакет и ИИ-помощник', 0, 'violet'), ...(REAL ? [it('p_home', 'people', 'Мои связи', 0, 'violet')] : []),
   ] : [
     it('c_home', 'home', 'Главная', 0, 'blue'), it('c_orders', 'orders', 'Заказы', actOrders('cust'), 'green', { on: n === 'c_orders' && !reqTab }),
     it('req', 'send', 'Мои заявки', homeNew('cust'), 'violet', { act: 'myReqs', on: reqTab }), it('c_msgs', 'chat', 'Сообщения', unreadMsgs('cust'), 'teal'),
     it('c_fav', 'heart', 'Избранное', S.favs.length, 'pink', { num: true }), it('c_sched', 'calok', 'Мои записи', 0, 'orange'),
     /* «мои бонусы» под рукой, как просил Максим (запись 48, 93:51) */
-    it('bonus', 'gift', 'Мои бонусы', bonusLive().length, 'orange', { act: 'myBonuses', on: false, num: true }), it('c_aboutme', 'star', 'Отзывы обо мне', 0, 'orange'),
+    it('bonus', 'gift', 'Мои бонусы', bonusLive().length, 'orange', { act: 'myBonuses', on: false, num: true }), it('c_aboutme', 'star', 'Отзывы обо мне', 0, 'orange'), ...(REAL ? [it('p_home', 'people', 'Мои связи', 0, 'violet')] : []),
   ];
   const tl = S.navMini ? 'Развернуть меню' : 'Свернуть меню'; const sw = `Перейти в роль «${ex ? 'Заказчик' : 'Исполнитель'}»`;
   return `<div class="cabtop"><button class="cabtog" data-a="navMini" aria-label="${tl}" title="${tl}" aria-expanded="${!S.navMini}">${ic('panel', 20, 2)}</button></div>
@@ -9909,7 +9925,7 @@ function celebrate(o, sum, title = 'Заказ закрыт') {
   const C = ['var(--brand)', '#F5A524', '#17B26A', '#EE46BC'];
   el.innerHTML = `${partyRain()}<div class="party-card"><div class="party-burst" aria-hidden="true">${Array.from({ length: 18 }, (_, i) => `<i style="--a:${i * 20}deg;--d:${96 + (i % 4) * 22}px;--c:${C[i % 4]};--t:${(i % 5) * 25}ms"></i>`).join('')}</div>
     <span class="party-ic">${ic('check', 40, 2.6)}</span><b class="party-t" id="partyT">${title}</b><span class="party-s">Деньги ваши</span><b class="party-sum num">${rub(sum)}</b>
-    <span class="m">Заказ № ${o.id} · ${esc(o.client)}${o.sub ? `<br>Визит ${o.sub.used} из ${o.sub.total}` : sum !== o.total ? `<br>Из ${rub(o.total)} — за вычетом ${payout(o).free ? 'эквайринга банка: первые три заказа без комиссии ZELDO' : 'комиссии и эквайринга'}` : ''}</span>
+    <span class="m">Заказ № ${o.id} · ${esc(o.client)}${o.sub ? `<br>Визит ${o.sub.used} из ${o.sub.total}` : sum !== o.total ? `<br>Из ${rub(o.total)} — за вычетом ${payout(o).free ? `эквайринга банка${payout(o).pool ? ' и части партнёрам' : ''}: первые три заказа без комиссии ZELDO` : `комиссии, эквайринга${payout(o).pool ? ' и части партнёрам' : ''}`}` : ''}</span>
     <div class="party-b">${btn('Отлично', 'partyClose', '', 'block')}${o.status === 'done' ? btn('Оценить заказчика', 'partyRate', String(o.id), 'text block') : ''}</div></div>`;
   ($('#phone') || document.body).appendChild(el);
   /* сумма набегает от нуля за 0,7 с, к концу медленнее */
@@ -10275,7 +10291,7 @@ function orderActions(o) {
     if (st === 'work' || st === 'rework') h += `${st === 'rework' ? `<div class="info warn"><b>Нужна доработка</b><span class="m">${esc(o.reworkText || '')}</span></div>` : ''}${btn('Передать результат', 'resultAsk', o.id, 'block')}`;
     if (st === 'result') h += `<div class="info"><b>Ждём приёмки</b><span class="m">Деньги придут, когда заказчик примет работу.</span></div>`;
     if (['done', 'cancel'].includes(st)) h += clientRateBlock(o);
-    if (st === 'done') { const p = payout(o); h += card(`<div class="h2">Деньги переведены</div>${sumLines([['Сумма заказа', rub(o.total)], [p.free ? 'Комиссия ZELDO: первые 3 заказа без неё' : `Комиссия ZELDO, ${p.rate}${NB}%${p.rate === 7 ? ' — постоянный клиент' : p.rate === 5 ? ' — заказ дороже 500 000 ₽' : ''}`, p.free ? rub(0) : '−' + rub(p.fee)], ['Эквайринг банка, ~2,5%', '−' + rub(p.acq)], ['Вам', rub(p.net), 'total']])}`, 'c'); }
+    if (st === 'done') { const p = payout(o); h += card(`<div class="h2">Деньги переведены</div>${sumLines([['Сумма заказа', rub(o.total)], [p.free ? 'Комиссия ZELDO: первые 3 заказа без неё' : `Комиссия ZELDO, ${p.rate}${NB}%${p.rate === 7 ? ' — постоянный клиент' : p.rate === 5 ? ' — заказ дороже 500 000 ₽' : ''}`, p.free ? rub(0) : '−' + rub(p.fee)], ['Эквайринг банка, ~2,5%', '−' + rub(p.acq)], ...(p.pool ? [['Партнёрам, по уровням заказа', '−' + rub(p.pool)]] : []), ['Вам', rub(p.net), 'total']])}`, 'c'); }
   }
   return h;
 }
@@ -10318,7 +10334,7 @@ SCREENS.order = p => {
         <div class="ocontact">${ex ? avaByName(o.client) : exAva(o.ex)}<span class="grow"><span class="m" style="display:block">${ex ? 'Заказчик' : 'Исполнитель'}</span><button class="plink" data-a="go" data-v="${ex ? gv('c_client', { name: o.client }) : gv('c_exec', { id: o.ex })}" aria-label="Профиль: ${esc(ex ? o.client : exName(o.ex))}"><b>${esc(ex ? o.client : exName(o.ex))}</b></button>${ex ? `<span class="m" style="display:block">${clientLine(o.client)}</span>` : ''}</span>
           ${ch ? `<button class="cbtn" data-a="go" data-v="${gv('chat', { id: ch.id })}" aria-label="Написать">${ic('chat', 22, 2)}${ch.unread ? `<i class="cdot"></i>` : ''}</button>` : `<button class="cbtn" data-a="orderChat" data-v="${o.id}" aria-label="Написать">${ic('chat', 22, 2)}</button>`}
           <button class="cbtn" data-a="callAsk" data-v="${ex ? '' : o.ex}" aria-label="Позвонить через ZELDO">${ic('phone', 22, 2)}</button></div>
-        ${ex ? '' : partnerBtn(o.ex)}`)}
+        ${partnerBtn(o.ex, '', o.offer, o.id)}`)}
       ${orderActions(o)}
       ${subCard(o)}
       ${card(`<div class="h2">${o.stages ? 'Этапы' : 'Ход заказа'}</div>${steps}`)}
@@ -11348,8 +11364,11 @@ const avaShrink = f => new Promise((ok, no) => { const u = URL.createObjectURL(f
 CH.avaPick = async el => { const f = el.files && el.files[0]; el.value = ''; if (!f) return;
   try { S.profile = S.profile || {}; S.profile.ava = await avaShrink(f); EX.alex.ava = S.profile.ava; render(); toast('Фото профиля обновлено'); } catch (e) { toast('Не получилось открыть фото. Попробуйте другое', 'info'); } };
 /* ---------- отзыв связан с заказом (запись 69): услуга, а участникам — ссылка на заказ ---------- */
-function revSvc(r) { const o = r.order != null ? orderById(r.order) : null; const svc = r.svc || (o && o.svc) || ''; if (!svc && !o) return '';
-  return `<div class="m">${esc(svc)}${o ? `${svc ? ' · ' : ''}<button class="lnk" data-a="go" data-v="${gv('order', { id: o.id })}">заказ № ${o.id}</button>` : ''}</div>`; }
+/* 20.11, владелец: «в отзывах помечалось, к какому заказу был отзыв» — везде: услуга, номер заказа и его дата */
+function revSvc(r) { const o = r.order != null ? orderById(r.order) : null; const svc = r.svc || (o && o.svc) || ''; if (!svc && r.order == null) return '';
+  const od = r.odate || (o && o.date) || ''; const dt = /^\d{4}-\d\d-\d\d$/.test(od) ? ` от ${fromKey(od).getDate()}${NB}${MONG[fromKey(od).getMonth()]}` : '';
+  const num = r.order == null ? '' : o ? `<button class="lnk" data-a="go" data-v="${gv('order', { id: o.id })}">заказ № ${o.id}${dt}</button>` : `заказ № ${r.order}${dt}`;
+  return `<div class="m">${esc(svc)}${svc && num ? ' · ' : ''}${num}</div>`; }
 Object.assign(window.__z, { timesFor, whenPast, resTags, tierPrice, tierText, revSvc, MIN_ORDER, blockers, cfgOf, wizApplySvc, wizToOffer, wizFromOffer: typeof wizFromOffer === 'function' ? wizFromOffer : null });
 
 /* ---------- фото к отзыву (запись 69: «фото, видео в отзывах»): до 5 фото, сжатые на телефоне ---------- */
@@ -11413,6 +11432,544 @@ Object.assign(window.__z, { revPhotos, ratePhField, svcTable, SERVICES, OFFERS, 
 
   window.__z.guard = { shield, why };
 })();
+
+/* ---------- макет на сайте: «Мои связи», награды и уровни на выдуманных данных (23.11.2026) ----------
+   Владелец 23.11: «внеси все правки на макет». Экраны партнёрки и наград (10c-ref.js, 10d-aw.js) в рабочей версии берут данные
+   с сервера; на сайте сервера нет, поэтому здесь — то же, что сервер отдал бы Алексею Смирнову (он исполнитель, заказчик и партнёр):
+   форма данных снята с настоящего сервера прогоном jt/ref02.js (DUMP=…), числа выдуманы. Действия — включить, вывести, сохранить
+   проценты, указать пригласившего — меняют только эту страницу. Пороги ступеней и значков Максим ещё не утвердил
+   (вопросник № 3), поэтому и здесь «критерии утверждаются», как в рабочей версии.
+   Собирается только в макет (build.py без --real), перед 10c-ref.js; после 10d-aw.js — 10f-demo.js. */
+window.__zDemo = true;
+{
+  const now = Date.now(), D = 864e5;
+  const clone = x => JSON.parse(JSON.stringify(x));
+  const RULES = { min: 5, max: 40, lvMin: 3, lvMax: 5, def: [10, 7, 5, 3, 1], changes: 2, swing: 15, hold: 10, life: 10, remind: 7, payMin: 10, payMax: 90, outFee: 5, inv: 1, outMin: 1000 };
+  const ME = { id: 1, name: 'Алексей Смирнов', email: 'al•••@yandex.ru', profile: {}, priv: {}, ver: 1, clean: 0, kyc: { st: 'ok', note: '', at: now - 40 * D },
+    payreq: { status: 'ip', fio: 'Смирнов Алексей Викторович', org: '', inn: '772800000000', bank: 'Т-Банк', acc: '40802810900001234417', st: 'ok', note: '', at: now - 41 * D } };
+  /* команда: 20 человек на четырёх уровнях, двое из лично приглашённых — исполнители */
+  const P = [['Марина К.', 1, 25, 0, 1], ['Олег Д.', 1, 24, 0, 1], ['Руслан А.', 1, 22, 1, 1], ['Света З.', 1, 19, 0, 1], ['Анна И.', 1, 14, 1, 1], ['Игорь Б.', 1, 6, 0, 1],
+    ['Ксения Л.', 2, 21, 0, 1], ['Денис П.', 2, 20, 0, 0], ['Павел Т.', 2, 18, 0, 1], ['Ольга С.', 2, 17, 0, 0], ['Никита В.', 2, 15, 0, 1], ['Юлия М.', 2, 12, 0, 0], ['Артём Г.', 2, 9, 0, 1], ['Вера Н.', 2, 7, 0, 0], ['Глеб Р.', 2, 3, 0, 0],
+    ['Тимур Х.', 3, 13, 0, 1], ['Лена Ф.', 3, 11, 0, 0], ['Максим Е.', 3, 8, 0, 0], ['Софья Ч.', 3, 4, 0, 1], ['Егор Ш.', 4, 2, 0, 0]];
+  const people = P.map(([name, lvl, d, exec, act]) => ({ name, lvl, at: now - d * D, exec: !!exec, act: !!act }));
+  /* баллы: 5020 начислено и доступно по сроку, 1180 на проверке; 1000 выведено, 600 в резерве за идущий заказ → доступно 3420 */
+  const ops = [
+    { at: now - 1 * D, t: 'Света З. · Уборка квартиры', s: 450, sub: '1-й уровень, 10 %', st: 'hold', until: now + 9 * D, order: null },
+    { at: now - 2 * D, t: 'Ксения Л. · Ремонт стиральной машины', s: 730, sub: '2-й уровень, 7 %', st: 'hold', until: now + 8 * D, order: null },
+    { at: now - 4 * D, t: 'Оплата заказа № 1042', s: -600, sub: 'Химчистка дивана', order: 1042 },
+    { at: now - 11 * D, t: 'Марина К. · Маникюр с покрытием', s: 180, sub: '1-й уровень, 10 %', st: 'ok', exp: now + 289 * D, order: null },
+    { at: now - 15 * D, t: 'Тимур Х. · Логотип для кофейни', s: 1500, sub: '3-й уровень, 5 %', st: 'ok', exp: now + 285 * D, order: null },
+    { at: now - 18 * D, t: 'Вывод на счёт', s: -1000, sub: 'Т-Банк ••4417, комиссия 50 ₽', st: 'paid', order: null },
+    { at: now - 23 * D, t: 'Олег Д. · Ремонт комнаты под ключ', s: 1890, sub: '1-й уровень, 10 %', st: 'ok', exp: now + 277 * D, order: null },
+    { at: now - 26 * D, t: 'Руслан А. · исполнитель, которого вы привели', s: 1000, sub: '1 % из комиссии ZELDO', st: 'ok', exp: now + 274 * D, order: null },
+    { at: now - 294 * D, t: 'Анна И. · Маникюр и педикюр', s: 450, sub: '1-й уровень, 10 %', st: 'ok', exp: now + 6 * D, order: null },
+  ];
+  const DB = {
+    code: 'ZK7M2Q', inv: null, canBind: false, partner: { st: 'on', at: now - 26 * D }, kyc: 'ok',
+    pts: { active: true, avail: 3420, lock: 0, hold: 1180, reserve: 600, soon: 450, soonAt: now + 6 * D, earned: 6200, burned: 0, ops },
+    team: { lv: [6, 9, 4, 1, 0], total: 20, execs: 2, act: 11, people },
+    set: { lv: [10, 7, 5, 3, 1], own: false, svc: { my_season: [12, 6, 3] }, lim: { '*': { left: 2, swing: 0, next: 0 }, my_season: { left: 1, swing: 0, next: 0 } } },
+    out: { can: true, who: 'ip', min: 1000, fee: 5 }, rules: RULES, day: D, test: null,
+  };
+  /* награды: ступень «Проверен» уже есть (паспорт, статус, пять заказов без жалоб), дальше — пороги, которые ещё утверждаются */
+  const open = (k, name, crit) => ({ k, name, open: true, ok: false, crit });
+  const exCrit = [{ t: 'Выполненных заказов', need: null, have: 236, ok: false }, { t: 'Средняя оценка', need: null, have: '4,9', ok: false }, { t: 'Заказов со спором', need: null, have: '1 %', ok: false }, { t: 'На ZELDO', need: null, have: '7 мес.', ok: false }];
+  const cuCrit = [{ t: 'Принятых заказов', need: null, have: 7, ok: false }, { t: 'Отмен после оплаты по своей инициативе', need: null, have: 0, ok: false }];
+  const AW = {
+    exec: { lv: 'checked', name: 'Проверен', idx: 1, badges: [],
+      steps: [{ k: 'checked', name: 'Проверен', open: false, ok: true, crit: [{ t: 'Паспорт, статус в налоговой и пять заказов без жалоб', ok: true, have: 'есть', need: '' }] },
+        open('stable', 'Стабильный', exCrit), open('reliable', 'Надёжный', exCrit), open('choice', 'Выбор ZELDO', exCrit)],
+      all: [{ k: 'ontime', name: 'Точно в срок', open: true, ok: false, crit: '', have: 'вовремя 96 % из 180' }, { k: 'repeat', name: 'Возвращаются снова', open: true, ok: false, crit: '', have: '41 % из 236' },
+        { k: 'top', name: 'Высокая оценка', open: true, ok: false, crit: '', have: '4,9 по 214 отзывам' }, { k: 'clean', name: 'Без нарушений', open: true, ok: false, crit: '', have: 'нарушений нет' }],
+      stats: { done: 236, paid: 240, rating: 4.9, nrev: 214, dsp: 1, onTime: 96, timed: 180, rep: 41, custs: 170, months: 7, ver: true, lastViol: 0 } },
+    cust: { lv: 'new', name: 'Новый', idx: 0, steps: [open('checked', 'Проверен', cuCrit), open('reliable', 'Надёжный', cuCrit)], stats: { done: 7, cancels: 0 } },
+    ref: { cust: { lv: 1, name: 'Импульс', act: 6, dev: 1, l1: 6, next: { name: 'Поток', open: true, need: null, have: 1, what: 'лично приглашённые сами привели людей с действием' } },
+      exec: { lv: 0, name: 'Искра', act: 2, dev: 0, l1: 2, next: { name: 'Импульс', open: false, need: 3, have: 2, what: 'лично приглашённых с подтверждённым действием' } } },
+    pkgs: [{ side: 'c', lvl: 0, name: 'Искра', at: now - 12 * D, till: now + 18 * D, basis: 'first', live: true, fee: null, disc: 0, uses: 0 }], pkgOn: false,
+    table: [{ name: 'Искра', fee: 10, disc: 0, uses: 0, thr: 10000 }, { name: 'Импульс', fee: 10, disc: 3, uses: 1, thr: 50000 }, { name: 'Поток', fee: 9.75, disc: 3, uses: 2, thr: 100000 },
+      { name: 'Орбита', fee: 9.5, disc: 3, uses: 3, thr: 200000 }, { name: 'Экосистема', fee: 9, disc: 4, uses: 5, thr: 400000 }],
+  };
+  /* финансы исполнителя в кабинете: этот месяц, с партнёрской частью */
+  const line = (id, svc, client, total, pool, poolPct, d, state) => { const acq = Math.round(total * 0.025); const fee = Math.round(total * 0.1);
+    return { id, svc, client, total, base: total, pct: 10, fee, acq, acqPct: 2.5, tip: 0, pool, poolPct, poolN: pool ? 1 : 0, net: total - fee - acq - pool, state, at: now - d * D, part: false }; };
+  const lines = [line(1040, 'Шиномонтаж', 'Олег', 4800, 480, 10, 1, 'wait'), line(1039, 'Сезонная смена колёс', 'Ксения', 6400, 0, 0, 2, 'done'),
+    line(1035, 'Шиномонтаж', 'Игорь', 7200, 1224, 17, 3, 'done'), line(1033, 'Сезонная смена колёс', 'Марина', 6400, 0, 0, 5, 'done')];
+  const done = lines.filter(l => l.state === 'done').reduce((a, l) => a + l.net, 0), wait = lines.filter(l => l.state === 'wait').reduce((a, l) => a + l.net, 0);
+  const pd = new Date(); pd.setDate(pd.getDate() + ((8 - pd.getDay()) % 7 || 7)); pd.setHours(10, 0, 0, 0);
+  S.money = { wallet: { sum: 0, ops: [] }, earn: { avail: done, wait, earned: done, paid: 0, lines, back: [], payouts: [] }, payDay: pd.getTime(), rules: { wdFee: 2, instantFee: 3, instantMin: 200, minPayout: 100, payDay: 1, payHour: 10 }, req: true };
+  S.ref = clone(DB); S.aw = clone(AW);
+  EX.alex.ref = { lv: DB.set.lv.slice(), svc: clone(DB.set.svc) };
+  /* сервер для экранов партнёрки: те же ответы, что дал бы настоящий, но в памяти страницы */
+  const err = (status, e) => ({ status, j: { err: e } });
+  const okRef = () => { EX.alex.ref = { lv: DB.set.lv.slice(), svc: clone(DB.set.svc) }; return { status: 200, j: clone(DB) }; };
+  const pts = n => `${n} ${pn(n, 'балл', 'балла', 'баллов')}`;
+  const ROUTES = {
+    '/api/ref': () => okRef(),
+    '/api/ref/on': () => { if (DB.partner.st) return err(400, '«Мои связи» уже включены'); DB.partner = { st: 'on', at: Date.now() }; DB.pts.active = true; DB.pts.avail += DB.pts.lock; DB.pts.lock = 0; return okRef(); },
+    '/api/ref/bind': b => { const c = String(b.code || '').trim().toUpperCase(); if (!DB.canBind) return err(400, 'Пригласившего указывают один раз и до первого заказа');
+      if (c === DB.code) return err(400, 'Это ваш собственный код'); if (c.length < 6) return err(404, 'Такого кода нет. Проверьте буквы и цифры'); DB.inv = { name: 'Ирина К.' }; DB.canBind = false; return okRef(); },
+    '/api/ref/out': b => { const n = Math.floor(Number(b.sum) || 0); if (n < DB.out.min) return err(400, `Минимум — ${pts(DB.out.min)}`); if (n > DB.pts.avail) return err(400, `Доступно только ${pts(DB.pts.avail)}`);
+      DB.pts.avail -= n; DB.pts.ops.unshift({ at: Date.now(), t: 'Вывод на счёт', s: -n, sub: `${ME.payreq.bank} ••${ME.payreq.acc.slice(-4)}, комиссия ${Math.round(n * DB.out.fee / 100)} ₽`, st: 'wait', order: null }); return okRef(); },
+    '/api/ref/set': b => { const card = b.card ? String(b.card) : null; const key = card || '*'; const lim = DB.set.lim[key] || (DB.set.lim[key] = { left: 2, swing: 0, next: 0 });
+      if (b.lv == null) { if (!card) return err(400, 'Нечего сбрасывать'); delete DB.set.svc[card]; return okRef(); }
+      const lv = (Array.isArray(b.lv) ? b.lv : []).map(Number); const e = window.__z.refLvErr ? window.__z.refLvErr(lv) : null; if (e) return err(400, e);
+      if (!lim.left) return err(400, 'Изменений за 30 дней больше нет');
+      const old = card ? DB.set.svc[card] || DB.set.lv : DB.set.lv; const sw = Math.abs(lv.reduce((a, x) => a + x, 0) - old.reduce((a, x) => a + x, 0));
+      if (lim.swing + sw > RULES.swing + 1e-9) return err(400, `За 30 дней можно сдвинуть не больше чем на ${RULES.swing} п. п.`);
+      lim.left--; lim.swing = Math.round((lim.swing + sw) * 10) / 10; if (!lim.left) lim.next = Date.now() + 30 * D;
+      if (card) DB.set.svc[card] = lv; else { DB.set.lv = lv; DB.set.own = true; } return okRef(); },
+  };
+  const fetch0 = window.fetch ? window.fetch.bind(window) : null;
+  window.fetch = async (url, o) => { const u = String(url && url.url || url); const path = u.replace(/^https?:\/\/[^/]+/, '').split('?')[0];
+    const h = ROUTES[path]; if (!h) return fetch0 ? fetch0(url, o) : Promise.reject(new Error('нет сети'));
+    let b = {}; try { b = o && o.body ? JSON.parse(o.body) : {}; } catch (e) { b = {}; }
+    await new Promise(r => setTimeout(r, 250)); const r = h(b);
+    return new Response(JSON.stringify(r.j), { status: r.status, headers: { 'Content-Type': 'application/json' } }); };
+  window.__z.real = { me: ME, api: async u => { const h = ROUTES[u]; if (!h) throw new Error('нет такого адреса'); return h({}).j; } };
+  window.__z.demoRef = { DB, ME, pts };
+  /* «Значок „Проверен“» в кабинете ведёт на экран, который в рабочей версии проверяет паспорт; на макете он уже пройден */
+  if (!SCREENS.e_kyc) SCREENS.e_kyc = () => ({ title: 'Значок «Проверен»', sub: 'Виден заказчикам в карточках и профиле',
+    body: `<div class="info ok"><b>Значок есть</b><span class="m">Паспорт проверен, фото удалено. Статус ИП подтвердила налоговая. Пять заказов без жалоб.</span></div>
+      ${card(`<div class="m">В рабочей версии здесь загружают фото паспорта: его видит только сотрудник ZELDO и удаляет после проверки.</div>`, 'c')}` });
+}
+
+/* ---------- рабочая версия: партнёрская программа «Мои связи» (20.11.2026) ----------
+   Максим 19.11: «настройки партнёрских баллов от самого исполнителя: он сам настраивает свою партнёрскую сеть. Этими баллами можно
+   расплачиваться у любого исполнителя»; «по партнёру всё в кабинете нужно правильно распределить». Макеты: «Мои связи» v8,
+   кабинет исполнителя (EVEN_provider_cabinet), «Настройка процентов». Правила и расчёты — на сервере (server/ref.js), здесь только экраны.
+   Нижнее меню не меняется: «Мои связи» открываются из «Кабинета» и из меню роли «Партнёр».
+   Собирается только в рабочую версию (build.py --real), после 10b-reg.js. */
+if (REAL || window.__zDemo) {
+  const R = window.__z.real;
+  const me = () => R.me || {};
+  const F = () => S.ref || null;
+  const post = async (url, data) => { try { const r = await fetch(url, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); return { ok: r.ok, status: r.status, j: await r.json().catch(() => ({})) }; } catch (e) { return { ok: false, status: 0, j: { err: 'Нет связи с сервером' } }; } };
+  const pts = n => pn(n, 'балл', 'балла', 'баллов');
+  const pctT = x => `${String(Math.round(x * 10) / 10).replace('.', ',')}${NB}%`;
+  const sumLv = lv => Math.round(lv.reduce((a, x) => a + x, 0) * 10) / 10;
+  const dDay = t => new Date(t).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', timeZone: 'Europe/Moscow' });
+  const testBox = t => `<div class="info"><b>Тестовый режим</b><span class="m">${esc(t.replace(/^Тестовый режим: /, '').replace(/^./, c => c.toUpperCase()))}</span></div>`;
+  document.head.insertAdjacentHTML('beforeend', `<style>
+    .p3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .p3 > div { background: var(--soft); border-radius: 14px; padding: 12px 10px; min-width: 0; }
+    .p3 b { display: block; font-size: 24px; line-height: 30px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .p3 span { display: block; font-size: 13px; line-height: 17px; color: var(--muted); }
+    .p3 > div.main { background: var(--act); color: #fff; } .p3 > div.main span { color: rgba(255, 255, 255, .85); }
+    .plv { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+    .plv > div { background: var(--soft); border-radius: 12px; padding: 10px 4px; text-align: center; min-width: 0; }
+    .plv b { display: block; font-size: 20px; line-height: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .plv span { display: block; font-size: 12px; line-height: 16px; color: var(--muted); }
+    .plv.pc b { color: var(--act); font-size: 17px; }
+    .pop { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--line); }
+    .pop:first-of-type { border-top: 0; padding-top: 4px; }
+    .pop .grow { min-width: 0; } .pop .grow b { display: block; overflow-wrap: anywhere; }
+    .pop .ps { font-weight: 800; white-space: nowrap; font-variant-numeric: tabular-nums; } .pop .ps.plus { color: var(--ok); }
+    .refrow { display: flex; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid var(--line); }
+    .refrow:first-child { border-top: 0; }
+    .refrow .grow { min-width: 0; } .refrow .grow b { display: block; }
+    .refrow .rv { min-width: 72px; text-align: center; font-size: 22px; font-weight: 800; color: var(--act); font-variant-numeric: tabular-nums; background: none; border: 0; padding: 4px; }
+    .refrow .rb { width: 44px; height: 44px; border-radius: 12px; border: 1.5px solid var(--act); color: var(--act); background: transparent; display: grid; place-items: center; flex: none; }
+    .refrow .rb:disabled { opacity: .35; }
+    .reftot { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+    .reftot b { font-size: 28px; line-height: 34px; font-weight: 800; color: var(--act); }
+    .pcode { font-size: 30px; line-height: 36px; font-weight: 800; letter-spacing: .12em; font-variant-numeric: tabular-nums; }
+    .pqr { max-width: 240px; margin: 0 auto; } .pqr svg { width: 100%; height: auto; display: block; }
+    .pok { color: var(--ok); } .pbad { color: var(--bad); }
+    .cab2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+    .cab2 > div { background: var(--soft); border-radius: 14px; padding: 12px; min-width: 0; }
+    .cab2 b { display: block; font-size: 22px; line-height: 28px; font-weight: 800; font-variant-numeric: tabular-nums; } .cab2 span { display: block; font-size: 13px; color: var(--muted); }
+    .ptsbox { border: 1.5px solid var(--line); border-radius: 16px; padding: 12px 14px; }
+  </style>`);
+
+  /* ---------- «Мои связи»: баллы, команда, ссылки, отчёты ---------- */
+  const OP_ST = { ok: ['Доступно', 'ok'], hold: ['На проверке', ''], check: ['Проверяет ZELDO', 'warn'], lock: ['Ждут включения', 'grey'], gone: ['Сгорели', 'grey'], wait: ['В работе', 'warn'], paid: ['Отправлено', 'ok'], rejected: ['Не прошёл', 'bad'] };
+  const opRow = op => { const st = OP_ST[op.st]; const sub = [op.sub, op.st === 'hold' && op.until ? `доступны с ${dDay(op.until)}` : '', op.st === 'ok' && op.exp ? `сгорят ${dDay(op.exp)}` : ''].filter(Boolean).join(' · ');
+    return `<div class="pop"><span class="grow"><b>${esc(op.t)}</b><span class="m">${esc(sub)}</span><span class="m">${dDay(op.at)}</span></span><span class="col g4" style="align-items:flex-end"><span class="ps ${op.s > 0 ? 'plus' : ''}">${op.s > 0 ? '+' : '−'}${fmtN(Math.abs(op.s))}</span>${st ? pill(st[0], st[1]) : ''}</span></div>`; };
+  function pTabPts(f) {
+    const p = f.pts; const on = !!f.partner.st;
+    const big = `<div class="p3"><div class="main"><b>${fmtN(on ? p.avail : p.lock)}</b><span>${on ? 'Доступно' : 'Ждут включения'}</span></div><div><b>${fmtN(p.hold)}</b><span>На проверке</span></div><div><b>${fmtN(p.reserve)}</b><span>В резерве</span></div></div>`;
+    const soon = p.soon ? `<div class="info warn"><b>${pts(p.soon)} сгорят ${dDay(p.soonAt)}</b><span class="m">Оплатите ими часть любого заказа: до 90 % цены. Не потратите — они вернутся исполнителям.</span></div>` : '';
+    const acts = on ? `<div class="btns two">${btn('Потратить', 'pSpend', '', 'soft')}${btn('Вывести в рубли', 'go', 'p_out', 'outline')}</div>` : btn('Включить «Мои связи»', 'go', 'p_on', 'block');
+    return `${card(`<div class="h2">Баллы связей</div>${big}<div class="m">1 балл = 1 ₽. Начисляем, когда заказчик принял работу. 10 дней баллы на проверке, потом доступны. Живут 10 месяцев. «В резерве» — уже потрачены на заказы, которые ещё идут: при отмене вернутся.</div>${acts}`)}
+      ${soon}
+      ${card(`<div class="h2">Операции</div>${p.ops.length ? p.ops.slice(0, 60).map(opRow).join('') : '<div class="m">Пока пусто. Пригласите людей по своей ссылке: когда они закажут услугу, здесь появятся баллы.</div>'}`, 'c')}`;
+  }
+  function pTabTeam(f) {
+    const t = f.team;
+    const inv = f.inv ? card(`<div class="row"><span class="ri">${ic('user', 22)}</span><span class="grow"><span class="m" style="display:block">Вас пригласил</span><b>${esc(f.inv.name)}</b></span></div>`, 'c')
+      : f.canBind ? card(`<div class="h2">Кто вас пригласил?</div><div class="m">Если вас позвали в ZELDO, впишите код этого человека. Указать можно один раз и только до первого заказа.</div>${field('Код приглашения', `<input class="input" id="pbind" data-in="pBindIn" data-enter="pBind" maxlength="12" autocomplete="off" placeholder="Например: K7M2QX" value="${esc(S.pBind || '')}" style="text-transform:uppercase">`)}${btn('Сохранить', 'pBind', '', 'soft block')}`) : '';
+    const lv = `<div class="plv">${t.lv.map((n, i) => `<div><b>${n}</b><span>${i + 1} уровень</span></div>`).join('')}</div>`;
+    const people = t.people.length ? t.people.slice(0, 200).map(x => `<div class="pop"><span class="grow"><b>${esc(x.name)}</b><span class="m">${x.lvl}-й уровень · с ${dDay(x.at)}</span></span><span class="col g4" style="align-items:flex-end">${x.exec ? pill('Исполнитель', '') : pill('Заказчик', 'grey')}${x.act ? '<span class="m pok">заказывал</span>' : '<span class="m">пока без заказов</span>'}</span></div>`).join('') : '<div class="m">Пока никого. Отправьте ссылку из вкладки «Ссылки».</div>';
+    return `${inv}${card(`<div class="row"><span class="h2 grow">Моя команда</span><b>${pn(t.total, 'человек', 'человека', 'человек')}</b></div>${lv}
+        <div class="m">1-й уровень — те, кого пригласили вы. 2-й — кого пригласили они, и так до пятого. С их заказов вам идут баллы по процентам исполнителя.</div>`)}
+      ${card(`<div class="row top"><span class="ri" style="color:var(--act)">${ic('case', 22)}</span><span class="grow"><b>Исполнители, которых вы привели: ${t.execs}</b><span class="m" style="display:block">С каждого их заказа — 1 % из комиссии ZELDO. Считаются только те, кого вы пригласили сами.</span></span></div>`, 'c')}
+      ${card(`<div class="h2">Люди</div>${people}`, 'c')}`;
+  }
+  const inviteLink = () => { const f = F(); const u = new URL('/', location.href); if (f) u.searchParams.set('ref', f.code); return u.href; };
+  function pTabLinks(f) {
+    return `${card(`<div class="h2">Мои ссылки</div><span class="m">Ваш код</span><div class="pcode">${esc(f.code)}</div>
+        <div class="sharel"><span class="grow">${esc(inviteLink())}</span></div>
+        <div class="btns two">${btn(`${ic('share', 20, 2)} Пригласить`, 'shareApp', '', '')}${btn(`${ic('copy', 20, 2)} Скопировать`, 'pCopy', '', 'soft')}</div>
+        ${btn(`${ic('qr', 20, 2)} Показать QR-код`, 'pQr', '', 'text block')}
+        <div class="m">Ссылка постоянная. Кто зарегистрируется по ней, навсегда останется в вашей команде. Код можно продиктовать: его вписывают в «Мои связи» → «Команда» до первого заказа.</div>`)}
+      ${card(`<div class="h2">Ссылки на услуги</div><div class="m">«Поделиться» в карточке любой услуги тоже несёт ваш код: человек сразу увидит услугу, а в команду попадёт к вам.</div>`, 'c')}`;
+  }
+  const PER = [['m', 'Этот месяц'], ['pm', 'Прошлый'], ['all', 'Всё время']];
+  const inPer = (t, k) => { if (k === 'all') return true; const d = new Date(); const a = new Date(d.getFullYear(), d.getMonth() - (k === 'pm' ? 1 : 0), 1).getTime(); const b = new Date(d.getFullYear(), d.getMonth() + (k === 'pm' ? 0 : 1), 1).getTime(); return t >= a && t < b; };
+  function pTabRep(f) {
+    const k = S.pPer || 'm'; const ops = f.pts.ops.filter(o => inPer(o.at, k));
+    const s = fn => ops.filter(fn).reduce((a, o) => a + Math.abs(o.s), 0);
+    const lines = [['Начислено', '+' + fmtN(s(o => o.s > 0 && !/^Вернулись/.test(o.t)))], ['Потрачено на заказы', '−' + fmtN(s(o => o.s < 0 && /^Оплата заказа/.test(o.t)))], ['Вернулось с отменённых заказов', '+' + fmtN(s(o => o.s > 0 && /^Вернулись/.test(o.t)))], ['Выведено на счёт', '−' + fmtN(s(o => o.s < 0 && /^Вывод/.test(o.t) && o.st !== 'rejected'))], ['Сгорело', '−' + fmtN(s(o => /^Сгорели/.test(o.t)))]];
+    return `${seg('pPer', PER, k)}${card(`${sumLines(lines)}<div class="m">Только ваши операции. Чужие суммы и номера чужих заказов в отчёт не попадают.</div>${btn(`${ic('doc', 20, 2)} Скачать отчёт для Excel`, 'pCsv', '', 'soft block')}`)}
+      ${card(`<div class="h2">Приглашения</div>${sumLines([['Всего в команде', String(f.team.total)], ['Пригласили сами', String(f.team.lv[0])], ['Из них заказывали', String(f.team.act)], ['Исполнителей привели', String(f.team.execs)]])}`, 'c')}`;
+  }
+  SCREENS.p_home = () => {
+    const f = F(); if (!f) return { title: 'Мои связи', body: '<div class="m">Загружаем…</div>' };
+    const on = !!f.partner.st; const t = S.pTab || 'pts';
+    const head = on ? card(`<div class="row"><span class="ri" style="color:var(--act)">${ic('people', 26, 1.9)}</span><span class="grow"><b class="t18" style="display:block">Партнёр ZELDO</b><span class="m">«Мои связи» включены ${dDay(f.partner.at)}${f.partner.st === 'test' ? ' · тестовый режим' : ''}</span></span></div>`, 'c')
+      : card(`<div class="h2">Баллы за тех, кого вы пригласили</div><div class="m">Друг зарегистрировался по вашей ссылке и заказал услугу. Исполнитель отдаёт вам часть цены баллами: обычно 10 %. Друг пригласил своего — с его заказов вам тоже, до пятого уровня.</div>
+        ${bullets(['Баллами оплачивают до 90 % любого заказа', 'ИП и ООО могут вывести их в рубли', 'Цена для друзей не меняется: делится исполнитель'])}
+        ${btn('Включить «Мои связи»', 'go', 'p_on', 'block')}${f.pts.lock + f.pts.hold ? `<div class="m">Уже ждут вас: ${pts(f.pts.lock + f.pts.hold)}. Станут доступны после включения.</div>` : ''}`, 'soft');
+    const body = t === 'team' ? pTabTeam(f) : t === 'links' ? pTabLinks(f) : t === 'rep' ? pTabRep(f) : pTabPts(f);
+    return { title: 'Мои связи', sub: 'Партнёрская программа ZELDO',
+      body: `${head}${ltabs('pTab', [['pts', 'Баллы'], ['team', 'Команда', f.team.total || ''], ['links', 'Ссылки'], ['rep', 'Отчёты']], t)}${body}
+        ${card(`<div class="list">${rl('Как это работает', 'Уровни, проверка 10 дней, срок 10 месяцев, вывод', 'pHow', '', { icon: 'info' })}${rl('Правила программы', 'Что можно и что нельзя', 'pRules', '', { icon: 'doc' })}${rl('Написать в поддержку', 'Если начисление кажется неверным', 'supportOpen', '', { icon: 'chat' })}</div>`, 'c')}` };
+  };
+  const RULES = ['Приглашать можно кого угодно: по ссылке, QR-коду или коду. Пригласить самого себя нельзя', 'Баллы начисляются, когда заказчик принял работу или спор решён в пользу исполнителя', '10 дней баллы на проверке. Если заказчик и партнёр входили с одного адреса, начисление проверяет сотрудник ZELDO', 'Баллы живут 10 месяцев с начисления. Сгоревшие возвращаются исполнителю', 'Тратить баллы можно у любого исполнителя: от 10 до 90 % цены после скидки, остальное — деньгами', 'При отмене заказа баллы возвращаются баллами, в той же доле, что и деньги', 'Вывести в рубли могут ИП и ООО: комиссия 5 %', 'Тратить и выводить можно после включения «Моих связей»: проверка личности и согласие с правилами', 'Накрутка — фальшивые аккаунты, заказы самому себе — ведёт к отмене баллов и блокировке'];
+  Object.assign(A, {
+    pTab(v) { S.pTab = v; render(); }, pPer(v) { S.pPer = v; render(); },
+    pHow() { const r = (F() || {}).rules || { def: [10, 7, 5, 3, 1] };
+      sheet('Как это работает', `<div class="m">Исполнитель сам решает, сколько отдать партнёрам: от 5 до 40 % цены, на 3–5 уровней. Обычно так:</div>
+        <div class="plv pc">${r.def.map((x, i) => `<div><b>${pctT(x)}</b><span>${i + 1} уровень</span></div>`).join('')}</div>
+        ${bullets(['1-й уровень — вы пригласили заказчика', '2-й — вы пригласили того, кто пригласил заказчика', 'И так до пятого. Нет человека на уровне — эта часть остаётся исполнителю', 'Привели исполнителя — 1 % с каждого его заказа из комиссии ZELDO'])}
+        <div class="m">Проценты фиксируются в момент оплаты. Если исполнитель потом их поменяет, на оплаченный заказ это не повлияет.</div>${btn('Понятно', 'closeSheet', '', 'soft block')}`); },
+    pRules() { sheet('Правила программы', `${bullets(RULES)}${btn('Понятно', 'closeSheet', '', 'soft block')}`); },
+    pSpend() { if (S.role !== 'cust') switchRole('cust', 'c_home'); else S.stack = [{ n: 'c_home', p: {} }]; render('new'); toast('Выберите услугу. При оплате отметьте «Оплатить часть баллами»', 'info'); },
+    async pCopy() { try { await navigator.clipboard.writeText(inviteLink()); toast('Ссылка скопирована', 'ok'); } catch (e) { toast('Скопируйте ссылку из поля выше', 'info'); } },
+    pQr() { if (typeof qrcode !== 'function') return toast('QR-код не загрузился', 'info'); const q = qrcode(0, 'M'); q.addData(inviteLink()); q.make();
+      sheet('QR-код приглашения', `<div class="pqr">${q.createSvgTag({ cellSize: 6, margin: 2, scalable: true })}</div><div class="m center">Покажите с экрана: человек наведёт камеру и откроет ZELDO по вашей ссылке.</div><div class="pcode center">${esc(F().code)}</div>${btn('Готово', 'closeSheet', '', 'soft block')}`); },
+    async pBind() { const code = String(S.pBind || '').trim(); if (!code) return toast('Впишите код', 'info'); const r = await post('/api/ref/bind', { code }); if (!r.ok) return toast(r.j.err || 'Не получилось', 'info'); S.ref = r.j; S.pBind = ''; render(); toast(`Готово: вас пригласил ${r.j.inv.name}`, 'ok'); },
+    pCsv() { const f = F(); const k = S.pPer || 'm'; const rows = [['Дата', 'Операция', 'Подробности', 'Баллы', 'Состояние']].concat(f.pts.ops.filter(o => inPer(o.at, k)).map(o => [new Date(o.at).toLocaleDateString('ru-RU'), o.t, o.sub || '', String(o.s), (OP_ST[o.st] || [''])[0]]));
+      const csv = '﻿' + rows.map(x => x.map(y => `"${String(y).replace(/"/g, '""')}"`).join(';')).join('\r\n');
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = `ZELDO-баллы-${(PER.find(x => x[0] === k) || PER[2])[1]}.csv`; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); toast('Отчёт скачан. Откроется в Excel или Numbers', 'ok'); },
+  });
+  IN.pBindIn = v => { S.pBind = v; };
+  /* ссылка-приглашение — с кодом с сервера, а не с номером аккаунта */
+  A.shareApp = () => shareLink('Пригласить в ZELDO', 'ZELDO — услуги рядом: мастера, ремонт, уборка, красота, обучение. Оплата через защищённый счёт.', inviteLink(), 'Это ваша ссылка-приглашение. Кто зарегистрируется по ней, попадёт в вашу команду. С его заказов вам будут баллы.');
+  const shOffer0 = A.shareOffer;
+  A.shareOffer = id => { const o = offerById(id); const f = F(); if (!o || !f) return shOffer0(id); const u = new URL(inviteLink()); u.hash = 'o=' + encodeURIComponent(o.id);
+    const pr = priceFrom(o); shareLink('Поделиться услугой', `${o.title}${pr ? ` — от ${rub(pr)}` : ''}. ZELDO: оплата через защищённый счёт.`, u.href, 'В ссылке ваш код: кто зарегистрируется по ней, попадёт в вашу команду.'); };
+
+  /* ---------- включение: личность + правила ---------- */
+  SCREENS.p_on = () => {
+    const f = F(); if (!f) return { title: 'Включить «Мои связи»', body: '' };
+    if (f.partner.st) return { title: 'Включить «Мои связи»', body: `<div class="info ok"><b>Уже включены</b><span class="m">Баллы можно тратить и выводить.</span></div>${goBtn('Открыть «Мои связи»', 'p_home')}` };
+    const k = f.kyc; const idOk = k === 'ok' || S.skip;
+    const idBox = S.skip ? testBox('Тестовый режим: проверку личности пропускаем. В настоящей версии её делает банк или сотрудник ZELDO по фото паспорта.')
+      : k === 'ok' ? '<div class="info ok"><b>Личность подтверждена</b><span class="m">Паспорт проверен, фото удалено.</span></div>'
+      : `<div class="m">Так мы защищаем баллы от накруток: один человек — один партнёр.</div>
+        <div class="optlist">${['Сбер ID', 'Т-ID', 'Альфа ID', 'Госуслуги'].map(b => `<button class="opt" disabled><span class="mark"></span><span class="grow"><span class="ot">${b}</span><span class="os">Подключим вместе с банком</span></span></button>`).join('')}</div>
+        ${k === 'wait' ? '<div class="info"><b>Паспорт на проверке</b><span class="m">Обычно это до суток. Мы пришлём уведомление.</span></div>' : k === 'bad' ? '<div class="info warn"><b>Фото не принято</b><span class="m">Загрузите другое: разворот целиком, без бликов.</span></div>' : ''}
+        <label class="btn ${k === 'wait' ? 'soft' : ''} block">${ic('camera', 20, 2)} ${S.kycBusy ? 'Загружаем…' : k === 'wait' ? 'Загрузить другое фото' : 'Подтвердить по фото паспорта'}<input type="file" accept="image/*" data-ch="kycPick" hidden></label>
+        <div class="m">Фото видит только сотрудник ZELDO. После проверки удаляем, остаётся отметка.</div>`;
+    return { title: 'Включить «Мои связи»', sub: 'Два шага: подтвердить личность и принять правила',
+      body: `${card(`<div class="row"><span class="onbn ${idOk ? 'ok' : ''}">${idOk ? ic('check', 18, 2.6) : 1}</span><b class="grow">Подтвердите личность</b></div>${idBox}`)}
+        ${card(`<div class="row"><span class="onbn ${S.pAgree ? 'ok' : ''}">${S.pAgree ? ic('check', 18, 2.6) : 2}</span><b class="grow">Примите правила</b></div>${bullets(RULES.slice(0, 4))}${btn('Все правила', 'pRules', '', 'text block')}
+          <label class="row top" style="gap:10px;cursor:pointer"><input type="checkbox" data-ch="pAgree" ${S.pAgree ? 'checked' : ''} style="width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--act)"><span class="grow">Принимаю правила партнёрской программы ZELDO</span></label>`)}`,
+      bar: `<div class="abar">${idOk && S.pAgree ? btn(S.pBusy ? 'Включаем…' : 'Включить «Мои связи»', 'pOn', '', 'block') : `<button class="btn block" disabled>Включить «Мои связи»</button><div class="why center">${!idOk ? 'Сначала подтвердите личность' : 'Отметьте, что принимаете правила'}</div>`}</div>` };
+  };
+  CH.pAgree = el => { S.pAgree = el.checked; render(); };
+  A.pOn = async () => { if (S.pBusy) return; S.pBusy = true; render(); const r = await post('/api/ref/on', { agree: true }); S.pBusy = false;
+    if (!r.ok) { render(); return toast(r.j.err || 'Не получилось', 'info'); }
+    S.ref = r.j; S.stack = S.stack.filter(x => x.n !== 'p_on'); if (!S.stack.some(x => x.n === 'p_home')) S.stack.push({ n: 'p_home', p: {} }); render('new');
+    toast(r.j.test || (r.j.pts.avail ? `«Мои связи» включены. Доступно ${pts(r.j.pts.avail)}` : '«Мои связи» включены'), 'ok'); };
+
+  /* ---------- вывод баллов в рубли: ИП и ООО ---------- */
+  SCREENS.p_out = () => {
+    const f = F(); if (!f) return { title: 'Вывести в рубли', body: '' }; const o = f.out; const p = f.pts;
+    if (!o.can) return { title: 'Вывести в рубли', body: `${card(`<div class="h2">Выводят ИП и ООО</div><div class="m">${o.who === 'npd' ? 'У вас статус самозанятого.' : 'Статус для выплат не указан.'} Баллы в рубли переводим только на счёт ИП или организации, с комиссией ${o.fee}${NB}%.</div><div class="m">Самозанятые и все остальные тратят баллы на заказы: до 90 % цены у любого исполнителя.</div>${btn('Потратить на заказ', 'pSpend', '', 'block')}${goBtn('Статус и реквизиты', 'e_req')}`)}` };
+    const n = Math.min(p.avail, Math.max(0, Math.floor(Number(S.pOutSum != null ? S.pOutSum : p.avail) || 0))); const fee = Math.round(n * o.fee / 100); const pr = me().payreq || {};
+    return { title: 'Вывести в рубли', sub: `Доступно ${pts(p.avail)}`,
+      body: `${card(`${field('Сколько баллов вывести', `<input class="input num" id="poutin" inputmode="numeric" data-in="pOutIn" value="${n || ''}" autocomplete="off">`, { hint: `От ${pts(o.min)}. 1 балл = 1 ₽` })}
+          <div id="pouts">${sumLines([['Баллов', fmtN(n)], [`Комиссия ${o.fee}${NB}%`, '−' + rub(fee)], ['Придёт на счёт', rub(n - fee), 'total']])}</div>
+          <div class="m">На счёт ${esc(pr.bank || 'банк')} ••${esc(String(pr.acc || '').slice(-4))}. Переводит сотрудник ZELDO в течение рабочего дня.</div>`)}
+        ${p.reserve ? `<div class="m">${pts(p.reserve)} в резерве: они потрачены на заказы, которые ещё идут.</div>` : ''}`,
+      bar: `<div class="abar">${n >= o.min ? btn(S.pBusy ? 'Отправляем…' : `Вывести ${pts(n)}`, 'pOut', '', 'block') : `<button class="btn block" disabled>Вывести</button><div class="why center">Минимум — ${pts(o.min)}</div>`}</div>` };
+  };
+  IN.pOutIn = v => { S.pOutSum = String(v).replace(/\D/g, ''); const s = SCREENS.p_out(); const b = document.getElementById('bar'); if (b) b.innerHTML = s.bar; const t = document.getElementById('pouts'); const m = s.body.match(/<div id="pouts">([\s\S]*?)<\/div>\s*<div class="m">На счёт/); if (t && m) t.innerHTML = m[1]; };
+  A.pOut = async () => { const f = F(); const n = Math.min(f.pts.avail, Math.floor(Number(S.pOutSum != null ? S.pOutSum : f.pts.avail) || 0)); if (S.pBusy) return; S.pBusy = true; render();
+    const r = await post('/api/ref/out', { sum: n }); S.pBusy = false; if (!r.ok) { render(); return toast(r.j.err || 'Не получилось', 'info'); }
+    S.ref = r.j; S.pOutSum = null; back(); toast(r.j.test || 'Заявка принята. Деньги придут в течение рабочего дня', 'ok'); };
+
+  /* ---------- исполнитель: проценты партнёрам (макет «Настройка процентов») ---------- */
+  function lvErr(lv) {
+    if (lv.length < 3 || lv.length > 5) return 'Уровней — от 3 до 5';
+    for (let i = 0; i < lv.length; i++) { if (lv[i] < 0.1) return `${i + 1}-й уровень — не меньше 0,1 %`; if (i && lv[i] > lv[i - 1] + 1e-9) return `${i + 1}-й уровень не может быть больше ${i}-го`; }
+    const s = sumLv(lv); if (s < 5) return `Всего партнёрам — не меньше 5 %, сейчас ${pctT(s)}`; if (s > 40) return `Всего партнёрам — не больше 40 %, сейчас ${pctT(s)}`;
+    return null;
+  }
+  const myCards = () => S.myServices.filter(m => m.offer && offerById(m.offer)).map(m => ({ id: m.offer, title: (offerById(m.offer) || {}).title || m.title || m.svc }));
+  const curLv = (f, cid) => (cid && f.set.svc[cid] ? f.set.svc[cid] : f.set.lv).slice();
+  SCREENS.e_refset = p => {
+    const f = F(); const cardId = p && p.card ? String(p.card) : null;
+    if (!f || !f.set) { if (f && S.myServices.some(m => m.offer) && !S.rsAsk) { S.rsAsk = 1; R.api('/api/ref').then(j => { S.ref = j; S.rsAsk = 0; render(); }).catch(() => { S.rsAsk = 0; }); }
+      return { title: 'Проценты партнёрам', body: card(`<div class="m">Проценты задаются, когда у вас есть хотя бы одна услуга.</div>${btn('Добавить услугу', 'newService', '', 'block')}`) }; }
+    const key = cardId || '*'; if (!S.rsd || S.rsd.key !== key) S.rsd = { key, lv: curLv(f, cardId) };
+    const lv = S.rsd.lv; const err = lvErr(lv); const s = sumLv(lv); const lim = f.set.lim[key] || { left: 2, swing: 0, next: 0 }; const t = S.rsTab || 'pct';
+    const own = cardId && f.set.svc[cardId]; const ttl = cardId ? (offerById(cardId) || {}).title || 'Услуга' : '';
+    const rows = lv.map((x, i) => `<div class="refrow"><span class="grow"><b>${i + 1} уровень</b><span class="m">${i === 0 ? 'пригласил заказчика' : `пригласил ${i}-й уровень`}</span></span>
+      <button class="rb" data-a="rsStep" data-v="${i}|-1" ${x <= 0.1 ? 'disabled' : ''} aria-label="Меньше на ${i + 1}-м уровне">${ic('minus', 20, 2.4)}</button><button class="rv" data-a="rsEdit" data-v="${i}" aria-label="Вписать процент ${i + 1}-го уровня">${pctT(x)}</button><button class="rb" data-a="rsStep" data-v="${i}|1" aria-label="Больше на ${i + 1}-м уровне">${ic('plus', 20, 2.4)}</button></div>`).join('');
+    const price = Math.max(100, Number(S.rsPrice) || 10000); const fee = Math.round(price * 0.1), acq = Math.round(price * 0.025), pool = lv.reduce((a, x) => a + Math.round(price * x / 100), 0);
+    const pctBody = `${card(`<div class="h2">Сколько уровней</div>${seg('rsLvN', [[3, '3'], [4, '4'], [5, '5']], lv.length)}<div style="margin-top:8px">${rows}</div>`)}
+      ${card(`<div class="reftot"><span class="h2">Итого</span><b>${pctT(s)} <span class="m" style="font-size:16px;font-weight:600">из 40 %</span></b></div>
+        ${err ? `<div class="pbad"><b>${esc(err)}</b></div>` : `<div class="pok row">${ic('check', 18, 2.6)}<b>Условия выполнены</b></div>`}
+        <div class="m">От 5 до 40 % на 3–5 уровней, шаг 0,1 %. Следующий уровень не больше предыдущего. Изменения применятся к новым заказам: оплаченные идут по старым процентам.</div>
+        <div class="m">${lim.left ? `Менять можно 2 раза за 30 дней и не больше чем на 15 п. п. Осталось изменений: ${lim.left}${lim.swing ? `, сдвиг уже ${String(lim.swing).replace('.', ',')} п. п.` : ''}.` : `Изменений за 30 дней больше нет. Следующее — ${dDay(lim.next)}.`}</div>`, 'soft')}`;
+    const calcBody = `${card(`${field('Цена заказа', `<input class="input num" inputmode="numeric" data-in="rsPriceIn" value="${price}" autocomplete="off">`)}
+        ${sumLines([['Цена', rub(price)], ['Комиссия ZELDO, 10 %', '−' + rub(fee)], ['Эквайринг банка, ~2,5 %', '−' + rub(acq)], [`Партнёрам, до ${pctT(s)}`, '−' + rub(pool)], ['Вам, не меньше', rub(price - fee - acq - pool), 'total']])}
+        <div class="m">Партнёрам уходит, только если у заказчика есть пригласившие. Нет никого — вы получите до ${rub(price - fee - acq)}. Первые три заказа — без комиссии ZELDO, с постоянных клиентов — 7 %.</div>`)}
+      ${card(`<div class="h2">По уровням</div>${sumLines(lv.map((x, i) => [`${i + 1} уровень, ${pctT(x)}`, rub(Math.round(price * x / 100))]))}`, 'c')}`;
+    const list = !cardId && myCards().length ? card(`<div class="h2">Свои проценты для услуги</div><div class="m">По умолчанию все услуги берут общую настройку. Любой услуге можно задать свою.</div><div class="list">${myCards().map(c => { const l = f.set.svc[c.id];
+      return rl(esc(c.title), l ? `Свои: ${pctT(sumLv(l))} · ${pn(l.length, 'уровень', 'уровня', 'уровней')}` : 'Как в общей настройке', 'go', gv('e_refset', { card: c.id }), {}); }).join('')}</div>`, 'c') : '';
+    return { title: cardId ? 'Проценты для услуги' : 'Настройка процентов', sub: cardId ? `${ttl}${own ? '' : ' · сейчас как в общей настройке'}` : 'Общая настройка для новых заказов по всем услугам',
+      body: `${seg('rsTab', [['pct', 'Проценты'], ['calc', 'Расчёт дохода']], t)}${t === 'calc' ? calcBody : pctBody}${list}`,
+      bar: `<div class="abar">${err || !lim.left ? `<button class="btn block" disabled>Сохранить</button><div class="why center">${err ? 'Исправьте проценты' : 'Изменений за 30 дней больше нет'}</div>` : btn(S.rsBusy ? 'Сохраняем…' : cardId ? 'Сохранить для услуги' : 'Сохранить для всех услуг', 'rsSave', '', 'block')}${own && lim.left ? btn('Вернуть общую настройку', 'rsReset', '', 'text block') : ''}</div>` };
+  };
+  const r1 = x => Math.round(x * 10) / 10;
+  Object.assign(A, {
+    rsTab(v) { S.rsTab = v; render(); },
+    rsLvN(v) { const n = Number(v); const lv = S.rsd.lv; while (lv.length < n) lv.push(Math.max(0.1, r1(Math.min(lv[lv.length - 1], 1)))); lv.length = n; render(); },
+    /* шаг 0,5 %, а ниже 1 % — 0,1 %: так удобно и крупные, и мелкие уровни */
+    rsStep(v) { const [i, d] = v.split('|').map(Number); const lv = S.rsd.lv; const st = (d > 0 ? lv[i] < 1 : lv[i] <= 1) ? 0.1 : 0.5; lv[i] = Math.max(0.1, Math.min(40, r1(lv[i] + d * st))); render(); },
+    rsEdit(v) { const i = Number(v); S.rsEditI = i; S.rsEditX = String(S.rsd.lv[i]).replace('.', ',');
+      sheet(`${i + 1} уровень`, `${field('Процент', `<input class="input num" id="rsx" inputmode="decimal" data-in="rsEditIn" data-enter="rsEditOk" value="${esc(S.rsEditX)}" autocomplete="off">`, { hint: 'С шагом 0,1. Например: 7,5' })}${btn('Готово', 'rsEditOk', '', 'block')}${btn('Отмена', 'closeSheet', '', 'text block')}`);
+      setTimeout(() => { const el = $('#rsx'); if (el) { el.focus(); el.select(); } }, 60); },
+    rsEditOk() { const x = Number(String(S.rsEditX).replace(',', '.').replace(/[^\d.]/g, '')); if (!isFinite(x) || x <= 0) return toast('Впишите число, например 7,5', 'info'); S.rsd.lv[S.rsEditI] = Math.min(40, r1(x)); closeSheet(); render(); },
+    async rsSave() { const p = cur().p || {}; if (S.rsBusy) return; S.rsBusy = true; render(); const r = await post('/api/ref/set', { card: p.card || null, lv: S.rsd.lv.map(r1) }); S.rsBusy = false;
+      if (!r.ok) { render(); return toast(r.j.err || 'Не получилось', 'info'); } S.ref = r.j; S.rsd = null; render(); toast('Сохранено. Новые заказы пойдут по этим процентам', 'ok'); },
+    async rsReset() { const p = cur().p || {}; const r = await post('/api/ref/set', { card: p.card, lv: null }); if (!r.ok) return toast(r.j.err || 'Не получилось', 'info'); S.ref = r.j; S.rsd = null; render(); toast('У услуги снова общая настройка', 'ok'); },
+  });
+  IN.rsEditIn = v => { S.rsEditX = v; };
+  let rsT = null;
+  IN.rsPriceIn = v => { S.rsPrice = String(v).replace(/\D/g, ''); clearTimeout(rsT); rsT = setTimeout(() => { render(); const i = document.querySelector('[data-in="rsPriceIn"]'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 600); };
+
+  /* ---------- кабинет исполнителя по макету Максима (EVEN_provider_cabinet): профиль, финансы, репутация, работа, акции, проценты партнёрам ----------
+     Зачёркнутое на его снимке 19.11 (счётчики, «Заказы и отклики», плоский список) убрано, «Мои услуги» и «Расписание» — в блоке «Моя работа», как в PDF.
+     «Тариф и ИИ» не показываем: цена не утверждена (решение 20.11, вопрос 11) */
+  const eCab1 = SCREENS.e_cab;
+  SCREENS.e_cab = p => {
+    const r = eCab1(p); const f = F(); const m = S.money; const e = m ? m.earn : null; const pr = me().payreq; const k = me().kyc || {};
+    const head = (r.body.match(/^<div class="card"><div class="row">[\s\S]*?<\/button><\/div>/) || [''])[0];
+    const onb = window.__z.onbSteps ? window.__z.onbSteps().filter(s => !s.opt && !s.done).length : 0;
+    const PRT = { auto: 'подтверждено налоговой', wait: 'проверим в течение дня', ok: 'проверено', bad: 'нужно исправить', test: 'в тесте проверка пропущена' };
+    const PST = { npd: 'Самозанятый', ip: 'ИП', ooo: 'ООО' };
+    const monthNet = e ? e.lines.filter(l => l.state === 'done' && inPer(l.at, 'm')).reduce((a, l) => a + l.net, 0) : 0;
+    const dsp = S.orders.filter(o => o.ex === 'alex' && o.status === 'dispute').length;
+    const lv = f && f.set ? f.set.lv : [10, 7, 5, 3, 1];
+    const myP = typeof myPromos === 'function' ? myPromos().filter(x => promoState(x) === 'on') : [];
+    const prof = card(`<div class="h2">Мой профиль</div><div class="list">
+        ${onb ? rl('Как начать продавать', `Осталось ${pn(onb, 'шаг', 'шага', 'шагов')}`, 'go', 'e_onb', { icon: 'spark' }) : ''}
+        ${rl('Профиль и направления', 'Фото, «О себе», где принимаете', 'go', 'e_profile', { icon: 'user' })}
+        ${rl('Статус и реквизиты', pr ? (pr.st === 'bad' ? `Нужно исправить: ${esc(pr.note)}` : `${PST[pr.status]} · ${PRT[pr.st]}`) : '<b style="color:var(--bad)">Не заполнены: без них нельзя продавать</b>', 'go', 'e_req', { icon: 'case' })}
+        ${rl('Значок «Проверен»', me().ver ? 'Есть: виден заказчикам' : k.st === 'wait' ? 'Паспорт на проверке' : 'Паспорт, статус и пять заказов без жалоб', 'go', 'e_kyc', { icon: 'shield' })}</div>`, 'c');
+    const fin = card(`<div class="row"><span class="h2 grow">Финансы</span><span class="m">за месяц</span></div>
+        <div class="cab2"><div><b>${rub(monthNet)}</b><span>Начислено</span></div><div><b>${rub(e ? e.avail : 0)}</b><span>Доступно к выводу</span></div></div>
+        ${sumLines([['Ждут приёмки', rub(e ? e.wait : 0)], ['Следующая выплата', m ? new Date(m.payDay).toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Moscow' }) : '—']])}
+        ${goBtn('Все финансы', 'e_money', 'block')}<div class="m center">Операции, выплаты, комиссия и партнёрам</div>`);
+    const rep = card(`<div class="h2">Репутация</div><div class="cab2"><div><b>${EX.alex.reviews ? `${String(EX.alex.rating).replace('.', ',')} ★` : '—'}</b><span>Качество${EX.alex.reviews ? ` · ${pn(EX.alex.reviews, 'отзыв', 'отзыва', 'отзывов')}` : ''}</span></div><div><b style="font-size:18px">${me().ver ? 'Проверен' : 'Новый участник'}</b><span>Надёжность</span></div></div>
+        <div class="btns two">${btn('Отзывы', 'go', gv('c_reviews', { id: 'alex' }), 'soft')}${btn('Как видят заказчики', 'go', gv('c_exec', { id: 'alex' }), 'soft')}</div>`);
+    const work = card(`<div class="h2">Моя работа</div><div class="list">
+        ${rl('Мои услуги', `${pn(S.myServices.length, 'карточка', 'карточки', 'карточек')} · цены и доступность`, 'go', 'e_services', { icon: 'orders' })}
+        ${rl('Расписание', 'Часы работы и перерывы', 'go', 'e_schedule', { icon: 'cal' })}
+        ${rl('Споры по заказам', dsp ? `Открыто: ${dsp}` : 'Открытых нет', 'eDsp', '', { icon: 'flag' })}
+        ${rl('Мои клиенты', 'База клиентов, напоминания', 'go', 'e_clients', { icon: 'people' })}</div>`, 'c');
+    const promos = card(`<div class="h2">Мои акции</div><div class="m">Скидки клиентам: на услугу, на следующий заказ, «приведи друга».${myP.length ? ` Сейчас действует: ${myP.length}.` : ''}</div>
+        <div class="btns two">${btn('Мои акции', 'go', 'e_promos', 'soft')}${btn('Создать', 'promoNew', '', '')}</div>`);
+    const refb = card(`<div class="row"><span class="h2 grow">Партнёрам от моих услуг</span><button class="lnk" data-a="go" data-v="e_refset">Настроить</button></div>
+        <div class="m">Часть цены, которую вы отдаёте тем, кто привёл заказчика. Отдельно от акций.</div>
+        <div class="plv pc" style="margin:8px 0">${lv.map((x, i) => `<div><b>${pctT(x)}</b><span>${i + 1} уровень</span></div>`).join('')}</div>
+        ${sumLines([['Всего партнёрам', pctT(sumLv(lv))]])}${btn(`Настроить ${ic('arr', 20, 2.2)}`, 'go', 'e_refset', 'block')}<div class="m center">Проценты и расчёт дохода по услуге</div>`);
+    const links = card(`<div class="list">${rl('Мои связи', f && f.partner.st ? `${pts(f.pts.avail)} доступно` : 'Баллы за тех, кого вы пригласили', 'go', 'p_home', { icon: 'people' })}${rl('Поддержка ZELDO', 'Отвечаем с 9:00 до 21:00 по Москве', 'supportOpen', '', { icon: 'shield' })}${rl('Помощь', 'Комиссия, оплата, споры', 'helpExec', '', { icon: 'info' })}${rl('Настройки', '', 'settings', '', { icon: 'gear' })}</div>`, 'c');
+    const a2 = typeof a2hsSkip === 'function' && !a2hsSkip() ? card(`<div class="h2">ZELDO всегда под рукой</div><div class="m">Ярлык на экране «Домой»: открывается как приложение, без строки браузера.</div>${btn('Добавить на экран', 'a2hs', '', 'soft block')}`, 'soft') : '';
+    r.body = head + prof + fin + rep + work + promos + refb + links + a2;
+    return r;
+  };
+  A.eDsp = () => { S.eOrdersTab = 'work'; go('e_orders'); };
+  /* в «Помощи» исполнителя — про партнёров */
+  const helpExec0 = A.helpExec;
+  A.helpExec = () => { helpExec0(); if (S.sheet) { S.sheet.body = S.sheet.body.replace('<button', '<div class="m">Партнёрам — часть цены, которую вы сами задаёте: от 5 до 40 % на 3–5 уровней. Уходит, только если у заказчика есть пригласившие. Настройка — «Кабинет» → «Партнёрам от моих услуг».</div><button'); renderOverlay(); } };
+
+  /* ---------- кабинет заказчика: «Мои связи» ---------- */
+  const cCab1 = SCREENS.c_cab;
+  SCREENS.c_cab = p => { const r = cCab1(p); const f = F();
+    const row = rl('Мои связи', f && f.partner.st ? `${pts(f.pts.avail)} доступно · ${pn(f.team.total, 'человек', 'человека', 'человек')} в команде` : f && (f.pts.lock + f.pts.hold) ? `Ждут включения: ${pts(f.pts.lock + f.pts.hold)}` : 'Баллы за тех, кого вы пригласили', 'go', 'p_home', { icon: 'people' });
+    r.body = r.body.replace('<div class="list">', `<div class="list">${row}`); return r; };
+  /* меню роли: «Партнёр» открывает «Мои связи»; подпись — что там, а не «активация отдельно» */
+  A.roleMenu = () => { const f = F(); S.panel = rolePanel().replace('Активация отдельно', f && f.partner.st ? `«Мои связи»: ${pts(f.pts.avail)} доступно` : '«Мои связи»: баллы за приглашённых'); S.sheet = null; renderOverlay(); };
+  /* меню роли: «Партнёр» открывает «Мои связи» */
+  const setRole0 = A.setRole;
+  A.setRole = r => { if (r !== 'partner') return setRole0(r); S.panel = null; S.sheet = null; if (S.role === 'guest') return setRole0('cust'); go('p_home'); renderOverlay(); };
+
+  /* ---------- оплата: часть баллами, 10–90 % цены после скидки, по умолчанию выключено ---------- */
+  const co1 = SCREENS.c_checkout;
+  SCREENS.c_checkout = p => {
+    const r = co1(p); const f = F(); S.coPtsMax = 0;
+    const ord = p.order ? orderById(p.order) : null; const o = offerById(ord ? ord.offer : p.id); if (!o || !f) return r;
+    if ((ord && p.extra && ord.change) || (ord && ord.stages) || (!ord && o.stages)) { S.coPtsN = 0; return r; }
+    const total = ord ? ord.total : calc(o, cfgOf(o)).total; const lo = Math.ceil(total * 0.1), hi = Math.floor(total * 0.9);
+    const av = f.partner.st ? f.pts.avail : 0; if (!av && !f.pts.lock) return r;
+    let box;
+    if (!f.partner.st) box = `<div class="ptsbox"><b>У вас ${pts(f.pts.lock)}</b><div class="m">Ими можно оплатить часть заказа, когда включите «Мои связи».</div>${btn('Включить', 'go', 'p_on', 'text')}</div>`;
+    else if (av < lo) box = `<div class="ptsbox"><b>Баллов: ${fmtN(av)}</b><div class="m">Баллами платят от 10 % цены: для этого заказа нужно хотя бы ${pts(lo)}.</div></div>`;
+    else { const max = Math.min(av, hi); S.coPtsMax = max; const n = Math.min(S.coPtsN || 0, max);
+      const steps = [10, 20, 30, 50, 70, 90].map(x => Math.floor(total * x / 100)).filter(x => x >= lo && x <= max); if (!steps.includes(max)) steps.push(max);
+      box = `<div class="ptsbox"><button class="opt ${n ? 'on' : ''}" data-a="coPts" data-v="${n ? 0 : steps[0]}" aria-pressed="${!!n}" style="border:0;padding:0;background:none"><span class="mark sq"></span><span class="grow"><span class="ot">Оплатить часть баллами</span><span class="os">Доступно ${pts(av)}. Можно от 10 до 90${NB}% цены</span></span></button>
+        ${n ? `<div class="chips" style="margin-top:10px">${steps.map(x => chip('coPts', x, x === av && x < hi ? `Все ${fmtN(x)}` : `${Math.round(x / total * 100)} % · ${fmtN(x)}`, x === n, { noCheck: true })).join('')}</div>
+          ${sumLines([['Баллами', '−' + fmtN(n)], ['Деньгами', rub(total - n), 'total']])}` : ''}</div>`; }
+    const at = r.body.search(/<(div|label) class="field ?"><span class="lbl">Способ оплаты/);
+    r.body = at >= 0 ? r.body.slice(0, at) + field('Баллы «Моих связей»', box) + r.body.slice(at) : r.body + box;
+    const n = S.coPtsN && S.coPtsMax ? Math.min(S.coPtsN, S.coPtsMax) : 0;
+    if (n && r.bar) r.bar = r.bar.replace(/Оплатить ([^<]+?)<\/button>/, `Оплатить ${rub(total - n)} + ${pts(n)}</button>`);
+    return r;
+  };
+  A.coPts = v => { S.coPtsN = Number(v) || 0; render(); };
+  /* после оплаты: доля баллами — в заказ, баланс ZELDO покрывает только денежную часть; проверяет и списывает сервер */
+  const pm0 = payMeta;
+  payMeta = function (ord) { const n = S.coPtsN && S.coPtsMax ? Math.min(S.coPtsN, S.coPtsMax) : 0; pm0(ord);
+    if (ord && n && !ord.stages && ord.total) { ord.fromPts = n; if (ord.fromBal) ord.fromBal = Math.max(0, Math.min(ord.fromBal, ord.total - n)); }
+    S.coPtsN = 0; S.coPtsMax = 0; };
+
+  /* ---------- экран услуги у исполнителя: свои проценты партнёрам (Максим 19.11: «в каждой услуге может настроить индивидуально») ---------- */
+  const eSvc0 = SCREENS.e_service;
+  SCREENS.e_service = p => { const r = eSvc0(p); const s = S.myServices.find(x => x.id === p.id); const f = F(); if (!s || !s.offer || !f || !f.set) return r;
+    const own = f.set.svc[s.offer]; const lv = own || f.set.lv;
+    const box = card(`<div class="row"><span class="h2 grow">Партнёрам по этой услуге</span>${pill(own ? 'Свои проценты' : 'Как в общей настройке', own ? 'ok' : 'grey')}</div>
+      <div class="plv pc" style="margin:8px 0">${lv.map((x, i) => `<div><b>${pctT(x)}</b><span>${i + 1} уровень</span></div>`).join('')}</div>
+      ${sumLines([['Всего партнёрам', pctT(sumLv(lv))]])}${btn(own ? 'Изменить проценты услуги' : 'Задать свои проценты', 'go', gv('e_refset', { card: s.offer }), 'soft block')}`);
+    const at = r.body.indexOf('<div class="m">Изменения не затронут'); r.body = at >= 0 ? r.body.slice(0, at) + box + r.body.slice(at) : r.body + box; return r; };
+  /* ---------- заказ у заказчика: чем оплачено — деньгами, баллами, с баланса ---------- */
+  const ord0 = SCREENS.order;
+  SCREENS.order = p => { const r = ord0(p); const o = orderById(p.id) || orderById(Number(p.id)); if (!o || !o.cust || !o.fromPts) return r;
+    const fb = Number(o.fromBal) || 0; const money = Math.max(0, o.total - o.fromPts - fb);
+    const box = card(`<div class="h2">Оплата</div>${sumLines([['Баллами «Моих связей»', pts(o.fromPts)], ...(fb ? [['С баланса ZELDO', rub(fb)]] : []), ['Деньгами', rub(money)], ['Всего', rub(o.total), 'total']])}<div class="m">Если заказ отменят, баллы вернутся баллами, деньги — деньгами, в той же доле.</div>`, 'c');
+    const at = r.body.indexOf(`<div class="h2">${o.stages ? 'Этапы' : 'Ход заказа'}</div>`); const st = at >= 0 ? r.body.lastIndexOf('<div class="card', at) : -1;
+    r.body = st >= 0 ? r.body.slice(0, st) + box + r.body.slice(st) : r.body + box; return r; };
+
+  Object.assign(window.__z, { refLvErr: lvErr });
+}
+
+/* ---------- рабочая версия: награды и уровни (20.11.2026) ----------
+   Документы Максима: исполнитель Новый → Проверен → Стабильный → Надёжный → Выбор ZELDO и четыре значка; заказчик Новый → Проверен → Надёжный;
+   «Мои связи» — уровни двух веток отдельно: Искра → Импульс → Поток → Орбита → Экосистема; пять пакетов на 30 дней.
+   Пороги, которых в документах нет, задаёт админ; пока порога нет, человек видит «критерии утверждаются», а не выдуманные числа.
+   Считает сервер (server/awards.js). Собирается только в рабочую версию, после 10c-ref.js. */
+if (REAL || window.__zDemo) {
+  const W = () => S.aw || null;
+  const dDay = t => new Date(t).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', timeZone: 'Europe/Moscow' });
+  const fmt = x => String(x).replace('.', ',');
+  const BADGE_IC = { ontime: 'clock', repeat: 'retry', top: 'star', clean: 'shield' };
+  document.head.insertAdjacentHTML('beforeend', `<style>
+    .lad { display: flex; flex-direction: column; }
+    .lad-s { display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+    .lad-s:first-child { border-top: 0; padding-top: 2px; }
+    .lad-s .grow { min-width: 0; } .lad-s .grow > b { display: block; }
+    .lad-d { width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center; background: var(--soft); color: var(--muted); font-weight: 800; font-size: 14px; }
+    .lad-s.ok .lad-d { background: var(--ok-soft); color: var(--ok); } .lad-s.cur .lad-d { background: var(--act); color: #fff; }
+    .crit { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; line-height: 19px; padding: 3px 0; } .crit span:last-child { white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .crit.ok span:last-child { color: var(--ok); font-weight: 700; }
+    .bdg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .bdg > div { border-radius: 14px; padding: 12px; background: var(--soft); min-width: 0; } .bdg > div.on { background: var(--ok-soft); }
+    .bdg b { display: flex; gap: 6px; align-items: center; } .bdg .m { display: block; margin-top: 4px; }
+    .awchips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .brl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .brl > div { background: var(--soft); border-radius: 14px; padding: 12px; min-width: 0; } .brl b.lv { display: block; font-size: 20px; line-height: 26px; color: var(--act); }
+    .pbar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 6px; } .pbar i { display: block; height: 100%; background: var(--act); border-radius: 3px; }
+  </style>`);
+  const critRows = l => l.map(c => `<div class="crit ${c.ok ? 'ok' : ''}"><span>${esc(c.t)}${c.need ? `: ${esc(String(c.need))}` : ''}</span><span>${c.ok ? ic('check', 16, 2.6) : ''}${esc(String(c.have))}</span></div>`).join('');
+  function ladder(names, cur, steps) {
+    return `<div class="lad">${names.map((n, i) => { const st = i ? steps[i - 1] : null; const ok = i <= cur; const isCur = i === cur; const isNext = i === cur + 1;
+      return `<div class="lad-s ${isCur ? 'cur' : ok ? 'ok' : ''}"><span class="lad-d">${ok && !isCur ? ic('check', 16, 2.6) : i + 1}</span><span class="grow"><b>${esc(n)}${isCur ? ' — сейчас' : ''}</b>
+        ${isNext && st ? (st.open ? '<span class="m">Критерии утверждаются: ZELDO объявит их отдельно</span>' : critRows(st.crit)) : !ok && st && st.open ? '<span class="m">Критерии утверждаются</span>' : ''}</span></div>`; }).join('')}</div>`;
+  }
+  const pkgCard = (l, side) => { const live = l.filter(p => p.live && p.side === side);
+    return live.length ? live.map(p => card(`<div class="row top"><span class="ri" style="color:var(--act)">${ic('gift', 22)}</span><span class="grow"><b>Пакет «${esc(p.name)}» до ${dDay(p.till)}</b><span class="m" style="display:block">${side === 'e' ? `Комиссия ZELDO ${fmt(p.fee)} % по заказам, оплаченным до этой даты. Если ваша обычная ставка ниже, остаётся она.` : p.basis === 'first' ? 'За первую покупку: умный подбор исполнителей под ваши заказы. Денежной скидки в этом пакете нет.' : `Для заказов: ${p.disc ? `${p.disc} % на ${pn(p.uses, 'заказ', 'заказа', 'заказов')} — подключим, когда утвердим экономику` : 'умный подбор исполнителей'}.`}</span></span></div>`, 'c')).join('') : ''; };
+
+  /* ---------- исполнитель: «Мой уровень» ---------- */
+  SCREENS.e_level = () => {
+    const w = W(); const e = w && w.exec; if (!e) return { title: 'Мой уровень', body: card('<div class="m">Уровень появится, когда у вас будет хотя бы одна услуга.</div>') };
+    const s = e.stats;
+    return { title: 'Мой уровень', sub: 'Профессиональная репутация исполнителя. Купить её нельзя: только заказы и отзывы',
+      body: `${card(`<div class="cab2"><div><b>${s.nrev ? `${fmt(s.rating)} ★` : '—'}</b><span>Качество${s.nrev ? ` · ${pn(s.nrev, 'отзыв', 'отзыва', 'отзывов')}` : ''}</span></div><div><b style="font-size:18px">${esc(e.name)}</b><span>Надёжность · ${pn(s.done, 'заказ', 'заказа', 'заказов')}</span></div></div>`)}
+        ${card(`<div class="h2">Ступени</div>${ladder(['Новый', 'Проверен', 'Стабильный', 'Надёжный', 'Выбор ZELDO'], e.idx, e.steps)}<div class="m">Ступень ставится сама, когда выполнены все условия. Отзывы заказчиков и споры влияют на неё; рейтинг как заказчика — нет.</div>`, 'c')}
+        ${card(`<div class="h2">Значки</div><div class="bdg">${e.all.map(b => `<div class="${b.ok ? 'on' : ''}"><b>${ic(BADGE_IC[b.k], 18, 2.2)}${esc(b.name)}</b><span class="m">${b.ok ? 'Есть: виден заказчикам' : b.open ? 'Критерии утверждаются' : esc(b.crit)}</span><span class="m">${esc(b.have)}</span></div>`).join('')}</div>`, 'c')}
+        ${pkgCard(w.pkgs, 'e')}
+        <div class="m">Поздравим, когда ступень изменится. Ступень не обещает заказов и дохода: это показатель для заказчиков.</div>` };
+  };
+  /* ---------- заказчик: «Рейтинг и достижения» ---------- */
+  SCREENS.c_level = () => {
+    const w = W(); if (!w) return { title: 'Рейтинг и достижения', body: '' }; const c = w.cust;
+    return { title: 'Рейтинг и достижения', sub: 'Доверие в заказах и то, что вы получили за покупки',
+      body: `${card(`<div class="h2">Обо мне</div>${ladder(['Новый', 'Проверен', 'Надёжный'], c.idx, c.steps)}<div class="m">Учитываем принятые заказы и отмены после оплаты. Исполнители видят ступень, когда вы к ним обращаетесь.</div>`)}
+        ${btn('Отзывы исполнителей обо мне', 'go', 'c_aboutme', 'soft block')}
+        <div class="h2">Достижения за покупки</div>${pkgCard(w.pkgs, 'c') || card('<div class="m">После первой принятой покупки — пакет «Искра» на 30 дней: умный подбор исполнителей.</div>', 'c')}` };
+  };
+  /* ---------- «Мои связи»: уровни двух веток и пакеты ---------- */
+  const brBox = (t, b) => { const nx = b.next; const pr = nx && !nx.open && nx.need ? Math.min(100, Math.round(nx.have / nx.need * 100)) : 0;
+    return `<div><span class="m">${t}</span><b class="lv">${b.name || 'Пока без уровня'}</b>${nx ? `<span class="m">Цель — ${esc(nx.name)}: ${nx.open ? 'критерии утверждаются' : `${nx.have} из ${nx.need}`}</span>${nx.open ? '' : `<div class="pbar"><i style="width:${pr}%"></i></div>`}` : '<span class="m">Высший уровень</span>'}</div>`; };
+  const brCard = w => card(`<div class="row"><span class="h2 grow">Уровень сети</span><button class="lnk" data-a="go" data-v="p_awards">Все уровни</button></div><div class="brl">${brBox('Ветка заказчиков', w.ref.cust)}${brBox('Ветка исполнителей', w.ref.exec)}</div>
+    <div class="m">Считаются только те, кого вы пригласили сами: их заказы как заказчиков и выполненные работы как исполнителей. Простая регистрация не засчитывается.</div>`);
+  SCREENS.p_awards = () => {
+    const w = W(); if (!w) return { title: 'Награды и преимущества', body: '' };
+    const NAMES = ['Искра', 'Импульс', 'Поток', 'Орбита', 'Экосистема']; const RULE = ['1 лично приглашённый с подтверждённым действием', '3 лично приглашённых с действием', 'Лично приглашённые сами привели людей с действием', 'Больше развитых веток', 'Ещё больше развитых веток'];
+    return { title: 'Награды и преимущества', sub: 'Уровни «Моих связей» и пакеты на 30 дней',
+      body: `${brCard(w)}
+        ${card(`<div class="h2">Уровни</div>${NAMES.map((n, i) => `<div class="sumline"><span><b>${n}</b><span class="m" style="display:block">${RULE[i]}</span></span><b>${[w.ref.cust.lv, w.ref.exec.lv].includes(i) ? ic('check', 18, 2.6) : ''}</b></div>`).join('')}<div class="m">Числа для «Потока», «Орбиты» и «Экосистемы» ещё утверждаются.</div>`, 'c')}
+        <div class="h2">Для заказов</div>${pkgCard(w.pkgs, 'c') || card('<div class="m">Сейчас пакетов нет.</div>', 'c')}
+        <div class="h2">Для работы</div>${pkgCard(w.pkgs, 'e') || card('<div class="m">Сейчас пакетов нет.</div>', 'c')}
+        ${card(`<div class="h2">Пять пакетов</div>${sumLines(w.table.map(x => [`<b>${x.name}</b><span class="m" style="display:block">заказчику: ${x.disc ? `${x.disc} % на ${pn(x.uses, 'заказ', 'заказа', 'заказов')}` : 'умный подбор'} · повтор от ${rub(x.thr)}</span>`, `${fmt(x.fee)} %`]))}
+          <div class="m">Справа — комиссия ZELDO для исполнителя на 30 дней. Пакет даётся по уровню ветки, когда ваши заказы вместе с заказами тех, кого вы пригласили, набрали порог. Сроки не складываются: следующий пакет — после текущего.</div>
+          ${w.pkgOn ? '' : '<div class="info"><b>Пакеты готовим к запуску</b><span class="m">Пороги, кроме 10 000 ₽, предварительные: проверяем экономику. Уровни уже считаются.</span></div>'}`, 'c')}` };
+  };
+  /* вкладка «Команда» — уровень сети сверху; в помощи — «Награды и преимущества» */
+  const home0 = SCREENS.p_home;
+  SCREENS.p_home = p => { const r = home0(p); const w = W(); if (!w) return r;
+    if ((S.pTab || 'pts') === 'team') { const i = r.body.indexOf('<div class="ltabs'); const j = i >= 0 ? r.body.indexOf('</div>', i) + 6 : -1; if (j > 5) r.body = r.body.slice(0, j) + brCard(w) + r.body.slice(j); }
+    const how = rl('Как это работает', 'Уровни, проверка 10 дней, срок 10 месяцев, вывод', 'pHow', '', { icon: 'info' });
+    r.body = r.body.replace(how, rl('Награды и преимущества', 'Уровни веток и пакеты на 30 дней', 'go', 'p_awards', { icon: 'gift' }) + how);
+    return r; };
+  /* кабинет исполнителя: «Репутация и награды» — ступень, значки, «Мой уровень» */
+  const eCab2 = SCREENS.e_cab;
+  SCREENS.e_cab = p => { const r = eCab2(p); const w = W(); const e = w && w.exec; if (!e) return r;
+    const got = e.all.filter(b => b.ok);
+    r.body = r.body.replace(/<div class="card "><div class="h2">Репутация<\/div>[\s\S]*?<\/button><\/div><\/div>/, card(`<div class="h2">Репутация и награды</div>
+      <div class="cab2"><div><b>${EX.alex.reviews ? `${fmt(EX.alex.rating)} ★` : '—'}</b><span>Качество${EX.alex.reviews ? ` · ${pn(EX.alex.reviews, 'отзыв', 'отзыва', 'отзывов')}` : ''}</span></div><div><b style="font-size:18px">${esc(e.name)}</b><span>Надёжность${e.idx < 4 ? ` · дальше «${esc(e.steps[e.idx].name)}»` : ''}</span></div></div>
+      ${got.length ? `<div class="awchips">${got.map(b => pill(esc(b.name), 'ok', BADGE_IC[b.k])).join('')}</div>` : ''}
+      <div class="btns two">${btn('Отзывы', 'go', gv('c_reviews', { id: 'alex' }), 'soft')}${btn('Мой уровень', 'go', 'e_level', 'soft')}</div>`));
+    return r; };
+  /* кабинет заказчика: «Рейтинг и достижения» */
+  const cCab2 = SCREENS.c_cab;
+  SCREENS.c_cab = p => { const r = cCab2(p); const w = W(); if (!w) return r; const pk = w.pkgs.find(x => x.live && x.side === 'c');
+    const row = rl('Рейтинг и достижения', `${esc(w.cust.name)}${pk ? ` · пакет «${esc(pk.name)}» до ${dDay(pk.till)}` : ''}`, 'go', 'c_level', { icon: 'star' });
+    const at = r.body.indexOf('<button class="rl" data-a="go" data-v="p_home">'); r.body = at >= 0 ? r.body.slice(0, at) + row + r.body.slice(at) : r.body; return r; };
+  /* профиль исполнителя глазами заказчика: ступень выше «Проверен» и значки */
+  const cEx2 = SCREENS.c_exec;
+  SCREENS.c_exec = p => { const r = cEx2(p); const a = p && (EX[p.id] || {}).aw; if (!a || ((a.lv === 'new' || a.lv === 'checked') && !a.b.length)) return r;
+    const NB2 = { ontime: 'Точно в срок', repeat: 'Возвращаются снова', top: 'Высокая оценка', clean: 'Без нарушений' };
+    const box = card(`<div class="h2">Награды ZELDO</div><div class="awchips">${a.lv !== 'new' && a.lv !== 'checked' ? pill(esc(a.name), '', 'diamond') : ''}${a.b.map(k => pill(NB2[k], 'ok', BADGE_IC[k])).join('')}</div><div class="m">Ставит ZELDO по заказам и отзывам. Купить нельзя.</div>`, 'c');
+    const i = r.body.indexOf('<div class="card'); r.body = i >= 0 ? r.body.slice(0, i) + box + r.body.slice(i) : box + r.body; return r; };
+}
+
+/* ---------- макет на сайте: оплата частью баллами (23.11.2026) ----------
+   В рабочей версии баллы за оплату списывает сервер; на макете — эта страница: доступно меньше, в резерве больше, в операциях —
+   «Оплата заказа № …». Собирается только в макет, после 10d-aw.js. Данные — z2/10e-demo.js. */
+if (window.__zDemo && window.__z.demoRef) {
+  const X = window.__z.demoRef;
+  const pmD = payMeta;
+  payMeta = function (ord) { pmD(ord); const n = ord && Number(ord.fromPts) || 0; if (!n) return;
+    const p = X.DB.pts; const take = Math.min(n, p.avail); p.avail -= take; p.reserve += take;
+    p.ops.unshift({ at: Date.now(), t: `Оплата заказа № ${ord.id}`, s: -take, sub: ord.svc || (offerById(ord.offer) || {}).title || '', order: ord.id });
+    S.ref = JSON.parse(JSON.stringify(X.DB)); };
+}
 
 })();
 
