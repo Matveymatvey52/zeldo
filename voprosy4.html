@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E1D36">
+<title>ZELFIR · вопросы 24.11</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap">
+<!-- Вопросник № 4 (24.11.2026): решения для оферт и политики данных — перед тем как Максим отдаст пакет документов юристу.
+     Устроен как № 2 и № 3: по одному вопросу, варианты и рекомендация Матвея, ответы на телефоне, в конце «Отправить» в Телеграм. -->
+<style>
+/* Лента вопросов: тёмная шапка с прогрессом, один вопрос на экране, кнопки внизу — как вопросники № 1 и № 2 */
+:root { --bg: #EEF2F8; --card: #FFFFFF; --ink: #0E1D36; --muted: #5B6B84; --line: #DCE3EE; --soft: #E8F0FE; --act: #0B6CF2; --act-ink: #FFFFFF; --rec: #17733F; --rec-soft: #E7F5EC; --hdr: #0E1D36; --hdr-ink: #FFFFFF; --hdr-muted: #C7D2E4;
+  --f-body: "Onest", "Segoe UI", system-ui, -apple-system, sans-serif; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0B1424; --card: #13203A; --ink: #EEF3FB; --muted: #9AA9C0; --line: #24345A; --soft: #172B4D; --act: #3D8EF8; --act-ink: #FFFFFF; --rec: #5BD08A; --rec-soft: #12301F; --hdr: #070D18; --hdr-ink: #FFFFFF; --hdr-muted: #9AA9C0; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0B1424; --card: #13203A; --ink: #EEF3FB; --muted: #9AA9C0; --line: #24345A; --soft: #172B4D; --act: #3D8EF8; --act-ink: #FFFFFF; --rec: #5BD08A; --rec-soft: #12301F; --hdr: #070D18; --hdr-ink: #FFFFFF; --hdr-muted: #9AA9C0; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); -webkit-text-size-adjust: 100%; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--hdr); }
+button, textarea { font: inherit; color: inherit; }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--hdr); color: var(--hdr-ink); padding-block: 14px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.top .in { max-width: 640px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+.logo { font-weight: 800; letter-spacing: 0.04em; font-size: 20px; }
+.prog { flex: 1; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.16); overflow: hidden; }
+.prog i { display: block; height: 100%; background: #3D8EF8; border-radius: 3px; transition: width 0.25s ease; }
+.cnt { font-size: 14px; color: var(--hdr-muted); font-variant-numeric: tabular-nums; min-width: 52px; text-align: right; }
+main { max-width: 640px; margin: 0 auto; padding-block: 20px calc(120px + env(safe-area-inset-bottom, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.blk { font-size: 14px; font-weight: 600; color: var(--act); text-transform: uppercase; letter-spacing: 0.06em; margin: 4px 0 8px; }
+h1 { font-size: 26px; line-height: 32px; margin: 0 0 10px; font-weight: 700; text-wrap: balance; }
+.ctx { color: var(--muted); font-size: 16px; line-height: 24px; margin: 0 0 18px; }
+.rec { background: var(--rec-soft); border-radius: 16px; padding: 14px 16px; margin: 0 0 18px; font-size: 15px; line-height: 22px; }
+.rec b { color: var(--rec); }
+.opts { display: grid; gap: 10px; }
+.opt { display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left; padding: 14px 16px; border-radius: 16px; border: 1.5px solid var(--line); background: var(--card); cursor: pointer; transition: border-color 0.15s ease, background-color 0.15s ease; }
+.opt .n { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--soft); color: var(--act); font-weight: 700; font-size: 15px; }
+.opt .t { display: grid; gap: 4px; font-size: 17px; line-height: 23px; min-width: 0; }
+.opt .s { color: var(--muted); font-size: 14px; line-height: 20px; }
+.opt .badge { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--rec-soft); color: var(--rec); font-size: 12px; font-weight: 600; vertical-align: 2px; }
+.opt.on { border-color: var(--act); background: var(--soft); }
+.opt.on .n { background: var(--act); color: var(--act-ink); }
+.opt:focus-visible, .btn:focus-visible, textarea:focus-visible { outline: 2px solid var(--act); outline-offset: 2px; }
+@media (hover: hover) { .opt:hover { border-color: var(--act); } }
+label.cm { display: block; margin-top: 16px; font-size: 15px; color: var(--muted); }
+textarea { width: 100%; min-height: 84px; margin-top: 6px; padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); font-size: 16px; line-height: 22px; resize: vertical; }
+textarea:focus { outline: none; border-color: var(--act); }
+.bar { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card); box-shadow: 0 -1px 0 var(--line); padding-block: 12px calc(12px + env(safe-area-inset-bottom, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.bar .in { max-width: 640px; margin: 0 auto; display: flex; gap: 10px; }
+.btn { flex: 1; min-height: 52px; border-radius: 14px; border: 0; background: var(--act); color: var(--act-ink); font-size: 17px; font-weight: 600; cursor: pointer; }
+.btn.soft { flex: 0 0 auto; padding: 0 18px; background: var(--soft); color: var(--act); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+.hello p, .end p { font-size: 17px; line-height: 26px; }
+.hello ol { padding-left: 22px; font-size: 16px; line-height: 26px; color: var(--muted); }
+.groups { display: grid; gap: 8px; margin: 14px 0; }
+.groups div { background: var(--card); border-radius: 14px; padding: 12px 14px; display: flex; justify-content: space-between; gap: 12px; font-size: 15px; }
+.groups b { font-variant-numeric: tabular-nums; color: var(--act); }
+.sum { display: grid; gap: 10px; margin: 16px 0; }
+.sum div { background: var(--card); border-radius: 14px; padding: 12px 14px; font-size: 15px; line-height: 21px; }
+.sum b { display: block; margin-bottom: 4px; }
+.sum .m { color: var(--muted); }
+.sum button { all: unset; color: var(--act); font-size: 14px; cursor: pointer; margin-top: 6px; display: inline-block; }
+.ok { color: var(--rec); font-weight: 600; }
+.saved { font-size: 14px; color: var(--muted); margin-top: 14px; min-height: 20px; }
+@media (prefers-reduced-motion: reduce) { .prog i, .opt { transition: none; } }
+</style>
+</head>
+<body>
+<div class="top"><div class="in"><span class="logo">ZELFIR</span><span class="prog" aria-hidden="true"><i id="pg" style="width:0"></i></span><span class="cnt" id="cnt"></span></div></div>
+<main id="app"></main>
+<div class="bar"><div class="in" id="bar"></div></div>
+<script>
+/* вопросы: блок, вопрос, пояснение, варианты [текст, подпись], номер рекомендованного (с 1), почему рекомендую */
+const Q = [
+  ["Оферта", "Как ZELFIR участвует в деньгах заказа?", "От этого зависит главный договор. Т-Банк предлагает «Безопасную сделку»: деньги лежат на номинальном счёте банка, а не у нас. Другой путь — агентский договор: деньги приходят на счёт ООО, и мы переводим их исполнителю.", [["Безопасная сделка Т-Банка: деньги у банка, ZELFIR — площадка", "Наш доход — только комиссия, меньше вопросов от налоговой"], ["Агентский договор: деньги приходят на счёт ООО", "Больше контроля, но вся сумма заказа проходит через нас"], ["Решит юрист вместе с банком", ""]], 1, "Вы уже выбрали Т-Банк с готовыми модулями. С номинальным счётом мы не держим чужие деньги, и в оферте меньше обязательств."],
+  ["Оферта", "Отвечает ли ZELFIR за качество работы?", "В оферте нужно прямо написать, кто отвечает перед заказчиком. Обычно площадка — посредник: договор на услугу заключают заказчик и исполнитель.", [["Нет, отвечает исполнитель. ZELFIR держит деньги до приёмки и разбирает споры", "Так устроены почти все площадки услуг"], ["Отвечаем сами в пределах суммы заказа", "Заказчику спокойнее, но риск на нас"], ["Обсудим с юристом", ""]], 1, "Деньги и так ждут приёмки, а спор решает ZELFIR. Отвечать за чужую работу своими деньгами на старте — лишний риск."],
+  ["Оферта", "С какого возраста можно пользоваться ZELFIR?", "Заказ и оплата картой — это договор. С 14 до 18 лет человек заключает такие договоры только с согласия родителей.", [["С 18 лет", "Никаких согласий"], ["С 14 лет с согласием родителей", "Подростки смогут заказывать репетиторов, но согласие надо проверять"], ["Заказчики с 14, исполнители с 18", ""]], 1, "Проверить согласие родителей онлайн сложно. Возраст можно снизить потом."],
+  ["Оферта", "Гарантия на работу: что пишем?", "По закону о защите прав потребителей недостатки работы исполнитель обязан исправить. Вопрос в том, обещаем ли мы что-то сверх закона.", [["Срок гарантии указывает исполнитель в карточке, дальше — по закону", "У стрижки и ремонта разные сроки"], ["Единая гарантия ZELFIR: 14 дней на бесплатную переделку", "Понятно заказчику, строже к мастерам"], ["Только закон, без отдельных обещаний", ""]], 1, "У ремонта гарантия нужна на месяцы, у стрижки она ни к чему. Пусть мастер пишет срок сам, а закон работает всегда."],
+  ["Оферта", "Претензия и суд: какие сроки и где?", "Перед судом стороны обмениваются претензиями. В оферте пишут срок ответа и суд. Заказчик-потребитель по закону всё равно может судиться по месту жительства.", [["Ответ на претензию — 10 рабочих дней, суд — по месту нахождения ООО", ""], ["Ответ — 30 дней, суд тот же", "Больше времени разобраться"], ["Решит юрист", ""]], 1, "Десяти рабочих дней хватает на разбор, и заказчик не ждёт месяц."],
+  ["Оферта", "Какие услуги запрещены на ZELFIR?", "Список нужен в оферте и в автопроверке карточек.", [["Интимные услуги, оружие, наркотики, азартные игры, взыскание долгов, всё незаконное. Медицина, анализы, вакцинация и другое по лицензии — только с документом", "Как сейчас в приложении"], ["Тот же список, но медицину не пускаем совсем", "Меньше риска, меньше услуг"], ["Пришлю свой список", "Напишите в комментарии"]], 1, "Карточки с лицензией уже уходят администратору вместе с документом."],
+  ["Оферта", "Реквизиты ООО для документов", "В оферте и политике нужны название, ИНН, ОГРН и адрес. Пока их нет, в черновиках стоят пометки «[название ООО]».", [["Пришлю, как только ООО зарегистрируют", ""], ["Название уже есть — напишу в комментарии", ""]], 1, "Юрист увидит пометки и сразу поймёт, куда вписать реквизиты."],
+  ["Деньги", "7 % с постоянных клиентов: оставляем вместе со ступенями?", "Вы утвердили ступени по цене заказа: 10 % до 100 000 ₽, 7 % до 500 000 ₽, 5 % дороже. Раньше договорились о 7 % с постоянных клиентов мастера. Сейчас работают оба правила, берётся меньшая ставка.", [["Оставляем оба правила, берётся меньшая ставка", "Как сейчас: мастеру выгодно возвращать клиентов"], ["Убираем 7 % с постоянных, только ступени по цене", "Проще объяснить"], ["Другое", "Напишите в комментарии"]], 1, "Скидка за постоянных клиентов держит мастеров на ZELFIR: им незачем уводить клиента в личную переписку."],
+  ["Деньги", "Чеки самозанятых: кто отправляет в налоговую?", "Вы сказали: чек отправляет платёжная система, но это нужно отслеживать. У Т-Банка есть сервис, который сам выбивает чек самозанятого в «Моём налоге».", [["Платформа выбивает чек сама через банк, мастер видит его в заказе", "Меньше ошибок и штрафов"], ["Мастер выбивает сам, мы просим ссылку на чек", "Проще для нас, но мастер может забыть"], ["Уточним у Т-Банка", ""]], 1, "Забудет мастер чек — штраф будет у него, а вопросы к нам. Автоматика это снимает."],
+  ["Деньги", "Онлайн-касса на комиссию ZELFIR: когда подключаем?", "На свою комиссию ZELFIR обязан выдавать чек. Вы нашли кассу за 890 ₽ в месяц.", [["Сразу, к первому настоящему заказу", "Иначе штраф"], ["После первых заказов", ""], ["Решит бухгалтер", ""]], 1, "Без кассы первый же настоящий заказ — нарушение."],
+  ["Деньги", "Человек удаляет аккаунт: что с деньгами и баллами?", "Удалить аккаунт можно в любой момент, так требует закон о персональных данных. Нужно решить, что делать с балансом и баллами «Моих связей».", [["Баланс возвращаем на карту, баллы сгорают", "Баллы — бонус, а не деньги"], ["Баланс на карту, баллы можно сначала вывести, если есть статус", ""], ["Удалить можно только с нулевым балансом", ""]], 1, "Деньги вернуть обязаны, а баллы — подарок. Предупредим об этом перед удалением."],
+  ["Доверие", "Значок «Проверен»: нужен ли паспорт?", "Вы спросили, можно ли без паспортов. Статус самозанятого налоговая проверяет автоматически и бесплатно, это заработает на сервере в России. Паспорт через банк (Т-ID) — после договора с Т-Банком.", [["До банка паспорт не берём: «Проверен» — статус в налоговой и 5 заказов без жалоб. После банка добавим вход через Т-ID", "Фото паспортов не храним"], ["Как сейчас: фото паспорта смотрит сотрудник и удаляет", "Надёжнее, но это работа для вас двоих"], ["«Проверен» — только после банка", ""]], 1, "Фото паспортов — лишняя ответственность по закону о персональных данных. Налоговая и заказы без жалоб уже многое говорят о мастере."],
+  ["Доверие", "ИИ-проверка карточек: что проверяет?", "Вы сказали подключить ИИ к проверке карточек. Цену владельцу назову отдельно.", [["Контакты в тексте и на фото, запрещённые услуги, совпадение фото с услугой. Сомнительное — человеку", ""], ["Только контакты и запрещённое", "Дешевле"], ["Всё смотрит человек, ИИ только подсказывает", ""]], 1, "ИИ снимет рутину, а спорные карточки по-прежнему решаете вы."],
+  ["Данные", "Сколько храним переписку и заказы после закрытия?", "В политике персональных данных нужен срок хранения.", [["3 года", "Столько можно подать в суд"], ["1 год", "Меньше данных, но для спора может не хватить"], ["5 лет, как бухгалтерские документы", ""]], 1, "Три года — общий срок исковой давности. Придёт заказчик с претензией — переписка будет на месте."],
+  ["Данные", "Какой ИИ пишем в политике данных?", "Вы предложили платную Алису (YandexGPT): данные остаются в России. Цену владельцу назову отдельно.", [["YandexGPT: споры, проверка карточек, подсказки", "Данные в России"], ["Пока без ИИ: споры решаем сами", "Бесплатно, но дольше"], ["Обсудим", ""]], 1, "Закону важно, куда уходят данные. С YandexGPT всё остаётся в России."],
+  ["Бренд", "Товарный знак ZELFIR: регистрируем?", "Пока знака нет, название может зарегистрировать кто-то другой. Регистрация в Роспатенте платная и занимает месяцы, точную цену уточним.", [["Подаём заявку сразу после открытия ООО", "Название защищено с даты подачи"], ["Позже, когда появятся первые клиенты", ""], ["Не нужно", ""]], 1, "Защита действует с даты подачи заявки. Чем раньше, тем меньше риск переименовываться снова."],
+];
+const KEY = 'zeldo-voprosy-4';
+let st; try { st = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { st = null; }
+if (!st) st = { i: -1, a: {} };
+const savedText = () => '';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* без памяти — ответы держатся до закрытия */ } };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const $ = id => document.getElementById(id);
+function head() { const n = Q.length; const i = Math.max(0, Math.min(st.i, n));
+  $('pg').style.width = `${st.i < 0 ? 0 : Math.round(i / n * 100)}%`; $('cnt').textContent = st.i < 0 ? '' : st.i >= n ? 'готово' : `${st.i + 1} из ${n}`; }
+function answerText(k) { const q = Q[k], a = st.a[k] || {}; const pick = a.o ? `${a.o}. ${q[3][a.o - 1][0]}` : 'свой вариант'; return `${pick}${a.c ? ` — ${a.c}` : ''}`; }
+function show() {
+  head(); window.scrollTo(0, 0);
+  if (st.i < 0) {
+    const g = {}; Q.forEach(q => { g[q[0]] = (g[q[0]] || 0) + 1; });
+    $('app').innerHTML = `<section class="hello"><div class="blk">Вопросник № 4 · для оферт</div><h1>${Q.length} вопросов, без которых не дописать документы</h1>
+      <p>Я собираю пакет документов для юриста: оферты для заказчиков и исполнителей, политику персональных данных, правила «Моих связей» и споров. Здесь — решения, которые в эти документы должны вписать вы.</p>
+      <div class="groups">${Object.entries(g).map(([k, n]) => `<div><span>${esc(k)}</span><b>${n}</b></div>`).join('')}</div>
+      <ol><li>По одному вопросу на экране: варианты ответа и рекомендация Матвея с объяснением.</li><li>Выберите вариант или напишите свой. Комментарий — по желанию.</li><li>В конце нажмите «Отправить» и выберите Телеграм: чат с Матвеем.</li></ol>
+      <p class="ctx">Можно прерваться: ответы запоминаются. Займёт около ${Math.ceil(Q.length / 3)} минут.</p></section>`;
+    $('bar').innerHTML = `<button class="btn" id="go">${Object.keys(st.a).length ? 'Продолжить' : 'Начать'}</button>`;
+    $('go').onclick = () => { st.i = Object.keys(st.a).length ? Math.min(Q.length, Object.keys(st.a).length) : 0; save(); show(); };
+    return;
+  }
+  if (st.i >= Q.length) return end();
+  const k = st.i, q = Q[k], a = st.a[k] || {};
+  $('app').innerHTML = `<div class="blk">${esc(q[0])}</div><h1>${esc(q[1])}</h1><p class="ctx">${esc(q[2])}</p>
+    <div class="rec"><b>Рекомендую ${q[4]}.</b> ${esc(q[5])}</div>
+    <div class="opts" role="radiogroup" aria-label="Варианты ответа">${q[3].map((o, j) => `<button class="opt ${a.o === j + 1 ? 'on' : ''}" role="radio" aria-checked="${a.o === j + 1}" data-o="${j + 1}"><span class="n">${j + 1}</span><span class="t"><span>${esc(o[0])}${j + 1 === q[4] ? '<span class="badge">рекомендую</span>' : ''}</span>${o[1] ? `<span class="s">${esc(o[1])}</span>` : ''}</span></button>`).join('')}</div>
+    <label class="cm" for="cm">Свой вариант или комментарий</label><textarea id="cm" placeholder="Например: да, но с оговоркой…">${esc(a.c || '')}</textarea>
+    <div class="saved" id="saved">${savedText()}</div>`;
+  document.querySelectorAll('.opt').forEach(b => b.onclick = () => { st.a[k] = Object.assign({}, st.a[k], { o: +b.dataset.o }); save(); show(); });
+  $('cm').oninput = e => { st.a[k] = Object.assign({}, st.a[k], { c: e.target.value.trim() }); if (!st.a[k].o && !st.a[k].c) delete st.a[k]; save(); $('nx').disabled = !st.a[k]; };
+  $('bar').innerHTML = `<button class="btn soft" id="bk">Назад</button><button class="btn" id="nx" ${st.a[k] ? '' : 'disabled'}>${k === Q.length - 1 ? 'Готово' : 'Дальше'}</button>`;
+  $('bk').onclick = () => { st.i--; save(); show(); };
+  $('nx').onclick = () => { st.i++; save(); show(); };
+}
+/* сообщение в Телеграме — до 4096 знаков: вопрос сокращаем; не влезло — только номера ответов и комментарии (полный текст Матвей восстановит по номерам) */
+function report(full) {
+  const h = `Ответы Максима, вопросник № 4 по ZELFIR (${new Date().toLocaleDateString('ru-RU')})\n\n`;
+  const cut = s => s.length > 48 ? s.slice(0, 46).replace(/\s+\S*$/, '') + '…' : s;
+  const a = h + Q.map((q, k) => `${k + 1}. ${full ? q[1] : cut(q[1])}\n→ ${st.a[k] ? answerText(k) : 'без ответа'}`).join(full ? '\n\n' : '\n');
+  if (full || a.length <= 3900) return a;
+  return h + Q.map((q, k) => { const x = st.a[k] || {}; return `${k + 1} → ${x.o || '—'}${x.c ? ` («${x.c}»)` : ''}`; }).join('\n');
+}
+function end() {
+  const missed = Q.filter((q, k) => !st.a[k]).length;
+  $('app').innerHTML = `<section class="end"><div class="blk">Готово</div><h1>Спасибо! Осталось отправить ответы Матвею</h1>
+    <p>Нажмите «Отправить» внизу и выберите Телеграм: чат с Матвеем. Или «Скопировать» и вставьте в чат сами.</p>
+    <p>${missed ? `Без ответа: ${missed}. Можно вернуться к ним или отправить так.` : 'Ответы есть на все вопросы.'} По ним Матвей впишет числа в админку и соберёт итоговый документ.</p>
+    <div class="sum">${Q.map((q, k) => `<div><b>${k + 1}. ${esc(q[1])}</b><span class="${st.a[k] ? '' : 'm'}">${st.a[k] ? esc(answerText(k)) : 'без ответа'}</span><br><button data-k="${k}">Изменить</button></div>`).join('')}</div>
+    <p class="ctx" id="msg"></p><div class="saved" id="saved">${savedText()}</div></section>`;
+  document.querySelectorAll('.sum button').forEach(b => b.onclick = () => { st.i = +b.dataset.k; save(); show(); });
+  $('bar').innerHTML = `<button class="btn soft" id="cp">Скопировать</button><button class="btn" id="tg">Отправить</button>`;
+  $('tg').onclick = async () => {
+    if (navigator.share) {
+      try { await navigator.share({ text: report() }); $('msg').innerHTML = '<span class="ok">Готово.</span> Если выбрали Матвея и нажали «Отправить», ответы у него.'; return; }
+      catch (e) { if (e && e.name === 'AbortError') { $('msg').textContent = 'Отправка отменена. Нажмите ещё раз и выберите Телеграм → чат с Матвеем.'; return; } }
+    }
+    const t = report(); const a = document.createElement('a'); a.href = `https://t.me/share/url?url=${encodeURIComponent(location.origin + location.pathname)}&text=${encodeURIComponent('\n' + t)}`; a.target = '_blank'; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove();
+    $('msg').textContent = 'Выберите в Телеграме чат с Матвеем и отправьте. Если Телеграм не открылся, нажмите «Скопировать».'; };
+  $('cp').onclick = async () => { try { await navigator.clipboard.writeText(report(true)); $('msg').innerHTML = '<span class="ok">Скопировано.</span> Вставьте в чат с Матвеем.'; }
+    catch (e) { $('msg').innerHTML = 'Не получилось скопировать автоматически. Выделите текст ниже и скопируйте.'; const pre = document.createElement('textarea'); pre.value = report(true); pre.rows = 10; $('msg').after(pre); pre.select(); } };
+}
+show();
+</script>
+
+</body>
+</html>
