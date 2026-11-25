@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E1D36">
+<title>ZELFIR · вопросы 26.11</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap">
+<!-- Вопросник № 5 (26.11.2026): разбор единой спецификации EVEN, которую Максим прислал 25.11, — что брать в ZELFIR.
+     Устроен как № 2–4: по одному вопросу, варианты и рекомендация Матвея, ответы на телефоне, в конце «Отправить» в Телеграм. -->
+<style>
+/* Лента вопросов: тёмная шапка с прогрессом, один вопрос на экране, кнопки внизу — как вопросники № 1 и № 2 */
+:root { --bg: #EEF2F8; --card: #FFFFFF; --ink: #0E1D36; --muted: #5B6B84; --line: #DCE3EE; --soft: #E8F0FE; --act: #0B6CF2; --act-ink: #FFFFFF; --rec: #17733F; --rec-soft: #E7F5EC; --hdr: #0E1D36; --hdr-ink: #FFFFFF; --hdr-muted: #C7D2E4;
+  --f-body: "Onest", "Segoe UI", system-ui, -apple-system, sans-serif; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0B1424; --card: #13203A; --ink: #EEF3FB; --muted: #9AA9C0; --line: #24345A; --soft: #172B4D; --act: #3D8EF8; --act-ink: #FFFFFF; --rec: #5BD08A; --rec-soft: #12301F; --hdr: #070D18; --hdr-ink: #FFFFFF; --hdr-muted: #9AA9C0; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0B1424; --card: #13203A; --ink: #EEF3FB; --muted: #9AA9C0; --line: #24345A; --soft: #172B4D; --act: #3D8EF8; --act-ink: #FFFFFF; --rec: #5BD08A; --rec-soft: #12301F; --hdr: #070D18; --hdr-ink: #FFFFFF; --hdr-muted: #9AA9C0; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); -webkit-text-size-adjust: 100%; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--hdr); }
+button, textarea { font: inherit; color: inherit; }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--hdr); color: var(--hdr-ink); padding-block: 14px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.top .in { max-width: 640px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+.logo { font-weight: 800; letter-spacing: 0.04em; font-size: 20px; }
+.prog { flex: 1; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.16); overflow: hidden; }
+.prog i { display: block; height: 100%; background: #3D8EF8; border-radius: 3px; transition: width 0.25s ease; }
+.cnt { font-size: 14px; color: var(--hdr-muted); font-variant-numeric: tabular-nums; min-width: 52px; text-align: right; }
+main { max-width: 640px; margin: 0 auto; padding-block: 20px calc(120px + env(safe-area-inset-bottom, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.blk { font-size: 14px; font-weight: 600; color: var(--act); text-transform: uppercase; letter-spacing: 0.06em; margin: 4px 0 8px; }
+h1 { font-size: 26px; line-height: 32px; margin: 0 0 10px; font-weight: 700; text-wrap: balance; }
+.ctx { color: var(--muted); font-size: 16px; line-height: 24px; margin: 0 0 18px; }
+.rec { background: var(--rec-soft); border-radius: 16px; padding: 14px 16px; margin: 0 0 18px; font-size: 15px; line-height: 22px; }
+.rec b { color: var(--rec); }
+.opts { display: grid; gap: 10px; }
+.opt { display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left; padding: 14px 16px; border-radius: 16px; border: 1.5px solid var(--line); background: var(--card); cursor: pointer; transition: border-color 0.15s ease, background-color 0.15s ease; }
+.opt .n { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--soft); color: var(--act); font-weight: 700; font-size: 15px; }
+.opt .t { display: grid; gap: 4px; font-size: 17px; line-height: 23px; min-width: 0; }
+.opt .s { color: var(--muted); font-size: 14px; line-height: 20px; }
+.opt .badge { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--rec-soft); color: var(--rec); font-size: 12px; font-weight: 600; vertical-align: 2px; }
+.opt.on { border-color: var(--act); background: var(--soft); }
+.opt.on .n { background: var(--act); color: var(--act-ink); }
+.opt:focus-visible, .btn:focus-visible, textarea:focus-visible { outline: 2px solid var(--act); outline-offset: 2px; }
+@media (hover: hover) { .opt:hover { border-color: var(--act); } }
+label.cm { display: block; margin-top: 16px; font-size: 15px; color: var(--muted); }
+textarea { width: 100%; min-height: 84px; margin-top: 6px; padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); font-size: 16px; line-height: 22px; resize: vertical; }
+textarea:focus { outline: none; border-color: var(--act); }
+.bar { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card); box-shadow: 0 -1px 0 var(--line); padding-block: 12px calc(12px + env(safe-area-inset-bottom, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.bar .in { max-width: 640px; margin: 0 auto; display: flex; gap: 10px; }
+.btn { flex: 1; min-height: 52px; border-radius: 14px; border: 0; background: var(--act); color: var(--act-ink); font-size: 17px; font-weight: 600; cursor: pointer; }
+.btn.soft { flex: 0 0 auto; padding: 0 18px; background: var(--soft); color: var(--act); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+.hello p, .end p { font-size: 17px; line-height: 26px; }
+.hello ol { padding-left: 22px; font-size: 16px; line-height: 26px; color: var(--muted); }
+.groups { display: grid; gap: 8px; margin: 14px 0; }
+.groups div { background: var(--card); border-radius: 14px; padding: 12px 14px; display: flex; justify-content: space-between; gap: 12px; font-size: 15px; }
+.groups b { font-variant-numeric: tabular-nums; color: var(--act); }
+.sum { display: grid; gap: 10px; margin: 16px 0; }
+.sum div { background: var(--card); border-radius: 14px; padding: 12px 14px; font-size: 15px; line-height: 21px; }
+.sum b { display: block; margin-bottom: 4px; }
+.sum .m { color: var(--muted); }
+.sum button { all: unset; color: var(--act); font-size: 14px; cursor: pointer; margin-top: 6px; display: inline-block; }
+.ok { color: var(--rec); font-weight: 600; }
+.saved { font-size: 14px; color: var(--muted); margin-top: 14px; min-height: 20px; }
+@media (prefers-reduced-motion: reduce) { .prog i, .opt { transition: none; } }
+</style>
+</head>
+<body>
+<div class="top"><div class="in"><span class="logo">ZELFIR</span><span class="prog" aria-hidden="true"><i id="pg" style="width:0"></i></span><span class="cnt" id="cnt"></span></div></div>
+<main id="app"></main>
+<div class="bar"><div class="in" id="bar"></div></div>
+<script>
+/* вопросы: блок, вопрос, пояснение, варианты [текст, подпись], номер рекомендованного (с 1), почему рекомендую */
+const Q = [
+  ["Вход", "Регистрация: открытая или только по приглашению?", "В спецификации EVEN регистрация закрытая: войти можно только по ссылке, QR-коду или номеру пригласившего. Сейчас в ZELFIR вход открытый по почте, а приглашение запоминается, если оно было.", [["Открытая. Пришёл по приглашению — закрепляем пригласившего", "Как сейчас"], ["Только по приглашению", "Каждый новый человек — чей-то в «Моих связях»"], ["Закрытая на пилот, потом открываем", ""]], 1, "На пилоте мастера придут из районных чатов и по визиткам, без ссылки. Закрытая дверь отсечёт и их, и заказчиков, которые нашли нас сами."],
+  ["Заявки", "Кто получает уведомление о новой заявке?", "Заказчик публикует заявку для всех. В спецификации её получают проверенные исполнители именно с этой услугой, подходящим форматом и районом работы. Для онлайн-услуг город не важен. Бюджет и время не отсекают: исполнитель предлагает свои.", [["Как в спецификации: проверенные, с этой услугой, форматом и районом; онлайн — без города", ""], ["Все исполнители раздела, без точной услуги", "Больше откликов, но и лишних уведомлений"], ["Только первые 10 по рейтингу", "Новичкам ничего не достанется"]], 1, "Мастер получает только то, что умеет, и туда, куда поедет. От лишних уведомлений быстро отвыкают их открывать."],
+  ["Заявки", "Может ли исполнитель изменить или отозвать свой отклик?", "В спецификации может, пока заказчик не согласился. После правки заказчик видит новую цену и срок, а его прежнее согласие на новые условия не переносится.", [["Да, до согласия заказчика. Заказчик видит, что условия изменились", ""], ["Только отозвать, менять нельзя", ""], ["Ни то ни другое", ""]], 1, "Мастер ошибся в цене — пусть исправит сам, а не пишет в поддержку."],
+  ["Запись", "Запрос на запись пришёл ночью или в выходной: когда начинается отсчёт двух часов?", "Сейчас исполнитель подтверждает запись за 2 часа, а ночью (с 22:00 до 8:00) — до 10 утра. В спецификации отсчёт идёт по рабочему графику исполнителя: запрос вне графика ждёт начала его рабочего дня. Не подтвердил — время освобождается, заказчику предлагаем ближайшие свободные окна.", [["По графику исполнителя: 2 часа с начала его рабочего дня", "Мастер с выходным в воскресенье не теряет запросы"], ["Как сейчас: 2 часа, ночью до 10:00", ""], ["Другое", "Напишите в комментарии"]], 1, "График уже есть в профиле исполнителя. Мастер не должен терять заказы только потому, что у него выходной."],
+  ["Запись", "Как переносить подтверждённую запись?", "В спецификации перенос предлагает любая сторона, вторая подтверждает. Пока ответа нет, старое время остаётся в силе. Обоим приходят напоминания: за сутки и за 2 часа до визита.", [["Только с согласия второй стороны, напоминания за 24 и 2 часа", ""], ["Заказчик переносит сам, если до визита больше суток", "Удобнее заказчику, мастер может потерять окно"], ["Только через отмену и новую запись", ""]], 1, "Время мастера — его деньги. Кнопка «Предложить другое время» решает задачу и заказчика, и мастера."],
+  ["Приёмка", "Сколько раз заказчик может попросить бесплатную доработку?", "В спецификации — один раз. Исполнитель исправляет за 3 дня, срок можно один раз продлить по согласию. Не успел — спор. Сейчас доработку можно просить без ограничений.", [["Один раз, исправить — до 3 дней. Дальше приёмка или спор", ""], ["Два раза", ""], ["Без ограничений", "Мастер может застрять в заказе"]], 1, "Ограничение защищает мастера от бесконечных переделок, а заказчика — от затягивания: после одной доработки решает спор."],
+  ["Споры", "Можно ли обжаловать решение администратора по спору?", "В спецификации можно один раз, с новыми материалами, и разбирает другой сотрудник. Сейчас ИИ предлагает решение, несогласный спор решает администратор, и это окончательно.", [["На старте без обжалования: решение администратора окончательное, дальше — суд", "В админке пока двое"], ["Одно обжалование: разбирает второй из вас", ""], ["Другое", "Напишите в комментарии"]], 1, "Пока в админке двое, повторный разбор — это тот же человек или его напарник. Вернёмся, когда появятся сотрудники."],
+  ["Деньги", "Ставим ли предел суммы одного заказа?", "В спецификации — 10 млн ₽, дороже только с одобрения администратора до оплаты. Сейчас предела нет.", [["10 млн ₽, дороже — с одобрения администратора", ""], ["1 млн ₽ на пилот", "На пилоте бытовые услуги"], ["Без предела", ""]], 1, "Лишний ноль в цене не должен уйти в банк. Большие проекты всё равно идут этапами."],
+  ["Деньги", "Сколько выгод можно применить к одному заказу?", "У заказчика бывает три выгоды: скидка исполнителя, баллы этого исполнителя и баллы «Моих связей». В спецификации к заказу применяется не больше одной, заказчик выбирает сам. Можно оплатить и без выгоды.", [["Одну, на выбор заказчика", "Как в спецификации"], ["Скидку исполнителя плюс баллы «Моих связей»", "Выгоднее заказчику, сложнее считать"], ["Все три сразу", "Мастер может отдать почти весь заказ"]], 1, "Если сложить скидку и баллы, мастер получит за работу меньше, чем рассчитывал. Одна выгода — понятная цена для обоих."],
+  ["Баллы", "Когда сгорают баллы «Моих связей»?", "В правилах сейчас: через 10 месяцев после начисления. В спецификации: через 12 месяцев, если человек ничего не делал в ZELFIR. Сгоревшие баллы возвращаются исполнителю деньгами.", [["Через 12 месяцев без активности", "Кто пользуется ZELFIR, тот ничего не теряет"], ["Через 10 месяцев после начисления", "Как сейчас"], ["Не сгорают", "Исполнитель не получит эти деньги обратно"]], 1, "Человек, который заказывает каждый месяц, не должен терять баллы из-за даты. Сгорает только то, о чём забыли."],
+  ["Баллы", "Заказ вернули, а баллы за него уже потрачены: что делаем?", "Баллы становятся доступны через 10 дней после приёмки. Если потом заказ вернули по спору или нашли обман, начисление отменяется. В спецификации сначала списываем доступные баллы, а если их не хватает, баланс уходит в минус. Будущие начисления его гасят, вывод закрыт. С карты ничего не списываем.", [["Как в спецификации: минус гасится будущими баллами, вывод закрыт", ""], ["Списываем только то, что есть, остальное прощаем", "Лазейка для обмана"], ["Выключаем «Мои связи» до разбора", ""]], 1, "Иначе можно заказать, получить баллы, потратить их и вернуть заказ."],
+  ["Акции", "Акция «Приведи друга»: проценты или рубли?", "Вы показали в видео: в акции сейчас только проценты. Нужен выбор: проценты или рубли, например «5 000 ₽ тебе и 5 000 ₽ другу». И исполнитель сам задаёт, сколько можно потратить на один заказ, например не больше 20 %. Это баллы исполнителя, тратятся только у него.", [["Проценты или рубли. Лимит на заказ задаёт исполнитель, но не больше 60 %", "60 % — потолок из спецификации"], ["Проценты или рубли, лимит до 100 %", "Друг может получить заказ бесплатно"], ["Только рубли", ""]], 1, "Потолок защищает мастера от заказа за ноль. Выбор «проценты или рубли» сделаю во всех акциях."],
+  ["Акции", "Когда друг считается приведённым и бонус получают оба?", "В спецификации — когда друг оплатил первый заказ у этого исполнителя и принял работу. Другой путь — сразу после регистрации.", [["После первого оплаченного и принятого заказа", "Бонус за настоящую покупку"], ["Сразу после регистрации друга", "Легко накрутить пустыми аккаунтами"], ["Другое", "Напишите в комментарии"]], 1, "Бонус за регистрацию достаётся ботам. Бонус за принятый заказ мастер платит из настоящих денег."],
+  ["Отзывы", "Отзывы вслепую?", "В спецификации первый отзыв скрыт, пока вторая сторона не напишет свой или не пройдёт 7 дней. Потом оба появляются одновременно. Сейчас отзыв виден сразу.", [["Да: до встречного отзыва или 7 дней", "Никто не пишет «в ответ»"], ["Как сейчас, сразу", ""]], 1, "Когда отзыв видно сразу, вторая сторона отвечает местью или вежливостью. Вслепую оценки честнее."],
+  ["Отзывы", "Фото и видео в отзыве заказчика", "В спецификации заказчик прикладывает до 5 фото и одно видео до 60 секунд. Лица, документы, телефоны и адреса не публикуются. Исполнитель ставит только звёзды и пишет текст.", [["Фото сейчас, видео после запуска", "Видео дорого хранить и проверять"], ["Фото и видео сразу", ""], ["Без фото", ""]], 1, "Фото результата — лучший отзыв о мастере. Видео подождёт, пока не посчитаем хранение."],
+  ["Рейтинг", "Показываем «Надёжность» в процентах?", "В спецификации в списке услуг виден процент заказов без нарушений за 3 месяца, если заказов не меньше 10. У нас это уже показывают ступени и значки по вашим порогам от 23.11: «Без нарушений», «Точно в срок».", [["Нет, хватает ступеней и значков", ""], ["Да, процент рядом с рейтингом", "Ещё одна цифра в карточке"]], 1, "В карточке уже есть звёзды, ступень и значки. Ещё один процент заказчик не прочитает."],
+  ["Уведомления", "Настройка уведомлений: делаем как в присланном образце?", "Вы прислали экран аптечного приложения: push и почта отдельно, по темам. В спецификации так же, и важное выключить нельзя: заказ, сроки, спор, выплата, вход с нового устройства. Сообщения о безопасности уходят во все каналы.", [["Да: темы и каналы по отдельности, важное не выключается", "SMS — позже, они платные"], ["Одна кнопка: всё или ничего", ""], ["Пока без настроек", ""]], 1, "Кто не может выключить рекламу, выключает всё и пропускает заказ."],
+  ["Поддержка", "За сколько отвечаем в поддержке?", "В спецификации: деньги и безопасность — в течение часа, остальное — в течение рабочего дня. У обращения есть статус: «Новое», «В работе», «Ждём ответа», «Решено». Сейчас дежурите вы двое, с 9 до 21.", [["Деньги и безопасность — 2 часа, остальное — рабочий день. Срок виден до отправки", "Выполнимо для двоих"], ["Как в спецификации: час и рабочий день", ""], ["Один срок для всего — рабочий день", ""]], 1, "Час двое не выдержат. Лучше честные два часа, чем просроченный час."],
+  ["Главная", "Главная заказчика: берём идеи из присланных скриншотов?", "Из аптечного приложения подойдут три вещи: полоска текущего заказа наверху, круглые плитки разделов («Мои заказы», «Бонусы», «Пригласить друга», «Акции») и баннер про баллы за друзей. Гостевую главную вы обещали прислать прототипом.", [["Да, все три — на главной после входа", "Гостевую соберу по вашему прототипу"], ["Только полоску текущего заказа", ""], ["Подожду прототип", ""]], 1, "Полоска заказа отвечает на главный вопрос заказчика: что с моим заказом. Плитки и баннер ведут в «Мои связи»."],
+  ["Заказчики", "Заказчики-компании: на пилоте или после?", "В спецификации в первой версии заказчик — только физлицо. Заказ от ИП и компании требует закрывающих документов и электронного документооборота.", [["Только физлица, компании после запуска", ""], ["Компании тоже, документы вручную", ""]], 1, "На пилоте бытовые услуги. Закрывающие документы для компаний — отдельная работа и для нас, и для юриста."],
+  ["После пилота", "Что откладываем на после пилота?", "Из спецификации и ваших файлов: кабинет компании и сотрудники; «Доставка», «Семья и забота», билеты, кризисная консультация; платный ИИ-помощник; бонусные пакеты на 30 дней; «Купить лиды» в кабинете партнёра; ролик «Как работает ZELFIR» на 90 секунд; договор с электронной подписью и версиями.", [["Всё перечисленное — после пилота", "Где нужно, в приложении будет пометка «в разработке»"], ["Не всё — напишу, что нужно раньше", "В комментарии"]], 1, "Пилот проверяет главное: заказ, оплату, приёмку и партнёрку. Остальное соберём по тому, что покажут первые заказы."],
+];
+const KEY = 'zeldo-voprosy-5';
+let st; try { st = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { st = null; }
+if (!st) st = { i: -1, a: {} };
+const savedText = () => '';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* без памяти — ответы держатся до закрытия */ } };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const $ = id => document.getElementById(id);
+function head() { const n = Q.length; const i = Math.max(0, Math.min(st.i, n));
+  $('pg').style.width = `${st.i < 0 ? 0 : Math.round(i / n * 100)}%`; $('cnt').textContent = st.i < 0 ? '' : st.i >= n ? 'готово' : `${st.i + 1} из ${n}`; }
+function answerText(k) { const q = Q[k], a = st.a[k] || {}; const pick = a.o ? `${a.o}. ${q[3][a.o - 1][0]}` : 'свой вариант'; return `${pick}${a.c ? ` — ${a.c}` : ''}`; }
+function show() {
+  head(); window.scrollTo(0, 0);
+  if (st.i < 0) {
+    const g = {}; Q.forEach(q => { g[q[0]] = (g[q[0]] || 0) + 1; });
+    $('app').innerHTML = `<section class="hello"><div class="blk">Вопросник № 5 · спецификация EVEN</div><h1>${Q.length} вопрос по вашей спецификации</h1>
+      <p>Я прочитал единую спецификацию EVEN. Большая часть уже есть в ZELFIR или решена позже: на встрече 23.11 и в вопросниках № 3 и № 4. Там, где решено позже, оставляю новое. Здесь только то, где нужно ваше решение: брать или нет.</p>
+      <div class="groups">${Object.entries(g).map(([k, n]) => `<div><span>${esc(k)}</span><b>${n}</b></div>`).join('')}</div>
+      <ol><li>По одному вопросу на экране: варианты ответа и рекомендация Матвея с объяснением.</li><li>Выберите вариант или напишите свой. Комментарий — по желанию.</li><li>В конце нажмите «Отправить» и выберите Телеграм: чат с Матвеем.</li></ol>
+      <p class="ctx">Можно прерваться: ответы запоминаются. Займёт около ${Math.ceil(Q.length / 3)} минут.</p></section>`;
+    $('bar').innerHTML = `<button class="btn" id="go">${Object.keys(st.a).length ? 'Продолжить' : 'Начать'}</button>`;
+    $('go').onclick = () => { st.i = Object.keys(st.a).length ? Math.min(Q.length, Object.keys(st.a).length) : 0; save(); show(); };
+    return;
+  }
+  if (st.i >= Q.length) return end();
+  const k = st.i, q = Q[k], a = st.a[k] || {};
+  $('app').innerHTML = `<div class="blk">${esc(q[0])}</div><h1>${esc(q[1])}</h1><p class="ctx">${esc(q[2])}</p>
+    <div class="rec"><b>Рекомендую ${q[4]}.</b> ${esc(q[5])}</div>
+    <div class="opts" role="radiogroup" aria-label="Варианты ответа">${q[3].map((o, j) => `<button class="opt ${a.o === j + 1 ? 'on' : ''}" role="radio" aria-checked="${a.o === j + 1}" data-o="${j + 1}"><span class="n">${j + 1}</span><span class="t"><span>${esc(o[0])}${j + 1 === q[4] ? '<span class="badge">рекомендую</span>' : ''}</span>${o[1] ? `<span class="s">${esc(o[1])}</span>` : ''}</span></button>`).join('')}</div>
+    <label class="cm" for="cm">Свой вариант или комментарий</label><textarea id="cm" placeholder="Например: да, но с оговоркой…">${esc(a.c || '')}</textarea>
+    <div class="saved" id="saved">${savedText()}</div>`;
+  document.querySelectorAll('.opt').forEach(b => b.onclick = () => { st.a[k] = Object.assign({}, st.a[k], { o: +b.dataset.o }); save(); show(); });
+  $('cm').oninput = e => { st.a[k] = Object.assign({}, st.a[k], { c: e.target.value.trim() }); if (!st.a[k].o && !st.a[k].c) delete st.a[k]; save(); $('nx').disabled = !st.a[k]; };
+  $('bar').innerHTML = `<button class="btn soft" id="bk">Назад</button><button class="btn" id="nx" ${st.a[k] ? '' : 'disabled'}>${k === Q.length - 1 ? 'Готово' : 'Дальше'}</button>`;
+  $('bk').onclick = () => { st.i--; save(); show(); };
+  $('nx').onclick = () => { st.i++; save(); show(); };
+}
+/* сообщение в Телеграме — до 4096 знаков: вопрос сокращаем; не влезло — только номера ответов и комментарии (полный текст Матвей восстановит по номерам) */
+function report(full) {
+  const h = `Ответы Максима, вопросник № 5 по ZELFIR (${new Date().toLocaleDateString('ru-RU')})\n\n`;
+  const cut = s => s.length > 48 ? s.slice(0, 46).replace(/\s+\S*$/, '') + '…' : s;
+  const a = h + Q.map((q, k) => `${k + 1}. ${full ? q[1] : cut(q[1])}\n→ ${st.a[k] ? answerText(k) : 'без ответа'}`).join(full ? '\n\n' : '\n');
+  if (full || a.length <= 3900) return a;
+  return h + Q.map((q, k) => { const x = st.a[k] || {}; return `${k + 1} → ${x.o || '—'}${x.c ? ` («${x.c}»)` : ''}`; }).join('\n');
+}
+function end() {
+  const missed = Q.filter((q, k) => !st.a[k]).length;
+  $('app').innerHTML = `<section class="end"><div class="blk">Готово</div><h1>Спасибо! Осталось отправить ответы Матвею</h1>
+    <p>Нажмите «Отправить» внизу и выберите Телеграм: чат с Матвеем. Или «Скопировать» и вставьте в чат сами.</p>
+    <p>${missed ? `Без ответа: ${missed}. Можно вернуться к ним или отправить так.` : 'Ответы есть на все вопросы.'} По ним Матвей поправит правила и приложение.</p>
+    <div class="sum">${Q.map((q, k) => `<div><b>${k + 1}. ${esc(q[1])}</b><span class="${st.a[k] ? '' : 'm'}">${st.a[k] ? esc(answerText(k)) : 'без ответа'}</span><br><button data-k="${k}">Изменить</button></div>`).join('')}</div>
+    <p class="ctx" id="msg"></p><div class="saved" id="saved">${savedText()}</div></section>`;
+  document.querySelectorAll('.sum button').forEach(b => b.onclick = () => { st.i = +b.dataset.k; save(); show(); });
+  $('bar').innerHTML = `<button class="btn soft" id="cp">Скопировать</button><button class="btn" id="tg">Отправить</button>`;
+  $('tg').onclick = async () => {
+    if (navigator.share) {
+      try { await navigator.share({ text: report() }); $('msg').innerHTML = '<span class="ok">Готово.</span> Если выбрали Матвея и нажали «Отправить», ответы у него.'; return; }
+      catch (e) { if (e && e.name === 'AbortError') { $('msg').textContent = 'Отправка отменена. Нажмите ещё раз и выберите Телеграм → чат с Матвеем.'; return; } }
+    }
+    const t = report(); const a = document.createElement('a'); a.href = `https://t.me/share/url?url=${encodeURIComponent(location.origin + location.pathname)}&text=${encodeURIComponent('\n' + t)}`; a.target = '_blank'; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove();
+    $('msg').textContent = 'Выберите в Телеграме чат с Матвеем и отправьте. Если Телеграм не открылся, нажмите «Скопировать».'; };
+  $('cp').onclick = async () => { try { await navigator.clipboard.writeText(report(true)); $('msg').innerHTML = '<span class="ok">Скопировано.</span> Вставьте в чат с Матвеем.'; }
+    catch (e) { $('msg').innerHTML = 'Не получилось скопировать автоматически. Выделите текст ниже и скопируйте.'; const pre = document.createElement('textarea'); pre.value = report(true); pre.rows = 10; $('msg').after(pre); pre.select(); } };
+}
+show();
+</script>
+
+</body>
+</html>
